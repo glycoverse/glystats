@@ -46,11 +46,20 @@ gly_dea <- function(exp, method = NULL, group_col = "group", ...) {
   cli::cli_alert_info("Group 2: {.val {levels(groups)[2]}}")
 
   # Perform DEA
-  switch(method,
-    "t-test" = .gly_dea_2groups(expr_mat, groups, t.test, ...),
-    "wilcoxon" = .gly_dea_2groups(expr_mat, groups, wilcox.test, ...),
+  result <- switch(method,
+    "t-test" = .gly_dea_2groups(expr_mat, groups, stats::t.test, ...),
+    "wilcoxon" = .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, ...),
     cli::cli_abort("Invalid method: {.val {method}}")
   )
+
+  # Add S3 class
+  if (method == "t-test") {
+    class(result) <- c("glystats_dea_res_ttest", "glystats_dea_res", class(result))
+  } else {
+    class(result) <- c("glystats_dea_res_wilcoxon", "glystats_dea_res", class(result))
+  }
+
+  result
 }
 
 .gly_dea_2groups <- function(expr_mat, groups, .f, ...) {
@@ -66,16 +75,16 @@ gly_dea <- function(exp, method = NULL, group_col = "group", ...) {
   ttest_res <- data %>%
     dplyr::nest_by(.data$variable) %>%
     dplyr::mutate(
-      ttest = list(.f(log_value ~ group, data = data)),
-      params = list(parameters::model_parameters(ttest)),
-      params = list(parameters::standardize_names(params)),
+      ttest = list(.f(log_value ~ group, data = .data$data)),
+      params = list(parameters::model_parameters(.data$ttest)),
+      params = list(parameters::standardize_names(.data$params)),
       ) %>%
     dplyr::select(all_of(c("variable", "params"))) %>%
     tidyr::unnest(all_of("params")) %>%
     dplyr::ungroup() %>%
     janitor::clean_names()
 
-  if (identical(.f, t.test)) {
+  if (identical(.f, stats::t.test)) {
     ttest_res <- dplyr::mutate(ttest_res, log2fc = .data$mean_group1 - .data$mean_group2)
   }
 

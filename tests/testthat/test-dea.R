@@ -47,6 +47,8 @@ test_that("gly_dea works with t-test method", {
   result <- suppressMessages(gly_dea(exp, method = "t-test", group_col = "group"))
   
   # Check result structure
+  expect_s3_class(result, "glystats_dea_res_ttest")
+  expect_s3_class(result, "glystats_dea_res")
   expect_s3_class(result, "data.frame")
   expect_equal(nrow(result), n_vars)
   
@@ -118,6 +120,8 @@ test_that("gly_dea works with wilcoxon method", {
   result <- suppressMessages(suppressWarnings(gly_dea(exp, method = "wilcoxon", group_col = "group")))
   
   # Check result structure
+  expect_s3_class(result, "glystats_dea_res_wilcoxon")
+  expect_s3_class(result, "glystats_dea_res")
   expect_s3_class(result, "data.frame")
   expect_equal(nrow(result), n_vars)
   

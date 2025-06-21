@@ -4,29 +4,22 @@
 \alias{gly_dea}
 \title{Differential Expression Analysis (DEA)}
 \usage{
-gly_dea(exp, group_col = "group", method = "limma", ...)
+gly_dea(exp, method = NULL, group_col = "group", ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object.}
 
+\item{method}{A character string specifying the method to use for DEA.
+Either "t-test" or "wilcoxon".}
+
 \item{group_col}{A character string specifying the column name of the group variable.
 Default is "group".}
-
-\item{method}{A character string specifying the method to use for DEA.
-Either "limma", "anova", "t-test", "wilcoxon", "kruskal"
-Default is "limma".}
 
 \item{...}{Additional arguments passed to the underlying function.}
 }
 \value{
-A tibble with the following columns:
-\itemize{
-\item \code{variable}: The variable name.
-\item \code{statistic}: The test statistic of the DEA.
-\item \code{p_value}: The p-value of the DEA.
-\item \code{FDR}: The false discovery rate of the DEA.
-\item \code{log2FC}: The log2 fold change of the DEA.
-}
+The DEA result as a tibble.
+If \code{method} is "t-test", a column \code{log2fc} is added to the result.
 }
 \description{
 Differential expression analysis for glycomics or glycoproteomics data.
