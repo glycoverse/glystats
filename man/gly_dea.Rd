@@ -4,23 +4,103 @@
 \alias{gly_dea}
 \title{Differential Expression Analysis (DEA)}
 \usage{
-gly_dea(exp, method = NULL, group_col = "group", ...)
+gly_dea(exp, method, group_col = "group", ...)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} object.}
+\item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{method}{A character string specifying the method to use for DEA.
-Either "t-test" or "wilcoxon".}
+\item{method}{A character string specifying the statistical method to use:
+\itemize{
+\item \code{"t-test"}: Student's t-test for two-group comparison (parametric)
+\item \code{"wilcoxon"}: Wilcoxon rank-sum test for two-group comparison (non-parametric)
+\item \code{"anova"}: One-way ANOVA for multi-group comparison (parametric)
+\item \code{"kruskal"}: Kruskal-Wallis test for multi-group comparison (non-parametric)
+}}
 
-\item{group_col}{A character string specifying the column name of the group variable.
-Default is "group".}
+\item{group_col}{A character string specifying the column name of the grouping variable
+in the sample information. Default is \code{"group"}.}
 
-\item{...}{Additional arguments passed to the underlying function.}
+\item{...}{Additional arguments passed to the underlying statistical functions.}
 }
 \value{
-The DEA result as a tibble.
-If \code{method} is "t-test", a column \code{log2fc} is added to the result.
+For two-group methods (\code{"t-test"}, \code{"wilcoxon"}):
+A tibble with statistical test results. For t-test, an additional \code{log2fc} column
+(log2 fold change) is included.
+
+For multi-group methods (\code{"anova"}, \code{"kruskal"}):
+A list containing two elements:
+\itemize{
+\item \code{main_test}: A tibble with main statistical test results
+\item \code{post_hoc}: A tibble with post-hoc pairwise comparison results (empty if no significant results)
+}
 }
 \description{
-Differential expression analysis for glycomics or glycoproteomics data.
+Perform differential expression analysis for glycomics or glycoproteomics data
+using various statistical methods. The function supports both two-group comparisons
+(t-test, Wilcoxon test) and multi-group comparisons (ANOVA, Kruskal-Wallis test).
+For multi-group methods, post-hoc tests are automatically performed for significant results.
+}
+\details{
+The function performs log2 transformation on the expression data (log2(x + 1)) before
+statistical testing. For two-group methods (t-test, Wilcoxon), exactly 2 groups are required.
+For multi-group methods (ANOVA, Kruskal-Wallis), at least 2 groups are required.
+
+\strong{Underlying Statistical Functions:}
+\itemize{
+\item \code{"t-test"}: \code{stats::t.test()}
+\item \code{"wilcoxon"}: \code{stats::wilcox.test()}
+\item \code{"anova"}: \code{stats::aov()}
+\item \code{"kruskal"}: \code{stats::kruskal.test()}
+}
+
+\strong{Post-hoc Tests:}
+\itemize{
+\item For ANOVA: Tukey's HSD test for pairwise comparisons (\code{stats::TukeyHSD()})
+\item For Kruskal-Wallis: Dunn's test with Holm correction for multiple comparisons (\code{FSA::dunnTest()})
+}
+
+Post-hoc tests are only performed for variables with significant main effects (p < 0.05).
+}
+\examples{
+\dontrun{
+# Create example experiment object
+sample_info <- tibble::tibble(
+  sample = paste0("S", 1:6),
+  group = rep(c("Control", "Treatment"), each = 3)
+)
+
+var_info <- tibble::tibble(
+  variable = paste0("Glycan_", 1:100)
+)
+
+expr_mat <- matrix(rnorm(600), nrow = 100, ncol = 6)
+rownames(expr_mat) <- var_info$variable
+colnames(expr_mat) <- sample_info$sample
+
+exp <- glyexp::experiment(
+  expr_mat = expr_mat,
+  sample_info = sample_info,
+  var_info = var_info,
+  exp_type = "glycomics",
+  glycan_type = "N"
+)
+
+# Two-group comparison with t-test
+result_ttest <- gly_dea(exp, method = "t-test")
+
+# Two-group comparison with Wilcoxon test
+result_wilcox <- gly_dea(exp, method = "wilcoxon")
+
+# Multi-group comparison with ANOVA
+sample_info$group <- rep(c("A", "B", "C"), each = 2)
+exp_multi <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+result_anova <- gly_dea(exp_multi, method = "anova")
+
+# Access main test results
+result_anova$main_test
+
+# Access post-hoc results
+result_anova$post_hoc
+}
+
 }
