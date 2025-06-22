@@ -1,6 +1,6 @@
 Package: glystats
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9011
+Version: 0.0.0.9012
 Authors@R: 
     person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
@@ -10,7 +10,9 @@ Suggests:
     testthat (>= 3.0.0),
     mixOmics,
     FSA,
-    ropls
+    ropls,
+    mockery,
+    Rtsne
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
