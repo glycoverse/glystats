@@ -34,6 +34,7 @@ test_that("gly_dea works with t-test method", {
   expect_s3_class(result, c("glystats_dea_res_ttest", "glystats_dea_res"))
   expect_equal(nrow(result), 3)
   expect_true("log2fc" %in% colnames(result))  # t-test should have log2fc
+  expect_true("p_adj" %in% colnames(result))  # p_adj should exist
   expect_true(all(result$log2fc > 0))  # All should be positive (A > B)
 })
 
@@ -203,7 +204,7 @@ test_that("gly_dea works with anova method", {
   
   # Check main_test only group rows
   expect_equal(nrow(result$main_test), 2)
-  expect_false("log2fc" %in% colnames(result$main_test))
+  expect_true("p_adj" %in% colnames(result$main_test))
 })
 
 test_that("gly_dea works with kruskal method", {

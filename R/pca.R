@@ -21,7 +21,7 @@
 #' @export
 gly_pca <- function(exp, center = TRUE, scale = TRUE, ...) {
   mat <- log(t(exp$expr_mat) + 1)
-  prcomp_res <- prcomp(mat, center = center, scale = scale, ...)
+  prcomp_res <- stats::prcomp(mat, center = center, scale = scale, ...)
   res <- list(
     "samples" = broom::tidy(prcomp_res, matrix = "samples"),
     "variables" = broom::tidy(prcomp_res, matrix = "variables"),

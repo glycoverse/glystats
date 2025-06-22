@@ -4,6 +4,7 @@
 #' using various statistical methods. The function supports both two-group comparisons
 #' (t-test, Wilcoxon test) and multi-group comparisons (ANOVA, Kruskal-Wallis test).
 #' For multi-group methods, post-hoc tests are automatically performed for significant results.
+#' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param method A character string specifying the statistical method to use:
@@ -13,7 +14,10 @@
 #'   - `"kruskal"`: Kruskal-Wallis test for multi-group comparison (non-parametric)
 #'  If not provided, default method is t-test for 2 groups, anova for more than 2 groups.
 #' @param group_col A character string specifying the column name of the grouping variable
-#'   in the sample information. Default is `"group"`.
+#'  in the sample information. Default is `"group"`.
+#' @param p_adj_method A character string specifying the method to adjust p-values.
+#'  See `p.adjust.methods` for available methods. Default is "BH".
+#'  If NULL, no adjustment is performed.
 #' @param ... Additional arguments passed to the underlying statistical functions.
 #'
 #' @details
@@ -31,7 +35,7 @@
 #' - For ANOVA: Tukey's HSD test for pairwise comparisons (`stats::TukeyHSD()`)
 #' - For Kruskal-Wallis: Dunn's test with Holm correction for multiple comparisons (`FSA::dunnTest()`)
 #'
-#' Post-hoc tests are only performed for variables with significant main effects (p < 0.05).
+#' Post-hoc tests are only performed for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
 #' For two-group methods (`"t-test"`, `"wilcoxon"`):
@@ -90,11 +94,12 @@
 #' @importFrom tidyselect all_of
 #' 
 #' @export
-gly_dea <- function(exp, method = NULL, group_col = "group", ...) {
+gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH", ...) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_choice(method, c("t-test", "wilcoxon", "anova", "kruskal"), null.ok = TRUE)
   checkmate::check_string(group_col)
+  checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -139,10 +144,10 @@ gly_dea <- function(exp, method = NULL, group_col = "group", ...) {
 
   # Perform DEA
   result <- switch(method,
-    "t-test" = .gly_dea_2groups(expr_mat, groups, stats::t.test, ...),
-    "wilcoxon" = .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, ...),
-    "anova" = .gly_dea_multi_groups(expr_mat, groups, stats::aov, stats::TukeyHSD, ...),
-    "kruskal" = .gly_dea_multi_groups(expr_mat, groups, stats::kruskal.test, FSA::dunnTest, ...),
+    "t-test" = .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, ...),
+    "wilcoxon" = .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, ...),
+    "anova" = .gly_dea_multi_groups(expr_mat, groups, stats::aov, stats::TukeyHSD, p_adj_method, ...),
+    "kruskal" = .gly_dea_multi_groups(expr_mat, groups, stats::kruskal.test, FSA::dunnTest, p_adj_method, ...),
     cli::cli_abort("Invalid method: {.val {method}}")
   )
 
@@ -158,7 +163,7 @@ gly_dea <- function(exp, method = NULL, group_col = "group", ...) {
   result
 }
 
-.gly_dea_2groups <- function(expr_mat, groups, .f, ...) {
+.gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, ...) {
   data <- expr_mat %>%
     t() %>%
     as.data.frame() %>%
@@ -180,6 +185,10 @@ gly_dea <- function(exp, method = NULL, group_col = "group", ...) {
     dplyr::ungroup() %>%
     janitor::clean_names()
 
+  if (!is.null(p_adj_method)) {
+    ttest_res <- dplyr::mutate(ttest_res, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
+  }
+
   if (identical(.f, stats::t.test)) {
     ttest_res <- dplyr::mutate(ttest_res, log2fc = .data$mean_group1 - .data$mean_group2)
   }
@@ -188,7 +197,7 @@ gly_dea <- function(exp, method = NULL, group_col = "group", ...) {
 }
 
 
-.gly_dea_multi_groups <- function(expr_mat, groups, .f, .ph, ...) {
+.gly_dea_multi_groups <- function(expr_mat, groups, .f, .ph, p_adj_method, ...) {
   # .f is aov or kruskal.test
   # .ph is post-hoc test, i.e., TukeyHSD for aov or FSA::dunnTest for kruskal.test
 
@@ -246,14 +255,19 @@ gly_dea <- function(exp, method = NULL, group_col = "group", ...) {
         dplyr::filter(.data$parameter == "group")
     }
 
+    if (!is.null(p_adj_method)) {
+      result <- dplyr::mutate(result, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
+    }
+
     result
   }
 
   # Helper function to generate post-hoc results
   .generate_posthoc_results <- function(main_test_res, data, .f) {
     # Filter significant results (p < 0.05)
+    p_col <- if ("p_adj" %in% colnames(main_test_res)) "p_adj" else "p"
     significant_vars <- main_test_res %>%
-      dplyr::filter(.data$p < 0.05) %>%
+      dplyr::filter(.data[[p_col]] < 0.05) %>%
       dplyr::pull(.data$variable)
     
     if (length(significant_vars) > 0) {

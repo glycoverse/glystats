@@ -4,7 +4,7 @@
 \alias{gly_dea}
 \title{Differential Expression Analysis (DEA)}
 \usage{
-gly_dea(exp, method = NULL, group_col = "group", ...)
+gly_dea(exp, method = NULL, group_col = "group", p_adj_method = "BH", ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -20,6 +20,10 @@ If not provided, default method is t-test for 2 groups, anova for more than 2 gr
 
 \item{group_col}{A character string specifying the column name of the grouping variable
 in the sample information. Default is \code{"group"}.}
+
+\item{p_adj_method}{A character string specifying the method to adjust p-values.
+See \code{p.adjust.methods} for available methods. Default is "BH".
+If NULL, no adjustment is performed.}
 
 \item{...}{Additional arguments passed to the underlying statistical functions.}
 }
@@ -40,6 +44,7 @@ Perform differential expression analysis for glycomics or glycoproteomics data
 using various statistical methods. The function supports both two-group comparisons
 (t-test, Wilcoxon test) and multi-group comparisons (ANOVA, Kruskal-Wallis test).
 For multi-group methods, post-hoc tests are automatically performed for significant results.
+P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1)) before
@@ -60,7 +65,7 @@ For multi-group methods (ANOVA, Kruskal-Wallis), at least 2 groups are required.
 \item For Kruskal-Wallis: Dunn's test with Holm correction for multiple comparisons (\code{FSA::dunnTest()})
 }
 
-Post-hoc tests are only performed for variables with significant main effects (p < 0.05).
+Post-hoc tests are only performed for variables with significant main effects (p_adj < 0.05).
 }
 \examples{
 \dontrun{
