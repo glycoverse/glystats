@@ -14,6 +14,6 @@ test_gp_exp <- exp |>
   slice_sample_var(n = 500) |>
   mutate_obs(
     sample = str_split_i(sample, "-", -1),
-    group = str_split_i(sample, "_", -1)
+    group = str_split_i(sample, "_", 1)
   )
 usethis::use_data(test_gp_exp, internal = TRUE, overwrite = TRUE)
