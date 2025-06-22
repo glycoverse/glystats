@@ -11,6 +11,7 @@
 #'   - `"wilcoxon"`: Wilcoxon rank-sum test for two-group comparison (non-parametric)
 #'   - `"anova"`: One-way ANOVA for multi-group comparison (parametric)
 #'   - `"kruskal"`: Kruskal-Wallis test for multi-group comparison (non-parametric)
+#'  If not provided, default method is t-test for 2 groups, anova for more than 2 groups.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'   in the sample information. Default is `"group"`.
 #' @param ... Additional arguments passed to the underlying statistical functions.
@@ -89,10 +90,10 @@
 #' @importFrom tidyselect all_of
 #' 
 #' @export
-gly_dea <- function(exp, method, group_col = "group", ...) {
+gly_dea <- function(exp, method = NULL, group_col = "group", ...) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
-  checkmate::check_choice(method, c("t-test", "wilcoxon", "anova", "kruskal"))
+  checkmate::check_choice(method, c("t-test", "wilcoxon", "anova", "kruskal"), null.ok = TRUE)
   checkmate::check_string(group_col)
 
   # Extract data from experiment object
@@ -109,10 +110,14 @@ gly_dea <- function(exp, method, group_col = "group", ...) {
   if (!is.factor(groups)) {
     groups <- factor(groups)
   }
-  
-  # Check group requirements based on method
+
+  # Check method
   n_groups <- length(levels(groups))
-  if (method %in% c("t-test", "wilcoxon")) {
+  if (is.null(method)) {
+    # Default method is t-test for 2 groups, anova for more than 2 groups
+    method <- if (n_groups == 2) "t-test" else "anova"
+  } else if (method %in% c("t-test", "wilcoxon")) {
+    # Or check user-specified method
     if (n_groups != 2) {
       cli::cli_abort(c(
         "{.field {group_col}} must be a factor with exactly 2 levels for {.val {method}}",

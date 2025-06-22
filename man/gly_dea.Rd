@@ -4,7 +4,7 @@
 \alias{gly_dea}
 \title{Differential Expression Analysis (DEA)}
 \usage{
-gly_dea(exp, method, group_col = "group", ...)
+gly_dea(exp, method = NULL, group_col = "group", ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -15,6 +15,7 @@ gly_dea(exp, method, group_col = "group", ...)
 \item \code{"wilcoxon"}: Wilcoxon rank-sum test for two-group comparison (non-parametric)
 \item \code{"anova"}: One-way ANOVA for multi-group comparison (parametric)
 \item \code{"kruskal"}: Kruskal-Wallis test for multi-group comparison (non-parametric)
+If not provided, default method is t-test for 2 groups, anova for more than 2 groups.
 }}
 
 \item{group_col}{A character string specifying the column name of the grouping variable
