@@ -246,3 +246,10 @@ test_that("gly_dea works with kruskal method", {
   expect_true(all(result$main_test$df == 2))  # 3 groups - 1
   expect_false("log2fc" %in% colnames(result$main_test))
 })
+
+test_that("gly_dea works with real data", {
+  result <- gly_dea(test_gp_exp)
+  expect_s3_class(result, c("glystats_dea_res_anova", "glystats_dea_res"))
+  expect_type(result, "list")
+  expect_setequal(names(result), c("main_test", "post_hoc"))
+})
