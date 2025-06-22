@@ -1,13 +1,15 @@
 Package: glystats
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9007
+Version: 0.0.0.9008
 Authors@R: 
     person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    mixOmics,
+    FSA
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -26,7 +28,6 @@ Imports:
     checkmate,
     cli,
     stats,
-    FSA,
     broom
 Depends: 
     R (>= 2.10)

@@ -2,6 +2,7 @@
 
 export(gly_dea)
 export(gly_pca)
+export(gly_plsda)
 importFrom(magrittr,"%>%")
 importFrom(rlang,.data)
 importFrom(tidyselect,all_of)
