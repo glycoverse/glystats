@@ -86,7 +86,7 @@ gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL,
     orthoI <- NA_integer_  # Let ropls determine automatically
   }
   
-  # Perform OPLS-DA (suppress output to avoid R CMD check issues)
+  # Perform OPLS-DA (suppress output and graphics to avoid R CMD check issues)
   oplsda_res <- suppressMessages(suppressWarnings({
     invisible(utils::capture.output({
       oplsda_result <- ropls::opls(
@@ -96,6 +96,8 @@ gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL,
         orthoI = orthoI,
         scaleC = scaling_option,
         crossvalI = min(7, nrow(mat) - 1),
+        fig.pdfC = "none",  # Explicitly disable PDF output
+        info.txtC = "none", # Disable text info output
         ...
       )
     }, type = "output"))
@@ -185,13 +187,18 @@ gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL,
 }
 
 # Utility function to create component info (DRY principle)
-.create_component_info <- function(summary_df, n_comp, prefix, comp_type, row_pattern, col_name) {
+.create_component_info <- function(summary_df, n_comp, prefix, comp_type, col_name) {
   components_list <- list()
   
   if (!is.null(summary_df) && n_comp > 0) {
     for (i in 1:n_comp) {
+      # For ropls getSummaryDF, the variance info is in the "Total" row
       variance_value <- .safe_extract({
-        summary_df[sprintf(row_pattern, i), col_name]
+        if ("Total" %in% rownames(summary_df) && col_name %in% colnames(summary_df)) {
+          as.numeric(summary_df["Total", col_name])
+        } else {
+          NA_real_
+        }
       }, default = NA_real_)
       
       components_list[[paste0(prefix, i)]] <- list(
@@ -216,14 +223,14 @@ gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL,
   
   # Add predictive components
   pred_components <- .create_component_info(
-    summary_df, predI, "pred", "predictive", "R2X(cum)%d", "R2X(cum)"
+    summary_df, predI, "pred", "predictive", "R2X(cum)"
   )
   components_list <- c(components_list, pred_components)
   
   # Add orthogonal components if available
   if (!is.null(orthoI) && !is.na(orthoI) && orthoI > 0) {
     ortho_components <- .create_component_info(
-      summary_df, orthoI, "ortho", "orthogonal", "R2Xo%d", "R2Xo"
+      summary_df, orthoI, "ortho", "orthogonal", "R2X(cum)"
     )
     components_list <- c(components_list, ortho_components)
   }
