@@ -95,8 +95,6 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, center = TRUE, scale 
       .before = 1
     )
   names(samples_tbl)[2:(1+ncomp)] <- paste0("comp", 1:ncomp)
-  # Add group column with original group column name
-  samples_tbl[[group_col]] <- group_labels
   samples_tbl
 }
 

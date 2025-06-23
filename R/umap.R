@@ -83,11 +83,6 @@ gly_umap <- function(exp,
     }
   }
   
-  # Add sample information if available
-  if (!is.null(sample_info) && nrow(sample_info) > 0) {
-    result <- dplyr::left_join(result, sample_info, by = "sample")
-  }
-  
   # Set S3 class
   structure(result, class = c("glystats_umap_res", attr(result, "class")))
 } 

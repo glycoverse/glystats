@@ -76,15 +76,13 @@ test_that("gly_umap works with default n_neighbors", {
   expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
 })
 
-test_that("gly_umap includes sample information", {
+test_that("gly_umap has consistent sample names", {
   skip_if_not_installed("uwot")
   
   result <- gly_umap(test_gp_exp, n_neighbors = 3)
   
-  # Should include columns from sample_info
-  sample_info_cols <- names(test_gp_exp$sample_info)
-  missing_cols <- setdiff(sample_info_cols, names(result))
-  expect_length(missing_cols, 0)
+  # Should have same sample names as input expression matrix
+  expect_equal(sort(result$sample), sort(colnames(test_gp_exp$expr_mat)))
 })
 
 test_that("gly_umap requires uwot package", {

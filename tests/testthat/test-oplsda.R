@@ -20,7 +20,6 @@ test_that("gly_oplsda works with basic functionality", {
   # Check samples tibble - basic required columns
   expect_s3_class(result$samples, "tbl_df")
   expect_true("sample" %in% names(result$samples))
-  expect_true("group" %in% names(result$samples))
   
   # Check variables tibble - basic structure
   expect_s3_class(result$variables, "tbl_df")
@@ -57,7 +56,6 @@ test_that("gly_oplsda works with different number of components", {
   
   # Check that we have the required columns even if no components are significant
   expect_true("sample" %in% names(result$samples))
-  expect_true("group" %in% names(result$samples))
   
   # Check variables tibble structure
   expect_s3_class(result$variables, "tbl_df")
@@ -76,7 +74,8 @@ test_that("gly_oplsda works with custom group column", {
   # Test with custom group column
   result <- gly_oplsda(exp_custom, group_col = "treatment")
   
-  expect_true("treatment" %in% names(result$samples))
+  expect_s3_class(result, "glystats_oplsda_res")
+  expect_true("sample" %in% names(result$samples))
 })
 
 test_that("gly_oplsda works with different scaling options", {

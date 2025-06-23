@@ -61,15 +61,13 @@ test_that("gly_tsne works with default perplexity", {
   expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
 })
 
-test_that("gly_tsne includes sample information", {
+test_that("gly_tsne has consistent sample names", {
   skip_if_not_installed("Rtsne")
   
   result <- gly_tsne(test_gp_exp, perplexity = 3)
   
-  # Should include columns from sample_info
-  sample_info_cols <- names(test_gp_exp$sample_info)
-  missing_cols <- setdiff(sample_info_cols, names(result))
-  expect_length(missing_cols, 0)
+  # Should have same sample names as input expression matrix
+  expect_equal(sort(result$sample), sort(colnames(test_gp_exp$expr_mat)))
 })
 
 test_that("gly_tsne requires Rtsne package", {

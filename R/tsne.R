@@ -62,11 +62,6 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 100
     tsne2 = tsne_res$Y[, 2]
   )
   
-  # Add sample information if available
-  if (!is.null(sample_info) && nrow(sample_info) > 0) {
-    result <- dplyr::left_join(result, sample_info, by = "sample")
-  }
-  
   # Set S3 class
   structure(result, class = c("glystats_tsne_res", attr(result, "class")))
 }

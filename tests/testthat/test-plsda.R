@@ -20,7 +20,6 @@ test_that("gly_plsda works with basic functionality", {
   # Check samples tibble
   expect_s3_class(result$samples, "tbl_df")
   expect_true("sample" %in% names(result$samples))
-  expect_true("group" %in% names(result$samples))
   expect_true("comp1" %in% names(result$samples))
   expect_true("comp2" %in% names(result$samples))
   
@@ -65,7 +64,8 @@ test_that("gly_plsda works with custom group column", {
   # Test with custom group column
   result <- gly_plsda(exp_custom, group_col = "treatment")
   
-  expect_true("treatment" %in% names(result$samples))
+  expect_s3_class(result, "glystats_plsda_res")
+  expect_true("sample" %in% names(result$samples))
 })
 
 test_that("gly_plsda handles errors correctly", {

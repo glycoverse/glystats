@@ -157,8 +157,6 @@ gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL,
     samples_tbl <- .add_components_to_tibble(samples_tbl, ortho_scores, orthoI, "ortho")
   }
   
-  # Add group column with original group column name
-  samples_tbl[[group_col]] <- group_labels
   samples_tbl
 }
 
