@@ -63,5 +63,5 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 100
   )
   
   # Set S3 class
-  structure(result, class = c("glystats_tsne_res", attr(result, "class")))
+  structure(result, class = c("glystats_tsne_res", "glystats_res", class(result)))
 }

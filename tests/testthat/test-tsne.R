@@ -7,7 +7,7 @@ test_that("gly_tsne works with default parameters", {
   result <- gly_tsne(test_gp_exp, perplexity = 3)
   
   # Check basic structure
-  expect_s3_class(result, "glystats_tsne_res")
+  expect_s3_class(result, c("glystats_tsne_res", "glystats_res"))
   expect_s3_class(result, "tbl_df")
   
   # Check dimensions
@@ -30,7 +30,7 @@ test_that("gly_tsne works with custom parameters", {
   
   result <- gly_tsne(test_gp_exp, perplexity = 2, max_iter = 250)
   
-  expect_s3_class(result, "glystats_tsne_res")
+  expect_s3_class(result, c("glystats_tsne_res", "glystats_res"))
   expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
   expect_true(all(c("tsne1", "tsne2", "sample") %in% names(result)))
 })
@@ -44,7 +44,7 @@ test_that("gly_tsne handles perplexity adjustment", {
     "Perplexity should be smaller"
   )
   
-  expect_s3_class(result, "glystats_tsne_res")
+  expect_s3_class(result, c("glystats_tsne_res", "glystats_res"))
   expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
 })
 
@@ -57,7 +57,7 @@ test_that("gly_tsne works with default perplexity", {
     "Perplexity should be smaller"
   )
   
-  expect_s3_class(result, "glystats_tsne_res")
+  expect_s3_class(result, c("glystats_tsne_res", "glystats_res"))
   expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
 })
 

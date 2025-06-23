@@ -8,7 +8,7 @@ test_that("gly_dea works with t-test method", {
   result <- suppressMessages(gly_dea(exp_2group, method = "t-test"))
   
   # Test core functionality
-  expect_s3_class(result, c("glystats_dea_res_ttest", "glystats_dea_res"))
+  expect_s3_class(result, c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res"))
   expect_equal(nrow(result), 10)
   expect_true("log2fc" %in% colnames(result))  # t-test should have log2fc
   expect_true("p_adj" %in% colnames(result))  # p_adj should exist
@@ -24,7 +24,7 @@ test_that("gly_dea works with wilcoxon method", {
   result <- suppressMessages(suppressWarnings(gly_dea(exp_2group, method = "wilcoxon")))
   
   # Test core functionality
-  expect_s3_class(result, c("glystats_dea_res_wilcoxon", "glystats_dea_res"))
+  expect_s3_class(result, c("glystats_dea_res_wilcoxon", "glystats_dea_res", "glystats_res"))
   expect_equal(nrow(result), 10)
   expect_false("log2fc" %in% colnames(result))  # Wilcoxon should NOT have log2fc
 })
@@ -87,7 +87,7 @@ test_that("gly_dea works with anova method", {
   result <- suppressMessages(gly_dea(exp_3group, method = "anova"))
   
   # Test core functionality
-  expect_s3_class(result, c("glystats_dea_res_anova", "glystats_dea_res"))
+  expect_s3_class(result, c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res"))
   expect_type(result, "list")
   expect_setequal(names(result), c("main_test", "post_hoc"))
   
@@ -106,7 +106,7 @@ test_that("gly_dea works with kruskal method", {
   result <- suppressMessages(gly_dea(exp_3group, method = "kruskal"))
   
   # Test core functionality
-  expect_s3_class(result, c("glystats_dea_res_kruskal", "glystats_dea_res"))
+  expect_s3_class(result, c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res"))
   expect_type(result, "list")
   expect_setequal(names(result), c("main_test", "post_hoc"))
   
@@ -120,7 +120,7 @@ test_that("gly_dea works with kruskal method", {
 test_that("gly_dea works with real data", {
   # This test uses the full test_gp_exp to ensure integration works
   result <- gly_dea(test_gp_exp)
-  expect_s3_class(result, c("glystats_dea_res_anova", "glystats_dea_res"))
+  expect_s3_class(result, c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res"))
   expect_type(result, "list")
   expect_setequal(names(result), c("main_test", "post_hoc"))
 })

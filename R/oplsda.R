@@ -111,7 +111,7 @@ gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL,
     "components" = .tidy_oplsda_components(oplsda_res, predI, orthoI)
   )
   
-  structure(res, class = "glystats_oplsda_res")
+  structure(res, class = c("glystats_oplsda_res", "glystats_res"))
 }
 
 # Helper functions to tidy OPLS-DA results (broom-style) ---------------------

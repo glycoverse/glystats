@@ -27,5 +27,5 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, ...) {
     "variables" = broom::tidy(prcomp_res, matrix = "variables"),
     "eigenvalues" = broom::tidy(prcomp_res, matrix = "eigenvalues")
   )
-  structure(res, class = "gly_pca")
+  structure(res, class = c("glystats_pca_res", "glystats_res"))
 }

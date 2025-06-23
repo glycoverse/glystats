@@ -84,5 +84,5 @@ gly_umap <- function(exp,
   }
   
   # Set S3 class
-  structure(result, class = c("glystats_umap_res", attr(result, "class")))
+  structure(result, class = c("glystats_umap_res", "glystats_res", class(result)))
 } 

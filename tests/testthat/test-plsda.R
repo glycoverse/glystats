@@ -13,7 +13,7 @@ test_that("gly_plsda works with basic functionality", {
   result <- gly_plsda(exp_2group)
   
   # Test basic structure
-  expect_s3_class(result, "glystats_plsda_res")
+  expect_s3_class(result, c("glystats_plsda_res", "glystats_res"))
   expect_type(result, "list")
   expect_named(result, c("samples", "variables", "components"))
   
@@ -64,7 +64,7 @@ test_that("gly_plsda works with custom group column", {
   # Test with custom group column
   result <- gly_plsda(exp_custom, group_col = "treatment")
   
-  expect_s3_class(result, "glystats_plsda_res")
+  expect_s3_class(result, c("glystats_plsda_res", "glystats_res"))
   expect_true("sample" %in% names(result$samples))
 })
 

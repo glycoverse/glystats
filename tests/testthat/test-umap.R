@@ -7,7 +7,7 @@ test_that("gly_umap works with default parameters", {
   result <- gly_umap(test_gp_exp, n_neighbors = 3)
   
   # Check basic structure
-  expect_s3_class(result, "glystats_umap_res")
+  expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
   expect_s3_class(result, "tbl_df")
   
   # Check dimensions
@@ -30,7 +30,7 @@ test_that("gly_umap works with custom parameters", {
   
   result <- gly_umap(test_gp_exp, n_neighbors = 2, min_dist = 0.01, n_epochs = 50)
   
-  expect_s3_class(result, "glystats_umap_res")
+  expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
   expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
   expect_true(all(c("umap1", "umap2", "sample") %in% names(result)))
 })
@@ -44,7 +44,7 @@ test_that("gly_umap handles n_neighbors adjustment", {
     "n_neighbors should be smaller"
   )
   
-  expect_s3_class(result, "glystats_umap_res")
+  expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
   expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
 })
 
@@ -53,7 +53,7 @@ test_that("gly_umap works with more than 2 components", {
   
   result <- gly_umap(test_gp_exp, n_neighbors = 3, n_components = 3)
   
-  expect_s3_class(result, "glystats_umap_res")
+  expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
   expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
   expect_true(all(c("umap1", "umap2", "umap3", "sample") %in% names(result)))
   
@@ -72,7 +72,7 @@ test_that("gly_umap works with default n_neighbors", {
     "n_neighbors should be smaller"
   )
   
-  expect_s3_class(result, "glystats_umap_res")
+  expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
   expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
 })
 

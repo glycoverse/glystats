@@ -13,7 +13,7 @@ test_that("gly_oplsda works with basic functionality", {
   result <- gly_oplsda(exp_2group)
   
   # Test basic structure
-  expect_s3_class(result, "glystats_oplsda_res")
+  expect_s3_class(result, c("glystats_oplsda_res", "glystats_res"))
   expect_type(result, "list")
   expect_named(result, c("samples", "variables", "components"))
   
@@ -50,7 +50,7 @@ test_that("gly_oplsda works with different number of components", {
   result <- suppressWarnings(gly_oplsda(exp_small, predI = 2, orthoI = 1))
   
   # Basic structure checks
-  expect_s3_class(result, "glystats_oplsda_res")
+  expect_s3_class(result, c("glystats_oplsda_res", "glystats_res"))
   expect_type(result, "list")
   expect_named(result, c("samples", "variables", "components"))
   
@@ -74,7 +74,7 @@ test_that("gly_oplsda works with custom group column", {
   # Test with custom group column
   result <- gly_oplsda(exp_custom, group_col = "treatment")
   
-  expect_s3_class(result, "glystats_oplsda_res")
+  expect_s3_class(result, c("glystats_oplsda_res", "glystats_res"))
   expect_true("sample" %in% names(result$samples))
 })
 
@@ -88,15 +88,15 @@ test_that("gly_oplsda works with different scaling options", {
   
   # Test with no centering or scaling
   result_none <- gly_oplsda(exp_small, center = FALSE, scale = FALSE)
-  expect_s3_class(result_none, "glystats_oplsda_res")
+  expect_s3_class(result_none, c("glystats_oplsda_res", "glystats_res"))
   
   # Test with only centering
   result_center <- gly_oplsda(exp_small, center = TRUE, scale = FALSE)
-  expect_s3_class(result_center, "glystats_oplsda_res")
+  expect_s3_class(result_center, c("glystats_oplsda_res", "glystats_res"))
   
   # Test with only scaling
   result_scale <- gly_oplsda(exp_small, center = FALSE, scale = TRUE)
-  expect_s3_class(result_scale, "glystats_oplsda_res")
+  expect_s3_class(result_scale, c("glystats_oplsda_res", "glystats_res"))
 })
 
 test_that("gly_oplsda handles errors correctly", {

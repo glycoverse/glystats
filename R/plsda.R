@@ -82,7 +82,7 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, center = TRUE, scale 
     "components" = .tidy_plsda_components(plsda_res, ncomp)
   )
   
-  structure(res, class = "glystats_plsda_res")
+  structure(res, class = c("glystats_plsda_res", "glystats_res"))
 }
 
 # Helper functions to tidy PLS-DA results (broom-style) ----------------------

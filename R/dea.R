@@ -158,9 +158,7 @@ gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH"
     "anova" = "glystats_dea_res_anova",
     "kruskal" = "glystats_dea_res_kruskal"
   )
-  class(result) <- c(subclass, "glystats_dea_res", class(result))
-
-  result
+  structure(result, class = c(subclass, "glystats_dea_res", "glystats_res", class(result)))
 }
 
 .gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, ...) {
