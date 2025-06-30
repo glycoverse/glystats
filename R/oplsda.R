@@ -44,26 +44,9 @@ gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL,
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns
   sample_info <- exp$sample_info
   
-  # Determine group variable
-  if (is.null(group_col)) {
-    char_cols <- names(sample_info)[sapply(sample_info, function(x) is.character(x) || is.factor(x))]
-    if (length(char_cols) == 0) {
-      cli::cli_abort("No character or factor columns found in sample information for grouping.")
-    }
-    group_col <- char_cols[1]
-    cli::cli_inform("Using {.field {group_col}} as grouping variable.")
-  }
-  
-  # Check if group variable exists
-  if (!group_col %in% names(sample_info)) {
-    cli::cli_abort("Group variable {.field {group_col}} not found in sample information.")
-  }
-  
-  # Extract group labels
-  group_labels <- sample_info[[group_col]]
-  if (is.character(group_labels)) {
-    group_labels <- as.factor(group_labels)
-  }
+  # Extract and validate groups using helper function
+  .check_group_column_exists(sample_info, group_col)
+  group_labels <- .extract_groups(sample_info, group_col)
   
   # Apply centering and scaling if requested
   if (center) {

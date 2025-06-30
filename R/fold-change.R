@@ -14,21 +14,16 @@ gly_fold_change <- function(exp, group_col = "group") {
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)
 
-  if (!group_col %in% colnames(exp$sample_info)) {
-    cli::cli_abort("Column {.field {group_col}} not found in sample information")
-  }
-
-  groups <- exp$sample_info[[group_col]]
-  if (!is.factor(groups)) {
-    groups <- factor(groups)
-  }
-
-  if (length(levels(groups)) != 2) {
-    cli::cli_abort("Group column {.field {group_col}} must have exactly 2 levels")
-  }
-
-  cli::cli_alert_info("Group 1: {.val {levels(groups)[1]}}")
-  cli::cli_alert_info("Group 2: {.val {levels(groups)[2]}}")
+  # Extract and validate groups using helper function
+  group_info <- .extract_and_validate_groups(
+    sample_info = exp$sample_info,
+    group_col = group_col,
+    min_count = 2,
+    max_count = 2,
+    method = "fold_change",
+    show_info = TRUE
+  )
+  groups <- group_info$groups
 
   expr_mat <- exp$expr_mat
   

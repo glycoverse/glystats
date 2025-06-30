@@ -91,25 +91,16 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, return_raw = FAL
   expr_mat <- glyexp::get_expr_mat(exp)
   sample_info <- glyexp::get_sample_info(exp)
 
-  # Check if group column exists
-  if (!group_col %in% colnames(sample_info)) {
-    cli::cli_abort("Column {.field {group_col}} not found in sample information")
-  }
-
-  # Get group information
-  groups <- sample_info[[group_col]]
-  if (!is.factor(groups)) {
-    groups <- factor(groups)
-  }
-
-  # Check that we have exactly 2 groups
-  n_groups <- length(levels(groups))
-  if (n_groups != 2) {
-    cli::cli_abort(c(
-      "{.field {group_col}} must be a factor with exactly 2 levels for ROC analysis",
-      "i" = "Current levels: {.val {levels(groups)}}"
-    ))
-  }
+  # Extract and validate groups using helper function
+  group_info <- .extract_and_validate_groups(
+    sample_info = sample_info,
+    group_col = group_col,
+    min_count = 2,
+    max_count = 2,
+    method = "ROC analysis",
+    show_info = TRUE
+  )
+  groups <- group_info$groups
 
   # Set positive class
   if (is.null(pos_class)) {

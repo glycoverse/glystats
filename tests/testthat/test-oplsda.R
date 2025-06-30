@@ -109,12 +109,12 @@ test_that("gly_oplsda handles errors correctly", {
   # Should error when default "group" column doesn't exist
   expect_error(
     gly_oplsda(exp_small),
-    "Group variable group not found"
+    "Column group not found in sample information"
   )
   
   # Should error when specified group variable doesn't exist
   expect_error(
     gly_oplsda(test_gp_exp, group_col = "nonexistent"),
-    "Group variable nonexistent not found"
+    "Column nonexistent not found in sample information"
   )
 }) 

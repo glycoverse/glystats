@@ -112,41 +112,30 @@ gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH"
   expr_mat <- glyexp::get_expr_mat(exp)
   sample_info <- glyexp::get_sample_info(exp)
 
-  # Check if group column exists
-  if (!group_col %in% colnames(sample_info)) {
-    cli::cli_abort("Column {.field {group_col}} not found in sample information")
-  }
-
-  # Get group information
-  groups <- sample_info[[group_col]]
-  if (!is.factor(groups)) {
-    groups <- factor(groups)
-  }
-
-  # Check method
+  # Extract groups first for method determination if needed
+  group_info <- .extract_and_validate_groups(
+    sample_info = sample_info,
+    group_col = group_col,
+    min_count = NULL,
+    max_count = NULL,
+    method = NULL,  # No validation yet, method may be auto-determined
+    show_info = FALSE  # Don't show info yet, will show after method is determined
+  )
+  groups <- group_info$groups
   n_groups <- length(levels(groups))
+
+  # Auto-determine method if not provided
   if (is.null(method)) {
-    # Default method is t-test for 2 groups, anova for more than 2 groups
     method <- if (n_groups == 2) "t-test" else "anova"
-  } else if (method %in% c("t-test", "wilcoxon")) {
-    # Or check user-specified method
-    if (n_groups != 2) {
-      cli::cli_abort(c(
-        "{.field {group_col}} must be a factor with exactly 2 levels for {.val {method}}",
-        "i" = "Current levels: {.val {levels(groups)}}"
-      ))
-    }
-    cli::cli_alert_info("Group 1: {.val {levels(groups)[1]}}")
-    cli::cli_alert_info("Group 2: {.val {levels(groups)[2]}}")
+  }
+
+  # Validate group count based on method and display group info
+  if (method %in% c("t-test", "wilcoxon")) {
+    .validate_group_count(groups, group_col, min_count = 2, max_count = 2, method = method)
+    .display_two_group_info(groups)
   } else if (method %in% c("anova", "kruskal")) {
-    if (n_groups < 2) {
-      cli::cli_abort(c(
-        "{.field {group_col}} must be a factor with at least 2 levels for {.val {method}}",
-        "i" = "Current levels: {.val {levels(groups)}}"
-      ))
-    }
-    cli::cli_alert_info("Number of groups: {.val {n_groups}}")
-    cli::cli_alert_info("Groups: {.val {levels(groups)}}")
+    .validate_group_count(groups, group_col, min_count = 2, method = method)
+    .display_multi_group_info(groups)
   }
 
   # Check package availability based on method
