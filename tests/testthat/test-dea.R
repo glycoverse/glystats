@@ -10,7 +10,6 @@ test_that("gly_dea works with t-test method", {
   # Test core functionality
   expect_s3_class(result, c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res"))
   expect_equal(nrow(result), 10)
-  expect_true("log2fc" %in% colnames(result))  # t-test should have log2fc
   expect_true("p_adj" %in% colnames(result))  # p_adj should exist
 })
 

@@ -39,8 +39,7 @@ If TRUE, returns raw statistical model objects as a list.}
 }
 \value{
 For two-group methods (\code{"t-test"}, \code{"wilcoxon"}):
-A tibble with statistical test results. For t-test, an additional \code{log2fc} column
-(log2 fold change) is included.
+A tibble with statistical test results.
 
 For multi-group methods (\code{"anova"}, \code{"kruskal"}):
 A list containing two elements:

@@ -46,8 +46,7 @@
 #'
 #' @returns
 #' For two-group methods (`"t-test"`, `"wilcoxon"`):
-#' A tibble with statistical test results. For t-test, an additional `log2fc` column
-#' (log2 fold change) is included.
+#' A tibble with statistical test results.
 #'
 #' For multi-group methods (`"anova"`, `"kruskal"`):
 #' A list containing two elements:
@@ -229,10 +228,6 @@ gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH"
 
   if (!is.null(p_adj_method)) {
     result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
-  }
-
-  if (identical(.f, stats::t.test)) {
-    result_tbl <- dplyr::mutate(result_tbl, log2fc = .data$mean_group1 - .data$mean_group2)
   }
 
   result_tbl
