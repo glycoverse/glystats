@@ -3,6 +3,7 @@
 export(enrich_go)
 export(enrich_kegg)
 export(gly_dea)
+export(gly_fold_change)
 export(gly_oplsda)
 export(gly_pca)
 export(gly_plsda)
