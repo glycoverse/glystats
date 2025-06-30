@@ -13,7 +13,8 @@ Suggests:
     FSA,
     ropls,
     mockery,
-    Rtsne
+    Rtsne,
+    org.Hs.eg.db
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -36,6 +37,11 @@ Imports:
     utils,
     uwot,
     pROC,
-    purrr
+    purrr,
+    clusterProfiler,
+    glyclean (>= 0.5.2)
 Depends: 
     R (>= 2.10)
+Remotes:  
+    glycoverse/glyclean
+    glycoverse/glyexp
