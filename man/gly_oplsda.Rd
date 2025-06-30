@@ -46,6 +46,11 @@ The function uses \code{ropls::opls()} to perform OPLS-DA and extracts relevant 
 for visualization and interpretation. OPLS-DA separates the predictive variation from
 the orthogonal variation that is not correlated with the response.
 }
+\section{Required packages}{
+
+This function requires the \code{ropls} package to be installed for OPLS-DA analysis.
+}
+
 \examples{
 \dontrun{
 oplsda_res <- gly_oplsda(exp)

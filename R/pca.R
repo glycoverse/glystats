@@ -8,6 +8,9 @@
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
 #' @param ... Additional arguments passed to `prcomp()`.
 #'
+#' @section Required packages:
+#' This function only uses base R packages and does not require additional dependencies.
+#'
 #' @return A list containing three tibbles:
 #'  - `samples`: PCA scores for each sample
 #'  - `variables`: PCA loadings for each variable

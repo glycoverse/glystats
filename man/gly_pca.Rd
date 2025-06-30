@@ -27,6 +27,11 @@ A list containing three tibbles:
 Perform principal component analysis on the expression data.
 The function uses \code{prcomp()} to perform PCA and \code{broom::tidy()} to tidy the results.
 }
+\section{Required packages}{
+
+This function only uses base R packages and does not require additional dependencies.
+}
+
 \examples{
 \dontrun{
 pca_res <- gly_pca(exp)

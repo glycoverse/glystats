@@ -49,6 +49,11 @@ The function requires exactly 2 groups in the specified grouping variable. If mo
 \item Coordinates are extracted using \code{pROC::coords()}
 }
 }
+\section{Required packages}{
+
+This function requires the \code{pROC} package to be installed for ROC curve computation.
+}
+
 \examples{
 \dontrun{
 # Create example experiment object with 2 groups

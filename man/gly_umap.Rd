@@ -42,6 +42,11 @@ A tibble with UMAP coordinates (umap1, umap2).
 Perform UMAP dimensionality reduction on the expression data.
 The function uses \code{uwot::umap()} to perform UMAP analysis.
 }
+\section{Required packages}{
+
+This function requires the \code{uwot} package to be installed for UMAP analysis.
+}
+
 \examples{
 \dontrun{
 umap_res <- gly_umap(exp)

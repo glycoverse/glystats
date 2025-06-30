@@ -67,6 +67,15 @@ For multi-group methods (ANOVA, Kruskal-Wallis), at least 2 groups are required.
 
 Post-hoc tests are only performed for variables with significant main effects (p_adj < 0.05).
 }
+\section{Required packages}{
+
+Depending on the method used, this function may require additional packages:
+\itemize{
+\item \code{FSA} package is required when using the "kruskal" method for Dunn's post-hoc test
+\item All other methods use base R statistical functions
+}
+}
+
 \examples{
 \dontrun{
 # Create example experiment object

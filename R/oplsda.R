@@ -16,6 +16,9 @@
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
 #' @param ... Additional arguments passed to `ropls::opls()`.
 #'
+#' @section Required packages:
+#' This function requires the `ropls` package to be installed for OPLS-DA analysis.
+#'
 #' @return A list containing three tibbles:
 #'  - `samples`: OPLS-DA scores for each sample with group information
 #'  - `variables`: OPLS-DA loadings for each variable
@@ -30,13 +33,7 @@
 gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL, 
                        center = TRUE, scale = TRUE, ...) {
   
-  # Check if ropls is available
-  if (!requireNamespace("ropls", quietly = TRUE)) {
-    cli::cli_abort(c(
-      "Package {.pkg ropls} is required for OPLS-DA analysis.",
-      "i" = "Install it with: {.code BiocManager::install('ropls')}"
-    ))
-  }
+  .check_pkg_available("ropls")
   
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns

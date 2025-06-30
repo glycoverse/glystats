@@ -21,6 +21,15 @@ A tibble of GO or KEGG enrichment results.
 Perform GO and KEGG enrichment analysis based on all the proteins (genes)
 in a \code{glyexp::experiment()}.
 }
+\section{Required packages}{
+
+This function requires the following packages to be installed:
+\itemize{
+\item \code{clusterProfiler} for enrichment analysis
+\item \code{org.Hs.eg.db} for human gene annotation (GO analysis only)
+}
+}
+
 \seealso{
 \code{\link[clusterProfiler:enrichGO]{clusterProfiler::enrichGO()}}, \code{\link[clusterProfiler:enrichKEGG]{clusterProfiler::enrichKEGG()}}
 }

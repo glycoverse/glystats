@@ -13,6 +13,9 @@
 #' @param learning_rate Learning rate for the optimization. Default is 1.0.
 #' @param ... Additional arguments passed to `uwot::umap()`.
 #'
+#' @section Required packages:
+#' This function requires the `uwot` package to be installed for UMAP analysis.
+#'
 #' @return A tibble with UMAP coordinates (umap1, umap2).
 #' 
 #' @examples
@@ -31,13 +34,7 @@ gly_umap <- function(exp,
                      learning_rate = 1.0,
                      ...) {
   
-  # Check if uwot is available
-  if (!requireNamespace("uwot", quietly = TRUE)) {
-    cli::cli_abort(c(
-      "Package {.pkg uwot} is required for UMAP analysis.",
-      "i" = "Install it with: {.code install.packages('uwot')}"
-    ))
-  }
+  .check_pkg_available("uwot")
   
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns

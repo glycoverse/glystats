@@ -10,6 +10,9 @@
 #' @param max_iter Maximum number of iterations. Default is 1000.
 #' @param ... Additional arguments passed to `Rtsne::Rtsne()`.
 #'
+#' @section Required packages:
+#' This function requires the `Rtsne` package to be installed for t-SNE analysis.
+#'
 #' @return A tibble with t-SNE coordinates (tsne1, tsne2).
 #' 
 #' @examples
@@ -20,13 +23,7 @@
 #' @export
 gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 1000, ...) {
   
-  # Check if Rtsne is available
-  if (!requireNamespace("Rtsne", quietly = TRUE)) {
-    cli::cli_abort(c(
-      "Package {.pkg Rtsne} is required for t-SNE analysis.",
-      "i" = "Install it with: {.code install.packages('Rtsne')}"
-    ))
-  }
+  .check_pkg_available("Rtsne")
   
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns

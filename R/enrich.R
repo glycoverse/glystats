@@ -6,10 +6,18 @@
 #' @param exp A `glyexp::experiment()` object.
 #' @param ... Arguments passed to [clusterProfiler::enrichGO()] or [clusterProfiler::enrichKEGG()].
 #'
+#' @section Required packages:
+#' This function requires the following packages to be installed:
+#' - `clusterProfiler` for enrichment analysis
+#' - `org.Hs.eg.db` for human gene annotation (GO analysis only)
+#'
 #' @return A tibble of GO or KEGG enrichment results.
 #' @seealso [clusterProfiler::enrichGO()], [clusterProfiler::enrichKEGG()]
 #' @export
 enrich_go <- function(exp, ...) {
+  .check_pkg_available("clusterProfiler")
+  .check_pkg_available("org.Hs.eg.db")
+  
   genes <- .extract_genes_from_exp(exp)
   res <- clusterProfiler::enrichGO(
     gene = genes,
@@ -26,6 +34,8 @@ enrich_go <- function(exp, ...) {
 #' @rdname enrich_go
 #' @export
 enrich_kegg <- function(exp, ...) {
+  .check_pkg_available("clusterProfiler")
+  
   genes <- .extract_genes_from_exp(exp)
   res <- clusterProfiler::enrichKEGG(
     gene = genes,

@@ -41,6 +41,11 @@ Perform partial least squares discriminant analysis on the expression data.
 The function uses \code{mixOmics::plsda()} to perform PLS-DA and extracts relevant results
 for visualization and interpretation.
 }
+\section{Required packages}{
+
+This function requires the \code{mixOmics} package to be installed for PLS-DA analysis.
+}
+
 \examples{
 \dontrun{
 plsda_res <- gly_plsda(exp)

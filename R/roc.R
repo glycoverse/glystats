@@ -24,6 +24,9 @@
 #' - ROC analysis is performed using `pROC::roc()`
 #' - Coordinates are extracted using `pROC::coords()`
 #'
+#' @section Required packages:
+#' This function requires the `pROC` package to be installed for ROC curve computation.
+#'
 #' @returns
 #' A list containing two elements:
 #' - `auc`: A named numeric vector of AUC values for each variable
@@ -74,6 +77,8 @@
 #'
 #' @export
 gly_roc <- function(exp, group_col = "group", pos_class = NULL) {
+  .check_pkg_available("pROC")
+  
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)

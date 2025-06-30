@@ -26,6 +26,11 @@ A tibble with t-SNE coordinates (tsne1, tsne2).
 Perform t-SNE dimensionality reduction on the expression data.
 The function uses \code{Rtsne::Rtsne()} to perform t-SNE analysis.
 }
+\section{Required packages}{
+
+This function requires the \code{Rtsne} package to be installed for t-SNE analysis.
+}
+
 \examples{
 \dontrun{
 tsne_res <- gly_tsne(exp)

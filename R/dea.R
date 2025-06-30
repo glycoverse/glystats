@@ -20,6 +20,11 @@
 #'  If NULL, no adjustment is performed.
 #' @param ... Additional arguments passed to the underlying statistical functions.
 #'
+#' @section Required packages:
+#' Depending on the method used, this function may require additional packages:
+#' - `FSA` package is required when using the "kruskal" method for Dunn's post-hoc test
+#' - All other methods use base R statistical functions
+#'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. For two-group methods (t-test, Wilcoxon), exactly 2 groups are required.
@@ -140,6 +145,11 @@ gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH"
     }
     cli::cli_alert_info("Number of groups: {.val {n_groups}}")
     cli::cli_alert_info("Groups: {.val {levels(groups)}}")
+  }
+
+  # Check package availability based on method
+  if (method == "kruskal") {
+    .check_pkg_available("FSA")
   }
 
   # Perform DEA

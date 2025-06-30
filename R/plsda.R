@@ -13,6 +13,9 @@
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
 #' @param ... Additional arguments passed to `mixOmics::plsda()`.
 #'
+#' @section Required packages:
+#' This function requires the `mixOmics` package to be installed for PLS-DA analysis.
+#'
 #' @return A list containing three tibbles:
 #'  - `samples`: PLS-DA scores for each sample with group information
 #'  - `variables`: PLS-DA loadings for each variable
@@ -26,13 +29,7 @@
 #' @export
 gly_plsda <- function(exp, group_col = "group", ncomp = 2, center = TRUE, scale = TRUE, ...) {
   
-  # Check if mixOmics is available
-  if (!requireNamespace("mixOmics", quietly = TRUE)) {
-    cli::cli_abort(c(
-      "Package {.pkg mixOmics} is required for PLS-DA analysis.",
-      "i" = "Install it with: {.code install.packages('mixOmics')}"
-    ))
-  }
+  .check_pkg_available("mixOmics")
   
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns
