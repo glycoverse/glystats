@@ -4,7 +4,7 @@
 \alias{gly_roc}
 \title{ROC Analysis for Glycomics and Glycoproteomics Data}
 \usage{
-gly_roc(exp, group_col = "group", pos_class = NULL)
+gly_roc(exp, group_col = "group", pos_class = NULL, return_raw = FALSE)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -16,6 +16,9 @@ exactly 2 levels for binary classification.}
 \item{pos_class}{A character string specifying which group level should be treated as
 the positive class. If \code{NULL} (default), the second level (alphabetically) will be
 used as the positive class.}
+
+\item{return_raw}{A logical value. If FALSE (default), returns processed results with
+AUC values and threshold coordinates. If TRUE, returns raw pROC objects as a list.}
 }
 \value{
 A list containing two elements:

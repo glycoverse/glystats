@@ -11,12 +11,15 @@
 #' @param metric Distance metric to use. Default is "euclidean".
 #' @param n_epochs Number of training epochs. Default is 200.
 #' @param learning_rate Learning rate for the optimization. Default is 1.0.
+#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
+#'   If TRUE, returns raw umap result matrix.
 #' @param ... Additional arguments passed to `uwot::umap()`.
 #'
 #' @section Required packages:
 #' This function requires the `uwot` package to be installed for UMAP analysis.
 #'
-#' @return A tibble with UMAP coordinates (umap1, umap2).
+#' @return A tibble with UMAP coordinates (umap1, umap2) when return_raw = FALSE,
+#'   or raw umap result matrix when return_raw = TRUE.
 #' 
 #' @examples
 #' \dontrun{
@@ -32,9 +35,12 @@ gly_umap <- function(exp,
                      metric = "euclidean",
                      n_epochs = 200,
                      learning_rate = 1.0,
+                     return_raw = FALSE,
                      ...) {
   
   .check_pkg_available("uwot")
+  
+  checkmate::check_logical(return_raw, len = 1)
   
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns
@@ -65,6 +71,11 @@ gly_umap <- function(exp,
       ...
     )
   )
+  
+  # Return raw results if requested
+  if (return_raw) {
+    return(umap_res)
+  }
   
   # Create result tibble
   result <- tibble::tibble(

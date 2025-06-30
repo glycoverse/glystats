@@ -5,17 +5,21 @@
 \alias{enrich_kegg}
 \title{GO and KEGG enrichment analysis}
 \usage{
-enrich_go(exp, ...)
+enrich_go(exp, return_raw = FALSE, ...)
 
-enrich_kegg(exp, ...)
+enrich_kegg(exp, return_raw = FALSE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object.}
 
+\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
+If TRUE, returns raw clusterProfiler enrichResult objects.}
+
 \item{...}{Arguments passed to \code{\link[clusterProfiler:enrichGO]{clusterProfiler::enrichGO()}} or \code{\link[clusterProfiler:enrichKEGG]{clusterProfiler::enrichKEGG()}}.}
 }
 \value{
-A tibble of GO or KEGG enrichment results.
+A tibble of GO or KEGG enrichment results (when return_raw = FALSE),
+or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
 }
 \description{
 Perform GO and KEGG enrichment analysis based on all the proteins (genes)

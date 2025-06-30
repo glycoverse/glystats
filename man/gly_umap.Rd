@@ -13,6 +13,7 @@ gly_umap(
   metric = "euclidean",
   n_epochs = 200,
   learning_rate = 1,
+  return_raw = FALSE,
   ...
 )
 }
@@ -33,10 +34,14 @@ gly_umap(
 
 \item{learning_rate}{Learning rate for the optimization. Default is 1.0.}
 
+\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
+If TRUE, returns raw umap result matrix.}
+
 \item{...}{Additional arguments passed to \code{uwot::umap()}.}
 }
 \value{
-A tibble with UMAP coordinates (umap1, umap2).
+A tibble with UMAP coordinates (umap1, umap2) when return_raw = FALSE,
+or raw umap result matrix when return_raw = TRUE.
 }
 \description{
 Perform UMAP dimensionality reduction on the expression data.

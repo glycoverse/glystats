@@ -10,6 +10,7 @@ gly_plsda(
   ncomp = 2,
   center = TRUE,
   scale = TRUE,
+  return_raw = FALSE,
   ...
 )
 }
@@ -26,14 +27,18 @@ Default to "group".}
 
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
 
+\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
+If TRUE, returns raw mixOmics plsda object.}
+
 \item{...}{Additional arguments passed to \code{mixOmics::plsda()}.}
 }
 \value{
-A list containing three tibbles:
+A list containing three tibbles (when return_raw = FALSE):
 \itemize{
 \item \code{samples}: PLS-DA scores for each sample with group information
 \item \code{variables}: PLS-DA loadings for each variable
 \item \code{components}: Component information including explained variance
+When return_raw = TRUE, returns the raw mixOmics plsda object.
 }
 }
 \description{

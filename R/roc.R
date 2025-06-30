@@ -12,6 +12,8 @@
 #' @param pos_class A character string specifying which group level should be treated as
 #'   the positive class. If `NULL` (default), the second level (alphabetically) will be
 #'   used as the positive class.
+#' @param return_raw A logical value. If FALSE (default), returns processed results with
+#'   AUC values and threshold coordinates. If TRUE, returns raw pROC objects as a list.
 #'
 #' @details
 #' For each variable, a ROC curve is computed using the expression values as predictor 
@@ -76,13 +78,14 @@
 #' @importFrom tidyselect all_of
 #'
 #' @export
-gly_roc <- function(exp, group_col = "group", pos_class = NULL) {
+gly_roc <- function(exp, group_col = "group", pos_class = NULL, return_raw = FALSE) {
   .check_pkg_available("pROC")
   
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)
   checkmate::check_string(pos_class, null.ok = TRUE)
+  checkmate::check_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -135,9 +138,14 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL) {
   cli::cli_alert_info("Performing ROC analysis for {.val {n_vars}} variables")
   
   # Helper function to compute ROC for a single variable
-  .compute_roc_single <- function(var_name, predictor) {
+  .compute_roc_single <- function(var_name, predictor, return_raw = FALSE) {
     # Compute ROC curve
     roc_obj <- pROC::roc(response, predictor, quiet = TRUE)
+    
+    # Return raw ROC object if requested
+    if (return_raw) {
+      return(roc_obj)
+    }
     
     # Extract coordinates
     coords <- pROC::coords(roc_obj, "all", ret = c("threshold", "sensitivity", "specificity"))
@@ -155,7 +163,14 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL) {
   }
   
   # Use purrr to compute ROC for all variables
-  roc_results <- purrr::map2(var_names, asplit(expr_mat, 1), .compute_roc_single)
+  roc_results <- purrr::map2(var_names, asplit(expr_mat, 1), 
+                             ~ .compute_roc_single(.x, .y, return_raw))
+  
+  # Return raw results if requested
+  if (return_raw) {
+    names(roc_results) <- var_names
+    return(roc_results)
+  }
   
   # Extract AUC values using purrr
   auc_values <- purrr::map_dbl(roc_results, ~ .x$auc)

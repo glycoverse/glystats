@@ -4,7 +4,14 @@
 \alias{gly_dea}
 \title{Differential Expression Analysis (DEA)}
 \usage{
-gly_dea(exp, method = NULL, group_col = "group", p_adj_method = "BH", ...)
+gly_dea(
+  exp,
+  method = NULL,
+  group_col = "group",
+  p_adj_method = "BH",
+  return_raw = FALSE,
+  ...
+)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -24,6 +31,9 @@ in the sample information. Default is \code{"group"}.}
 \item{p_adj_method}{A character string specifying the method to adjust p-values.
 See \code{p.adjust.methods} for available methods. Default is "BH".
 If NULL, no adjustment is performed.}
+
+\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
+If TRUE, returns raw statistical model objects as a list.}
 
 \item{...}{Additional arguments passed to the underlying statistical functions.}
 }

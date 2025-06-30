@@ -11,6 +11,7 @@ gly_oplsda(
   orthoI = NULL,
   center = TRUE,
   scale = TRUE,
+  return_raw = FALSE,
   ...
 )
 }
@@ -30,14 +31,18 @@ the number is automatically determined.}
 
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
 
+\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
+If TRUE, returns raw ropls object.}
+
 \item{...}{Additional arguments passed to \code{ropls::opls()}.}
 }
 \value{
-A list containing three tibbles:
+A list containing three tibbles (when return_raw = FALSE):
 \itemize{
 \item \code{samples}: OPLS-DA scores for each sample with group information
 \item \code{variables}: OPLS-DA loadings for each variable
 \item \code{components}: Component information including explained variance
+When return_raw = TRUE, returns the raw ropls object.
 }
 }
 \description{

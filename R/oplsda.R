@@ -14,15 +14,18 @@
 #'   the number is automatically determined.
 #' @param center A logical indicating whether to center the data. Default is TRUE.
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
+#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
+#'   If TRUE, returns raw ropls object.
 #' @param ... Additional arguments passed to `ropls::opls()`.
 #'
 #' @section Required packages:
 #' This function requires the `ropls` package to be installed for OPLS-DA analysis.
 #'
-#' @return A list containing three tibbles:
+#' @return A list containing three tibbles (when return_raw = FALSE):
 #'  - `samples`: OPLS-DA scores for each sample with group information
 #'  - `variables`: OPLS-DA loadings for each variable
 #'  - `components`: Component information including explained variance
+#' When return_raw = TRUE, returns the raw ropls object.
 #' 
 #' @examples
 #' \dontrun{
@@ -31,9 +34,11 @@
 #'
 #' @export
 gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL, 
-                       center = TRUE, scale = TRUE, ...) {
+                       center = TRUE, scale = TRUE, return_raw = FALSE, ...) {
   
   .check_pkg_available("ropls")
+  
+  checkmate::check_logical(return_raw, len = 1)
   
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns
@@ -101,6 +106,11 @@ gly_oplsda <- function(exp, group_col = "group", predI = 1, orthoI = NULL,
     oplsda_result
   }))
   
+  # Return raw results if requested
+  if (return_raw) {
+    return(oplsda_res)
+  }
+
   # Use broom-style helper functions to extract tidy results
   res <- list(
     "samples" = .tidy_oplsda_samples(oplsda_res, mat, group_labels, group_col, predI, orthoI),

@@ -4,6 +4,8 @@
 #' in a `glyexp::experiment()`.
 #'
 #' @param exp A `glyexp::experiment()` object.
+#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
+#'   If TRUE, returns raw clusterProfiler enrichResult objects.
 #' @param ... Arguments passed to [clusterProfiler::enrichGO()] or [clusterProfiler::enrichKEGG()].
 #'
 #' @section Required packages:
@@ -11,12 +13,15 @@
 #' - `clusterProfiler` for enrichment analysis
 #' - `org.Hs.eg.db` for human gene annotation (GO analysis only)
 #'
-#' @return A tibble of GO or KEGG enrichment results.
+#' @return A tibble of GO or KEGG enrichment results (when return_raw = FALSE),
+#'   or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
 #' @seealso [clusterProfiler::enrichGO()], [clusterProfiler::enrichKEGG()]
 #' @export
-enrich_go <- function(exp, ...) {
+enrich_go <- function(exp, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("org.Hs.eg.db")
+  
+  checkmate::check_logical(return_raw, len = 1)
   
   genes <- .extract_genes_from_exp(exp)
   res <- clusterProfiler::enrichGO(
@@ -26,6 +31,12 @@ enrich_go <- function(exp, ...) {
     readable = TRUE,
     ...
   )
+  
+  # Return raw results if requested
+  if (return_raw) {
+    return(res)
+  }
+  
   res <- tibble::as_tibble(res)
   res <- janitor::clean_names(res)
   structure(res, class = c("glystats_go_ora_res", class(res)))
@@ -33,8 +44,10 @@ enrich_go <- function(exp, ...) {
 
 #' @rdname enrich_go
 #' @export
-enrich_kegg <- function(exp, ...) {
+enrich_kegg <- function(exp, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
+  
+  checkmate::check_logical(return_raw, len = 1)
   
   genes <- .extract_genes_from_exp(exp)
   res <- clusterProfiler::enrichKEGG(
@@ -42,6 +55,12 @@ enrich_kegg <- function(exp, ...) {
     keyType = "uniprot",
     ...
   )
+  
+  # Return raw results if requested
+  if (return_raw) {
+    return(res)
+  }
+  
   res <- tibble::as_tibble(res)
   res <- janitor::clean_names(res)
   structure(res, class = c("glystats_kegg_ora_res", class(res)))

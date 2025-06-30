@@ -11,15 +11,18 @@
 #' @param ncomp Integer, number of components to extract. Default is 2.
 #' @param center A logical indicating whether to center the data. Default is TRUE.
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
+#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
+#'   If TRUE, returns raw mixOmics plsda object.
 #' @param ... Additional arguments passed to `mixOmics::plsda()`.
 #'
 #' @section Required packages:
 #' This function requires the `mixOmics` package to be installed for PLS-DA analysis.
 #'
-#' @return A list containing three tibbles:
+#' @return A list containing three tibbles (when return_raw = FALSE):
 #'  - `samples`: PLS-DA scores for each sample with group information
 #'  - `variables`: PLS-DA loadings for each variable
 #'  - `components`: Component information including explained variance
+#' When return_raw = TRUE, returns the raw mixOmics plsda object.
 #' 
 #' @examples
 #' \dontrun{
@@ -27,9 +30,11 @@
 #' }
 #'
 #' @export
-gly_plsda <- function(exp, group_col = "group", ncomp = 2, center = TRUE, scale = TRUE, ...) {
+gly_plsda <- function(exp, group_col = "group", ncomp = 2, center = TRUE, scale = TRUE, return_raw = FALSE, ...) {
   
   .check_pkg_available("mixOmics")
+  
+  checkmate::check_logical(return_raw, len = 1)
   
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns
@@ -72,6 +77,11 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, center = TRUE, scale 
     ...
   )
   
+  # Return raw results if requested
+  if (return_raw) {
+    return(plsda_res)
+  }
+
   # Use broom-style helper functions to extract tidy results
   res <- list(
     "samples" = .tidy_plsda_samples(plsda_res, mat, group_labels, group_col, ncomp),

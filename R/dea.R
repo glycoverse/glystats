@@ -18,6 +18,8 @@
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
+#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
+#'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to the underlying statistical functions.
 #'
 #' @section Required packages:
@@ -99,12 +101,13 @@
 #' @importFrom tidyselect all_of
 #' 
 #' @export
-gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH", ...) {
+gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_choice(method, c("t-test", "wilcoxon", "anova", "kruskal"), null.ok = TRUE)
   checkmate::check_string(group_col)
   checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::check_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -154,12 +157,17 @@ gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH"
 
   # Perform DEA
   result <- switch(method,
-    "t-test" = .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, ...),
-    "wilcoxon" = .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, ...),
-    "anova" = .gly_dea_multi_groups(expr_mat, groups, stats::aov, stats::TukeyHSD, p_adj_method, ...),
-    "kruskal" = .gly_dea_multi_groups(expr_mat, groups, stats::kruskal.test, FSA::dunnTest, p_adj_method, ...),
+    "t-test" = .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, return_raw, ...),
+    "wilcoxon" = .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, return_raw, ...),
+    "anova" = .gly_dea_multi_groups(expr_mat, groups, stats::aov, stats::TukeyHSD, p_adj_method, return_raw, ...),
+    "kruskal" = .gly_dea_multi_groups(expr_mat, groups, stats::kruskal.test, FSA::dunnTest, p_adj_method, return_raw, ...),
     cli::cli_abort("Invalid method: {.val {method}}")
   )
+
+  # Return raw results if requested
+  if (return_raw) {
+    return(result)
+  }
 
   # Add S3 class
   subclass <- switch(method,
@@ -171,7 +179,16 @@ gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH"
   structure(result, class = c(subclass, "glystats_dea_res", "glystats_res", class(result)))
 }
 
-.gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, ...) {
+.gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, return_raw = FALSE, ...) {
+  mod_list <- .gly_dea_2groups_raw(expr_mat, groups, .f, ...)
+  if (return_raw) {
+    return(mod_list)
+  }
+  .gly_dea_2groups_tibblify(mod_list, .f, p_adj_method)
+}
+
+# Generate raw model list for 2-group analysis
+.gly_dea_2groups_raw <- function(expr_mat, groups, .f, ...) {
   data <- expr_mat %>%
     t() %>%
     as.data.frame() %>%
@@ -181,127 +198,242 @@ gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH"
     tidyr::pivot_longer(cols = -all_of(c("sample", "group")), names_to = "variable", values_to = "value") %>%
     dplyr::mutate(log_value = log2(.data$value + 1))
 
-  ttest_res <- data %>%
+  # Perform statistical tests and store raw results
+  nested_data <- data %>%
     dplyr::nest_by(.data$variable) %>%
+    dplyr::mutate(test_result = list(.f(log_value ~ group, data = .data$data)))
+  
+  # Return named list of raw results
+  raw_results <- nested_data$test_result
+  names(raw_results) <- nested_data$variable
+  raw_results
+}
+
+# Convert raw model list to tibble for 2-group analysis
+.gly_dea_2groups_tibblify <- function(mod_list, .f, p_adj_method) {
+  # Create a tibble from the model list
+  var_names <- names(mod_list)
+  
+  result_tbl <- tibble::tibble(
+    variable = var_names,
+    test_result = mod_list
+  ) %>%
     dplyr::mutate(
-      ttest = list(.f(log_value ~ group, data = .data$data)),
-      params = list(parameters::model_parameters(.data$ttest)),
-      params = list(parameters::standardize_names(.data$params)),
-      ) %>%
+      params = purrr::map(.data$test_result, ~ parameters::model_parameters(.x)),
+      params = purrr::map(.data$params, ~ parameters::standardize_names(.x)),
+    ) %>%
     dplyr::select(all_of(c("variable", "params"))) %>%
     tidyr::unnest(all_of("params")) %>%
     dplyr::ungroup() %>%
     janitor::clean_names()
 
   if (!is.null(p_adj_method)) {
-    ttest_res <- dplyr::mutate(ttest_res, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
+    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
   }
 
   if (identical(.f, stats::t.test)) {
-    ttest_res <- dplyr::mutate(ttest_res, log2fc = .data$mean_group1 - .data$mean_group2)
+    result_tbl <- dplyr::mutate(result_tbl, log2fc = .data$mean_group1 - .data$mean_group2)
   }
 
-  ttest_res
+  result_tbl
 }
 
-
-.gly_dea_multi_groups <- function(expr_mat, groups, .f, .ph, p_adj_method, ...) {
-  # .f is aov or kruskal.test
-  # .ph is post-hoc test, i.e., TukeyHSD for aov or FSA::dunnTest for kruskal.test
-
-  # Helper function to perform post-hoc tests
-  .perform_posthoc_test <- function(data_nested, .f) {
-    if (identical(.f, stats::aov)) {
-      # TukeyHSD for ANOVA
-      aov_model <- stats::aov(log_value ~ group, data = data_nested)
-      tukey_result <- stats::TukeyHSD(aov_model)
-      # Extract pairwise comparisons
-      tukey_df <- as.data.frame(tukey_result$group)
-      tukey_df$comparison <- rownames(tukey_df)
-      tukey_df
-    } else {
-      # Dunn test for Kruskal-Wallis
-      dunn_result <- FSA::dunnTest(log_value ~ group, data = data_nested, method = "holm")
-      dunn_result$res
-    }
-  }
-
-  # Helper function to prepare data for analysis
-  .prepare_multi_group_data <- function(expr_mat, groups) {
-    expr_mat %>%
-      t() %>%
-      as.data.frame() %>%
-      tibble::rownames_to_column("sample") %>%
-      tibble::as_tibble() %>%
-      dplyr::mutate(group = groups) %>%
-      tidyr::pivot_longer(
-        cols = -all_of(c("sample", "group")),
-        names_to = "variable",
-        values_to = "value"
-      ) %>%
-      dplyr::mutate(log_value = log2(.data$value + 1))
-  }
-
-  # Helper function to run main tests on all variables
-  .run_main_tests <- function(data, .f) {
-    result <- data %>%
-      dplyr::nest_by(.data$variable) %>%
-      dplyr::mutate(
-        test_result = list(.f(log_value ~ group, data = .data$data)),
-        params = list(parameters::model_parameters(.data$test_result)),
-        params = list(parameters::standardize_names(.data$params)),
-      ) %>%
-      dplyr::select(all_of(c("variable", "params"))) %>%
-      tidyr::unnest(all_of("params")) %>%
-      dplyr::ungroup() %>%
-      janitor::clean_names()
-
-    # For ANOVA, filter to keep only group effects (not residuals)
-    # For Kruskal-Wallis, keep all results (there's only one row per variable anyway)
-    if (identical(.f, stats::aov)) {
-      result <- result %>%
-        dplyr::filter(.data$parameter == "group")
-    }
-
-    if (!is.null(p_adj_method)) {
-      result <- dplyr::mutate(result, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
-    }
-
-    result
-  }
-
-  # Helper function to generate post-hoc results
-  .generate_posthoc_results <- function(main_test_res, data, .f) {
-    # Filter significant results (p < 0.05)
-    p_col <- if ("p_adj" %in% colnames(main_test_res)) "p_adj" else "p"
-    significant_vars <- main_test_res %>%
-      dplyr::filter(.data[[p_col]] < 0.05) %>%
-      dplyr::pull(.data$variable)
-    
-    if (length(significant_vars) > 0) {
-      # Perform post-hoc tests for significant variables
-      posthoc_results <- data %>%
-        dplyr::filter(.data$variable %in% significant_vars) %>%
-        dplyr::nest_by(.data$variable) %>%
-        dplyr::mutate(posthoc = list(.perform_posthoc_test(.data$data, .f))) %>%
-        dplyr::select(all_of(c("variable", "posthoc"))) %>%
-        tidyr::unnest(all_of("posthoc")) %>%
-        dplyr::ungroup() %>%
-        janitor::clean_names()
-      
-      return(posthoc_results)
-    } else {
-      # No significant results, return empty tibble with proper structure
-      return(tibble::tibble())
-    }
-  }
-
+# Multi-group analysis function
+.gly_dea_multi_groups <- function(expr_mat, groups, .f, .ph, p_adj_method, return_raw = FALSE, ...) {
   if (length(levels(groups)) < 2) {
     cli::cli_abort("Multi-group analysis requires at least 2 groups")
   }
-  data <- .prepare_multi_group_data(expr_mat, groups)
-  main_test_res <- .run_main_tests(data, .f)
-  posthoc_res <- .generate_posthoc_results(main_test_res, data, .f)
+  mod_list <- .gly_dea_multi_groups_raw(expr_mat, groups, .f, p_adj_method, ...)
+  if (return_raw) {
+    return(mod_list)
+  }
+  .gly_dea_multi_groups_tibblify(mod_list, .f, p_adj_method)
+}
 
-  list(main_test = main_test_res, post_hoc = posthoc_res)
+# Helper function to perform raw post-hoc tests (returns raw objects)
+.perform_raw_posthoc_test <- function(data_nested, .f) {
+  if (identical(.f, stats::aov)) {
+    # TukeyHSD for ANOVA - return raw TukeyHSD object
+    aov_model <- stats::aov(log_value ~ group, data = data_nested)
+    stats::TukeyHSD(aov_model)
+  } else {
+    # Dunn test for Kruskal-Wallis - return raw dunnTest object
+    FSA::dunnTest(log_value ~ group, data = data_nested, method = "holm")
+  }
+}
+
+# Helper function to generate raw main test results
+.generate_raw_main_results <- function(data, .f, ...) {
+  main_test_raw <- data %>%
+    dplyr::nest_by(.data$variable) %>%
+    dplyr::mutate(
+      test_result = list(.f(log_value ~ group, data = .data$data))
+    )
+  
+  main_test_list <- main_test_raw$test_result
+  names(main_test_list) <- main_test_raw$variable
+  main_test_list
+}
+
+# Helper function to generate raw post-hoc results
+.generate_raw_posthoc_results <- function(main_test_raw, data, .f, p_adj_method) {
+  # First, we need to determine which variables are significant
+  # We'll need to extract p-values from the raw results
+  significant_vars <- c()
+  
+  for (var_name in names(main_test_raw)) {
+    raw_result <- main_test_raw[[var_name]]
+    
+    # Extract p-value from raw result
+    if (identical(.f, stats::aov)) {
+      # For ANOVA, extract p-value from summary
+      p_val <- summary(raw_result)[[1]][["Pr(>F)"]][1]
+    } else {
+      # For Kruskal-Wallis, p-value is in $p.value
+      p_val <- raw_result$p.value
+    }
+    
+    # Apply p-adjustment if needed
+    if (!is.null(p_val) && !is.na(p_val)) {
+      if (p_val < 0.05) {  # Use unadjusted p-value for initial filtering
+        significant_vars <- c(significant_vars, var_name)
+      }
+    }
+  }
+  
+  # Apply p-adjustment to all p-values if requested
+  if (!is.null(p_adj_method) && length(significant_vars) > 0) {
+    all_p_vals <- sapply(names(main_test_raw), function(var_name) {
+      raw_result <- main_test_raw[[var_name]]
+      if (identical(.f, stats::aov)) {
+        summary(raw_result)[[1]][["Pr(>F)"]][1]
+      } else {
+        raw_result$p.value
+      }
+    })
+    
+    adj_p_vals <- stats::p.adjust(all_p_vals, method = p_adj_method)
+    significant_vars <- names(adj_p_vals)[adj_p_vals < 0.05 & !is.na(adj_p_vals)]
+  }
+  
+  if (length(significant_vars) > 0) {
+    # Perform post-hoc tests for significant variables and return raw objects
+    posthoc_raw_results <- data %>%
+      dplyr::filter(.data$variable %in% significant_vars) %>%
+      dplyr::nest_by(.data$variable) %>%
+      dplyr::mutate(posthoc_raw = list(.perform_raw_posthoc_test(.data$data, .f))) %>%
+      dplyr::select(all_of(c("variable", "posthoc_raw")))
+    
+    # Convert to named list
+    raw_posthoc_list <- posthoc_raw_results$posthoc_raw
+    names(raw_posthoc_list) <- posthoc_raw_results$variable
+    
+    return(raw_posthoc_list)
+  } else {
+    # No significant results, return empty named list
+    return(list())
+  }
+}
+
+# Helper function to prepare data for analysis
+.prepare_multi_group_data <- function(expr_mat, groups) {
+  expr_mat %>%
+    t() %>%
+    as.data.frame() %>%
+    tibble::rownames_to_column("sample") %>%
+    tibble::as_tibble() %>%
+    dplyr::mutate(group = groups) %>%
+    tidyr::pivot_longer(
+      cols = -all_of(c("sample", "group")),
+      names_to = "variable",
+      values_to = "value"
+    ) %>%
+    dplyr::mutate(log_value = log2(.data$value + 1))
+}
+
+# Generate raw model list for multi-group analysis
+.gly_dea_multi_groups_raw <- function(expr_mat, groups, .f, p_adj_method, ...) {
+  data <- .prepare_multi_group_data(expr_mat, groups)
+  main_test_list <- .generate_raw_main_results(data, .f, ...)
+  posthoc_raw <- .generate_raw_posthoc_results(main_test_list, data, .f, p_adj_method)
+  
+  list(
+    main_test = main_test_list,
+    post_hoc = posthoc_raw
+  )
+}
+
+# Convert raw model list to tibble for multi-group analysis
+.gly_dea_multi_groups_tibblify <- function(mod_list, .f, p_adj_method) {
+  # Convert main test results to tibble
+  main_test_tbl <- .tibblify_main_test_results(mod_list$main_test, .f, p_adj_method)
+  
+  # Convert post-hoc results to tibble
+  posthoc_tbl <- .tibblify_posthoc_results(mod_list$post_hoc, .f)
+  
+  list(main_test = main_test_tbl, post_hoc = posthoc_tbl)
+}
+
+# Helper function to convert main test raw results to tibble
+.tibblify_main_test_results <- function(main_test_raw, .f, p_adj_method) {
+  var_names <- names(main_test_raw)
+  
+  result_tbl <- tibble::tibble(
+    variable = var_names,
+    test_result = main_test_raw
+  ) %>%
+    dplyr::mutate(
+      params = purrr::map(.data$test_result, ~ parameters::model_parameters(.x)),
+      params = purrr::map(.data$params, ~ parameters::standardize_names(.x)),
+    ) %>%
+    dplyr::select(all_of(c("variable", "params"))) %>%
+    tidyr::unnest(all_of("params")) %>%
+    dplyr::ungroup() %>%
+    janitor::clean_names()
+
+  # For ANOVA, filter to keep only group effects (not residuals)
+  # For Kruskal-Wallis, keep all results (there's only one row per variable anyway)
+  if (identical(.f, stats::aov)) {
+    result_tbl <- result_tbl %>%
+      dplyr::filter(.data$parameter == "group")
+  }
+
+  if (!is.null(p_adj_method)) {
+    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
+  }
+
+  result_tbl
+}
+
+# Helper function to convert post-hoc raw results to tibble
+.tibblify_posthoc_results <- function(posthoc_raw, .f) {
+  if (length(posthoc_raw) == 0) {
+    return(tibble::tibble())
+  }
+  
+  # Convert each raw post-hoc result to tibble format
+  posthoc_list <- list()
+  
+  for (var_name in names(posthoc_raw)) {
+    raw_result <- posthoc_raw[[var_name]]
+    
+    if (identical(.f, stats::aov)) {
+      # TukeyHSD result processing
+      tukey_df <- as.data.frame(raw_result$group)
+      tukey_df$comparison <- rownames(tukey_df)
+      tukey_df$variable <- var_name
+      posthoc_list[[var_name]] <- tukey_df
+    } else {
+      # Dunn test result processing
+      dunn_df <- raw_result$res
+      dunn_df$variable <- var_name
+      posthoc_list[[var_name]] <- dunn_df
+    }
+  }
+  
+  # Combine all results
+  result_tbl <- dplyr::bind_rows(posthoc_list) %>%
+    janitor::clean_names()
+  
+  result_tbl
 }

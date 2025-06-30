@@ -8,12 +8,15 @@
 #' @param perplexity Perplexity parameter for t-SNE. Default is 30.
 #' @param theta Speed/accuracy trade-off parameter. Default is 0.5.
 #' @param max_iter Maximum number of iterations. Default is 1000.
+#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
+#'   If TRUE, returns raw Rtsne object.
 #' @param ... Additional arguments passed to `Rtsne::Rtsne()`.
 #'
 #' @section Required packages:
 #' This function requires the `Rtsne` package to be installed for t-SNE analysis.
 #'
-#' @return A tibble with t-SNE coordinates (tsne1, tsne2).
+#' @return A tibble with t-SNE coordinates (tsne1, tsne2) when return_raw = FALSE,
+#'   or raw Rtsne object when return_raw = TRUE.
 #' 
 #' @examples
 #' \dontrun{
@@ -21,9 +24,11 @@
 #' }
 #'
 #' @export
-gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 1000, ...) {
+gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 1000, return_raw = FALSE, ...) {
   
   .check_pkg_available("Rtsne")
+  
+  checkmate::check_logical(return_raw, len = 1)
   
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns
@@ -52,6 +57,11 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 100
     ...
   )
   
+  # Return raw results if requested
+  if (return_raw) {
+    return(tsne_res)
+  }
+
   # Create result tibble
   result <- tibble::tibble(
     sample = rownames(mat),

@@ -4,7 +4,15 @@
 \alias{gly_tsne}
 \title{t-Distributed Stochastic Neighbor Embedding (t-SNE)}
 \usage{
-gly_tsne(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 1000, ...)
+gly_tsne(
+  exp,
+  dims = 2,
+  perplexity = 30,
+  theta = 0.5,
+  max_iter = 1000,
+  return_raw = FALSE,
+  ...
+)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -17,10 +25,14 @@ gly_tsne(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 1000, ...)
 
 \item{max_iter}{Maximum number of iterations. Default is 1000.}
 
+\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
+If TRUE, returns raw Rtsne object.}
+
 \item{...}{Additional arguments passed to \code{Rtsne::Rtsne()}.}
 }
 \value{
-A tibble with t-SNE coordinates (tsne1, tsne2).
+A tibble with t-SNE coordinates (tsne1, tsne2) when return_raw = FALSE,
+or raw Rtsne object when return_raw = TRUE.
 }
 \description{
 Perform t-SNE dimensionality reduction on the expression data.
