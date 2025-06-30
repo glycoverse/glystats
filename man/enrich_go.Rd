@@ -3,27 +3,25 @@
 \name{enrich_go}
 \alias{enrich_go}
 \alias{enrich_kegg}
-\title{GO and KEGG enrichment analysis}
+\title{GO and KEGG over-representation analysis (ORA)}
 \usage{
 enrich_go(exp, return_raw = FALSE, ...)
 
 enrich_kegg(exp, return_raw = FALSE, ...)
-}
-\arguments{
-\item{exp}{A \code{glyexp::experiment()} object.}
-
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw clusterProfiler enrichResult objects.}
-
-\item{...}{Arguments passed to \code{\link[clusterProfiler:enrichGO]{clusterProfiler::enrichGO()}} or \code{\link[clusterProfiler:enrichKEGG]{clusterProfiler::enrichKEGG()}}.}
 }
 \value{
 A tibble of GO or KEGG enrichment results (when return_raw = FALSE),
 or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
 }
 \description{
-Perform GO and KEGG enrichment analysis based on all the proteins (genes)
-in a \code{glyexp::experiment()}.
+Perform GO and KEGG ORA for all proteins (genes) in a \code{glyexp::experiment()}.
+
+This function uses the "protein" column in the variable information tibble, or
+falls back to the "proteins" column if "protein" is not present.
+If the "proteins" column is used, \code{\link[glyclean:infer_protein]{glyclean::infer_protein()}} is called to resolve
+cases with multiple gene entries.
+In both cases, protein identifiers should be UniProt accessions.
+For the "proteins" column, multiple proteins should be separated by ";".
 }
 \section{Required packages}{
 

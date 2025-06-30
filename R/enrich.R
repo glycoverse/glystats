@@ -1,12 +1,14 @@
-#' GO and KEGG enrichment analysis
+#' GO and KEGG over-representation analysis (ORA)
 #'
-#' Perform GO and KEGG enrichment analysis based on all the proteins (genes)
-#' in a `glyexp::experiment()`.
+#' @description
+#' Perform GO and KEGG ORA for all proteins (genes) in a `glyexp::experiment()`.
 #'
-#' @param exp A `glyexp::experiment()` object.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw clusterProfiler enrichResult objects.
-#' @param ... Arguments passed to [clusterProfiler::enrichGO()] or [clusterProfiler::enrichKEGG()].
+#' This function uses the "protein" column in the variable information tibble, or
+#' falls back to the "proteins" column if "protein" is not present.
+#' If the "proteins" column is used, [glyclean::infer_protein()] is called to resolve
+#' cases with multiple gene entries.
+#' In both cases, protein identifiers should be UniProt accessions.
+#' For the "proteins" column, multiple proteins should be separated by ";".
 #'
 #' @section Required packages:
 #' This function requires the following packages to be installed:
