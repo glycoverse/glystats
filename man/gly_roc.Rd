@@ -62,3 +62,6 @@ The function requires exactly 2 groups in the specified grouping variable. If mo
 This function requires the \code{pROC} package to be installed for ROC curve computation.
 }
 
+\seealso{
+\code{\link[pROC:roc]{pROC::roc()}}, \code{\link[pROC:coords]{pROC::coords()}}
+}

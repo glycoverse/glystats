@@ -18,15 +18,8 @@
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
 #'
-#' @returns
-#' A tibble with t-test results, or a list of `t.test` models if `return_raw` is TRUE.
-#'
+#' @returns A tibble with t-test results, or a list of `t.test` models if `return_raw` is TRUE.
 #' @seealso [stats::t.test()]
-#'
-#' @importFrom magrittr %>%
-#' @importFrom rlang .data
-#' @importFrom tidyselect all_of
-#'
 #' @export
 gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
   # Validate inputs

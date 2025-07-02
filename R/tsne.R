@@ -17,12 +17,7 @@
 #'
 #' @return A tibble with t-SNE coordinates (tsne1, tsne2) when return_raw = FALSE,
 #'   or raw Rtsne object when return_raw = TRUE.
-#' 
-#' @examples
-#' \dontrun{
-#' tsne_res <- gly_tsne(exp)
-#' }
-#'
+#' @seealso [Rtsne::Rtsne()]
 #' @export
 gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 1000, return_raw = FALSE, ...) {
   

@@ -18,7 +18,7 @@
 #'  - `variables`: PCA loadings for each variable
 #'  - `eigenvalues`: PCA eigenvalues
 #' When return_raw = TRUE, returns the raw prcomp object.
-#'
+#' @seealso [stats::prcomp()]
 #' @export
 gly_pca <- function(exp, center = TRUE, scale = TRUE, return_raw = FALSE, ...) {
   checkmate::check_logical(return_raw, len = 1)

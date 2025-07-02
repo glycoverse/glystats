@@ -36,3 +36,6 @@ The function uses \code{prcomp()} to perform PCA and \code{broom::tidy()} to tid
 This function only uses base R packages and does not require additional dependencies.
 }
 
+\seealso{
+\code{\link[stats:prcomp]{stats::prcomp()}}
+}

@@ -40,11 +40,7 @@
 #'   - `sensitivity`: Sensitivity (True Positive Rate)
 #'   - `specificity`: Specificity (True Negative Rate)
 #' If `return_raw` is TRUE, returns a list of `pROC` objects.
-#'
-#' @importFrom magrittr %>%
-#' @importFrom rlang .data
-#' @importFrom tidyselect all_of
-#'
+#' @seealso [pROC::roc()], [pROC::coords()]
 #' @export
 gly_roc <- function(exp, group_col = "group", pos_class = NULL, return_raw = FALSE) {
   .check_pkg_available("pROC")

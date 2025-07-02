@@ -52,9 +52,6 @@ The function uses \code{uwot::umap()} to perform UMAP analysis.
 This function requires the \code{uwot} package to be installed for UMAP analysis.
 }
 
-\examples{
-\dontrun{
-umap_res <- gly_umap(exp)
-}
-
+\seealso{
+\code{\link[uwot:umap]{uwot::umap()}}
 }

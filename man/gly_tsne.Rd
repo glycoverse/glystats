@@ -43,9 +43,6 @@ The function uses \code{Rtsne::Rtsne()} to perform t-SNE analysis.
 This function requires the \code{Rtsne} package to be installed for t-SNE analysis.
 }
 
-\examples{
-\dontrun{
-tsne_res <- gly_tsne(exp)
-}
-
+\seealso{
+\code{\link[Rtsne:Rtsne]{Rtsne::Rtsne()}}
 }

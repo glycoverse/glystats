@@ -20,12 +20,7 @@
 #'
 #' @return A tibble with UMAP coordinates (umap1, umap2) when return_raw = FALSE,
 #'   or raw umap result matrix when return_raw = TRUE.
-#' 
-#' @examples
-#' \dontrun{
-#' umap_res <- gly_umap(exp)
-#' }
-#'
+#' @seealso [uwot::umap()]
 #' @export
 gly_umap <- function(exp, 
                      n_neighbors = 15, 
