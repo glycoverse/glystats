@@ -9,6 +9,13 @@ enrich_go(exp, return_raw = FALSE, ...)
 
 enrich_kegg(exp, return_raw = FALSE, ...)
 }
+\arguments{
+\item{exp}{A \code{glyexp::experiment()} object.}
+
+\item{return_raw}{A logical value indicating whether to return raw clusterProfiler enrichResult objects.}
+
+\item{...}{Additional arguments passed to \code{clusterProfiler::enrichGO()} or \code{clusterProfiler::enrichKEGG()}.}
+}
 \value{
 A tibble of GO or KEGG enrichment results (when return_raw = FALSE),
 or raw clusterProfiler enrichResult objects (when return_raw = TRUE).

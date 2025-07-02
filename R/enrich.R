@@ -14,6 +14,10 @@
 #' This function requires the following packages to be installed:
 #' - `clusterProfiler` for enrichment analysis
 #' - `org.Hs.eg.db` for human gene annotation (GO analysis only)
+#' 
+#' @param exp A `glyexp::experiment()` object.
+#' @param return_raw A logical value indicating whether to return raw clusterProfiler enrichResult objects.
+#' @param ... Additional arguments passed to `clusterProfiler::enrichGO()` or `clusterProfiler::enrichKEGG()`.
 #'
 #' @return A tibble of GO or KEGG enrichment results (when return_raw = FALSE),
 #'   or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
