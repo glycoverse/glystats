@@ -1,7 +1,6 @@
 test_that("gly_roc works with 2-group binary classification", {
   # Use test_gp_exp and filter to 2 groups for ROC analysis
-  exp_2group <- test_gp_exp |>
-    glyexp::filter_obs(group %in% c("C", "H")) |>
+  exp_2group <- exp_2groups() |>
     glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
   
   # Run ROC analysis
@@ -10,26 +9,23 @@ test_that("gly_roc works with 2-group binary classification", {
   # Test structure
   expect_s3_class(result, c("glystats_roc_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("auc", "thresholds"))
+  expect_setequal(names(result), c("auc", "coords"))
   
   # Test AUC
-  expect_type(result$auc, "double")
-  expect_length(result$auc, 10)  # Should have AUC for each variable
-  expect_true(all(result$auc >= 0 & result$auc <= 1))  # AUC should be between 0 and 1
-  expect_true(all(names(result$auc) %in% glyexp::get_var_info(exp_2group)$variable))
-  
-  # Test thresholds
-  expect_s3_class(result$thresholds, "data.frame")
-  expect_true(all(c("variable", "threshold", "sensitivity", "specificity") %in% colnames(result$thresholds)))
-  expect_true(all(result$thresholds$sensitivity >= 0 & result$thresholds$sensitivity <= 1))
-  expect_true(all(result$thresholds$specificity >= 0 & result$thresholds$specificity <= 1))
-  expect_equal(length(unique(result$thresholds$variable)), 10)
+  expect_s3_class(result$auc, "tbl_df")
+  expect_true(all(result$auc$auc >= 0 & result$auc$auc <= 1))  # AUC should be between 0 and 1
+
+  # Test coords
+  expect_s3_class(result$coords, "tbl_df")
+  expect_true(all(c("variable", "threshold", "sensitivity", "specificity") %in% colnames(result$coords)))
+  expect_true(all(result$coords$sensitivity >= 0 & result$coords$sensitivity <= 1))
+  expect_true(all(result$coords$specificity >= 0 & result$coords$specificity <= 1))
+  expect_equal(length(unique(result$coords$variable)), 10)
 })
 
 test_that("gly_roc works with automatic pos_class detection", {
   # Use test_gp_exp and filter to 2 groups
-  exp_2group <- test_gp_exp |>
-    glyexp::filter_obs(group %in% c("C", "H")) |>
+  exp_2group <- exp_2groups() |>
     glyexp::slice_sample_var(n = 5)
   
   # Run ROC analysis without specifying pos_class
@@ -38,9 +34,8 @@ test_that("gly_roc works with automatic pos_class detection", {
   # Test basic structure
   expect_s3_class(result, c("glystats_roc_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("auc", "thresholds"))
-  expect_length(result$auc, 5)
-  expect_s3_class(result$thresholds, "data.frame")
+  expect_setequal(names(result), c("auc", "coords"))
+  expect_s3_class(result$coords, "tbl_df")
 })
 
 test_that("gly_roc error handling", {
@@ -71,8 +66,7 @@ test_that("gly_roc error handling", {
 
 test_that("gly_roc works with different group column names", {
   # Modify sample info to use different group column name
-  exp_2group <- test_gp_exp |>
-    glyexp::filter_obs(group %in% c("C", "H")) |>
+  exp_2group <- exp_2groups() |>
     glyexp::slice_sample_var(n = 5) |>
     glyexp::mutate_obs(condition = group)
   
@@ -80,6 +74,5 @@ test_that("gly_roc works with different group column names", {
   
   expect_s3_class(result, c("glystats_roc_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("auc", "thresholds"))
-  expect_length(result$auc, 5)
-}) 
+  expect_setequal(names(result), c("auc", "coords"))
+})

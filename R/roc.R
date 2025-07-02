@@ -31,47 +31,15 @@
 #'
 #' @returns
 #' A list containing two elements:
-#' - `auc`: A named numeric vector of AUC values for each variable
-#' - `thresholds`: A tibble containing ROC curve coordinates with columns:
+#' - `auc`: A tibble containing AUC values for each variable, with columns:
+#'   - `variable`: Variable name
+#'   - `auc`: AUC value
+#' - `coords`: A tibble containing ROC curve coordinates with columns:
 #'   - `variable`: Variable name
 #'   - `threshold`: Threshold value
 #'   - `sensitivity`: Sensitivity (True Positive Rate)
 #'   - `specificity`: Specificity (True Negative Rate)
-#'
-#' @examples
-#' \dontrun{
-#' # Create example experiment object with 2 groups
-#' sample_info <- tibble::tibble(
-#'   sample = paste0("S", 1:20),
-#'   group = rep(c("Control", "Treatment"), each = 10)
-#' )
-#' 
-#' var_info <- tibble::tibble(
-#'   variable = paste0("Glycan_", 1:100)
-#' )
-#' 
-#' expr_mat <- matrix(rnorm(2000), nrow = 100, ncol = 20)
-#' rownames(expr_mat) <- var_info$variable
-#' colnames(expr_mat) <- sample_info$sample
-#' 
-#' exp <- glyexp::experiment(
-#'   expr_mat = expr_mat,
-#'   sample_info = sample_info,
-#'   var_info = var_info,
-#'   exp_type = "glycomics",
-#'   glycan_type = "N"
-#' )
-#' 
-#' # Perform ROC analysis
-#' result <- gly_roc(exp, group_col = "group", pos_class = "Treatment")
-#' 
-#' # View AUC values
-#' head(result$auc)
-#' 
-#' # View ROC curve coordinates for first variable
-#' result$thresholds |> 
-#'   dplyr::filter(variable == names(result$auc)[1])
-#' }
+#' If `return_raw` is TRUE, returns a list of `pROC` objects.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
@@ -115,66 +83,28 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, return_raw = FAL
     }
   }
 
-  cli::cli_alert_info("Group 1 (negative): {.val {levels(groups)[levels(groups) != pos_class]}}")
-  cli::cli_alert_info("Group 2 (positive): {.val {pos_class}}")
-
   # Prepare data for ROC analysis
   # Convert to binary response (1 for positive class, 0 for negative class)
   response <- as.numeric(groups == pos_class)
-  
-  # Calculate ROC for each variable
-  var_names <- rownames(expr_mat)
-  n_vars <- length(var_names)
-  
-  cli::cli_alert_info("Performing ROC analysis for {.val {n_vars}} variables")
-  
-  # Helper function to compute ROC for a single variable
-  .compute_roc_single <- function(var_name, predictor, return_raw = FALSE) {
-    # Compute ROC curve
-    roc_obj <- pROC::roc(response, predictor, quiet = TRUE)
-    
-    # Return raw ROC object if requested
-    if (return_raw) {
-      return(roc_obj)
-    }
-    
-    # Extract coordinates
-    coords <- pROC::coords(roc_obj, "all", ret = c("threshold", "sensitivity", "specificity"))
-    
-    # Return list with AUC and coordinates
-    list(
-      auc = as.numeric(roc_obj$auc),
-      coords = tibble::tibble(
-        variable = var_name,
-        threshold = coords$threshold,
-        sensitivity = coords$sensitivity,
-        specificity = coords$specificity
-      )
-    )
-  }
-  
-  # Use purrr to compute ROC for all variables
-  roc_results <- purrr::map2(var_names, asplit(expr_mat, 1), 
-                             ~ .compute_roc_single(.x, .y, return_raw))
-  
-  # Return raw results if requested
-  if (return_raw) {
-    names(roc_results) <- var_names
-    return(roc_results)
-  }
-  
-  # Extract AUC values using purrr
-  auc_values <- purrr::map_dbl(roc_results, ~ .x$auc)
-  names(auc_values) <- var_names
-  
-  # Extract and combine threshold data using purrr
-  thresholds <- purrr::map_dfr(roc_results, ~ .x$coords)
-  
-  # Return results with S3 class
-  result <- list(
-    auc = auc_values,
-    thresholds = thresholds
+  roc_objs <- purrr::map(
+    rownames(expr_mat),
+    ~ suppressMessages(pROC::roc(response, expr_mat[.x,]))
   )
+
+  if (return_raw) {
+    return(roc_objs)
+  }
+
+  roc_auc_tb <- tibble::tibble(
+    variable = rownames(expr_mat),
+    auc = purrr::map_dbl(roc_objs, ~ .x$auc)
+  )
+
+  coords_tb <- roc_objs %>%
+    purrr::map(~ tibble::as_tibble(pROC::coords(.x, "all"))) %>%
+    rlang::set_names(rownames(expr_mat)) %>%
+    dplyr::bind_rows(.id = "variable")
   
-  structure(result, class = c("glystats_roc_res", "glystats_res", class(result)))
+  res <- list(auc = roc_auc_tb, coords = coords_tb)
+  structure(res, class = c("glystats_roc_res", "glystats_res"))
 }

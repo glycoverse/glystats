@@ -1,6 +1,3 @@
-# Skip tests if required packages are not available
-skip_if_not_installed <- function(pkg) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    testthat::skip(paste("Package", pkg, "not available"))
-  }
+exp_2groups <- function() {
+  glyexp::filter_obs(test_gp_exp, group %in% c("C", "H"))
 }

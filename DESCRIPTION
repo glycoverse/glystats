@@ -37,7 +37,6 @@ Imports:
     cli,
     stats,
     broom,
-    utils,
     purrr,
     glyclean (>= 0.5.2),
     stringr

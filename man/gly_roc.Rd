@@ -23,13 +23,18 @@ AUC values and threshold coordinates. If TRUE, returns raw pROC objects as a lis
 \value{
 A list containing two elements:
 \itemize{
-\item \code{auc}: A named numeric vector of AUC values for each variable
-\item \code{thresholds}: A tibble containing ROC curve coordinates with columns:
+\item \code{auc}: A tibble containing AUC values for each variable, with columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{auc}: AUC value
+}
+\item \code{coords}: A tibble containing ROC curve coordinates with columns:
 \itemize{
 \item \code{variable}: Variable name
 \item \code{threshold}: Threshold value
 \item \code{sensitivity}: Sensitivity (True Positive Rate)
 \item \code{specificity}: Specificity (True Negative Rate)
+If \code{return_raw} is TRUE, returns a list of \code{pROC} objects.
 }
 }
 }
@@ -57,39 +62,3 @@ The function requires exactly 2 groups in the specified grouping variable. If mo
 This function requires the \code{pROC} package to be installed for ROC curve computation.
 }
 
-\examples{
-\dontrun{
-# Create example experiment object with 2 groups
-sample_info <- tibble::tibble(
-  sample = paste0("S", 1:20),
-  group = rep(c("Control", "Treatment"), each = 10)
-)
-
-var_info <- tibble::tibble(
-  variable = paste0("Glycan_", 1:100)
-)
-
-expr_mat <- matrix(rnorm(2000), nrow = 100, ncol = 20)
-rownames(expr_mat) <- var_info$variable
-colnames(expr_mat) <- sample_info$sample
-
-exp <- glyexp::experiment(
-  expr_mat = expr_mat,
-  sample_info = sample_info,
-  var_info = var_info,
-  exp_type = "glycomics",
-  glycan_type = "N"
-)
-
-# Perform ROC analysis
-result <- gly_roc(exp, group_col = "group", pos_class = "Treatment")
-
-# View AUC values
-head(result$auc)
-
-# View ROC curve coordinates for first variable
-result$thresholds |> 
-  dplyr::filter(variable == names(result$auc)[1])
-}
-
-}

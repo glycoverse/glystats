@@ -36,9 +36,3 @@ The function uses \code{prcomp()} to perform PCA and \code{broom::tidy()} to tid
 This function only uses base R packages and does not require additional dependencies.
 }
 
-\examples{
-\dontrun{
-pca_res <- gly_pca(exp)
-}
-
-}

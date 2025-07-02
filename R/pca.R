@@ -18,11 +18,6 @@
 #'  - `variables`: PCA loadings for each variable
 #'  - `eigenvalues`: PCA eigenvalues
 #' When return_raw = TRUE, returns the raw prcomp object.
-#' 
-#' @examples
-#' \dontrun{
-#' pca_res <- gly_pca(exp)
-#' }
 #'
 #' @export
 gly_pca <- function(exp, center = TRUE, scale = TRUE, return_raw = FALSE, ...) {
