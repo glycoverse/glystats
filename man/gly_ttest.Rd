@@ -28,7 +28,7 @@ If TRUE, returns raw statistical model objects as a list.}
 \item{...}{Additional arguments passed to \code{stats::t.test()}.}
 }
 \value{
-A tibble with t-test results.
+A tibble with t-test results, or a list of \code{t.test} models if \code{return_raw} is TRUE.
 }
 \description{
 Perform two-sample t-test for glycomics or glycoproteomics data.
@@ -38,4 +38,7 @@ P-values are adjusted for multiple testing using the method specified by \code{p
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1)) before
 statistical testing. Exactly 2 groups are required in the grouping variable.
+}
+\seealso{
+\code{\link[stats:t.test]{stats::t.test()}}
 }

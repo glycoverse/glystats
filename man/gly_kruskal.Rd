@@ -28,7 +28,8 @@ If TRUE, returns raw statistical model objects as a list.}
 \item{...}{Additional arguments passed to \code{stats::kruskal.test()}.}
 }
 \value{
-A tibble with Kruskal-Wallis test results and a post_hoc column indicating significant group pairs.
+A tibble with Kruskal-Wallis test results and a post_hoc column indicating significant group pairs,
+or a list of \code{kruskal.test} objects and \code{dunnTest} objects if \code{return_raw} is TRUE.
 }
 \description{
 Perform Kruskal-Wallis test for glycomics or glycoproteomics data.
@@ -49,3 +50,6 @@ for variables with significant main effects (p_adj < 0.05).
 This function requires the \code{FSA} package for Dunn's post-hoc test.
 }
 
+\seealso{
+\code{\link[stats:kruskal.test]{stats::kruskal.test()}}, \code{\link[FSA:dunnTest]{FSA::dunnTest()}}
+}

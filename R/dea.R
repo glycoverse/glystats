@@ -19,7 +19,9 @@
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
 #'
 #' @returns
-#' A tibble with t-test results.
+#' A tibble with t-test results, or a list of `t.test` models if `return_raw` is TRUE.
+#'
+#' @seealso [stats::t.test()]
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
@@ -80,7 +82,9 @@ gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
 #'
 #' @returns
-#' A tibble with Wilcoxon test results.
+#' A tibble with Wilcoxon test results, or a list of `wilcox.test` models if `return_raw` is TRUE.
+#' 
+#' @seealso [stats::wilcox.test()]
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
@@ -146,7 +150,10 @@ gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", return_raw
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A tibble with ANOVA results and a post_hoc column indicating significant group pairs.
+#' A tibble with ANOVA results and a post_hoc column indicating significant group pairs,
+#' or a list of `aov` models and `TukeyHSD` objects if `return_raw` is TRUE.
+#'
+#' @seealso [stats::aov()], [stats::TukeyHSD()]
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
@@ -215,7 +222,10 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A tibble with Kruskal-Wallis test results and a post_hoc column indicating significant group pairs.
+#' A tibble with Kruskal-Wallis test results and a post_hoc column indicating significant group pairs,
+#' or a list of `kruskal.test` objects and `dunnTest` objects if `return_raw` is TRUE.
+#'
+#' @seealso [stats::kruskal.test()], [FSA::dunnTest()]
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data

@@ -28,7 +28,8 @@ If TRUE, returns raw statistical model objects as a list.}
 \item{...}{Additional arguments passed to \code{stats::aov()}.}
 }
 \value{
-A tibble with ANOVA results and a post_hoc column indicating significant group pairs.
+A tibble with ANOVA results and a post_hoc column indicating significant group pairs,
+or a list of \code{aov} models and \code{TukeyHSD} objects if \code{return_raw} is TRUE.
 }
 \description{
 Perform one-way ANOVA for glycomics or glycoproteomics data.
@@ -43,4 +44,7 @@ statistical testing. At least 2 groups are required in the grouping variable.
 \strong{Post-hoc Test:}
 Tukey's HSD test for pairwise comparisons (\code{stats::TukeyHSD()}) is performed
 for variables with significant main effects (p_adj < 0.05).
+}
+\seealso{
+\code{\link[stats:aov]{stats::aov()}}, \code{\link[stats:TukeyHSD]{stats::TukeyHSD()}}
 }
