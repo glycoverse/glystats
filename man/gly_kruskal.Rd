@@ -28,11 +28,7 @@ If TRUE, returns raw statistical model objects as a list.}
 \item{...}{Additional arguments passed to \code{stats::kruskal.test()}.}
 }
 \value{
-A list containing two elements:
-\itemize{
-\item \code{main_test}: A tibble with Kruskal-Wallis test results
-\item \code{post_hoc}: A tibble with Dunn's post-hoc pairwise comparison results (empty if no significant results)
-}
+A tibble with Kruskal-Wallis test results and a post_hoc column indicating significant group pairs.
 }
 \description{
 Perform Kruskal-Wallis test for glycomics or glycoproteomics data.

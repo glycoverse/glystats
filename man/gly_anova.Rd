@@ -28,11 +28,7 @@ If TRUE, returns raw statistical model objects as a list.}
 \item{...}{Additional arguments passed to \code{stats::aov()}.}
 }
 \value{
-A list containing two elements:
-\itemize{
-\item \code{main_test}: A tibble with ANOVA results
-\item \code{post_hoc}: A tibble with Tukey's HSD post-hoc pairwise comparison results (empty if no significant results)
-}
+A tibble with ANOVA results and a post_hoc column indicating significant group pairs.
 }
 \description{
 Perform one-way ANOVA for glycomics or glycoproteomics data.

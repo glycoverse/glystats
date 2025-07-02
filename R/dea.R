@@ -146,9 +146,7 @@ gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", return_raw
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A list containing two elements:
-#' - `main_test`: A tibble with ANOVA results
-#' - `post_hoc`: A tibble with Tukey's HSD post-hoc pairwise comparison results (empty if no significant results)
+#' A tibble with ANOVA results and a post_hoc column indicating significant group pairs.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
@@ -217,9 +215,7 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A list containing two elements:
-#' - `main_test`: A tibble with Kruskal-Wallis test results
-#' - `post_hoc`: A tibble with Dunn's post-hoc pairwise comparison results (empty if no significant results)
+#' A tibble with Kruskal-Wallis test results and a post_hoc column indicating significant group pairs.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
@@ -444,13 +440,10 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", return_ra
 
 # Convert raw model list to tibble for multi-group analysis
 .gly_dea_multi_groups_tibblify <- function(mod_list, .f, p_adj_method) {
-  # Convert main test results to tibble
   main_test_tbl <- .tibblify_main_test_results(mod_list$main_test, .f, p_adj_method)
-  
-  # Convert post-hoc results to tibble
-  posthoc_tbl <- .tibblify_posthoc_results(mod_list$post_hoc, .f)
-  
-  list(main_test = main_test_tbl, post_hoc = posthoc_tbl)
+  post_hoc_vec <- .format_posthoc_results(mod_list$post_hoc, .f, main_test_tbl$variable)
+  main_test_tbl$post_hoc <- post_hoc_vec
+  main_test_tbl
 }
 
 # Helper function to convert main test raw results to tibble
@@ -485,34 +478,21 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", return_ra
 }
 
 # Helper function to convert post-hoc raw results to tibble
-.tibblify_posthoc_results <- function(posthoc_raw, .f) {
+.format_posthoc_results <- function(posthoc_raw, .f, variables) {
   if (length(posthoc_raw) == 0) {
-    return(tibble::tibble())
+    return(rep(NA_character_, length(variables)))
   }
-  
-  # Convert each raw post-hoc result to tibble format
-  posthoc_list <- list()
-  
-  for (var_name in names(posthoc_raw)) {
-    raw_result <- posthoc_raw[[var_name]]
-    
+  posthoc_map <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
     if (identical(.f, stats::aov)) {
-      # TukeyHSD result processing
       tukey_df <- as.data.frame(raw_result$group)
-      tukey_df$comparison <- rownames(tukey_df)
-      tukey_df$variable <- var_name
-      posthoc_list[[var_name]] <- tukey_df
+      sig_pairs <- rownames(tukey_df)[tukey_df$"p adj" < 0.05]
+      sig_str <- if (length(sig_pairs) == 0) NA_character_ else paste(sig_pairs, collapse = ";")
     } else {
-      # Dunn test result processing
       dunn_df <- raw_result$res
-      dunn_df$variable <- var_name
-      posthoc_list[[var_name]] <- dunn_df
+      sig_pairs <- dunn_df$Comparison[dunn_df$P.adj < 0.05]
+      sig_str <- if (length(sig_pairs) == 0) NA_character_ else paste(sig_pairs, collapse = ";")
     }
-  }
-  
-  # Combine all results
-  result_tbl <- dplyr::bind_rows(posthoc_list) %>%
-    janitor::clean_names()
-  
-  result_tbl
+    sig_str
+  })
+  purrr::map_chr(variables, ~ posthoc_map[[.x]] %||% NA_character_)
 }

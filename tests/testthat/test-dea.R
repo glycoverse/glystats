@@ -39,12 +39,10 @@ test_that("gly_anova works with anova method", {
   
   # Test core functionality
   expect_s3_class(result, c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res"))
-  expect_type(result, "list")
-  expect_setequal(names(result), c("main_test", "post_hoc"))
-  
-  # Check main_test structure
-  expect_equal(nrow(result$main_test), 10)
-  expect_true("p_adj" %in% colnames(result$main_test))
+  expect_true(tibble::is_tibble(result))
+  expect_equal(nrow(result), 10)
+  expect_true("p_adj" %in% colnames(result))
+  expect_true("post_hoc" %in% colnames(result))
 })
 
 test_that("gly_kruskal works with kruskal method", {
@@ -58,14 +56,12 @@ test_that("gly_kruskal works with kruskal method", {
   
   # Test core functionality
   expect_s3_class(result, c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res"))
-  expect_type(result, "list")
-  expect_setequal(names(result), c("main_test", "post_hoc"))
-  
-  # Check main_test structure
-  expect_equal(nrow(result$main_test), 10)
-  expect_true("method" %in% colnames(result$main_test))
-  expect_true(all(result$main_test$df == 2))  # 3 groups - 1
-  expect_false("log2fc" %in% colnames(result$main_test))
+  expect_true(tibble::is_tibble(result))
+  expect_equal(nrow(result), 10)
+  expect_true("method" %in% colnames(result))
+  expect_true(all(result$df == 2))  # 3 groups - 1
+  expect_true("post_hoc" %in% colnames(result))
+  expect_false("log2fc" %in% colnames(result))
 })
 
 test_that("all dea functions basic functionality works", {
@@ -127,6 +123,6 @@ test_that("gly_anova works with real data", {
   # This test uses the full test_gp_exp to ensure integration works
   result <- suppressMessages(gly_anova(test_gp_exp))
   expect_s3_class(result, c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res"))
-  expect_type(result, "list")
-  expect_setequal(names(result), c("main_test", "post_hoc"))
+  expect_true(tibble::is_tibble(result))
+  expect_true("post_hoc" %in% colnames(result))
 })
