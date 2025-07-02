@@ -1,18 +1,10 @@
-#' Differential Expression Analysis (DEA)
+#' Two-sample t-test for Differential Expression Analysis
 #'
-#' Perform differential expression analysis for glycomics or glycoproteomics data
-#' using various statistical methods. The function supports both two-group comparisons
-#' (t-test, Wilcoxon test) and multi-group comparisons (ANOVA, Kruskal-Wallis test).
-#' For multi-group methods, post-hoc tests are automatically performed for significant results.
+#' Perform two-sample t-test for glycomics or glycoproteomics data.
+#' The function supports Student's t-test for comparing two groups.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param method A character string specifying the statistical method to use:
-#'   - `"t-test"`: Student's t-test for two-group comparison (parametric)
-#'   - `"wilcoxon"`: Wilcoxon rank-sum test for two-group comparison (non-parametric)
-#'   - `"anova"`: One-way ANOVA for multi-group comparison (parametric)
-#'   - `"kruskal"`: Kruskal-Wallis test for multi-group comparison (non-parametric)
-#'  If not provided, default method is t-test for 2 groups, anova for more than 2 groups.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -20,90 +12,23 @@
 #'  If NULL, no adjustment is performed.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw statistical model objects as a list.
-#' @param ... Additional arguments passed to the underlying statistical functions.
-#'
-#' @section Required packages:
-#' Depending on the method used, this function may require additional packages:
-#' - `FSA` package is required when using the "kruskal" method for Dunn's post-hoc test
-#' - All other methods use base R statistical functions
+#' @param ... Additional arguments passed to `stats::t.test()`.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
-#' statistical testing. For two-group methods (t-test, Wilcoxon), exactly 2 groups are required.
-#' For multi-group methods (ANOVA, Kruskal-Wallis), at least 2 groups are required.
-#'
-#' **Underlying Statistical Functions:**
-#' - `"t-test"`: `stats::t.test()`
-#' - `"wilcoxon"`: `stats::wilcox.test()`
-#' - `"anova"`: `stats::aov()`
-#' - `"kruskal"`: `stats::kruskal.test()`
-#'
-#' **Post-hoc Tests:**
-#' - For ANOVA: Tukey's HSD test for pairwise comparisons (`stats::TukeyHSD()`)
-#' - For Kruskal-Wallis: Dunn's test with Holm correction for multiple comparisons (`FSA::dunnTest()`)
-#'
-#' Post-hoc tests are only performed for variables with significant main effects (p_adj < 0.05).
+#' statistical testing. Exactly 2 groups are required in the grouping variable.
 #'
 #' @returns
-#' For two-group methods (`"t-test"`, `"wilcoxon"`):
-#' A tibble with statistical test results.
-#'
-#' For multi-group methods (`"anova"`, `"kruskal"`):
-#' A list containing two elements:
-#' - `main_test`: A tibble with main statistical test results
-#' - `post_hoc`: A tibble with post-hoc pairwise comparison results (empty if no significant results)
-#'
-#' @examples
-#' \dontrun{
-#' # Create example experiment object
-#' sample_info <- tibble::tibble(
-#'   sample = paste0("S", 1:6),
-#'   group = rep(c("Control", "Treatment"), each = 3)
-#' )
-#' 
-#' var_info <- tibble::tibble(
-#'   variable = paste0("Glycan_", 1:100)
-#' )
-#' 
-#' expr_mat <- matrix(rnorm(600), nrow = 100, ncol = 6)
-#' rownames(expr_mat) <- var_info$variable
-#' colnames(expr_mat) <- sample_info$sample
-#' 
-#' exp <- glyexp::experiment(
-#'   expr_mat = expr_mat,
-#'   sample_info = sample_info,
-#'   var_info = var_info,
-#'   exp_type = "glycomics",
-#'   glycan_type = "N"
-#' )
-#' 
-#' # Two-group comparison with t-test
-#' result_ttest <- gly_dea(exp, method = "t-test")
-#' 
-#' # Two-group comparison with Wilcoxon test
-#' result_wilcox <- gly_dea(exp, method = "wilcoxon")
-#' 
-#' # Multi-group comparison with ANOVA
-#' sample_info$group <- rep(c("A", "B", "C"), each = 2)
-#' exp_multi <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
-#' result_anova <- gly_dea(exp_multi, method = "anova")
-#' 
-#' # Access main test results
-#' result_anova$main_test
-#' 
-#' # Access post-hoc results
-#' result_anova$post_hoc
-#' }
+#' A tibble with t-test results.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @importFrom tidyselect all_of
-#' 
+#'
 #' @export
-gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
+gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
-  checkmate::check_choice(method, c("t-test", "wilcoxon", "anova", "kruskal"), null.ok = TRUE)
   checkmate::check_string(group_col)
   checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
   checkmate::check_logical(return_raw, len = 1)
@@ -112,45 +37,18 @@ gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH"
   expr_mat <- glyexp::get_expr_mat(exp)
   sample_info <- glyexp::get_sample_info(exp)
 
-  # Extract groups first for method determination if needed
+  # Extract and validate groups
   group_info <- .extract_and_validate_groups(
     sample_info = sample_info,
     group_col = group_col,
-    min_count = NULL,
-    max_count = NULL,
-    method = NULL,  # No validation yet, method may be auto-determined
-    show_info = FALSE  # Don't show info yet, will show after method is determined
+    min_count = 2,
+    max_count = 2,
+    method = "t-test"
   )
   groups <- group_info$groups
-  n_groups <- length(levels(groups))
 
-  # Auto-determine method if not provided
-  if (is.null(method)) {
-    method <- if (n_groups == 2) "t-test" else "anova"
-  }
-
-  # Validate group count based on method and display group info
-  if (method %in% c("t-test", "wilcoxon")) {
-    .validate_group_count(groups, group_col, min_count = 2, max_count = 2, method = method)
-    .display_two_group_info(groups)
-  } else if (method %in% c("anova", "kruskal")) {
-    .validate_group_count(groups, group_col, min_count = 2, method = method)
-    .display_multi_group_info(groups)
-  }
-
-  # Check package availability based on method
-  if (method == "kruskal") {
-    .check_pkg_available("FSA")
-  }
-
-  # Perform DEA
-  result <- switch(method,
-    "t-test" = .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, return_raw, ...),
-    "wilcoxon" = .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, return_raw, ...),
-    "anova" = .gly_dea_multi_groups(expr_mat, groups, stats::aov, stats::TukeyHSD, p_adj_method, return_raw, ...),
-    "kruskal" = .gly_dea_multi_groups(expr_mat, groups, stats::kruskal.test, FSA::dunnTest, p_adj_method, return_raw, ...),
-    cli::cli_abort("Invalid method: {.val {method}}")
-  )
+  # Perform t-test
+  result <- .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, return_raw, ...)
 
   # Return raw results if requested
   if (return_raw) {
@@ -158,13 +56,210 @@ gly_dea <- function(exp, method = NULL, group_col = "group", p_adj_method = "BH"
   }
 
   # Add S3 class
-  subclass <- switch(method,
-    "t-test" = "glystats_dea_res_ttest",
-    "wilcoxon" = "glystats_dea_res_wilcoxon",
-    "anova" = "glystats_dea_res_anova",
-    "kruskal" = "glystats_dea_res_kruskal"
+  structure(result, class = c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res", class(result)))
+}
+
+#' Wilcoxon rank-sum test for Differential Expression Analysis
+#'
+#' Perform Wilcoxon rank-sum test (Mann-Whitney U test) for glycomics or glycoproteomics data.
+#' The function supports non-parametric comparison of two groups.
+#' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
+#'
+#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param group_col A character string specifying the column name of the grouping variable
+#'  in the sample information. Default is `"group"`.
+#' @param p_adj_method A character string specifying the method to adjust p-values.
+#'  See `p.adjust.methods` for available methods. Default is "BH".
+#'  If NULL, no adjustment is performed.
+#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
+#'   If TRUE, returns raw statistical model objects as a list.
+#' @param ... Additional arguments passed to `stats::wilcox.test()`.
+#'
+#' @details
+#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' statistical testing. Exactly 2 groups are required in the grouping variable.
+#'
+#' @returns
+#' A tibble with Wilcoxon test results.
+#'
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
+#' @importFrom tidyselect all_of
+#' 
+#' @export
+gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
+  # Validate inputs
+  checkmate::check_class(exp, "glyexp_experiment")
+  checkmate::check_string(group_col)
+  checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::check_logical(return_raw, len = 1)
+
+  # Extract data from experiment object
+  expr_mat <- glyexp::get_expr_mat(exp)
+  sample_info <- glyexp::get_sample_info(exp)
+
+  # Extract and validate groups
+  group_info <- .extract_and_validate_groups(
+    sample_info = sample_info,
+    group_col = group_col,
+    min_count = 2,
+    max_count = 2,
+    method = "wilcoxon"
   )
-  structure(result, class = c(subclass, "glystats_dea_res", "glystats_res", class(result)))
+  groups <- group_info$groups
+
+  # Perform Wilcoxon test
+  result <- .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, return_raw, ...)
+
+  # Return raw results if requested
+  if (return_raw) {
+    return(result)
+  }
+
+  # Add S3 class
+  structure(result, class = c("glystats_dea_res_wilcoxon", "glystats_dea_res", "glystats_res", class(result)))
+}
+
+#' One-way ANOVA for Differential Expression Analysis
+#'
+#' Perform one-way ANOVA for glycomics or glycoproteomics data.
+#' The function supports parametric comparison of multiple groups.
+#' For significant results, Tukey's HSD post-hoc test is automatically performed.
+#' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
+#'
+#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param group_col A character string specifying the column name of the grouping variable
+#'  in the sample information. Default is `"group"`.
+#' @param p_adj_method A character string specifying the method to adjust p-values.
+#'  See `p.adjust.methods` for available methods. Default is "BH".
+#'  If NULL, no adjustment is performed.
+#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
+#'   If TRUE, returns raw statistical model objects as a list.
+#' @param ... Additional arguments passed to `stats::aov()`.
+#'
+#' @details
+#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' statistical testing. At least 2 groups are required in the grouping variable.
+#' 
+#' **Post-hoc Test:**
+#' Tukey's HSD test for pairwise comparisons (`stats::TukeyHSD()`) is performed
+#' for variables with significant main effects (p_adj < 0.05).
+#'
+#' @returns
+#' A list containing two elements:
+#' - `main_test`: A tibble with ANOVA results
+#' - `post_hoc`: A tibble with Tukey's HSD post-hoc pairwise comparison results (empty if no significant results)
+#'
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
+#' @importFrom tidyselect all_of
+#' 
+#' @export
+gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
+  # Validate inputs
+  checkmate::check_class(exp, "glyexp_experiment")
+  checkmate::check_string(group_col)
+  checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::check_logical(return_raw, len = 1)
+
+  # Extract data from experiment object
+  expr_mat <- glyexp::get_expr_mat(exp)
+  sample_info <- glyexp::get_sample_info(exp)
+
+  # Extract and validate groups
+  group_info <- .extract_and_validate_groups(
+    sample_info = sample_info,
+    group_col = group_col,
+    min_count = 2,
+    max_count = NULL,
+    method = "anova"
+  )
+  groups <- group_info$groups
+
+  # Perform ANOVA
+  result <- .gly_dea_multi_groups(expr_mat, groups, stats::aov, stats::TukeyHSD, p_adj_method, return_raw, ...)
+
+  # Return raw results if requested
+  if (return_raw) {
+    return(result)
+  }
+
+  # Add S3 class
+  structure(result, class = c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res", class(result)))
+}
+
+#' Kruskal-Wallis test for Differential Expression Analysis
+#'
+#' Perform Kruskal-Wallis test for glycomics or glycoproteomics data.
+#' The function supports non-parametric comparison of multiple groups.
+#' For significant results, Dunn's post-hoc test is automatically performed.
+#' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
+#'
+#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param group_col A character string specifying the column name of the grouping variable
+#'  in the sample information. Default is `"group"`.
+#' @param p_adj_method A character string specifying the method to adjust p-values.
+#'  See `p.adjust.methods` for available methods. Default is "BH".
+#'  If NULL, no adjustment is performed.
+#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
+#'   If TRUE, returns raw statistical model objects as a list.
+#' @param ... Additional arguments passed to `stats::kruskal.test()`.
+#'
+#' @section Required packages:
+#' This function requires the `FSA` package for Dunn's post-hoc test.
+#'
+#' @details
+#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' statistical testing. At least 2 groups are required in the grouping variable.
+#' 
+#' **Post-hoc Test:**
+#' Dunn's test with Holm correction for multiple comparisons (`FSA::dunnTest()`) is performed
+#' for variables with significant main effects (p_adj < 0.05).
+#'
+#' @returns
+#' A list containing two elements:
+#' - `main_test`: A tibble with Kruskal-Wallis test results
+#' - `post_hoc`: A tibble with Dunn's post-hoc pairwise comparison results (empty if no significant results)
+#'
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
+#' @importFrom tidyselect all_of
+#' 
+#' @export
+gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
+  # Validate inputs
+  checkmate::check_class(exp, "glyexp_experiment")
+  checkmate::check_string(group_col)
+  checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::check_logical(return_raw, len = 1)
+
+  # Check package availability
+  .check_pkg_available("FSA")
+
+  # Extract data from experiment object
+  expr_mat <- glyexp::get_expr_mat(exp)
+  sample_info <- glyexp::get_sample_info(exp)
+
+  # Extract and validate groups
+  group_info <- .extract_and_validate_groups(
+    sample_info = sample_info,
+    group_col = group_col,
+    min_count = 2,
+    max_count = NULL,
+    method = "kruskal"
+  )
+  groups <- group_info$groups
+
+  # Perform Kruskal-Wallis test
+  result <- .gly_dea_multi_groups(expr_mat, groups, stats::kruskal.test, FSA::dunnTest, p_adj_method, return_raw, ...)
+
+  # Return raw results if requested
+  if (return_raw) {
+    return(result)
+  }
+
+  # Add S3 class
+  structure(result, class = c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res", class(result)))
 }
 
 .gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, return_raw = FALSE, ...) {
