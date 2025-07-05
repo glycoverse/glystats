@@ -1,17 +1,29 @@
+# Helper function to create test data with protein column
+create_exp_with_protein <- function(exp) {
+  exp$var_info <- exp$var_info |>
+    dplyr::select(-proteins, -genes, -protein_sites) |>
+    dplyr::mutate(
+      protein = c("P12345", "P23456", "P34567", "P45678", "P56789")[seq_len(glyexp::n_variables(exp))],
+      gene = c("GENE1", "GENE2", "GENE3", "GENE4", "GENE5")[seq_len(glyexp::n_variables(exp))],
+      protein_site = as.integer(c(100, 200, 300, 400, 500)[seq_len(glyexp::n_variables(exp))])
+    )
+  exp
+}
+
 # Integration test for GO enrichment
 test_that("enrich_go works with protein column (integration)", {
   # Skip if required packages are not available
   skip_if_not_installed("clusterProfiler")
   skip_if_not_installed("org.Hs.eg.db")
   
-  # Use glyclean::infer_protein to convert genes column to protein column
-  exp_with_protein <- glyclean::infer_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
+  # Create test data with protein column
+  exp_with_protein <- create_exp_with_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
   
   result <- suppressMessages(enrich_go(exp_with_protein))
   expect_s3_class(result, "glystats_go_ora_res")
 })
 
-test_that("enrich_go works with genes column and infer_protein", {
+test_that("enrich_go works with protein column and returns properly formatted results", {
   # Mock the enrichGO function - create a mock data frame
   mock_result <- data.frame(
     ID = character(0),
@@ -20,7 +32,8 @@ test_that("enrich_go works with genes column and infer_protein", {
   )
   
   with_mocked_bindings({
-    result <- enrich_go(test_gp_exp |> glyexp::slice_head_var(n = 5))
+    exp_with_protein <- create_exp_with_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
+    result <- enrich_go(exp_with_protein)
     expect_s3_class(result, "glystats_go_ora_res")
     expect_true("id" %in% colnames(result))  # Check column name cleaning works
   },
@@ -34,19 +47,16 @@ test_that("enrich_go handles missing protein information", {
   exp_small <- test_gp_exp |> 
     glyexp::slice_head_var(n = 5)
   
-  # Remove both protein and proteins columns
+  # Remove protein column
   exp_no_proteins <- exp_small
   if ("protein" %in% colnames(exp_no_proteins$var_info)) {
     exp_no_proteins$var_info <- exp_no_proteins$var_info |> dplyr::select(-protein)
-  }
-  if ("proteins" %in% colnames(exp_no_proteins$var_info)) {
-    exp_no_proteins$var_info <- exp_no_proteins$var_info |> dplyr::select(-proteins)
   }
   
   # Should error when no protein information is available
   expect_error(
     enrich_go(exp_no_proteins),
-    "protein.*or.*proteins.*column not found"
+    "protein.*column not found"
   )
 })
 
@@ -60,7 +70,7 @@ test_that("enrich_go passes additional arguments to enrichGO", {
   enrichGO_args <- NULL
   
   with_mocked_bindings({
-    exp_with_protein <- glyclean::infer_protein(test_gp_exp |> glyexp::slice_head_var(n = 3))
+    exp_with_protein <- create_exp_with_protein(test_gp_exp |> glyexp::slice_head_var(n = 3))
     result <- enrich_go(exp_with_protein, pvalueCutoff = 0.01, ont = "BP")
     
     expect_s3_class(result, "glystats_go_ora_res")
@@ -86,8 +96,8 @@ test_that("enrich_go filters out NA proteins", {
   captured_genes <- NULL
   
   with_mocked_bindings({
-    # Convert to protein column first, then add some NAs
-    exp_with_protein <- glyclean::infer_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
+    # Create protein column with some NAs
+    exp_with_protein <- create_exp_with_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
     exp_with_nas <- exp_with_protein |>
       glyexp::mutate_var(protein = ifelse(seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0, 
                                          NA_character_, protein))
@@ -106,6 +116,8 @@ test_that("enrich_go filters out NA proteins", {
   )
 })
 
+
+
 # Integration test for KEGG enrichment
 test_that("enrich_kegg works with protein column (integration)", {
   # Skip if required packages are not available
@@ -114,8 +126,8 @@ test_that("enrich_kegg works with protein column (integration)", {
   # Skip if network connection is not available
   skip_if_offline()
   
-  # Use glyclean::infer_protein to convert genes column to protein column
-  exp_with_protein <- glyclean::infer_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
+  # Create test data with protein column
+  exp_with_protein <- create_exp_with_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
   
   # Try KEGG enrichment - might fail due to network issues
   result <- try(suppressMessages(enrich_kegg(exp_with_protein)), silent = TRUE)
@@ -126,7 +138,7 @@ test_that("enrich_kegg works with protein column (integration)", {
   expect_s3_class(result, "glystats_kegg_ora_res")
 })
 
-test_that("enrich_kegg works with genes column and infer_protein", {
+test_that("enrich_kegg works with protein column and returns properly formatted results", {
   # Mock the enrichKEGG function - create a mock data frame
   mock_result <- data.frame(
     ID = character(0),
@@ -135,7 +147,8 @@ test_that("enrich_kegg works with genes column and infer_protein", {
   )
   
   with_mocked_bindings({
-    result <- enrich_kegg(test_gp_exp |> glyexp::slice_head_var(n = 5))
+    exp_with_protein <- create_exp_with_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
+    result <- enrich_kegg(exp_with_protein)
     expect_s3_class(result, "glystats_kegg_ora_res")
     expect_true("id" %in% colnames(result))  # Check column name cleaning works
   },
@@ -149,19 +162,16 @@ test_that("enrich_kegg handles missing protein information", {
   exp_small <- test_gp_exp |> 
     glyexp::slice_head_var(n = 5)
   
-  # Remove both protein and proteins columns
+  # Remove protein column
   exp_no_proteins <- exp_small
   if ("protein" %in% colnames(exp_no_proteins$var_info)) {
     exp_no_proteins$var_info <- exp_no_proteins$var_info |> dplyr::select(-protein)
-  }
-  if ("proteins" %in% colnames(exp_no_proteins$var_info)) {
-    exp_no_proteins$var_info <- exp_no_proteins$var_info |> dplyr::select(-proteins)
   }
   
   # Should error when no protein information is available
   expect_error(
     enrich_kegg(exp_no_proteins),
-    "protein.*or.*proteins.*column not found"
+    "protein.*column not found"
   )
 })
 
@@ -175,7 +185,7 @@ test_that("enrich_kegg passes additional arguments to enrichKEGG", {
   enrichKEGG_args <- NULL
   
   with_mocked_bindings({
-    exp_with_protein <- glyclean::infer_protein(test_gp_exp |> glyexp::slice_head_var(n = 3))
+    exp_with_protein <- create_exp_with_protein(test_gp_exp |> glyexp::slice_head_var(n = 3))
     result <- enrich_kegg(exp_with_protein, pvalueCutoff = 0.001, qvalueCutoff = 0.1)
     
     expect_s3_class(result, "glystats_kegg_ora_res")
@@ -200,8 +210,8 @@ test_that("enrich_kegg filters out NA proteins", {
   captured_genes <- NULL
   
   with_mocked_bindings({
-    # Convert to protein column first, then add some NAs
-    exp_with_protein <- glyclean::infer_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
+    # Create protein column with some NAs
+    exp_with_protein <- create_exp_with_protein(test_gp_exp |> glyexp::slice_head_var(n = 5))
     exp_with_nas <- exp_with_protein |>
       glyexp::mutate_var(protein = ifelse(seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0, 
                                          NA_character_, protein))

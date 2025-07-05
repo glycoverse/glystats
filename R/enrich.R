@@ -3,12 +3,8 @@
 #' @description
 #' Perform GO and KEGG ORA for all proteins (genes) in a `glyexp::experiment()`.
 #'
-#' This function uses the "protein" column in the variable information tibble, or
-#' falls back to the "proteins" column if "protein" is not present.
-#' If the "proteins" column is used, [glyclean::infer_protein()] is called to resolve
-#' cases with multiple gene entries.
-#' In both cases, protein identifiers should be UniProt accessions.
-#' For the "proteins" column, multiple proteins should be separated by ";".
+#' This function uses the "protein" column in the variable information tibble.
+#' Protein identifiers should be UniProt accessions.
 #'
 #' @section Required packages:
 #' This function requires the following packages to be installed:
@@ -76,11 +72,8 @@ enrich_kegg <- function(exp, return_raw = FALSE, ...) {
 .extract_genes_from_exp <- function(exp) {
   if ("protein" %in% colnames(exp$var_info)) {
     genes <- exp$var_info$protein  # Uniprot
-  } else if ("proteins" %in% colnames(exp$var_info)) {
-    exp2 <- glyclean::infer_protein(exp)  # resolve multiple gene problem
-    genes <- exp2$var_info$protein
   } else {
-    cli::cli_abort("{.field protein} or {.field proteins} column not found in the variable information tibble.")
+    cli::cli_abort("{.field protein} column not found in the variable information tibble.")
   }
   unique(genes[!is.na(genes)])
 }

@@ -23,12 +23,8 @@ or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
 \description{
 Perform GO and KEGG ORA for all proteins (genes) in a \code{glyexp::experiment()}.
 
-This function uses the "protein" column in the variable information tibble, or
-falls back to the "proteins" column if "protein" is not present.
-If the "proteins" column is used, \code{\link[glyclean:infer_protein]{glyclean::infer_protein()}} is called to resolve
-cases with multiple gene entries.
-In both cases, protein identifiers should be UniProt accessions.
-For the "proteins" column, multiple proteins should be separated by ";".
+This function uses the "protein" column in the variable information tibble.
+Protein identifiers should be UniProt accessions.
 }
 \section{Required packages}{
 
