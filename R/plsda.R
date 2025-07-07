@@ -4,7 +4,7 @@
 #' The function uses `mixOmics::plsda()` to perform PLS-DA and returns tidy results.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param group_col A character string specifying the column name in sample information 
+#' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param ncomp An integer indicating the number of components to include. Default is 2.
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
@@ -15,6 +15,14 @@
 #' @section Required packages:
 #' This function requires the following packages to be installed:
 #' - `mixOmics` for PLS-DA analysis
+#'
+#' @section Sample size requirements:
+#' According to the Topliss ratio principle, the ratio of samples to variables (n/p)
+#' should be at least 5 to avoid overfitting and ensure reliable results. This function
+#' will throw an error if n/p < 5. For datasets with high dimensionality relative to
+#' sample size, consider:
+#' - Feature selection before analysis
+#' - Collecting more samples
 #'
 #' @return A list containing four tibbles (when return_raw = FALSE):
 #'  - `samples`: PLS-DA scores for each sample with group information
@@ -29,11 +37,11 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, return_
   .check_pkg_available("mixOmics")
 
   # Validate inputs
-  checkmate::check_class(exp, "glyexp_experiment")
-  checkmate::check_string(group_col)
-  checkmate::check_int(ncomp, lower = 1)
-  checkmate::check_logical(scale, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_class(exp, "glyexp_experiment")
+  checkmate::assert_string(group_col)
+  checkmate::assert_int(ncomp, lower = 1)
+  checkmate::assert_logical(scale, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -48,6 +56,23 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, return_
     method = "PLS-DA"
   )
   groups <- group_info$groups
+
+  # Validate sample-to-variable ratio (Topliss ratio)
+  n_samples <- length(groups)
+  n_variables <- nrow(expr_mat)
+  topliss_ratio <- n_samples / n_variables
+
+  if (topliss_ratio < 5) {
+    cli::cli_abort(c(
+      "Insufficient sample-to-variable ratio for reliable PLS-DA analysis.",
+      "x" = "Current ratio: {n_samples}/{n_variables} = {round(topliss_ratio, 2)}",
+      "!" = "According to the Topliss ratio principle, n/p should be ≥ 5 to avoid overfitting.",
+      "i" = "Consider:",
+      "*" = "Collecting more samples (need ≥ {ceiling(n_variables * 5)} samples)",
+      "*" = "Reducing variables through feature selection",
+      "*" = "Using dimensionality reduction techniques first"
+    ))
+  }
 
   # Prepare data matrix (samples as rows, variables as columns)
   mat <- log(t(expr_mat) + 1)

@@ -50,6 +50,18 @@ This function requires the following packages to be installed:
 }
 }
 
+\section{Sample size requirements}{
+
+According to the Topliss ratio principle, the ratio of samples to variables (n/p)
+should be at least 5 to avoid overfitting and ensure reliable results. This function
+will throw an error if n/p < 5. For datasets with high dimensionality relative to
+sample size, consider:
+\itemize{
+\item Feature selection before analysis
+\item Collecting more samples
+}
+}
+
 \seealso{
 \code{\link[mixOmics:plsda]{mixOmics::plsda()}}
 }
