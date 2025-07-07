@@ -75,9 +75,8 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
       "x" = "Current ratio: {n_samples}/{n_variables} = {round(topliss_ratio, 2)}",
       "!" = "According to the Topliss ratio principle, n/p should be >= 5 to avoid overfitting.",
       "i" = "Consider:",
-      "*" = "Collecting more samples (need ≥ {ceiling(n_variables >= 5)} samples)",
-      "*" = "Reducing variables through feature selection",
-      "*" = "Using dimensionality reduction techniques first"
+      "*" = "Collecting more samples (need >= {ceiling(n_variables * 5)} samples)",
+      "*" = "Reducing variables through feature selection"
     ))
   }
 
