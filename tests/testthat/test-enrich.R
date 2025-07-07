@@ -43,7 +43,7 @@ test_that("enrich_go handles missing protein information", {
   
   # Should error when no protein information is available
   expect_error(
-    enrich_go(exp_no_proteins),
+    suppressMessages(enrich_go(exp_no_proteins)),
     "protein.*column not found"
   )
 })
@@ -132,7 +132,7 @@ test_that("enrich_kegg handles missing protein information", {
   
   # Should error when no protein information is available
   expect_error(
-    enrich_kegg(exp_no_proteins),
+    suppressMessages(enrich_kegg(exp_no_proteins)),
     "protein.*column not found"
   )
 })
@@ -221,7 +221,7 @@ test_that("enrich_reactome handles missing protein information", {
   
   # Should error when no protein information is available
   expect_error(
-    enrich_reactome(exp_no_proteins),
+    suppressMessages(enrich_reactome(exp_no_proteins)),
     "protein.*column not found"
   )
 })
@@ -243,7 +243,7 @@ test_that("enrich_reactome filters out NA proteins", {
         glyexp::mutate_var(protein = ifelse(seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0, 
                                            NA_character_, protein))
       
-      result <- enrich_reactome(exp_with_nas)
+      suppressMessages(result <- enrich_reactome(exp_with_nas))
       
       expect_s3_class(result, "glystats_reactome_ora_res")
       # Check that NA values were filtered out

@@ -43,19 +43,19 @@ test_that("gly_plsda validates Topliss ratio", {
   # Test that function correctly rejects datasets with insufficient n/p ratio
   # The test dataset has 12 samples and 500 variables (ratio = 0.024 << 5)
   expect_error(
-    gly_plsda(test_gp_exp),
+    suppressMessages(gly_plsda(test_gp_exp)),
     "Insufficient sample-to-variable ratio"
   )
 
   # Test that the error message contains helpful information
   expect_error(
-    gly_plsda(test_gp_exp),
+    suppressMessages(gly_plsda(test_gp_exp)),
     "Topliss ratio principle"
   )
 
   # Test that the error message suggests solutions
   expect_error(
-    gly_plsda(test_gp_exp),
+    suppressMessages(gly_plsda(test_gp_exp)),
     "Collecting more samples"
   )
 })
@@ -78,13 +78,13 @@ test_that("gly_plsda validates inputs", {
 
   # Test invalid group column (should fail before Topliss ratio check)
   expect_error(
-    gly_plsda(test_gp_exp, group_col = "nonexistent"),
+    suppressMessages(gly_plsda(test_gp_exp, group_col = "nonexistent")),
     "not found in sample information"
   )
 
   # Test invalid ncomp (should fail before Topliss ratio check)
   expect_error(
-    gly_plsda(test_gp_exp, ncomp = 0),
+    suppressMessages(gly_plsda(test_gp_exp, ncomp = 0)),
     "Assertion on 'ncomp' failed"
   )
 })

@@ -43,19 +43,19 @@ test_that("gly_oplsda validates Topliss ratio", {
   # Test that function correctly rejects datasets with insufficient n/p ratio
   # The test dataset has 6 samples and 500 variables (ratio = 0.012 << 5)
   expect_error(
-    gly_oplsda(exp_2groups()),
+    suppressMessages(gly_oplsda(exp_2groups())),
     "Insufficient sample-to-variable ratio"
   )
 
   # Test that the error message contains helpful information
   expect_error(
-    gly_oplsda(exp_2groups()),
+    suppressMessages(gly_oplsda(exp_2groups())),
     "Topliss ratio principle"
   )
 
   # Test that the error message suggests solutions
   expect_error(
-    gly_oplsda(exp_2groups()),
+    suppressMessages(gly_oplsda(exp_2groups())),
     "Collecting more samples"
   )
 })
@@ -100,25 +100,25 @@ test_that("gly_oplsda validates inputs", {
 
   # Test invalid pred_i
   expect_error(
-    gly_oplsda(exp_2groups(), pred_i = 0),
+    suppressMessages(gly_oplsda(exp_2groups(), pred_i = 0)),
     "Assertion on 'pred_i' failed"
   )
 
   # Test invalid ortho_i
   expect_error(
-    gly_oplsda(exp_2groups(), ortho_i = -1),
+    suppressMessages(gly_oplsda(exp_2groups(), ortho_i = -1)),
     "Assertion on 'ortho_i' failed"
   )
 
   # Test multi-group data (should fail at group validation before Topliss ratio)
   expect_error(
-    gly_oplsda(test_gp_exp),
+    suppressMessages(gly_oplsda(test_gp_exp)),
     "group must have exactly 2 levels for"
   )
 
   # Test invalid group column (should fail before Topliss ratio check)
   expect_error(
-    gly_oplsda(exp_2groups(), group_col = "nonexistent"),
+    suppressMessages(gly_oplsda(exp_2groups(), group_col = "nonexistent")),
     "not found in sample information"
   )
 })
@@ -153,7 +153,7 @@ test_that("gly_oplsda validates Topliss ratio with invalid data", {
 
   # Test that function rejects datasets with insufficient n/p ratio
   expect_error(
-    gly_oplsda(exp_2groups()),
+    suppressMessages(gly_oplsda(exp_2groups())),
     "Insufficient sample-to-variable ratio"
   )
 })
