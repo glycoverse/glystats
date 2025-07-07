@@ -3,25 +3,28 @@
 \name{enrich_go}
 \alias{enrich_go}
 \alias{enrich_kegg}
-\title{GO and KEGG over-representation analysis (ORA)}
+\alias{enrich_reactome}
+\title{GO, KEGG, and Reactome over-representation analysis (ORA)}
 \usage{
 enrich_go(exp, return_raw = FALSE, ...)
 
 enrich_kegg(exp, return_raw = FALSE, ...)
+
+enrich_reactome(exp, return_raw = FALSE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object.}
 
 \item{return_raw}{A logical value indicating whether to return raw clusterProfiler enrichResult objects.}
 
-\item{...}{Additional arguments passed to \code{clusterProfiler::enrichGO()} or \code{clusterProfiler::enrichKEGG()}.}
+\item{...}{Additional arguments passed to \code{clusterProfiler::enrichGO()}, \code{clusterProfiler::enrichKEGG()}, or \code{ReactomePA::enrichPathway()}.}
 }
 \value{
-A tibble of GO or KEGG enrichment results (when return_raw = FALSE),
+A tibble of GO, KEGG, or Reactome enrichment results (when return_raw = FALSE),
 or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
 }
 \description{
-Perform GO and KEGG ORA for all proteins (genes) in a \code{glyexp::experiment()}.
+Perform GO, KEGG, and Reactome ORA for all proteins (genes) in a \code{glyexp::experiment()}.
 
 This function uses the "protein" column in the variable information tibble.
 Protein identifiers should be UniProt accessions.
@@ -31,10 +34,11 @@ Protein identifiers should be UniProt accessions.
 This function requires the following packages to be installed:
 \itemize{
 \item \code{clusterProfiler} for enrichment analysis
+\item \code{ReactomePA} for Reactome pathway analysis
 \item \code{org.Hs.eg.db} for human gene annotation (GO analysis only)
 }
 }
 
 \seealso{
-\code{\link[clusterProfiler:enrichGO]{clusterProfiler::enrichGO()}}, \code{\link[clusterProfiler:enrichKEGG]{clusterProfiler::enrichKEGG()}}
+\code{\link[clusterProfiler:enrichGO]{clusterProfiler::enrichGO()}}, \code{\link[clusterProfiler:enrichKEGG]{clusterProfiler::enrichKEGG()}}, \code{\link[ReactomePA:enrichPathway]{ReactomePA::enrichPathway()}}
 }
