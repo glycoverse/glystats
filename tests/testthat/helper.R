@@ -8,17 +8,20 @@ exp_topliss_valid <- function() {
   # Use deterministic patterns for maximum discrimination
   set.seed(42)  # For reproducibility
 
+  # Generate sample names
+  sample_names <- paste0("Sample_", 1:50)
+
   # Generate sample information (glyexp will add the "sample" column automatically)
   sample_info <- data.frame(
     group = rep(c("Control", "Treatment"), each = 25),
     stringsAsFactors = FALSE
   )
-  rownames(sample_info) <- paste0("Sample_", 1:50)
+  rownames(sample_info) <- sample_names
 
   # Generate expression matrix (8 variables, 50 samples)
   expr_mat <- matrix(nrow = 8, ncol = 50)
   rownames(expr_mat) <- paste0("Feature_", 1:8)
-  colnames(expr_mat) <- rownames(sample_info)
+  colnames(expr_mat) <- sample_names
 
   # Create highly discriminative patterns
   # Control group (columns 1-25): specific pattern
