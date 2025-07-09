@@ -3,10 +3,10 @@ test_that("gly_fold_change works with basic 2-group comparison", {
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
     glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
-  
-  # Run fold change calculation
-  result <- suppressMessages(gly_fold_change(exp_2group))
-  
+
+  # Run fold change calculation with add_info = FALSE for basic test
+  result <- suppressMessages(gly_fold_change(exp_2group, add_info = FALSE))
+
   # Test core functionality
   expect_s3_class(result, "glystats_fc_res")
   expect_equal(nrow(result), 10)
@@ -14,9 +14,17 @@ test_that("gly_fold_change works with basic 2-group comparison", {
   expect_setequal(colnames(result), c("variable", "log2fc"))
   expect_type(result$variable, "character")
   expect_type(result$log2fc, "double")
-  
+
   # Check that all variables are included
   expect_setequal(result$variable, glyexp::get_var_info(exp_2group)$variable)
+
+  # Test with add_info = TRUE (default)
+  result_with_info <- suppressMessages(gly_fold_change(exp_2group))
+  expect_s3_class(result_with_info, "glystats_fc_res")
+  expect_equal(nrow(result_with_info), 10)
+  expect_true(ncol(result_with_info) > 2)  # Should have more columns with var_info
+  expect_true("variable" %in% colnames(result_with_info))
+  expect_true("log2fc" %in% colnames(result_with_info))
 })
 
 test_that("gly_fold_change works with custom group column", {
@@ -26,9 +34,9 @@ test_that("gly_fold_change works with custom group column", {
     glyexp::slice_sample_var(n = 5) |>
     glyexp::mutate_obs(treatment = group)  # Add a custom group column
   
-  # Test with custom group column
-  result <- suppressMessages(gly_fold_change(exp_2group, group_col = "treatment"))
-  
+  # Test with custom group column and add_info = FALSE
+  result <- suppressMessages(gly_fold_change(exp_2group, group_col = "treatment", add_info = FALSE))
+
   expect_s3_class(result, "glystats_fc_res")
   expect_equal(nrow(result), 5)
   expect_equal(ncol(result), 2)
@@ -107,8 +115,8 @@ test_that("gly_fold_change handles edge cases", {
     glyexp::filter_obs(group %in% c("C", "H")) |>
     glyexp::slice_sample_var(n = 1)
   
-  result <- suppressMessages(gly_fold_change(exp_minimal))
-  
+  result <- suppressMessages(gly_fold_change(exp_minimal, add_info = FALSE))
+
   expect_s3_class(result, "glystats_fc_res")
   expect_equal(nrow(result), 1)
   expect_equal(ncol(result), 2)

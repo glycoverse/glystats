@@ -9,6 +9,8 @@
 #' @param pred_i An integer indicating the number of predictive components to include. Default is 1.
 #' @param ortho_i An integer indicating the number of orthogonal components to include. Default is NA (automatic).
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
+#' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
+#'  will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw ropls opls object.
 #' @param ... Additional arguments passed to `ropls::opls()`.
@@ -33,7 +35,7 @@
 #' When return_raw = TRUE, returns the raw ropls opls object.
 #' @seealso [ropls::opls()]
 #' @export
-gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale = TRUE, return_raw = FALSE, ...) {
+gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale = TRUE, add_info = TRUE, return_raw = FALSE, ...) {
   # Check package availability
   .check_pkg_available("ropls")
 
@@ -45,6 +47,7 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
     checkmate::assert_int(ortho_i, lower = 0)
   }
   checkmate::assert_logical(scale, len = 1)
+  checkmate::assert_logical(add_info, len = 1)
   checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
@@ -117,12 +120,16 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
   }
 
   # Extract and format results
-  res <- .format_oplsda_results(oplsda_res, groups, sample_info)
+  res <- .format_oplsda_results(oplsda_res, groups, sample_info, add_info)
+
+  # Process results with add_info logic
+  res <- .process_results_add_info(res, exp, add_info)
+
   structure(res, class = c("glystats_oplsda_res", "glystats_res"))
 }
 
 # Helper function to format OPLS-DA results
-.format_oplsda_results <- function(oplsda_res, groups, sample_info) {
+.format_oplsda_results <- function(oplsda_res, groups, sample_info, add_info = TRUE) {
   # Check if model was successfully built
   if (length(oplsda_res@scoreMN) == 0) {
     # Model building failed - provide informative error
@@ -155,15 +162,9 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
 
   samples_tbl <- tibble::as_tibble(all_scores, .name_repair = "minimal")
   samples_tbl$sample <- rownames(all_scores)
-  samples_tbl$group <- as.character(groups)
 
-  # Add sample information if available (excluding group column to avoid duplication)
-  if (!is.null(sample_info) && "sample" %in% colnames(sample_info)) {
-    sample_info_subset <- sample_info[, !colnames(sample_info) %in% "group", drop = FALSE]
-    if (ncol(sample_info_subset) > 1) {  # Only join if there are columns other than sample
-      samples_tbl <- dplyr::left_join(samples_tbl, sample_info_subset, by = "sample")
-    }
-  }
+  # Note: We don't add group here because it will be handled by .process_results_add_info
+  # This ensures consistent behavior across all functions
 
   # Extract variable loadings (predictive components)
   pred_loadings <- oplsda_res@loadingMN

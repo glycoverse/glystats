@@ -1,7 +1,7 @@
 #' ROC Analysis for Glycomics and Glycoproteomics Data
 #'
 #' Perform Receiver Operating Characteristic (ROC) analysis for binary classification
-#' of glycomics or glycoproteomics data. The function calculates ROC curves and 
+#' of glycomics or glycoproteomics data. The function calculates ROC curves and
 #' Area Under the Curve (AUC) values for each variable to assess their discriminatory
 #' power between two groups.
 #'
@@ -12,11 +12,13 @@
 #' @param pos_class A character string specifying which group level should be treated as
 #'   the positive class. If `NULL` (default), the second level (alphabetically) will be
 #'   used as the positive class.
+#' @param add_info A logical value. If TRUE (default), variable information from the experiment
+#'  will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed results with
 #'   AUC values and threshold coordinates. If TRUE, returns raw pROC objects as a list.
 #'
 #' @details
-#' For each variable, a ROC curve is computed using the expression values as predictor 
+#' For each variable, a ROC curve is computed using the expression values as predictor
 #' and the binary group labels as response.
 #'
 #' The function requires exactly 2 groups in the specified grouping variable. If more than
@@ -42,13 +44,14 @@
 #' If `return_raw` is TRUE, returns a list of `pROC` objects.
 #' @seealso [pROC::roc()], [pROC::coords()]
 #' @export
-gly_roc <- function(exp, group_col = "group", pos_class = NULL, return_raw = FALSE) {
+gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE, return_raw = FALSE) {
   .check_pkg_available("pROC")
-  
+
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)
   checkmate::check_string(pos_class, null.ok = TRUE)
+  checkmate::check_logical(add_info, len = 1)
   checkmate::check_logical(return_raw, len = 1)
 
   # Extract data from experiment object
@@ -100,7 +103,11 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, return_raw = FAL
     purrr::map(~ tibble::as_tibble(pROC::coords(.x, "all"))) %>%
     rlang::set_names(rownames(expr_mat)) %>%
     dplyr::bind_rows(.id = "variable")
-  
+
   res <- list(auc = roc_auc_tb, coords = coords_tb)
+
+  # Process results with add_info logic
+  res <- .process_results_add_info(res, exp, add_info)
+
   structure(res, class = c("glystats_roc_res", "glystats_res"))
 }

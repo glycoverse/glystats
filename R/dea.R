@@ -10,6 +10,8 @@
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
+#' @param add_info A logical value. If TRUE (default), variable information from the experiment
+#'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::t.test()`.
@@ -21,11 +23,12 @@
 #' @returns A tibble with t-test results, or a list of `t.test` models if `return_raw` is TRUE.
 #' @seealso [stats::t.test()]
 #' @export
-gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
+gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)
   checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::check_logical(add_info, len = 1)
   checkmate::check_logical(return_raw, len = 1)
 
   # Extract data from experiment object
@@ -50,6 +53,9 @@ gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
     return(result)
   }
 
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
   # Add S3 class
   structure(result, class = c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res", class(result)))
 }
@@ -66,6 +72,8 @@ gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
+#' @param add_info A logical value. If TRUE (default), variable information from the experiment
+#'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::wilcox.test()`.
@@ -76,19 +84,20 @@ gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
 #'
 #' @returns
 #' A tibble with Wilcoxon test results, or a list of `wilcox.test` models if `return_raw` is TRUE.
-#' 
+#'
 #' @seealso [stats::wilcox.test()]
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @importFrom tidyselect all_of
-#' 
+#'
 #' @export
-gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
+gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)
   checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::check_logical(add_info, len = 1)
   checkmate::check_logical(return_raw, len = 1)
 
   # Extract data from experiment object
@@ -113,6 +122,9 @@ gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", return_raw
     return(result)
   }
 
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
   # Add S3 class
   structure(result, class = c("glystats_dea_res_wilcoxon", "glystats_dea_res", "glystats_res", class(result)))
 }
@@ -130,6 +142,8 @@ gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", return_raw
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
+#' @param add_info A logical value. If TRUE (default), variable information from the experiment
+#'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::aov()`.
@@ -137,7 +151,7 @@ gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", return_raw
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
-#' 
+#'
 #' **Post-hoc Test:**
 #' Tukey's HSD test for pairwise comparisons (`stats::TukeyHSD()`) is performed
 #' for variables with significant main effects (p_adj < 0.05).
@@ -151,13 +165,14 @@ gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", return_raw
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @importFrom tidyselect all_of
-#' 
+#'
 #' @export
-gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
+gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)
   checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::check_logical(add_info, len = 1)
   checkmate::check_logical(return_raw, len = 1)
 
   # Extract data from experiment object
@@ -182,6 +197,9 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
     return(result)
   }
 
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
   # Add S3 class
   structure(result, class = c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res", class(result)))
 }
@@ -199,6 +217,8 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
+#' @param add_info A logical value. If TRUE (default), variable information from the experiment
+#'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::kruskal.test()`.
@@ -209,7 +229,7 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
-#' 
+#'
 #' **Post-hoc Test:**
 #' Dunn's test with Holm correction for multiple comparisons (`FSA::dunnTest()`) is performed
 #' for variables with significant main effects (p_adj < 0.05).
@@ -223,13 +243,14 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", return_raw 
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @importFrom tidyselect all_of
-#' 
+#'
 #' @export
-gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", return_raw = FALSE, ...) {
+gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)
   checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::check_logical(add_info, len = 1)
   checkmate::check_logical(return_raw, len = 1)
 
   # Check package availability
@@ -256,6 +277,9 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", return_ra
   if (return_raw) {
     return(result)
   }
+
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
 
   # Add S3 class
   structure(result, class = c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res", class(result)))

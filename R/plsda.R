@@ -8,6 +8,8 @@
 #'   that contains group labels. Default is "group".
 #' @param ncomp An integer indicating the number of components to include. Default is 2.
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
+#' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
+#'  will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw mixOmics plsda object.
 #' @param ... Additional arguments passed to `mixOmics::plsda()`.
@@ -32,7 +34,7 @@
 #' When return_raw = TRUE, returns the raw mixOmics plsda object.
 #' @seealso [mixOmics::plsda()]
 #' @export
-gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, return_raw = FALSE, ...) {
+gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, add_info = TRUE, return_raw = FALSE, ...) {
   # Check package availability
   .check_pkg_available("mixOmics")
 
@@ -41,6 +43,7 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, return_
   checkmate::assert_string(group_col)
   checkmate::assert_int(ncomp, lower = 1)
   checkmate::assert_logical(scale, len = 1)
+  checkmate::assert_logical(add_info, len = 1)
   checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
@@ -85,25 +88,23 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, return_
   }
 
   # Extract and format results
-  res <- .format_plsda_results(plsda_res, groups, sample_info)
+  res <- .format_plsda_results(plsda_res, groups, sample_info, add_info)
+
+  # Process results with add_info logic
+  res <- .process_results_add_info(res, exp, add_info)
+
   structure(res, class = c("glystats_plsda_res", "glystats_res"))
 }
 
 # Helper function to format PLS-DA results
-.format_plsda_results <- function(plsda_res, groups, sample_info) {
+.format_plsda_results <- function(plsda_res, groups, sample_info, add_info = TRUE) {
   # Extract sample scores
   samples_tbl <- tibble::as_tibble(plsda_res$variates$X, .name_repair = "minimal")
   colnames(samples_tbl) <- paste0("comp", seq_len(ncol(samples_tbl)))
   samples_tbl$sample <- rownames(plsda_res$variates$X)
-  samples_tbl$group <- as.character(groups)
 
-  # Add sample information if available (excluding group column to avoid duplication)
-  if (!is.null(sample_info) && "sample" %in% colnames(sample_info)) {
-    sample_info_subset <- sample_info[, !colnames(sample_info) %in% "group", drop = FALSE]
-    if (ncol(sample_info_subset) > 1) {  # Only join if there are columns other than sample
-      samples_tbl <- dplyr::left_join(samples_tbl, sample_info_subset, by = "sample")
-    }
-  }
+  # Note: We don't add group or sample_info here because it will be handled by .process_results_add_info
+  # This ensures consistent behavior across all functions
 
   # Extract variable loadings
   variables_tbl <- tibble::as_tibble(plsda_res$loadings$X, .name_repair = "minimal")

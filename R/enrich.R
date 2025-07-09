@@ -11,8 +11,10 @@
 #' - `clusterProfiler` for enrichment analysis
 #' - `ReactomePA` for Reactome pathway analysis
 #' - `org.Hs.eg.db` for human gene annotation (GO analysis only)
-#' 
+#'
 #' @param exp A `glyexp::experiment()` object.
+#' @param add_info A logical value. This parameter is included for API consistency but has no effect
+#'  since enrichment results do not contain variable or sample columns.
 #' @param return_raw A logical value indicating whether to return raw clusterProfiler enrichResult objects.
 #' @param ... Additional arguments passed to `clusterProfiler::enrichGO()`, `clusterProfiler::enrichKEGG()`, or `ReactomePA::enrichPathway()`.
 #'
@@ -20,12 +22,13 @@
 #'   or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
 #' @seealso [clusterProfiler::enrichGO()], [clusterProfiler::enrichKEGG()], [ReactomePA::enrichPathway()]
 #' @export
-enrich_go <- function(exp, return_raw = FALSE, ...) {
+enrich_go <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("org.Hs.eg.db")
-  
+
+  checkmate::check_logical(add_info, len = 1)
   checkmate::check_logical(return_raw, len = 1)
-  
+
   genes <- .extract_genes_from_exp(exp)
   res <- clusterProfiler::enrichGO(
     gene = genes,
@@ -34,12 +37,12 @@ enrich_go <- function(exp, return_raw = FALSE, ...) {
     readable = TRUE,
     ...
   )
-  
+
   # Return raw results if requested
   if (return_raw) {
     return(res)
   }
-  
+
   res <- tibble::as_tibble(res)
   res <- janitor::clean_names(res)
   structure(res, class = c("glystats_go_ora_res", class(res)))
@@ -47,23 +50,24 @@ enrich_go <- function(exp, return_raw = FALSE, ...) {
 
 #' @rdname enrich_go
 #' @export
-enrich_kegg <- function(exp, return_raw = FALSE, ...) {
+enrich_kegg <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
-  
+
+  checkmate::check_logical(add_info, len = 1)
   checkmate::check_logical(return_raw, len = 1)
-  
+
   genes <- .extract_genes_from_exp(exp)
   res <- clusterProfiler::enrichKEGG(
     gene = genes,
     keyType = "uniprot",
     ...
   )
-  
+
   # Return raw results if requested
   if (return_raw) {
     return(res)
   }
-  
+
   res <- tibble::as_tibble(res)
   res <- janitor::clean_names(res)
   structure(res, class = c("glystats_kegg_ora_res", class(res)))
@@ -71,15 +75,16 @@ enrich_kegg <- function(exp, return_raw = FALSE, ...) {
 
 #' @rdname enrich_go
 #' @export
-enrich_reactome <- function(exp, return_raw = FALSE, ...) {
+enrich_reactome <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("ReactomePA")
   .check_pkg_available("org.Hs.eg.db")
-  
+
+  checkmate::check_logical(add_info, len = 1)
   checkmate::check_logical(return_raw, len = 1)
-  
+
   uniprot_ids <- .extract_genes_from_exp(exp)
-  
+
   # Convert UniProt to Entrez IDs
   suppressWarnings(suppressMessages(
     entrez_ids <- clusterProfiler::bitr(
@@ -95,7 +100,7 @@ enrich_reactome <- function(exp, return_raw = FALSE, ...) {
     pct_failed <- round(n_failed / length(uniprot_ids) * 100, 1)
     cli::cli_alert_warning("{.val {n_failed}} of {.val {length(uniprot_ids)}} ({.val {pct_failed}}%) proteins failed to map to Entrez IDs.")
   }
-  
+
   # Perform Reactome pathway analysis
   res <- ReactomePA::enrichPathway(
     gene = entrez_ids,
@@ -103,12 +108,12 @@ enrich_reactome <- function(exp, return_raw = FALSE, ...) {
     readable = TRUE,
     ...
   )
-  
+
   # Return raw results if requested
   if (return_raw) {
     return(res)
   }
-  
+
   res <- tibble::as_tibble(res)
   res <- janitor::clean_names(res)
   structure(res, class = c("glystats_reactome_ora_res", class(res)))

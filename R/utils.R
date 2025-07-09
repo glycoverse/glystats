@@ -96,7 +96,7 @@
 }
 
 # Extract and validate groups (comprehensive function)
-.extract_and_validate_groups <- function(sample_info, group_col, min_count = NULL, max_count = NULL, 
+.extract_and_validate_groups <- function(sample_info, group_col, min_count = NULL, max_count = NULL,
                                         method = NULL, show_info = TRUE) {
   .check_group_column_exists(sample_info, group_col)
   groups <- .extract_groups(sample_info, group_col)
@@ -105,4 +105,101 @@
     .display_group_info(groups)
   }
   list(groups = groups, group_col = group_col)
+}
+
+# Add info helper functions ---------------
+
+# Check if a tibble contains variable or sample columns
+.has_variable_column <- function(tbl) {
+  "variable" %in% colnames(tbl) || "column" %in% colnames(tbl)
+}
+
+.has_sample_column <- function(tbl) {
+  "sample" %in% colnames(tbl) || "row" %in% colnames(tbl)
+}
+
+# Add variable information to a tibble
+.add_variable_info <- function(tbl, exp) {
+  if (!.has_variable_column(tbl)) {
+    return(tbl)
+  }
+
+  var_info <- glyexp::get_var_info(exp)
+  # Remove the variable column from var_info to avoid duplication
+  var_info_subset <- var_info[, !colnames(var_info) %in% "variable", drop = FALSE]
+
+  # Only join if there are columns other than variable
+  if (ncol(var_info_subset) > 0) {
+    # Put var_info columns first, then the original tibble columns
+    result <- dplyr::left_join(var_info, tbl, by = "variable")
+    return(result)
+  }
+
+  return(tbl)
+}
+
+# Add sample information to a tibble
+.add_sample_info <- function(tbl, exp) {
+  if (!.has_sample_column(tbl)) {
+    return(tbl)
+  }
+
+  sample_info <- glyexp::get_sample_info(exp)
+  # Remove the sample column from sample_info to avoid duplication
+  sample_info_subset <- sample_info[, !colnames(sample_info) %in% "sample", drop = FALSE]
+
+  # Only join if there are columns other than sample
+  if (ncol(sample_info_subset) > 0) {
+    # Put sample_info columns first, then the original tibble columns
+    result <- dplyr::left_join(sample_info, tbl, by = "sample")
+    return(result)
+  }
+
+  return(tbl)
+}
+
+# Process a single tibble with add_info logic
+.process_tibble_add_info <- function(tbl, exp, add_info) {
+  if (!add_info) {
+    return(tbl)
+  }
+
+  # Add variable info if tibble has variable column
+  if (.has_variable_column(tbl)) {
+    tbl <- .add_variable_info(tbl, exp)
+  }
+
+  # Add sample info if tibble has sample column
+  if (.has_sample_column(tbl)) {
+    tbl <- .add_sample_info(tbl, exp)
+  }
+
+  return(tbl)
+}
+
+# Process results with add_info logic (handles both single tibbles and lists)
+.process_results_add_info <- function(results, exp, add_info) {
+  if (!add_info) {
+    return(results)
+  }
+
+  # If results is a tibble, process it directly
+  if (tibble::is_tibble(results)) {
+    return(.process_tibble_add_info(results, exp, add_info))
+  }
+
+  # If results is a list, process each tibble in the list
+  if (is.list(results)) {
+    processed_results <- purrr::map(results, function(item) {
+      if (tibble::is_tibble(item)) {
+        .process_tibble_add_info(item, exp, add_info)
+      } else {
+        item
+      }
+    })
+    return(processed_results)
+  }
+
+  # If results is neither tibble nor list, return as is
+  return(results)
 }
