@@ -13,6 +13,7 @@ gly_umap(
   metric = "euclidean",
   n_epochs = 200,
   learning_rate = 1,
+  add_info = TRUE,
   return_raw = FALSE,
   ...
 )
@@ -33,6 +34,9 @@ gly_umap(
 \item{n_epochs}{Number of training epochs. Default is 200.}
 
 \item{learning_rate}{Learning rate for the optimization. Default is 1.0.}
+
+\item{add_info}{A logical value. If TRUE (default), sample information from the experiment
+will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw umap result matrix.}

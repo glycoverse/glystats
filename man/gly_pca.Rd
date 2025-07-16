@@ -4,7 +4,14 @@
 \alias{gly_pca}
 \title{Principal Component Analysis (PCA)}
 \usage{
-gly_pca(exp, center = TRUE, scale = TRUE, return_raw = FALSE, ...)
+gly_pca(
+  exp,
+  center = TRUE,
+  scale = TRUE,
+  add_info = TRUE,
+  return_raw = FALSE,
+  ...
+)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -12,6 +19,9 @@ gly_pca(exp, center = TRUE, scale = TRUE, return_raw = FALSE, ...)
 \item{center}{A logical indicating whether to center the data. Default is TRUE.}
 
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
+
+\item{add_info}{A logical value. If TRUE (default), sample and variable information from the experiment
+will be added to the result tibbles. If FALSE, only the PCA results are returned.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw prcomp object.}

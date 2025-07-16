@@ -10,6 +10,7 @@ gly_oplsda(
   pred_i = 1,
   ortho_i = NA,
   scale = TRUE,
+  add_info = TRUE,
   return_raw = FALSE,
   ...
 )
@@ -25,6 +26,9 @@ that contains group labels. Default is "group".}
 \item{ortho_i}{An integer indicating the number of orthogonal components to include. Default is NA (automatic).}
 
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
+
+\item{add_info}{A logical value. If TRUE (default), sample and variable information from the experiment
+will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw ropls opls object.}

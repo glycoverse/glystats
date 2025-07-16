@@ -10,6 +10,7 @@ gly_tsne(
   perplexity = 30,
   theta = 0.5,
   max_iter = 1000,
+  add_info = TRUE,
   return_raw = FALSE,
   ...
 )
@@ -24,6 +25,9 @@ gly_tsne(
 \item{theta}{Speed/accuracy trade-off parameter. Default is 0.5.}
 
 \item{max_iter}{Maximum number of iterations. Default is 1000.}
+
+\item{add_info}{A logical value. If TRUE (default), sample information from the experiment
+will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw Rtsne object.}

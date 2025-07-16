@@ -4,12 +4,15 @@
 \alias{gly_fold_change}
 \title{Calculate fold change}
 \usage{
-gly_fold_change(exp, group_col = "group")
+gly_fold_change(exp, group_col = "group", add_info = TRUE)
 }
 \arguments{
-\item{exp}{A \code{glystats_exp} object.}
+\item{exp}{A \code{glyexp::experiment()} object.}
 
-\item{group_col}{The column name of the group information in the \code{exp$var_info} data frame.}
+\item{group_col}{The column name of the group information in the sample information.}
+
+\item{add_info}{A logical value. If TRUE (default), variable information from the experiment
+will be added to the result tibble. If FALSE, only the fold change results are returned.}
 }
 \value{
 A tibble with two columns: \code{variable} and \code{log2fc}.

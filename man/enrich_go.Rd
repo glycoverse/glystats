@@ -6,14 +6,17 @@
 \alias{enrich_reactome}
 \title{GO, KEGG, and Reactome over-representation analysis (ORA)}
 \usage{
-enrich_go(exp, return_raw = FALSE, ...)
+enrich_go(exp, add_info = TRUE, return_raw = FALSE, ...)
 
-enrich_kegg(exp, return_raw = FALSE, ...)
+enrich_kegg(exp, add_info = TRUE, return_raw = FALSE, ...)
 
-enrich_reactome(exp, return_raw = FALSE, ...)
+enrich_reactome(exp, add_info = TRUE, return_raw = FALSE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object.}
+
+\item{add_info}{A logical value. This parameter is included for API consistency but has no effect
+since enrichment results do not contain variable or sample columns.}
 
 \item{return_raw}{A logical value indicating whether to return raw clusterProfiler enrichResult objects.}
 

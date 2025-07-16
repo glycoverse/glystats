@@ -9,6 +9,7 @@ gly_plsda(
   group_col = "group",
   ncomp = 2,
   scale = TRUE,
+  add_info = TRUE,
   return_raw = FALSE,
   ...
 )
@@ -22,6 +23,9 @@ that contains group labels. Default is "group".}
 \item{ncomp}{An integer indicating the number of components to include. Default is 2.}
 
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
+
+\item{add_info}{A logical value. If TRUE (default), sample and variable information from the experiment
+will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw mixOmics plsda object.}

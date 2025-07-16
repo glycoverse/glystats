@@ -8,6 +8,7 @@ gly_kruskal(
   exp,
   group_col = "group",
   p_adj_method = "BH",
+  add_info = TRUE,
   return_raw = FALSE,
   ...
 )
@@ -21,6 +22,9 @@ in the sample information. Default is \code{"group"}.}
 \item{p_adj_method}{A character string specifying the method to adjust p-values.
 See \code{p.adjust.methods} for available methods. Default is "BH".
 If NULL, no adjustment is performed.}
+
+\item{add_info}{A logical value. If TRUE (default), variable information from the experiment
+will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw statistical model objects as a list.}
