@@ -7,9 +7,11 @@
 <url><loc>https://glycoverse.github.io/glystats/SUPPORT.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/authors.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/index.html</loc></url>
-<url><loc>https://glycoverse.github.io/glystats/reference/enrich_go.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/reference/gly_anova.html</loc></url>
+<url><loc>https://glycoverse.github.io/glystats/reference/gly_cor.html</loc></url>
+<url><loc>https://glycoverse.github.io/glystats/reference/gly_enrich_go.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/reference/gly_fold_change.html</loc></url>
+<url><loc>https://glycoverse.github.io/glystats/reference/gly_hclust.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/reference/gly_kruskal.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/reference/gly_oplsda.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/reference/gly_pca.html</loc></url>

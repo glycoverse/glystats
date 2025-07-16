@@ -9,7 +9,7 @@ The function uses prcomp() to perform PCA and broom::tidy() to tidy the results.
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9016</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,14 @@ The function uses <code><a href="https://rdrr.io/r/stats/prcomp.html" class="ext
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_pca</span><span class="op">(</span><span class="va">exp</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">TRUE</span>, return_raw <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_pca</span><span class="op">(</span></span>
+<span>  <span class="va">exp</span>,</span>
+<span>  center <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  return_raw <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -57,6 +64,11 @@ The function uses <code><a href="https://rdrr.io/r/stats/prcomp.html" class="ext
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
 <dd><p>A logical indicating whether to scale the data. Default is TRUE.</p></dd>
+
+
+<dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
+<dd><p>A logical value. If TRUE (default), sample and variable information from the experiment
+will be added to the result tibbles. If FALSE, only the PCA results are returned.</p></dd>
 
 
 <dt id="arg-return-raw">return_raw<a class="anchor" aria-label="anchor" href="#arg-return-raw"></a></dt>

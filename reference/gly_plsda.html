@@ -9,7 +9,7 @@ The function uses mixOmics::plsda() to perform PLS-DA and returns tidy results."
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9016</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,6 +45,7 @@ The function uses <code><a href="https://rdrr.io/pkg/mixOmics/man/plsda.html" cl
 <span>  group_col <span class="op">=</span> <span class="st">"group"</span>,</span>
 <span>  ncomp <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  return_raw <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -69,6 +70,11 @@ that contains group labels. Default is "group".</p></dd>
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
 <dd><p>A logical indicating whether to scale the data. Default is TRUE.</p></dd>
+
+
+<dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
+<dd><p>A logical value. If TRUE (default), sample and variable information from the experiment
+will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.</p></dd>
 
 
 <dt id="arg-return-raw">return_raw<a class="anchor" aria-label="anchor" href="#arg-return-raw"></a></dt>

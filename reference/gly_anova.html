@@ -13,7 +13,7 @@ P-values are adjusted for multiple testing using the method specified by p_adj_m
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9016</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +50,7 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 <span>  <span class="va">exp</span>,</span>
 <span>  group_col <span class="op">=</span> <span class="st">"group"</span>,</span>
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
+<span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  return_raw <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -72,6 +73,11 @@ in the sample information. Default is <code>"group"</code>.</p></dd>
 <dd><p>A character string specifying the method to adjust p-values.
 See <code>p.adjust.methods</code> for available methods. Default is "BH".
 If NULL, no adjustment is performed.</p></dd>
+
+
+<dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
+<dd><p>A logical value. If TRUE (default), variable information from the experiment
+will be added to the result tibble. If FALSE, only the statistical results are returned.</p></dd>
 
 
 <dt id="arg-return-raw">return_raw<a class="anchor" aria-label="anchor" href="#arg-return-raw"></a></dt>

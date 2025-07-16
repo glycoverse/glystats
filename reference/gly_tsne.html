@@ -9,7 +9,7 @@ The function uses Rtsne::Rtsne() to perform t-SNE analysis."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9016</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@ The function uses <code><a href="https://rdrr.io/pkg/Rtsne/man/Rtsne.html" class
 <span>  perplexity <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  theta <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  max_iter <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  return_raw <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -73,6 +74,11 @@ The function uses <code><a href="https://rdrr.io/pkg/Rtsne/man/Rtsne.html" class
 
 <dt id="arg-max-iter">max_iter<a class="anchor" aria-label="anchor" href="#arg-max-iter"></a></dt>
 <dd><p>Maximum number of iterations. Default is 1000.</p></dd>
+
+
+<dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
+<dd><p>A logical value. If TRUE (default), sample information from the experiment
+will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.</p></dd>
 
 
 <dt id="arg-return-raw">return_raw<a class="anchor" aria-label="anchor" href="#arg-return-raw"></a></dt>
