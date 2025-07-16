@@ -32,7 +32,8 @@ If TRUE, returns raw statistical model objects as a list.}
 \item{...}{Additional arguments passed to \code{stats::t.test()}.}
 }
 \value{
-A tibble with t-test results, or a list of \code{t.test} models if \code{return_raw} is TRUE.
+A tibble with t-test results including log2 fold change (log2fc),
+or a list of \code{t.test} models if \code{return_raw} is TRUE.
 }
 \description{
 Perform two-sample t-test for glycomics or glycoproteomics data.

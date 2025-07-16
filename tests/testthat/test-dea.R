@@ -3,14 +3,16 @@ test_that("gly_ttest works with t-test method", {
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
     glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
-  
+
   # Run DEA with t-test
   result <- suppressMessages(gly_ttest(exp_2group))
-  
+
   # Test core functionality
   expect_s3_class(result, c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res"))
   expect_equal(nrow(result), 10)
   expect_true("p_adj" %in% colnames(result))  # p_adj should exist
+  expect_true("log2fc" %in% colnames(result))  # log2fc should exist
+  expect_type(result$log2fc, "double")  # log2fc should be numeric
 })
 
 test_that("gly_wilcox works with wilcoxon method", {
@@ -18,14 +20,15 @@ test_that("gly_wilcox works with wilcoxon method", {
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("M", "Y")) |>
     glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
-  
+
   # Run DEA with wilcoxon test
   result <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group)))
-  
+
   # Test core functionality
   expect_s3_class(result, c("glystats_dea_res_wilcoxon", "glystats_dea_res", "glystats_res"))
   expect_equal(nrow(result), 10)
-  expect_false("log2fc" %in% colnames(result))  # Wilcoxon should NOT have log2fc
+  expect_true("log2fc" %in% colnames(result))  # Wilcoxon should now have log2fc
+  expect_type(result$log2fc, "double")  # log2fc should be numeric
 })
 
 test_that("gly_anova works with anova method", {

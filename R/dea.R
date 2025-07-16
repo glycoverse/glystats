@@ -20,7 +20,8 @@
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
 #'
-#' @returns A tibble with t-test results, or a list of `t.test` models if `return_raw` is TRUE.
+#' @returns A tibble with t-test results including log2 fold change (log2fc),
+#'   or a list of `t.test` models if `return_raw` is TRUE.
 #' @seealso [stats::t.test()]
 #' @export
 gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
@@ -83,7 +84,8 @@ gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
 #'
 #' @returns
-#' A tibble with Wilcoxon test results, or a list of `wilcox.test` models if `return_raw` is TRUE.
+#' A tibble with Wilcoxon test results including log2 fold change (log2fc),
+#' or a list of `wilcox.test` models if `return_raw` is TRUE.
 #'
 #' @seealso [stats::wilcox.test()]
 #'
@@ -290,7 +292,7 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   if (return_raw) {
     return(mod_list)
   }
-  .gly_dea_2groups_tibblify(mod_list, .f, p_adj_method)
+  .gly_dea_2groups_tibblify(mod_list, .f, p_adj_method, expr_mat, groups)
 }
 
 # Generate raw model list for 2-group analysis
@@ -316,10 +318,10 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
 }
 
 # Convert raw model list to tibble for 2-group analysis
-.gly_dea_2groups_tibblify <- function(mod_list, .f, p_adj_method) {
+.gly_dea_2groups_tibblify <- function(mod_list, .f, p_adj_method, expr_mat, groups) {
   # Create a tibble from the model list
   var_names <- names(mod_list)
-  
+
   result_tbl <- tibble::tibble(
     variable = var_names,
     test_result = mod_list
@@ -336,6 +338,9 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   if (!is.null(p_adj_method)) {
     result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
   }
+
+  # Calculate log2 fold change
+  result_tbl <- .add_log2fc_to_result(result_tbl, expr_mat, groups)
 
   result_tbl
 }
@@ -522,4 +527,30 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
     sig_str
   })
   purrr::map_chr(variables, ~ posthoc_map[[.x]] %||% NA_character_)
+}
+
+# Helper function to add log2 fold change to DEA results
+.add_log2fc_to_result <- function(result_tbl, expr_mat, groups) {
+  # Calculate mean expression for each group for each variable
+  group_levels <- levels(groups)
+  group1_indices <- which(groups == group_levels[1])
+  group2_indices <- which(groups == group_levels[2])
+
+  # Calculate log2 fold change for each variable
+  log2fc_values <- purrr::map_dbl(result_tbl$variable, function(var_name) {
+    # Get expression values for this variable
+    var_expr <- expr_mat[var_name, ]
+
+    # Calculate mean expression for each group
+    group1_mean <- mean(var_expr[group1_indices], na.rm = TRUE)
+    group2_mean <- mean(var_expr[group2_indices], na.rm = TRUE)
+
+    # Calculate log2 fold change (group2 vs group1)
+    log2(group2_mean / group1_mean)
+  })
+
+  # Add log2fc column to result
+  result_tbl$log2fc <- log2fc_values
+
+  result_tbl
 }

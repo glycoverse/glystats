@@ -32,7 +32,8 @@ If TRUE, returns raw statistical model objects as a list.}
 \item{...}{Additional arguments passed to \code{stats::wilcox.test()}.}
 }
 \value{
-A tibble with Wilcoxon test results, or a list of \code{wilcox.test} models if \code{return_raw} is TRUE.
+A tibble with Wilcoxon test results including log2 fold change (log2fc),
+or a list of \code{wilcox.test} models if \code{return_raw} is TRUE.
 }
 \description{
 Perform Wilcoxon rank-sum test (Mann-Whitney U test) for glycomics or glycoproteomics data.
