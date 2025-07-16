@@ -22,7 +22,7 @@
 #'   or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
 #' @seealso [clusterProfiler::enrichGO()], [clusterProfiler::enrichKEGG()], [ReactomePA::enrichPathway()]
 #' @export
-enrich_go <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
+gly_enrich_go <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("org.Hs.eg.db")
 
@@ -48,9 +48,9 @@ enrich_go <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   structure(res, class = c("glystats_go_ora_res", class(res)))
 }
 
-#' @rdname enrich_go
+#' @rdname gly_enrich_go
 #' @export
-enrich_kegg <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
+gly_enrich_kegg <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
 
   checkmate::check_logical(add_info, len = 1)
@@ -73,9 +73,9 @@ enrich_kegg <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   structure(res, class = c("glystats_kegg_ora_res", class(res)))
 }
 
-#' @rdname enrich_go
+#' @rdname gly_enrich_go
 #' @export
-enrich_reactome <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
+gly_enrich_reactome <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("ReactomePA")
   .check_pkg_available("org.Hs.eg.db")
