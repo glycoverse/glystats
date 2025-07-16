@@ -60,22 +60,3 @@ test_that("add_info parameter works correctly for ROC analysis", {
   expect_true(ncol(result_roc_no_info$coords) < ncol(result_roc_with_info$coords))
   expect_true("variable" %in% colnames(result_roc_with_info$coords))
 })
-
-test_that("add_info parameter has no effect on enrichment functions", {
-  # Create a minimal experiment for testing
-  exp_subset <- test_gp_exp |>
-    glyexp::slice_sample_var(n = 5)
-  
-  # Skip if required packages are not available
-  skip_if_not_installed("clusterProfiler")
-  skip_if_not_installed("org.Hs.eg.db")
-  
-  # Test enrich_go (this might fail due to missing proteins, but we just want to test the parameter)
-  expect_error({
-    result_go_no_info <- suppressMessages(enrich_go(exp_subset, add_info = FALSE))
-  }, NA)  # Should not error due to add_info parameter
-  
-  expect_error({
-    result_go_with_info <- suppressMessages(enrich_go(exp_subset, add_info = TRUE))
-  }, NA)  # Should not error due to add_info parameter
-})

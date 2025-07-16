@@ -41,10 +41,10 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, return_ra
 
   # Rename columns to be consistent with other glystats functions
   if ("row" %in% colnames(samples_tbl)) {
-    samples_tbl <- dplyr::rename(samples_tbl, sample = .data$row)
+    samples_tbl <- dplyr::rename(samples_tbl, c(sample = "row"))
   }
   if ("column" %in% colnames(variables_tbl)) {
-    variables_tbl <- dplyr::rename(variables_tbl, variable = .data$column)
+    variables_tbl <- dplyr::rename(variables_tbl, c(variable = "column"))
   }
 
   res <- list(
