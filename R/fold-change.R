@@ -13,9 +13,9 @@
 #' @return A tibble with two columns: `variable` and `log2fc`.
 #' @export
 gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
-  checkmate::check_class(exp, "glyexp_experiment")
-  checkmate::check_string(group_col)
-  checkmate::check_logical(add_info, len = 1)
+  checkmate::assert_class(exp, "glyexp_experiment")
+  checkmate::assert_string(group_col)
+  checkmate::assert_logical(add_info, len = 1)
 
   # Extract and validate groups using helper function
   group_info <- .extract_and_validate_groups(

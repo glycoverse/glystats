@@ -25,8 +25,8 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 100
 
   .check_pkg_available("Rtsne")
 
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns

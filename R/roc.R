@@ -48,11 +48,11 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE,
   .check_pkg_available("pROC")
 
   # Validate inputs
-  checkmate::check_class(exp, "glyexp_experiment")
-  checkmate::check_string(group_col)
-  checkmate::check_string(pos_class, null.ok = TRUE)
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_class(exp, "glyexp_experiment")
+  checkmate::assert_string(group_col)
+  checkmate::assert_string(pos_class, null.ok = TRUE)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)

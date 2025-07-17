@@ -38,8 +38,8 @@ gly_umap <- function(exp,
 
   .check_pkg_available("uwot")
 
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract expression matrix and sample info
   mat <- t(exp$expr_mat)  # Samples as rows, variables as columns

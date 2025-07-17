@@ -36,11 +36,11 @@ gly_ttest <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::check_class(exp, "glyexp_experiment")
-  checkmate::check_string(group_col)
-  checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_class(exp, "glyexp_experiment")
+  checkmate::assert_string(group_col)
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -117,11 +117,11 @@ gly_wilcox <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::check_class(exp, "glyexp_experiment")
-  checkmate::check_string(group_col)
-  checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_class(exp, "glyexp_experiment")
+  checkmate::assert_string(group_col)
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -193,11 +193,11 @@ gly_wilcox <- function(
 #' @export
 gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
   # Validate inputs
-  checkmate::check_class(exp, "glyexp_experiment")
-  checkmate::check_string(group_col)
-  checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_class(exp, "glyexp_experiment")
+  checkmate::assert_string(group_col)
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -271,11 +271,11 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
 #' @export
 gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
   # Validate inputs
-  checkmate::check_class(exp, "glyexp_experiment")
-  checkmate::check_string(group_col)
-  checkmate::check_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_class(exp, "glyexp_experiment")
+  checkmate::assert_string(group_col)
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Check package availability
   .check_pkg_available("FSA")

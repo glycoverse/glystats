@@ -23,8 +23,8 @@
 #' @seealso [stats::prcomp()]
 #' @export
 gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, return_raw = FALSE, ...) {
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   mat <- log(t(exp$expr_mat) + 1)
   prcomp_res <- stats::prcomp(mat, center = center, scale = scale, ...)

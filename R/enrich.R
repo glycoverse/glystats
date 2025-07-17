@@ -26,8 +26,8 @@ gly_enrich_go <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("org.Hs.eg.db")
 
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
   res <- clusterProfiler::enrichGO(
@@ -53,8 +53,8 @@ gly_enrich_go <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
 gly_enrich_kegg <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   .check_pkg_available("clusterProfiler")
 
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
   res <- clusterProfiler::enrichKEGG(
@@ -80,8 +80,8 @@ gly_enrich_reactome <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   .check_pkg_available("ReactomePA")
   .check_pkg_available("org.Hs.eg.db")
 
-  checkmate::check_logical(add_info, len = 1)
-  checkmate::check_logical(return_raw, len = 1)
+  checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   uniprot_ids <- .extract_genes_from_exp(exp)
 
