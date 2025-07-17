@@ -10,6 +10,8 @@
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
+#' @param ref_group A character string specifying the reference group.
+#'  If NULL (default), the first level of the group factor is used as the reference.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
@@ -24,7 +26,15 @@
 #'   or a list of `t.test` models if `return_raw` is TRUE.
 #' @seealso [stats::t.test()]
 #' @export
-gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
+gly_ttest <- function(
+  exp,
+  group_col = "group",
+  p_adj_method = "BH",
+  ref_group = NULL,
+  add_info = TRUE,
+  return_raw = FALSE,
+  ...
+) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)
@@ -45,9 +55,10 @@ gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
     method = "t-test"
   )
   groups <- group_info$groups
+  checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Perform t-test
-  result <- .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, return_raw, ...)
+  result <- .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, ref_group, return_raw, ...)
 
   # Return raw results if requested
   if (return_raw) {
@@ -73,6 +84,8 @@ gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
+#' @param ref_group A character string specifying the reference group.
+#'  If NULL (default), the first level of the group factor is used as the reference.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
@@ -94,7 +107,15 @@ gly_ttest <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
 #' @importFrom tidyselect all_of
 #'
 #' @export
-gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
+gly_wilcox <- function(
+  exp,
+  group_col = "group",
+  p_adj_method = "BH",
+  ref_group = NULL,
+  add_info = TRUE,
+  return_raw = FALSE,
+  ...
+) {
   # Validate inputs
   checkmate::check_class(exp, "glyexp_experiment")
   checkmate::check_string(group_col)
@@ -115,9 +136,10 @@ gly_wilcox <- function(exp, group_col = "group", p_adj_method = "BH", add_info =
     method = "wilcoxon"
   )
   groups <- group_info$groups
+  checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Perform Wilcoxon test
-  result <- .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, return_raw, ...)
+  result <- .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, ref_group, return_raw, ...)
 
   # Return raw results if requested
   if (return_raw) {
@@ -287,7 +309,13 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   structure(result, class = c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res", class(result)))
 }
 
-.gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, return_raw = FALSE, ...) {
+.gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, ref_group, return_raw = FALSE, ...) {
+  # Reorder groups if ref_group is specified
+  if (!is.null(ref_group)) {
+    groups <- .reorder_groups_for_ref(groups, ref_group)
+  }
+  cli::cli_alert_info("Reference group: {.val {levels(groups)[1]}}")
+
   mod_list <- .gly_dea_2groups_raw(expr_mat, groups, .f, ...)
   if (return_raw) {
     return(mod_list)
@@ -553,4 +581,15 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   result_tbl$log2fc <- log2fc_values
 
   result_tbl
+}
+
+# Helper function to reorder groups so that ref_group becomes the first level
+.reorder_groups_for_ref <- function(groups, ref_group) {
+  current_levels <- levels(groups)
+
+  # Move ref_group to the first position
+  new_levels <- c(ref_group, setdiff(current_levels, ref_group))
+
+  # Reorder the factor levels
+  factor(groups, levels = new_levels)
 }

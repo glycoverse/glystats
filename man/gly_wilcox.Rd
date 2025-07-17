@@ -8,6 +8,7 @@ gly_wilcox(
   exp,
   group_col = "group",
   p_adj_method = "BH",
+  ref_group = NULL,
   add_info = TRUE,
   return_raw = FALSE,
   ...
@@ -22,6 +23,9 @@ in the sample information. Default is \code{"group"}.}
 \item{p_adj_method}{A character string specifying the method to adjust p-values.
 See \code{p.adjust.methods} for available methods. Default is "BH".
 If NULL, no adjustment is performed.}
+
+\item{ref_group}{A character string specifying the reference group.
+If NULL (default), the first level of the group factor is used as the reference.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the statistical results are returned.}

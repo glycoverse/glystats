@@ -129,3 +129,51 @@ test_that("gly_anova works with real data", {
   expect_true(tibble::is_tibble(result))
   expect_true("post_hoc" %in% colnames(result))
 })
+
+test_that("gly_ttest ref_group parameter works", {
+  # Use test_gp_exp and filter to 2 groups for t-test
+  exp_2group <- test_gp_exp |>
+    glyexp::filter_obs(group %in% c("C", "H")) |>
+    glyexp::slice_sample_var(n = 5)
+
+  # Test with default (no ref_group)
+  result_default <- suppressMessages(gly_ttest(exp_2group))
+
+  # Test with ref_group = "H" (should reverse the comparison)
+  result_ref_h <- suppressMessages(gly_ttest(exp_2group, ref_group = "H"))
+
+  # Test with ref_group = "C" (should be same as default since C is first alphabetically)
+  result_ref_c <- suppressMessages(gly_ttest(exp_2group, ref_group = "C"))
+
+  # Check that log2fc values are negated when reference group changes
+  expect_equal(result_default$log2fc, -result_ref_h$log2fc, tolerance = 1e-10)
+  expect_equal(result_default$log2fc, result_ref_c$log2fc, tolerance = 1e-10)
+
+  # Test invalid ref_group
+  expect_error(suppressMessages(gly_ttest(exp_2group, ref_group = "invalid")),
+               "Must be element of set")
+})
+
+test_that("gly_wilcox ref_group parameter works", {
+  # Use test_gp_exp and filter to 2 groups for wilcoxon test
+  exp_2group <- test_gp_exp |>
+    glyexp::filter_obs(group %in% c("M", "Y")) |>
+    glyexp::slice_sample_var(n = 5)
+
+  # Test with default (no ref_group)
+  result_default <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group)))
+
+  # Test with ref_group = "Y" (should reverse the comparison)
+  result_ref_y <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group, ref_group = "Y")))
+
+  # Test with ref_group = "M" (should be same as default since M is first alphabetically)
+  result_ref_m <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group, ref_group = "M")))
+
+  # Check that log2fc values are negated when reference group changes
+  expect_equal(result_default$log2fc, -result_ref_y$log2fc, tolerance = 1e-10)
+  expect_equal(result_default$log2fc, result_ref_m$log2fc, tolerance = 1e-10)
+
+  # Test invalid ref_group
+  expect_error(suppressMessages(gly_wilcox(exp_2group, ref_group = "invalid")),
+               "Must be element of set")
+})

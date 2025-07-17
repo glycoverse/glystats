@@ -6,6 +6,8 @@
 \alias{glystats-package}
 \title{glystats: Statistical Analysis of Glycoproteomics and Glycomics Data}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 This package provides statistical analysis of glycoproteomics and glycomics data. It works seamlessly with 'glyexp' package.
 }
 \seealso{
