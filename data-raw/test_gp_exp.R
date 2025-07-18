@@ -33,7 +33,6 @@ exp <- read_pglyco3_pglycoquant(
 set.seed(123)
 test_gp_exp <- exp |>
   auto_clean() |>
-  slice_sample_var(n = 500) |>
   mutate_obs(
     sample = str_split_i(sample, "-", -1),
     group = str_split_i(sample, "_", 1)
