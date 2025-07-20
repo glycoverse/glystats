@@ -26,8 +26,10 @@
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A tibble with ANOVA results and a post_hoc column indicating significant group pairs,
-#' or a list of `aov` models and `TukeyHSD` objects if `return_raw` is TRUE.
+#' A list containing two tibbles: `main_test` with ANOVA results and a post_hoc column
+#' indicating significant group pairs, and `post_hoc_test` with detailed pairwise
+#' comparison results in long format (variable, group1, group2, p_value, p_adj columns).
+#' If `return_raw` is TRUE, returns a list of `aov` models and `TukeyHSD` objects.
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
 #'
@@ -66,10 +68,10 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
     return(result)
   }
 
-  # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
+  # Process results with add_info logic for main_test
+  result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
 
-  # Add S3 class
+  # Add S3 class to the entire list
   structure(result, class = c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res", class(result)))
 }
 
@@ -104,8 +106,10 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A tibble with Kruskal-Wallis test results and a post_hoc column indicating significant group pairs,
-#' or a list of `kruskal.test` objects and `dunnTest` objects if `return_raw` is TRUE.
+#' A list containing two tibbles: `main_test` with Kruskal-Wallis test results and a post_hoc column
+#' indicating significant group pairs, and `post_hoc_test` with detailed pairwise
+#' comparison results in long format (variable, group1, group2, p_value, p_adj columns).
+#' If `return_raw` is TRUE, returns a list of `kruskal.test` objects and `dunnTest` objects.
 #'
 #' @seealso [stats::kruskal.test()], [FSA::dunnTest()]
 #'
@@ -147,10 +151,10 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
     return(result)
   }
 
-  # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
+  # Process results with add_info logic for main_test
+  result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
 
-  # Add S3 class
+  # Add S3 class to the entire list
   structure(result, class = c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res", class(result)))
 }
 
@@ -286,7 +290,15 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   main_test_tbl <- .tibblify_main_test_results(mod_list$main_test, .f, p_adj_method)
   post_hoc_vec <- .format_posthoc_results(mod_list$post_hoc, .f, main_test_tbl$variable)
   main_test_tbl$post_hoc <- post_hoc_vec
-  main_test_tbl
+
+  # Create post-hoc test tibble in long format
+  post_hoc_test_tbl <- .tibblify_posthoc_results(mod_list$post_hoc, .f)
+
+  # Return list with both tibbles
+  list(
+    main_test = main_test_tbl,
+    post_hoc_test = post_hoc_test_tbl
+  )
 }
 
 # Helper function to convert main test raw results to tibble
@@ -338,4 +350,55 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
     sig_str
   })
   purrr::map_chr(variables, ~ posthoc_map[[.x]] %||% NA_character_)
+}
+
+# Helper function to convert post-hoc raw results to long format tibble
+.tibblify_posthoc_results <- function(posthoc_raw, .f) {
+  if (length(posthoc_raw) == 0) {
+    # Return empty tibble with correct structure
+    return(tibble::tibble(
+      variable = character(0),
+      group1 = character(0),
+      group2 = character(0),
+      p_value = numeric(0),
+      p_adj = numeric(0)
+    ))
+  }
+
+  # Convert each post-hoc result to tibble and combine
+  result_list <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
+    if (identical(.f, stats::aov)) {
+      # For TukeyHSD results
+      tukey_df <- as.data.frame(raw_result$group)
+      tukey_df$comparison <- rownames(tukey_df)
+
+      # Parse group comparisons (format: "group2-group1")
+      comparison_parts <- stringr::str_split(tukey_df$comparison, "-", simplify = TRUE)
+
+      tibble::tibble(
+        variable = var_name,
+        group1 = comparison_parts[, 2],  # Second part is group1
+        group2 = comparison_parts[, 1],  # First part is group2
+        p_value = tukey_df$`p adj`,      # TukeyHSD already provides adjusted p-values
+        p_adj = tukey_df$`p adj`
+      )
+    } else {
+      # For Dunn test results
+      dunn_df <- raw_result$res
+
+      # Parse group comparisons (format: "group1 - group2")
+      comparison_parts <- stringr::str_split(dunn_df$Comparison, " - ", simplify = TRUE)
+
+      tibble::tibble(
+        variable = var_name,
+        group1 = comparison_parts[, 1],
+        group2 = comparison_parts[, 2],
+        p_value = dunn_df$P.unadj,       # Unadjusted p-value
+        p_adj = dunn_df$P.adj            # Adjusted p-value
+      )
+    }
+  })
+
+  # Combine all results
+  dplyr::bind_rows(result_list)
 }

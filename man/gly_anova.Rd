@@ -32,8 +32,10 @@ If TRUE, returns raw statistical model objects as a list.}
 \item{...}{Additional arguments passed to \code{stats::aov()}.}
 }
 \value{
-A tibble with ANOVA results and a post_hoc column indicating significant group pairs,
-or a list of \code{aov} models and \code{TukeyHSD} objects if \code{return_raw} is TRUE.
+A list containing two tibbles: \code{main_test} with ANOVA results and a post_hoc column
+indicating significant group pairs, and \code{post_hoc_test} with detailed pairwise
+comparison results in long format (variable, group1, group2, p_value, p_adj columns).
+If \code{return_raw} is TRUE, returns a list of \code{aov} models and \code{TukeyHSD} objects.
 }
 \description{
 Perform one-way ANOVA for glycomics or glycoproteomics data.
