@@ -197,7 +197,7 @@ gly_limma <- function(
   colnames(design) <- valid_names
 
   # Create mapping from original names to valid names
-  name_mapping <- setNames(valid_names, group_levels)
+  name_mapping <- rlang::set_names(valid_names, group_levels)
 
   # Generate contrasts based on user input or default pairwise
   if (is.null(contrasts)) {
