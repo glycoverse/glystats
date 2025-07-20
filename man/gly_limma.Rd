@@ -9,6 +9,7 @@ gly_limma(
   group_col = "group",
   p_adj_method = "BH",
   ref_group = NULL,
+  contrasts = NULL,
   add_info = TRUE,
   return_raw = FALSE,
   ...
@@ -25,7 +26,13 @@ Must be one of the methods supported by \code{stats::p.adjust()}. Default is "BH
 Set to NULL to skip p-value adjustment.}
 
 \item{ref_group}{A character string specifying the reference group.
-If NULL (default), the first level of the group factor is used as the reference.}
+If NULL (default), the first level of the group factor is used as the reference.
+Only used for two-group comparisons.}
+
+\item{contrasts}{A character vector specifying custom contrasts for multi-group comparisons.
+If NULL (default), all pairwise comparisons are automatically generated.
+Supports two formats: "group1-group2" or "group1_vs_group2".
+Use the second format if group names contain hyphens.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the statistical results are returned.}
@@ -36,18 +43,26 @@ If TRUE, returns raw limma fit objects as a list.}
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
 }
 \value{
-A tibble with limma results including log2 fold change (log2fc),
-or a list of limma fit objects if \code{return_raw} is TRUE.
+A tibble with limma results including log2 fold change (log2fc).
+For multi-group comparisons, includes a "contrast" column indicating the comparison.
+If \code{return_raw} is TRUE, returns raw limma fit objects as a list.
 }
 \description{
 Perform differential expression analysis using linear models with empirical Bayes
-moderation from the limma package.
+moderation from the limma package. Supports both two-group and multi-group comparisons.
 }
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1)) before
 statistical testing. The analysis uses linear models with empirical Bayes moderation
-to improve statistical power, especially for small sample sizes. Exactly 2 groups are
-required in the grouping variable.
+to improve statistical power, especially for small sample sizes.
+
+For two-group comparisons, a simple contrast is performed between the groups.
+For multi-group comparisons (3+ groups), all pairwise comparisons are automatically
+generated and performed using contrast matrices unless custom contrasts are specified.
+
+When specifying custom contrasts, use either "group1-group2" or "group1_vs_group2" format.
+If group names contain hyphens and you use the first format, an error will be raised
+suggesting to use the second format.
 }
 \section{Required packages}{
 
@@ -58,5 +73,5 @@ This function requires the following packages to be installed:
 }
 
 \seealso{
-\code{\link[limma:lmFit]{limma::lmFit()}}, \code{\link[limma:ebayes]{limma::eBayes()}}
+\code{\link[limma:lmFit]{limma::lmFit()}}, \code{\link[limma:ebayes]{limma::eBayes()}}, \code{\link[limma:makeContrasts]{limma::makeContrasts()}}
 }
