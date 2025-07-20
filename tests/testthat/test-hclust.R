@@ -67,7 +67,8 @@ test_that("gly_hclust works with different methods", {
   methods <- c("complete", "average", "single", "ward.D2")
 
   for (method in methods) {
-    result <- suppressMessages(gly_hclust(exp_subset, method = method))
+    # Pass hclust method via hclust.method parameter
+    result <- suppressMessages(gly_hclust(exp_subset, hclust.method = method))
     expect_s3_class(result, "glystats_hclust_res")
     expect_true("clusters" %in% names(result))
   }
@@ -82,7 +83,8 @@ test_that("gly_hclust works with different distance methods", {
   dist_methods <- c("euclidean", "manhattan", "maximum")
   
   for (dist_method in dist_methods) {
-    result <- suppressMessages(gly_hclust(exp_subset, dist_method = dist_method))
+    # Pass distance method via dist.method parameter
+    result <- suppressMessages(gly_hclust(exp_subset, dist.method = dist_method))
     expect_s3_class(result, "glystats_hclust_res")
     expect_true("clusters" %in% names(result))
   }

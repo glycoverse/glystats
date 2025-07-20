@@ -8,8 +8,6 @@ gly_tsne(
   exp,
   dims = 2,
   perplexity = 30,
-  theta = 0.5,
-  max_iter = 1000,
   add_info = TRUE,
   return_raw = FALSE,
   ...
@@ -21,10 +19,6 @@ gly_tsne(
 \item{dims}{Number of output dimensions. Default is 2.}
 
 \item{perplexity}{Perplexity parameter for t-SNE. Default is 30.}
-
-\item{theta}{Speed/accuracy trade-off parameter. Default is 0.5.}
-
-\item{max_iter}{Maximum number of iterations. Default is 1000.}
 
 \item{add_info}{A logical value. If TRUE (default), sample information from the experiment
 will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.}

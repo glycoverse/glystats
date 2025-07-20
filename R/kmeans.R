@@ -9,10 +9,7 @@
 #'   variables/features, or "sample" to cluster samples/observations.
 #' @param centers Either the number of clusters (integer) or a set of initial cluster centers.
 #'   Default is 3.
-#' @param iter.max The maximum number of iterations allowed. Default is 10.
-#' @param nstart How many random sets should be chosen if centers is a number. Default is 1.
-#' @param algorithm Character string specifying the algorithm to use. May be abbreviated.
-#'   Default is "Hartigan-Wong".
+
 #' @param scale A logical indicating whether to scale the data before clustering. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
@@ -46,9 +43,6 @@ gly_kmeans <- function(
   exp,
   on = "variable",
   centers = 3,
-  iter.max = 10,
-  nstart = 1,
-  algorithm = "Hartigan-Wong",
   scale = TRUE,
   add_info = TRUE,
   return_raw = FALSE,
@@ -61,9 +55,6 @@ gly_kmeans <- function(
     checkmate::check_integerish(centers, lower = 1, len = 1),
     checkmate::check_matrix(centers)
   )
-  checkmate::assert_integerish(iter.max, lower = 1, len = 1)
-  checkmate::assert_integerish(nstart, lower = 1, len = 1)
-  checkmate::assert_string(algorithm)
   checkmate::assert_logical(scale, len = 1)
   checkmate::assert_logical(add_info, len = 1)
   checkmate::assert_logical(return_raw, len = 1)
@@ -91,11 +82,8 @@ gly_kmeans <- function(
 
   # Perform k-means clustering
   kmeans_res <- stats::kmeans(
-    mat, 
+    mat,
     centers = centers,
-    iter.max = iter.max,
-    nstart = nstart,
-    algorithm = algorithm,
     ...
   )
 

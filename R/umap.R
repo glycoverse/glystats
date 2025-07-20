@@ -8,9 +8,7 @@
 #' @param n_components Number of output dimensions. Default is 2.
 #' @param min_dist Minimum distance between embedded points. Default is 0.1.
 #' @param spread Controls how tightly the embedding is packed. Default is 1.0.
-#' @param metric Distance metric to use. Default is "euclidean".
-#' @param n_epochs Number of training epochs. Default is 200.
-#' @param learning_rate Learning rate for the optimization. Default is 1.0.
+
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'  will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
@@ -29,9 +27,6 @@ gly_umap <- function(exp,
                      n_components = 2,
                      min_dist = 0.1,
                      spread = 1.0,
-                     metric = "euclidean",
-                     n_epochs = 200,
-                     learning_rate = 1.0,
                      add_info = TRUE,
                      return_raw = FALSE,
                      ...) {
@@ -63,9 +58,6 @@ gly_umap <- function(exp,
       n_components = n_components,
       min_dist = min_dist,
       spread = spread,
-      metric = metric,
-      n_epochs = n_epochs,
-      learning_rate = learning_rate,
       verbose = FALSE,
       ...
     )
@@ -95,4 +87,4 @@ gly_umap <- function(exp,
 
   # Set S3 class
   structure(result, class = c("glystats_umap_res", "glystats_res", class(result)))
-} 
+}

@@ -7,8 +7,6 @@
 gly_hclust(
   exp,
   on = "variable",
-  method = "complete",
-  dist_method = "euclidean",
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
   add_info = TRUE,
@@ -22,14 +20,6 @@ gly_hclust(
 \item{on}{A character string specifying what to cluster. Either "variable" (default) to cluster
 variables/features, or "sample" to cluster samples/observations.}
 
-\item{method}{The agglomeration method to be used. This should be one of
-"ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", or "centroid".
-Default is "complete".}
-
-\item{dist_method}{The distance measure to be used. This must be one of
-"euclidean", "maximum", "manhattan", "canberra", "binary", or "minkowski".
-Default is "euclidean".}
-
 \item{k_values}{A numeric vector specifying the number of clusters to cut the tree into.
 Default is c(2, 3, 4, 5). If NULL, no cluster assignments are returned.}
 
@@ -41,7 +31,9 @@ will be added to the result tibbles. If FALSE, only the clustering results are r
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw hclust object.}
 
-\item{...}{Additional arguments passed to \code{stats::dist()} or \code{stats::hclust()}.}
+\item{...}{Additional arguments passed to \code{stats::dist()} and \code{stats::hclust()}.
+Note: if both functions need a \code{method} parameter, use \code{dist.method} for distance
+and \code{hclust.method} for clustering method.}
 }
 \value{
 A list containing multiple tibbles (when return_raw = FALSE):

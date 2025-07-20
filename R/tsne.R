@@ -6,8 +6,7 @@
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param dims Number of output dimensions. Default is 2.
 #' @param perplexity Perplexity parameter for t-SNE. Default is 30.
-#' @param theta Speed/accuracy trade-off parameter. Default is 0.5.
-#' @param max_iter Maximum number of iterations. Default is 1000.
+
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'  will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
@@ -21,7 +20,7 @@
 #'   or raw Rtsne object when return_raw = TRUE.
 #' @seealso [Rtsne::Rtsne()]
 #' @export
-gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 1000, add_info = TRUE, return_raw = FALSE, ...) {
+gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, return_raw = FALSE, ...) {
 
   .check_pkg_available("Rtsne")
 
@@ -49,8 +48,6 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, theta = 0.5, max_iter = 100
     X = mat,
     dims = dims,
     perplexity = perplexity,
-    theta = theta,
-    max_iter = max_iter,
     check_duplicates = FALSE,  # Set to FALSE for better performance
     ...
   )

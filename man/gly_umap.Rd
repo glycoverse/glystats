@@ -10,9 +10,6 @@ gly_umap(
   n_components = 2,
   min_dist = 0.1,
   spread = 1,
-  metric = "euclidean",
-  n_epochs = 200,
-  learning_rate = 1,
   add_info = TRUE,
   return_raw = FALSE,
   ...
@@ -28,12 +25,6 @@ gly_umap(
 \item{min_dist}{Minimum distance between embedded points. Default is 0.1.}
 
 \item{spread}{Controls how tightly the embedding is packed. Default is 1.0.}
-
-\item{metric}{Distance metric to use. Default is "euclidean".}
-
-\item{n_epochs}{Number of training epochs. Default is 200.}
-
-\item{learning_rate}{Learning rate for the optimization. Default is 1.0.}
 
 \item{add_info}{A logical value. If TRUE (default), sample information from the experiment
 will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.}

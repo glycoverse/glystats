@@ -8,12 +8,7 @@
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param on A character string specifying what to cluster. Either "variable" (default) to cluster
 #'   variables/features, or "sample" to cluster samples/observations.
-#' @param method The agglomeration method to be used. This should be one of
-#'   "ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", or "centroid".
-#'   Default is "complete".
-#' @param dist_method The distance measure to be used. This must be one of
-#'   "euclidean", "maximum", "manhattan", "canberra", "binary", or "minkowski".
-#'   Default is "euclidean".
+
 #' @param k_values A numeric vector specifying the number of clusters to cut the tree into.
 #'   Default is c(2, 3, 4, 5). If NULL, no cluster assignments are returned.
 #' @param scale A logical indicating whether to scale the data before clustering. Default is TRUE.
@@ -21,7 +16,9 @@
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw hclust object.
-#' @param ... Additional arguments passed to `stats::dist()` or `stats::hclust()`.
+#' @param ... Additional arguments passed to `stats::dist()` and `stats::hclust()`.
+#'   Note: if both functions need a `method` parameter, use `dist.method` for distance
+#'   and `hclust.method` for clustering method.
 #'
 #' @section Required packages:
 #' This function only uses base R packages and does not require additional dependencies.
@@ -56,8 +53,6 @@
 gly_hclust <- function(
   exp,
   on = "variable",
-  method = "complete",
-  dist_method = "euclidean",
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
   add_info = TRUE,
@@ -67,8 +62,6 @@ gly_hclust <- function(
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_choice(on, c("variable", "sample"))
-  checkmate::assert_string(method)
-  checkmate::assert_string(dist_method)
   if (!is.null(k_values)) {
     checkmate::assert_integerish(k_values, lower = 2, min.len = 1)
   }
@@ -97,11 +90,32 @@ gly_hclust <- function(
     mat <- scale(mat)
   }
 
+  # Extract arguments for dist() and hclust()
+  dots <- list(...)
+
+  # Handle method parameter conflicts
+  dist_args <- dots
+  hclust_args <- dots
+
+  # If dist.method is specified, use it for dist() and remove from hclust_args
+  if ("dist.method" %in% names(dots)) {
+    dist_args$method <- dots$dist.method
+    dist_args$dist.method <- NULL
+    hclust_args$dist.method <- NULL
+  }
+
+  # If hclust.method is specified, use it for hclust() and remove from dist_args
+  if ("hclust.method" %in% names(dots)) {
+    hclust_args$method <- dots$hclust.method
+    hclust_args$hclust.method <- NULL
+    dist_args$hclust.method <- NULL
+  }
+
   # Calculate distance matrix
-  dist_mat <- stats::dist(mat, method = dist_method, ...)
+  dist_mat <- do.call(stats::dist, c(list(x = mat), dist_args))
 
   # Perform hierarchical clustering
-  hclust_res <- stats::hclust(dist_mat, method = method, ...)
+  hclust_res <- do.call(stats::hclust, c(list(d = dist_mat), hclust_args))
 
   # Return raw results if requested
   if (return_raw) {

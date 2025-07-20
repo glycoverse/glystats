@@ -8,9 +8,6 @@ gly_kmeans(
   exp,
   on = "variable",
   centers = 3,
-  iter.max = 10,
-  nstart = 1,
-  algorithm = "Hartigan-Wong",
   scale = TRUE,
   add_info = TRUE,
   return_raw = FALSE,
@@ -25,13 +22,6 @@ variables/features, or "sample" to cluster samples/observations.}
 
 \item{centers}{Either the number of clusters (integer) or a set of initial cluster centers.
 Default is 3.}
-
-\item{iter.max}{The maximum number of iterations allowed. Default is 10.}
-
-\item{nstart}{How many random sets should be chosen if centers is a number. Default is 1.}
-
-\item{algorithm}{Character string specifying the algorithm to use. May be abbreviated.
-Default is "Hartigan-Wong".}
 
 \item{scale}{A logical indicating whether to scale the data before clustering. Default is TRUE.}
 
