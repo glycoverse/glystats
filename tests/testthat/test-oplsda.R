@@ -157,3 +157,21 @@ test_that("gly_oplsda validates Topliss ratio with invalid data", {
     "Insufficient sample-to-variable ratio"
   )
 })
+
+test_that("gly_oplsda_ works correctly", {
+  skip_if_not_installed("ropls")
+
+  exp <- exp_topliss_valid()
+  expr_mat <- glyexp::get_expr_mat(exp)
+  groups <- factor(glyexp::get_sample_info(exp)$group)
+
+  # Test function execution
+  suppressMessages(suppressWarnings({
+    capture.output({
+      result <- gly_oplsda_(expr_mat, groups)
+    }, type = "output")
+  }))
+
+  # Verify results
+  expect_s3_class(result, "glystats_oplsda_res")
+})

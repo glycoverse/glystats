@@ -124,6 +124,27 @@ test_that("gly_fold_change handles edge cases", {
   # Test with many variables to ensure performance
   exp_large <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H"))
-  
+
   expect_no_error(suppressMessages(gly_fold_change(exp_large)))
-}) 
+})
+
+test_that("gly_fold_change_ works correctly", {
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+  groups <- factor(rep(c("A", "B"), each = 5))
+
+  # Test function execution
+  suppressMessages({
+    result <- gly_fold_change_(expr_mat, groups)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_fc_res")
+  expect_true(tibble::is_tibble(result))
+  expect_setequal(colnames(result), c("variable", "log2fc"))
+  expect_type(result$log2fc, "double")
+  expect_equal(nrow(result), 10)
+})

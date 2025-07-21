@@ -4,6 +4,8 @@
 #' The function uses `ropls::opls()` to perform OPLS-DA and returns tidy results.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor vector specifying group membership for each sample.
 #' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param pred_i An integer indicating the number of predictive components to include. Default is 1.
@@ -11,6 +13,7 @@
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.
+#'  Only applicable to `gly_oplsda()`.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw ropls opls object.
 #' @param ... Additional arguments passed to `ropls::opls()`.
@@ -18,6 +21,13 @@
 #' @section Required packages:
 #' This function requires the following packages to be installed:
 #' - `ropls` for OPLS-DA analysis
+#'
+#' @details
+#' `gly_oplsda()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_oplsda_()` is the underlying API that works with matrices and factor vectors directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @section Sample size requirements:
 #' According to the Topliss ratio principle, the ratio of samples to variables (n/p)
@@ -64,9 +74,6 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
   )
   groups <- group_info$groups
 
-  # Ensure groups have sample names for proper matching with expression matrix
-  names(groups) <- sample_info$sample
-
   # Validate sample-to-variable ratio (Topliss ratio)
   n_samples <- length(groups)
   n_variables <- nrow(expr_mat)
@@ -83,9 +90,31 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
     ))
   }
 
+  # Call the underlying API
+  result <- gly_oplsda_(expr_mat, groups, pred_i, ortho_i, scale, return_raw, ...)
+
+  # If raw results requested, return directly (no add_info processing needed)
+  if (return_raw) {
+    return(result)
+  }
+
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
+  structure(result, class = c("glystats_oplsda_res", "glystats_res"))
+}
+
+#' @rdname gly_oplsda
+#' @export
+gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, return_raw = FALSE, ...) {
+  .check_pkg_available("ropls")
+
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_factor(groups, len = ncol(expr_mat))
+  checkmate::assert_logical(return_raw, len = 1)
+
   # Prepare data matrix (samples as rows, variables as columns)
-  # Ensure expression matrix columns are in the same order as groups
-  expr_mat <- expr_mat[, names(groups), drop = FALSE]
   mat <- log(t(expr_mat) + 1)
 
   # Perform OPLS-DA
@@ -120,11 +149,9 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
   }
 
   # Extract and format results
-  res <- .format_oplsda_results(oplsda_res, groups, sample_info, add_info)
+  res <- .format_oplsda_results(oplsda_res, groups, NULL, FALSE)
 
-  # Process results with add_info logic
-  res <- .process_results_add_info(res, exp, add_info)
-
+  # Add S3 class
   structure(res, class = c("glystats_oplsda_res", "glystats_res"))
 }
 

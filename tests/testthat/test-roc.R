@@ -76,3 +76,26 @@ test_that("gly_roc works with different group column names", {
   expect_type(result, "list")
   expect_setequal(names(result), c("auc", "coords"))
 })
+
+test_that("gly_roc_ works correctly", {
+  skip_if_not_installed("pROC")
+
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+  groups <- factor(rep(c("A", "B"), each = 5))
+
+  # Test function execution
+  suppressMessages({
+    result <- gly_roc_(expr_mat, groups, pos_class = "B")
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_roc_res")
+  expect_type(result, "list")
+  expect_setequal(names(result), c("auc", "coords"))
+  expect_true(tibble::is_tibble(result$auc))
+  expect_equal(nrow(result$auc), 10)
+})

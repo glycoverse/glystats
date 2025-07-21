@@ -1,22 +1,45 @@
 #' GO, KEGG, and Reactome over-representation analysis (ORA)
 #'
 #' @description
-#' Perform GO, KEGG, and Reactome ORA for all proteins (genes) in a `glyexp::experiment()`.
+#' Perform GO, KEGG, and Reactome ORA for proteins/genes.
 #'
-#' This function uses the "protein" column in the variable information tibble.
-#' Protein identifiers should be UniProt accessions.
+#' @param exp A `glyexp::experiment()` object.
+#' @param proteins A character vector of UniProt accession IDs.
+#' @param add_info A logical value. This parameter is included for API consistency but has no effect
+#'  since enrichment results do not contain variable or sample columns.
+#'  Only applicable to top-level APIs.
+#' @param return_raw A logical value indicating whether to return raw clusterProfiler enrichResult objects.
+#' @param ... Additional arguments passed to `clusterProfiler::enrichGO()`, `clusterProfiler::enrichKEGG()`, or `ReactomePA::enrichPathway()`.
 #'
 #' @section Required packages:
-#' This function requires the following packages to be installed:
+#' These functions require the following packages to be installed:
 #' - `clusterProfiler` for enrichment analysis
 #' - `ReactomePA` for Reactome pathway analysis
 #' - `org.Hs.eg.db` for human gene annotation (GO analysis only)
 #'
-#' @param exp A `glyexp::experiment()` object.
-#' @param add_info A logical value. This parameter is included for API consistency but has no effect
-#'  since enrichment results do not contain variable or sample columns.
-#' @param return_raw A logical value indicating whether to return raw clusterProfiler enrichResult objects.
-#' @param ... Additional arguments passed to `clusterProfiler::enrichGO()`, `clusterProfiler::enrichKEGG()`, or `ReactomePA::enrichPathway()`.
+#' @details
+#' These functions perform over-representation analysis using the specified database.
+#'
+#' `gly_enrich_go()`, `gly_enrich_kegg()`, and `gly_enrich_reactome()` are the top-level APIs
+#' that work with `glyexp::experiment()` objects and extract protein information automatically
+#' from the "protein" column in the variable information tibble.
+#'
+#' `gly_enrich_go_()`, `gly_enrich_kegg_()`, and `gly_enrich_reactome_()` are the underlying APIs
+#' that work with protein vectors directly, providing more flexibility for users who don't use the glyexp package.
+#'
+#' **Gene Extraction (top-level APIs only):**
+#' Proteins are extracted from the experiment's variable information. The function
+#' looks for columns containing protein identifiers and uses them for enrichment analysis.
+#' Protein identifiers should be UniProt accessions.
+#'
+#' **GO Analysis:**
+#' Uses `clusterProfiler::enrichGO()` with UniProt IDs as input.
+#'
+#' **KEGG Analysis:**
+#' Uses `clusterProfiler::enrichKEGG()` with UniProt IDs as input.
+#'
+#' **Reactome Analysis:**
+#' Converts UniProt IDs to Entrez IDs and uses `ReactomePA::enrichPathway()`.
 #'
 #' @return A tibble of GO, KEGG, or Reactome enrichment results (when return_raw = FALSE),
 #'   or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
@@ -30,8 +53,22 @@ gly_enrich_go <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   checkmate::assert_logical(return_raw, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
+  result <- gly_enrich_go_(genes, return_raw, ...)
+
+  return(result)
+}
+
+#' @rdname gly_enrich_go
+#' @export
+gly_enrich_go_ <- function(proteins, return_raw = FALSE, ...) {
+  .check_pkg_available("clusterProfiler")
+  .check_pkg_available("org.Hs.eg.db")
+
+  checkmate::assert_character(proteins, min.len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
+
   res <- clusterProfiler::enrichGO(
-    gene = genes,
+    gene = proteins,
     OrgDb = "org.Hs.eg.db",
     keyType = "UNIPROT",
     readable = TRUE,
@@ -57,8 +94,21 @@ gly_enrich_kegg <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   checkmate::assert_logical(return_raw, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
+  result <- gly_enrich_kegg_(genes, return_raw, ...)
+
+  return(result)
+}
+
+#' @rdname gly_enrich_go
+#' @export
+gly_enrich_kegg_ <- function(proteins, return_raw = FALSE, ...) {
+  .check_pkg_available("clusterProfiler")
+
+  checkmate::assert_character(proteins, min.len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
+
   res <- clusterProfiler::enrichKEGG(
-    gene = genes,
+    gene = proteins,
     keyType = "uniprot",
     ...
   )
@@ -84,21 +134,35 @@ gly_enrich_reactome <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   checkmate::assert_logical(return_raw, len = 1)
 
   uniprot_ids <- .extract_genes_from_exp(exp)
+  result <- gly_enrich_reactome_(uniprot_ids, return_raw, ...)
+
+  return(result)
+}
+
+#' @rdname gly_enrich_go
+#' @export
+gly_enrich_reactome_ <- function(proteins, return_raw = FALSE, ...) {
+  .check_pkg_available("clusterProfiler")
+  .check_pkg_available("ReactomePA")
+  .check_pkg_available("org.Hs.eg.db")
+
+  checkmate::assert_character(proteins, min.len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Convert UniProt to Entrez IDs
   suppressWarnings(suppressMessages(
     entrez_ids <- clusterProfiler::bitr(
-      uniprot_ids,
+      proteins,
       fromType = "UNIPROT",
       toType = "ENTREZID",
       OrgDb = org.Hs.eg.db::org.Hs.eg.db
     )$ENTREZID
   ))
   entrez_ids <- entrez_ids[!is.na(entrez_ids)]
-  n_failed <- length(uniprot_ids) - length(entrez_ids)
+  n_failed <- length(proteins) - length(entrez_ids)
   if (n_failed > 0) {
-    pct_failed <- round(n_failed / length(uniprot_ids) * 100, 1)
-    cli::cli_alert_warning("{.val {n_failed}} of {.val {length(uniprot_ids)}} ({.val {pct_failed}}%) proteins failed to map to Entrez IDs.")
+    pct_failed <- round(n_failed / length(proteins) * 100, 1)
+    cli::cli_alert_warning("{.val {n_failed}} of {.val {length(proteins)}} ({.val {pct_failed}}%) proteins failed to map to Entrez IDs.")
   }
 
   # Perform Reactome pathway analysis

@@ -6,6 +6,9 @@
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor vector specifying group membership for each sample.
+#'   Must have at least 2 levels.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -13,6 +16,7 @@
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#'  Only applicable to `gly_anova()`.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::aov()`.
@@ -20,6 +24,12 @@
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
+#'
+#' `gly_anova()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_anova_()` is the underlying API that works with matrices and factor vectors directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' **Post-hoc Test:**
 #' Tukey's HSD test for pairwise comparisons (`stats::TukeyHSD()`) is performed
@@ -60,6 +70,41 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
   )
   groups <- group_info$groups
 
+  # Call the underlying API
+  result <- gly_anova_(expr_mat, groups, p_adj_method, return_raw, ...)
+
+  # If raw results requested, return directly (no add_info processing needed)
+  if (return_raw) {
+    return(result)
+  }
+
+  # Process results with add_info logic for main_test
+  result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
+
+  # Add S3 class to the entire list
+  structure(result, class = c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res", class(result)))
+}
+
+#' @rdname gly_anova
+#' @export
+gly_anova_ <- function(
+  expr_mat,
+  groups,
+  p_adj_method = "BH",
+  return_raw = FALSE,
+  ...
+) {
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_factor(groups, len = ncol(expr_mat))
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(return_raw, len = 1)
+
+  # Validate group count
+  if (length(levels(groups)) < 2) {
+    cli::cli_abort("groups must have at least 2 levels for ANOVA")
+  }
+
   # Perform ANOVA
   result <- .gly_dea_multi_groups(expr_mat, groups, stats::aov, stats::TukeyHSD, p_adj_method, return_raw, ...)
 
@@ -67,9 +112,6 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
   if (return_raw) {
     return(result)
   }
-
-  # Process results with add_info logic for main_test
-  result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
 
   # Add S3 class to the entire list
   structure(result, class = c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res", class(result)))
@@ -83,6 +125,9 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor vector specifying group membership for each sample.
+#'   Must have at least 2 levels.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -90,6 +135,7 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#'  Only applicable to `gly_kruskal()`.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::kruskal.test()`.
@@ -100,6 +146,12 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
+#'
+#' `gly_kruskal()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_kruskal_()` is the underlying API that works with matrices and factor vectors directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' **Post-hoc Test:**
 #' Dunn's test with Holm correction for multiple comparisons (`FSA::dunnTest()`) is performed
@@ -143,6 +195,44 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   )
   groups <- group_info$groups
 
+  # Call the underlying API
+  result <- gly_kruskal_(expr_mat, groups, p_adj_method, return_raw, ...)
+
+  # If raw results requested, return directly (no add_info processing needed)
+  if (return_raw) {
+    return(result)
+  }
+
+  # Process results with add_info logic for main_test
+  result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
+
+  # Add S3 class to the entire list
+  structure(result, class = c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res", class(result)))
+}
+
+#' @rdname gly_kruskal
+#' @export
+gly_kruskal_ <- function(
+  expr_mat,
+  groups,
+  p_adj_method = "BH",
+  return_raw = FALSE,
+  ...
+) {
+  # Check package availability
+  .check_pkg_available("FSA")
+
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_factor(groups, len = ncol(expr_mat))
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(return_raw, len = 1)
+
+  # Validate group count
+  if (length(levels(groups)) < 2) {
+    cli::cli_abort("groups must have at least 2 levels for Kruskal-Wallis test")
+  }
+
   # Perform Kruskal-Wallis test
   result <- .gly_dea_multi_groups(expr_mat, groups, stats::kruskal.test, FSA::dunnTest, p_adj_method, return_raw, ...)
 
@@ -150,9 +240,6 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   if (return_raw) {
     return(result)
   }
-
-  # Process results with add_info logic for main_test
-  result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
 
   # Add S3 class to the entire list
   structure(result, class = c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res", class(result)))

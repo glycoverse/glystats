@@ -2,6 +2,7 @@
 % Please edit documentation in R/tsne.R
 \name{gly_tsne}
 \alias{gly_tsne}
+\alias{gly_tsne_}
 \title{t-Distributed Stochastic Neighbor Embedding (t-SNE)}
 \usage{
 gly_tsne(
@@ -12,6 +13,8 @@ gly_tsne(
   return_raw = FALSE,
   ...
 )
+
+gly_tsne_(expr_mat, dims = 2, perplexity = 30, return_raw = FALSE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -21,12 +24,15 @@ gly_tsne(
 \item{perplexity}{Perplexity parameter for t-SNE. Default is 30.}
 
 \item{add_info}{A logical value. If TRUE (default), sample information from the experiment
-will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.}
+will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.
+Only applicable to \code{gly_tsne()}.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw Rtsne object.}
 
 \item{...}{Additional arguments passed to \code{Rtsne::Rtsne()}.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A tibble with t-SNE coordinates (tsne1, tsne2) when return_raw = FALSE,
@@ -35,6 +41,13 @@ or raw Rtsne object when return_raw = TRUE.
 \description{
 Perform t-SNE dimensionality reduction on the expression data.
 The function uses \code{Rtsne::Rtsne()} to perform t-SNE analysis.
+}
+\details{
+\code{gly_tsne()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
+the \code{add_info} parameter for joining experiment metadata.
+
+\code{gly_tsne_()} is the underlying API that works with matrices directly,
+providing more flexibility for users who don't use the glyexp package.
 }
 \section{Required packages}{
 

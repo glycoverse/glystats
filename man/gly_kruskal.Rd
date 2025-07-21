@@ -2,6 +2,7 @@
 % Please edit documentation in R/anova.R
 \name{gly_kruskal}
 \alias{gly_kruskal}
+\alias{gly_kruskal_}
 \title{Kruskal-Wallis test for Differential Expression Analysis}
 \usage{
 gly_kruskal(
@@ -12,6 +13,8 @@ gly_kruskal(
   return_raw = FALSE,
   ...
 )
+
+gly_kruskal_(expr_mat, groups, p_adj_method = "BH", return_raw = FALSE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -24,12 +27,18 @@ See \code{p.adjust.methods} for available methods. Default is "BH".
 If NULL, no adjustment is performed.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.}
+will be added to the result tibble. If FALSE, only the statistical results are returned.
+Only applicable to \code{gly_kruskal()}.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw statistical model objects as a list.}
 
 \item{...}{Additional arguments passed to \code{stats::kruskal.test()}.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+
+\item{groups}{A factor vector specifying group membership for each sample.
+Must have at least 2 levels.}
 }
 \value{
 A list containing two tibbles: \code{main_test} with Kruskal-Wallis test results and a post_hoc column
@@ -46,6 +55,12 @@ P-values are adjusted for multiple testing using the method specified by \code{p
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1)) before
 statistical testing. At least 2 groups are required in the grouping variable.
+
+\code{gly_kruskal()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
+the \code{add_info} parameter for joining experiment metadata.
+
+\code{gly_kruskal_()} is the underlying API that works with matrices and factor vectors directly,
+providing more flexibility for users who don't use the glyexp package.
 
 \strong{Post-hoc Test:}
 Dunn's test with Holm correction for multiple comparisons (\code{FSA::dunnTest()}) is performed

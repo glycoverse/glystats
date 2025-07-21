@@ -74,4 +74,27 @@ test_that("gly_tsne requires Rtsne package", {
   # Test that the function would fail if Rtsne is not available
   # This is tested by verifying the error message structure exists
   expect_true(any(grepl("Rtsne", deparse(body(gly_tsne)))))
-}) 
+})
+
+test_that("gly_tsne_ works correctly", {
+  skip_if_not_installed("Rtsne")
+
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+
+  # Test function execution with appropriate perplexity
+  suppressMessages({
+    result <- gly_tsne_(expr_mat, perplexity = 3)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_tsne_res")
+  expect_true(tibble::is_tibble(result))
+  expect_true("sample" %in% colnames(result))
+  expect_true("tsne1" %in% colnames(result))
+  expect_true("tsne2" %in% colnames(result))
+  expect_equal(nrow(result), 10)
+})

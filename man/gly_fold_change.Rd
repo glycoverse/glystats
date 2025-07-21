@@ -2,9 +2,12 @@
 % Please edit documentation in R/fold-change.R
 \name{gly_fold_change}
 \alias{gly_fold_change}
+\alias{gly_fold_change_}
 \title{Calculate fold change}
 \usage{
 gly_fold_change(exp, group_col = "group", add_info = TRUE)
+
+gly_fold_change_(expr_mat, groups)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object.}
@@ -12,7 +15,13 @@ gly_fold_change(exp, group_col = "group", add_info = TRUE)
 \item{group_col}{The column name of the group information in the sample information.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the fold change results are returned.}
+will be added to the result tibble. If FALSE, only the fold change results are returned.
+Only applicable to \code{gly_fold_change()}.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+
+\item{groups}{A factor vector specifying group membership for each sample.
+Must have exactly 2 levels.}
 }
 \value{
 A tibble with two columns: \code{variable} and \code{log2fc}.
@@ -22,4 +31,11 @@ Calculate fold change for a given expression matrix and group information.
 It could only be used for 2-group analysis.
 When you run this function, you will see message about "Group 1" and "Group 2".
 "Group 1" is the reference group, and "Group 2" is the test group.
+}
+\details{
+\code{gly_fold_change()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
+the \code{add_info} parameter for joining experiment metadata.
+
+\code{gly_fold_change_()} is the underlying API that works with matrices and factor vectors directly,
+providing more flexibility for users who don't use the glyexp package.
 }

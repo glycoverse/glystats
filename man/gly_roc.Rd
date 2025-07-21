@@ -2,6 +2,7 @@
 % Please edit documentation in R/roc.R
 \name{gly_roc}
 \alias{gly_roc}
+\alias{gly_roc_}
 \title{ROC Analysis for Glycomics and Glycoproteomics Data}
 \usage{
 gly_roc(
@@ -11,6 +12,8 @@ gly_roc(
   add_info = TRUE,
   return_raw = FALSE
 )
+
+gly_roc_(expr_mat, groups, pos_class = NULL, return_raw = FALSE)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -24,10 +27,16 @@ the positive class. If \code{NULL} (default), the second level (alphabetically) 
 used as the positive class.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.}
+will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
+Only applicable to \code{gly_roc()}.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed results with
 AUC values and threshold coordinates. If TRUE, returns raw pROC objects as a list.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+
+\item{groups}{A factor vector specifying group membership for each sample.
+Must have exactly 2 levels.}
 }
 \value{
 A list containing two elements:
@@ -59,6 +68,12 @@ and the binary group labels as response.
 
 The function requires exactly 2 groups in the specified grouping variable. If more than
 2 groups are present, an error will be thrown.
+
+\code{gly_roc()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
+the \code{add_info} parameter for joining experiment metadata.
+
+\code{gly_roc_()} is the underlying API that works with matrices and factor vectors directly,
+providing more flexibility for users who don't use the glyexp package.
 
 \strong{Underlying Function:}
 \itemize{

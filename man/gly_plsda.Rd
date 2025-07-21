@@ -2,6 +2,7 @@
 % Please edit documentation in R/plsda.R
 \name{gly_plsda}
 \alias{gly_plsda}
+\alias{gly_plsda_}
 \title{Partial Least Squares Discriminant Analysis (PLS-DA)}
 \usage{
 gly_plsda(
@@ -13,6 +14,8 @@ gly_plsda(
   return_raw = FALSE,
   ...
 )
+
+gly_plsda_(expr_mat, groups, ncomp = 2, scale = TRUE, return_raw = FALSE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -25,12 +28,17 @@ that contains group labels. Default is "group".}
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
 
 \item{add_info}{A logical value. If TRUE (default), sample and variable information from the experiment
-will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.}
+will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.
+Only applicable to \code{gly_plsda()}.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw mixOmics plsda object.}
 
 \item{...}{Additional arguments passed to \code{mixOmics::plsda()}.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+
+\item{groups}{A factor vector specifying group membership for each sample.}
 }
 \value{
 A list containing four tibbles (when return_raw = FALSE):
@@ -45,6 +53,13 @@ When return_raw = TRUE, returns the raw mixOmics plsda object.
 \description{
 Perform partial least squares discriminant analysis on the expression data.
 The function uses \code{mixOmics::plsda()} to perform PLS-DA and returns tidy results.
+}
+\details{
+\code{gly_plsda()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
+the \code{add_info} parameter for joining experiment metadata.
+
+\code{gly_plsda_()} is the underlying API that works with matrices and factor vectors directly,
+providing more flexibility for users who don't use the glyexp package.
 }
 \section{Required packages}{
 

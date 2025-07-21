@@ -115,3 +115,45 @@ test_that("gly_kruskal works with real data", {
   expect_true("post_hoc" %in% colnames(result$main_test))
   expect_true(tibble::is_tibble(result$post_hoc_test))
 })
+
+test_that("gly_anova_ works correctly", {
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+  groups <- factor(rep(c("A", "B", "C"), c(3, 3, 4)))
+
+  # Test function execution
+  suppressMessages({
+    result <- gly_anova_(expr_mat, groups)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_dea_res_anova")
+  expect_type(result, "list")
+  expect_named(result, c("main_test", "post_hoc_test"))
+  expect_true(tibble::is_tibble(result$main_test))
+  expect_equal(nrow(result$main_test), 10)
+})
+
+test_that("gly_kruskal_ works correctly", {
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+  groups <- factor(rep(c("A", "B", "C"), c(3, 3, 4)))
+
+  # Test function execution
+  suppressMessages({
+    result <- gly_kruskal_(expr_mat, groups)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_dea_res_kruskal")
+  expect_type(result, "list")
+  expect_named(result, c("main_test", "post_hoc_test"))
+  expect_true(tibble::is_tibble(result$main_test))
+  expect_equal(nrow(result$main_test), 10)
+})

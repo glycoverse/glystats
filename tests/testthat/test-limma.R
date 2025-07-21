@@ -243,3 +243,26 @@ test_that("gly_limma handles group names with hyphens correctly", {
   expect_equal(length(unique(result$contrast)), 1)
   expect_equal(unique(result$contrast), "High-dose_vs_Control-1")
 })
+
+test_that("gly_limma_ works correctly", {
+  skip_if_not_installed("limma")
+
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+  groups <- factor(rep(c("A", "B"), each = 5))
+
+  # Test function execution
+  suppressMessages({
+    result <- gly_limma_(expr_mat, groups)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_dea_res_limma")
+  expect_true(tibble::is_tibble(result))
+  expect_true("log2fc" %in% colnames(result))
+  expect_true("p" %in% colnames(result))  # limma uses "p" not "p_value"
+  expect_equal(nrow(result), 10)
+})

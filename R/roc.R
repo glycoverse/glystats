@@ -6,6 +6,9 @@
 #' power between two groups.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor vector specifying group membership for each sample.
+#'   Must have exactly 2 levels.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'   in the sample information. Default is `"group"`. The grouping variable must have
 #'   exactly 2 levels for binary classification.
@@ -14,6 +17,7 @@
 #'   used as the positive class.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
+#'  Only applicable to `gly_roc()`.
 #' @param return_raw A logical value. If FALSE (default), returns processed results with
 #'   AUC values and threshold coordinates. If TRUE, returns raw pROC objects as a list.
 #'
@@ -23,6 +27,12 @@
 #'
 #' The function requires exactly 2 groups in the specified grouping variable. If more than
 #' 2 groups are present, an error will be thrown.
+#'
+#' `gly_roc()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_roc_()` is the underlying API that works with matrices and factor vectors directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' **Underlying Function:**
 #' - ROC analysis is performed using `pROC::roc()`
@@ -69,6 +79,36 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE,
   )
   groups <- group_info$groups
 
+  # Call the underlying API
+  result <- gly_roc_(expr_mat, groups, pos_class, return_raw)
+
+  # If raw results requested, return directly (no add_info processing needed)
+  if (return_raw) {
+    return(result)
+  }
+
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
+  structure(result, class = c("glystats_roc_res", "glystats_res"))
+}
+
+#' @rdname gly_roc
+#' @export
+gly_roc_ <- function(expr_mat, groups, pos_class = NULL, return_raw = FALSE) {
+  .check_pkg_available("pROC")
+
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_factor(groups, len = ncol(expr_mat))
+  checkmate::assert_string(pos_class, null.ok = TRUE)
+  checkmate::assert_logical(return_raw, len = 1)
+
+  # Validate group count
+  if (length(levels(groups)) != 2) {
+    cli::cli_abort("groups must have exactly 2 levels for ROC analysis")
+  }
+
   # Set positive class
   if (is.null(pos_class)) {
     pos_class <- levels(groups)[2]  # Use second level alphabetically as default
@@ -83,7 +123,6 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE,
   }
 
   # Prepare data for ROC analysis
-  # Convert to binary response (1 for positive class, 0 for negative class)
   response <- as.numeric(groups == pos_class)
   roc_objs <- purrr::map(
     rownames(expr_mat),
@@ -104,10 +143,9 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE,
     rlang::set_names(rownames(expr_mat)) %>%
     dplyr::bind_rows(.id = "variable")
 
-  res <- list(auc = roc_auc_tb, coords = coords_tb)
+  # Create result list
+  result <- list(auc = roc_auc_tb, coords = coords_tb)
 
-  # Process results with add_info logic
-  res <- .process_results_add_info(res, exp, add_info)
-
-  structure(res, class = c("glystats_roc_res", "glystats_res"))
+  # Add S3 class
+  structure(result, class = c("glystats_roc_res", "glystats_res"))
 }

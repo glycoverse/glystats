@@ -89,4 +89,27 @@ test_that("gly_umap requires uwot package", {
   # Test that the function would fail if uwot is not available
   # This is tested by verifying the error message structure exists
   expect_true(any(grepl("uwot", deparse(body(gly_umap)))))
-}) 
+})
+
+test_that("gly_umap_ works correctly", {
+  skip_if_not_installed("uwot")
+
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+
+  # Test function execution with appropriate n_neighbors
+  suppressMessages({
+    result <- gly_umap_(expr_mat, n_components = 2, n_neighbors = 3)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_umap_res")
+  expect_true(tibble::is_tibble(result))
+  expect_true("sample" %in% colnames(result))
+  expect_true("umap1" %in% colnames(result))
+  expect_true("umap2" %in% colnames(result))
+  expect_equal(nrow(result), 10)
+})

@@ -141,3 +141,24 @@ test_that("gly_cor produces consistent results", {
   expect_equal(result1$p_value, result2$p_value)
   expect_equal(result1$p_adj, result2$p_adj)
 })
+
+test_that("gly_cor_ works correctly", {
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+
+  # Test function execution
+  suppressMessages({
+    result <- gly_cor_(expr_mat)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_cor_res")
+  expect_true(nrow(result) > 0)
+  expect_true("variable1" %in% colnames(result))
+  expect_true("variable2" %in% colnames(result))
+  expect_true("cor" %in% colnames(result))
+  expect_equal(nrow(result), 45)  # 10 choose 2 = 45 pairs
+})

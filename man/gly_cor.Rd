@@ -2,10 +2,20 @@
 % Please edit documentation in R/cor.R
 \name{gly_cor}
 \alias{gly_cor}
+\alias{gly_cor_}
 \title{Correlation Analysis for Glycomics and Glycoproteomics Data}
 \usage{
 gly_cor(
   exp,
+  on = "variable",
+  method = "pearson",
+  p_adj_method = "BH",
+  return_raw = FALSE,
+  ...
+)
+
+gly_cor_(
+  expr_mat,
   on = "variable",
   method = "pearson",
   p_adj_method = "BH",
@@ -30,6 +40,8 @@ If NULL, no adjustment is performed.}
 If TRUE, returns raw rcorr object.}
 
 \item{...}{Additional arguments passed to \code{Hmisc::rcorr()}.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A tibble with correlation results (when return_raw = FALSE):
@@ -52,6 +64,11 @@ The function performs log2 transformation on the expression data (log2(x + 1)) b
 correlation analysis. When \code{on = "variable"} (default), correlations are calculated between
 variables across samples. When \code{on = "sample"}, correlations are calculated between
 samples across variables.
+
+\code{gly_cor()} is the top-level API that works with \code{glyexp::experiment()} objects.
+
+\code{gly_cor_()} is the underlying API that works with matrices directly,
+providing more flexibility for users who don't use the glyexp package.
 
 \strong{Correlation Calculation:}
 Correlation coefficients and p-values are calculated using \code{Hmisc::rcorr()} which is

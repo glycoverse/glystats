@@ -2,6 +2,7 @@
 % Please edit documentation in R/umap.R
 \name{gly_umap}
 \alias{gly_umap}
+\alias{gly_umap_}
 \title{Uniform Manifold Approximation and Projection (UMAP)}
 \usage{
 gly_umap(
@@ -14,6 +15,8 @@ gly_umap(
   return_raw = FALSE,
   ...
 )
+
+gly_umap_(expr_mat, n_components = 2, return_raw = FALSE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -27,12 +30,15 @@ gly_umap(
 \item{spread}{Controls how tightly the embedding is packed. Default is 1.0.}
 
 \item{add_info}{A logical value. If TRUE (default), sample information from the experiment
-will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.}
+will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.
+Only applicable to \code{gly_umap()}.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw umap result matrix.}
 
 \item{...}{Additional arguments passed to \code{uwot::umap()}.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A tibble with UMAP coordinates (umap1, umap2) when return_raw = FALSE,
@@ -41,6 +47,13 @@ or raw umap result matrix when return_raw = TRUE.
 \description{
 Perform UMAP dimensionality reduction on the expression data.
 The function uses \code{uwot::umap()} to perform UMAP analysis.
+}
+\details{
+\code{gly_umap()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
+the \code{add_info} parameter for joining experiment metadata.
+
+\code{gly_umap_()} is the underlying API that works with matrices directly,
+providing more flexibility for users who don't use the glyexp package.
 }
 \section{Required packages}{
 

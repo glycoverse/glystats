@@ -267,3 +267,71 @@ test_that("gly_enrich_reactome filters out NA proteins", {
   .package = "clusterProfiler"
   )
 })
+
+test_that("gly_enrich_go_ works correctly", {
+  # Create test proteins
+  proteins <- c("P12345", "Q67890", "R11111")
+
+  # Mock the enrichGO function
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings({
+    result <- gly_enrich_go_(proteins)
+    expect_s3_class(result, "glystats_go_ora_res")
+    expect_true("id" %in% colnames(result))
+  },
+  enrichGO = function(...) mock_result,
+  .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_kegg_ works correctly", {
+  # Create test proteins
+  proteins <- c("P12345", "Q67890", "R11111")
+
+  # Mock the enrichKEGG function
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings({
+    result <- gly_enrich_kegg_(proteins)
+    expect_s3_class(result, "glystats_kegg_ora_res")
+    expect_true("id" %in% colnames(result))
+  },
+  enrichKEGG = function(...) mock_result,
+  .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_reactome_ works correctly", {
+  # Create test proteins
+  proteins <- c("P12345", "Q67890", "R11111")
+
+  # Mock the functions
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings({
+    with_mocked_bindings({
+      result <- gly_enrich_reactome_(proteins)
+      expect_s3_class(result, "glystats_reactome_ora_res")
+      expect_true("id" %in% colnames(result))
+    },
+    enrichPathway = function(...) mock_result,
+    .package = "ReactomePA"
+    )
+  },
+  bitr = function(...) data.frame(UNIPROT = character(0), ENTREZID = character(0), stringsAsFactors = FALSE),
+  .package = "clusterProfiler"
+  )
+})

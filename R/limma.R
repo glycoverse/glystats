@@ -4,6 +4,9 @@
 #' moderation from the limma package. Supports both two-group and multi-group comparisons.
 #'
 #' @param exp A `glyexp_experiment` object containing expression data and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor vector specifying group membership for each sample.
+#'   Must have at least 2 levels.
 #' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param p_adj_method A character string specifying the method for multiple testing correction.
@@ -18,6 +21,7 @@
 #'   Use the second format if group names contain hyphens.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#'  Only applicable to `gly_limma()`.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw limma fit objects as a list.
 #' @param ... Additional arguments passed to `limma::lmFit()`.
@@ -26,6 +30,12 @@
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. The analysis uses linear models with empirical Bayes moderation
 #' to improve statistical power, especially for small sample sizes.
+#'
+#' `gly_limma()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_limma_()` is the underlying API that works with matrices and factor vectors directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' For two-group comparisons, a simple contrast is performed between the groups.
 #' For multi-group comparisons (3+ groups), all pairwise comparisons are automatically
@@ -83,6 +93,51 @@ gly_limma <- function(
   # Validate ref_group parameter
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
+  # Call the underlying API
+  result <- gly_limma_(expr_mat, groups, p_adj_method, ref_group, contrasts, return_raw, ...)
+
+  # If raw results requested, return directly (no add_info processing needed)
+  if (return_raw) {
+    return(result)
+  }
+
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
+  # Add S3 class
+  structure(result, class = c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res", class(result)))
+}
+
+#' @rdname gly_limma
+#' @export
+gly_limma_ <- function(
+  expr_mat,
+  groups,
+  p_adj_method = "BH",
+  ref_group = NULL,
+  contrasts = NULL,
+  return_raw = FALSE,
+  ...
+) {
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_factor(groups, len = ncol(expr_mat))
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_character(contrasts, null.ok = TRUE)
+  checkmate::assert_logical(return_raw, len = 1)
+
+  # Check package availability
+  .check_pkg_available("limma")
+
+  # Validate groups
+  n_groups <- length(levels(groups))
+  if (n_groups < 2) {
+    cli::cli_abort("groups must have at least 2 levels for limma analysis")
+  }
+
+  # Validate ref_group parameter
+  checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
+
   # Perform limma analysis based on number of groups
   if (n_groups == 2) {
     # Two-group comparison
@@ -97,11 +152,12 @@ gly_limma <- function(
     return(result)
   }
 
-  # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
   # Add S3 class
-  structure(result, class = c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res", class(result)))
+  if (n_groups == 2) {
+    structure(result, class = c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res", class(result)))
+  } else {
+    structure(result, class = c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res", class(result)))
+  }
 }
 
 # Internal helper functions for limma analysis

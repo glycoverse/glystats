@@ -2,39 +2,72 @@
 % Please edit documentation in R/enrich.R
 \name{gly_enrich_go}
 \alias{gly_enrich_go}
+\alias{gly_enrich_go_}
 \alias{gly_enrich_kegg}
+\alias{gly_enrich_kegg_}
 \alias{gly_enrich_reactome}
+\alias{gly_enrich_reactome_}
 \title{GO, KEGG, and Reactome over-representation analysis (ORA)}
 \usage{
 gly_enrich_go(exp, add_info = TRUE, return_raw = FALSE, ...)
 
+gly_enrich_go_(proteins, return_raw = FALSE, ...)
+
 gly_enrich_kegg(exp, add_info = TRUE, return_raw = FALSE, ...)
 
+gly_enrich_kegg_(proteins, return_raw = FALSE, ...)
+
 gly_enrich_reactome(exp, add_info = TRUE, return_raw = FALSE, ...)
+
+gly_enrich_reactome_(proteins, return_raw = FALSE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object.}
 
 \item{add_info}{A logical value. This parameter is included for API consistency but has no effect
-since enrichment results do not contain variable or sample columns.}
+since enrichment results do not contain variable or sample columns.
+Only applicable to top-level APIs.}
 
 \item{return_raw}{A logical value indicating whether to return raw clusterProfiler enrichResult objects.}
 
 \item{...}{Additional arguments passed to \code{clusterProfiler::enrichGO()}, \code{clusterProfiler::enrichKEGG()}, or \code{ReactomePA::enrichPathway()}.}
+
+\item{proteins}{A character vector of UniProt accession IDs.}
 }
 \value{
 A tibble of GO, KEGG, or Reactome enrichment results (when return_raw = FALSE),
 or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
 }
 \description{
-Perform GO, KEGG, and Reactome ORA for all proteins (genes) in a \code{glyexp::experiment()}.
+Perform GO, KEGG, and Reactome ORA for proteins/genes.
+}
+\details{
+These functions perform over-representation analysis using the specified database.
 
-This function uses the "protein" column in the variable information tibble.
+\code{gly_enrich_go()}, \code{gly_enrich_kegg()}, and \code{gly_enrich_reactome()} are the top-level APIs
+that work with \code{glyexp::experiment()} objects and extract protein information automatically
+from the "protein" column in the variable information tibble.
+
+\code{gly_enrich_go_()}, \code{gly_enrich_kegg_()}, and \code{gly_enrich_reactome_()} are the underlying APIs
+that work with protein vectors directly, providing more flexibility for users who don't use the glyexp package.
+
+\strong{Gene Extraction (top-level APIs only):}
+Proteins are extracted from the experiment's variable information. The function
+looks for columns containing protein identifiers and uses them for enrichment analysis.
 Protein identifiers should be UniProt accessions.
+
+\strong{GO Analysis:}
+Uses \code{clusterProfiler::enrichGO()} with UniProt IDs as input.
+
+\strong{KEGG Analysis:}
+Uses \code{clusterProfiler::enrichKEGG()} with UniProt IDs as input.
+
+\strong{Reactome Analysis:}
+Converts UniProt IDs to Entrez IDs and uses \code{ReactomePA::enrichPathway()}.
 }
 \section{Required packages}{
 
-This function requires the following packages to be installed:
+These functions require the following packages to be installed:
 \itemize{
 \item \code{clusterProfiler} for enrichment analysis
 \item \code{ReactomePA} for Reactome pathway analysis

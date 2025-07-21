@@ -31,6 +31,46 @@ test_that("gly_wilcox works with wilcoxon method", {
   expect_type(result$log2fc, "double")  # log2fc should be numeric
 })
 
+test_that("gly_ttest_ works correctly", {
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+  groups <- factor(rep(c("A", "B"), each = 5))
+
+  # Test function execution
+  suppressMessages({
+    result <- gly_ttest_(expr_mat, groups)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_dea_res_ttest")
+  expect_true(nrow(result) > 0)
+  expect_true("log2fc" %in% colnames(result))
+  expect_equal(nrow(result), 10)
+})
+
+test_that("gly_wilcox_ works correctly", {
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+  groups <- factor(rep(c("A", "B"), each = 5))
+
+  # Test function execution
+  suppressMessages({
+    result <- gly_wilcox_(expr_mat, groups)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_dea_res_wilcoxon")
+  expect_true(nrow(result) > 0)
+  expect_true("log2fc" %in% colnames(result))
+  expect_equal(nrow(result), 10)
+})
+
 test_that("gly_ttest and gly_wilcox basic functionality works", {
   # Test both methods work with test_gp_exp
   exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5)  # Use very small subset

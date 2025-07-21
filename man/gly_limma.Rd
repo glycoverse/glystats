@@ -2,6 +2,7 @@
 % Please edit documentation in R/limma.R
 \name{gly_limma}
 \alias{gly_limma}
+\alias{gly_limma_}
 \title{Linear Models for Differential Expression Analysis using limma}
 \usage{
 gly_limma(
@@ -11,6 +12,16 @@ gly_limma(
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
+  return_raw = FALSE,
+  ...
+)
+
+gly_limma_(
+  expr_mat,
+  groups,
+  p_adj_method = "BH",
+  ref_group = NULL,
+  contrasts = NULL,
   return_raw = FALSE,
   ...
 )
@@ -35,12 +46,18 @@ Supports two formats: "group1-group2" or "group1_vs_group2".
 Use the second format if group names contain hyphens.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.}
+will be added to the result tibble. If FALSE, only the statistical results are returned.
+Only applicable to \code{gly_limma()}.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw limma fit objects as a list.}
 
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+
+\item{groups}{A factor vector specifying group membership for each sample.
+Must have at least 2 levels.}
 }
 \value{
 A tibble with limma results including log2 fold change (log2fc).
@@ -55,6 +72,12 @@ moderation from the limma package. Supports both two-group and multi-group compa
 The function performs log2 transformation on the expression data (log2(x + 1)) before
 statistical testing. The analysis uses linear models with empirical Bayes moderation
 to improve statistical power, especially for small sample sizes.
+
+\code{gly_limma()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
+the \code{add_info} parameter for joining experiment metadata.
+
+\code{gly_limma_()} is the underlying API that works with matrices and factor vectors directly,
+providing more flexibility for users who don't use the glyexp package.
 
 For two-group comparisons, a simple contrast is performed between the groups.
 For multi-group comparisons (3+ groups), all pairwise comparisons are automatically

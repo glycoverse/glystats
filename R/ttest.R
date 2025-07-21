@@ -5,6 +5,9 @@
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor vector specifying group membership for each sample.
+#'   Must have exactly 2 levels.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -14,6 +17,7 @@
 #'  If NULL (default), the first level of the group factor is used as the reference.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#'  Only applicable to `gly_ttest()`.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::t.test()`.
@@ -21,6 +25,12 @@
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
+#'
+#' `gly_ttest()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_ttest_()` is the underlying API that works with matrices and factor vectors directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @returns A tibble with t-test results including log2 fold change (log2fc),
 #'   or a list of `t.test` models if `return_raw` is TRUE.
@@ -57,6 +67,44 @@ gly_ttest <- function(
   groups <- group_info$groups
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
+  # Call the underlying API
+  result <- gly_ttest_(expr_mat, groups, p_adj_method, ref_group, return_raw, ...)
+
+  # If raw results requested, return directly (no add_info processing needed)
+  if (return_raw) {
+    return(result)
+  }
+
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
+  # Add S3 class
+  structure(result, class = c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res", class(result)))
+}
+
+#' @rdname gly_ttest
+#' @export
+gly_ttest_ <- function(
+  expr_mat,
+  groups,
+  p_adj_method = "BH",
+  ref_group = NULL,
+  return_raw = FALSE,
+  ...
+) {
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_factor(groups, len = ncol(expr_mat))
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(return_raw, len = 1)
+
+  # Validate group count
+  if (length(levels(groups)) != 2) {
+    cli::cli_abort("groups must have exactly 2 levels for t-test")
+  }
+
+  checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
+
   # Perform t-test
   result <- .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, ref_group, return_raw, ...)
 
@@ -64,9 +112,6 @@ gly_ttest <- function(
   if (return_raw) {
     return(result)
   }
-
-  # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
 
   # Add S3 class
   structure(result, class = c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res", class(result)))
@@ -79,6 +124,9 @@ gly_ttest <- function(
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor vector specifying group membership for each sample.
+#'   Must have exactly 2 levels.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -88,6 +136,7 @@ gly_ttest <- function(
 #'  If NULL (default), the first level of the group factor is used as the reference.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#'  Only applicable to `gly_wilcox()`.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::wilcox.test()`.
@@ -95,6 +144,12 @@ gly_ttest <- function(
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
+#'
+#' `gly_wilcox()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_wilcox_()` is the underlying API that works with matrices and factor vectors directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @returns
 #' A tibble with Wilcoxon test results including log2 fold change (log2fc),
@@ -138,6 +193,44 @@ gly_wilcox <- function(
   groups <- group_info$groups
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
+  # Call the underlying API
+  result <- gly_wilcox_(expr_mat, groups, p_adj_method, ref_group, return_raw, ...)
+
+  # If raw results requested, return directly (no add_info processing needed)
+  if (return_raw) {
+    return(result)
+  }
+
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
+  # Add S3 class
+  structure(result, class = c("glystats_dea_res_wilcoxon", "glystats_dea_res", "glystats_res", class(result)))
+}
+
+#' @rdname gly_wilcox
+#' @export
+gly_wilcox_ <- function(
+  expr_mat,
+  groups,
+  p_adj_method = "BH",
+  ref_group = NULL,
+  return_raw = FALSE,
+  ...
+) {
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_factor(groups, len = ncol(expr_mat))
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(return_raw, len = 1)
+
+  # Validate group count
+  if (length(levels(groups)) != 2) {
+    cli::cli_abort("groups must have exactly 2 levels for Wilcoxon test")
+  }
+
+  checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
+
   # Perform Wilcoxon test
   result <- .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, ref_group, return_raw, ...)
 
@@ -145,9 +238,6 @@ gly_wilcox <- function(
   if (return_raw) {
     return(result)
   }
-
-  # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
 
   # Add S3 class
   structure(result, class = c("glystats_dea_res_wilcoxon", "glystats_dea_res", "glystats_res", class(result)))

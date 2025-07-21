@@ -5,14 +5,15 @@
 #' tidy results with cluster assignments.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
 #' @param on A character string specifying what to cluster. Either "variable" (default) to cluster
 #'   variables/features, or "sample" to cluster samples/observations.
 #' @param centers Either the number of clusters (integer) or a set of initial cluster centers.
 #'   Default is 3.
-
 #' @param scale A logical indicating whether to scale the data before clustering. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
+#'   Only applicable to `gly_kmeans()`.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw kmeans object.
 #' @param ... Additional arguments passed to `stats::kmeans()`.
@@ -25,6 +26,12 @@
 #' clustering. When `on = "variable"` (default), variables are clustered based on their
 #' expression patterns across samples. When `on = "sample"`, samples are clustered based
 #' on their expression profiles across variables.
+#'
+#' `gly_kmeans()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_kmeans_()` is the underlying API that works with matrices directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' **Data Preparation:**
 #' Data is log2-transformed and optionally scaled before clustering.
@@ -61,6 +68,41 @@ gly_kmeans <- function(
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
+
+  # Call the underlying API
+  result <- gly_kmeans_(expr_mat, on, centers, scale, return_raw, ...)
+
+  # If raw results requested, return directly (no add_info processing needed)
+  if (return_raw) {
+    return(result)
+  }
+
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
+  # Add S3 class
+  structure(result, class = c("glystats_kmeans_res", "glystats_res", class(result)))
+}
+
+#' @rdname gly_kmeans
+#' @export
+gly_kmeans_ <- function(
+  expr_mat,
+  on = "variable",
+  centers = 3,
+  scale = TRUE,
+  return_raw = FALSE,
+  ...
+) {
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_choice(on, c("variable", "sample"))
+  checkmate::assert(
+    checkmate::check_integerish(centers, lower = 1, len = 1),
+    checkmate::check_matrix(centers)
+  )
+  checkmate::assert_logical(scale, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Prepare data for clustering based on 'on' parameter
   if (on == "sample") {
@@ -101,22 +143,6 @@ gly_kmeans <- function(
   # Set the appropriate column name based on clustering type
   colnames(result_tbl)[1] <- cluster_type
 
-  # Add info if requested
-  if (add_info) {
-    if (cluster_type == "sample") {
-      sample_info <- glyexp::get_sample_info(exp)
-      if (!is.null(sample_info) && nrow(sample_info) > 0) {
-        result_tbl <- result_tbl %>%
-          dplyr::left_join(sample_info, by = "sample")
-      }
-    } else {
-      var_info <- glyexp::get_var_info(exp)
-      if (!is.null(var_info) && nrow(var_info) > 0) {
-        result_tbl <- result_tbl %>%
-          dplyr::left_join(var_info, by = "variable")
-      }
-    }
-  }
-
-  return(result_tbl)
+  # Add S3 class
+  structure(result_tbl, class = c("glystats_kmeans_res", "glystats_res", class(result_tbl)))
 }

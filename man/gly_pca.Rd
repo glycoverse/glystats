@@ -2,6 +2,7 @@
 % Please edit documentation in R/pca.R
 \name{gly_pca}
 \alias{gly_pca}
+\alias{gly_pca_}
 \title{Principal Component Analysis (PCA)}
 \usage{
 gly_pca(
@@ -12,6 +13,8 @@ gly_pca(
   return_raw = FALSE,
   ...
 )
+
+gly_pca_(expr_mat, center = TRUE, scale = TRUE, return_raw = FALSE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -21,12 +24,15 @@ gly_pca(
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
 
 \item{add_info}{A logical value. If TRUE (default), sample and variable information from the experiment
-will be added to the result tibbles. If FALSE, only the PCA results are returned.}
+will be added to the result tibbles. If FALSE, only the PCA results are returned.
+Only applicable to \code{gly_pca()}.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw prcomp object.}
 
 \item{...}{Additional arguments passed to \code{prcomp()}.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list containing three tibbles (when return_raw = FALSE):
@@ -40,6 +46,16 @@ When return_raw = TRUE, returns the raw prcomp object.
 \description{
 Perform principal component analysis on the expression data.
 The function uses \code{prcomp()} to perform PCA and \code{broom::tidy()} to tidy the results.
+}
+\details{
+The function performs log transformation on the expression data (log(x + 1)) before
+PCA analysis.
+
+\code{gly_pca()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
+the \code{add_info} parameter for joining experiment metadata.
+
+\code{gly_pca_()} is the underlying API that works with matrices directly,
+providing more flexibility for users who don't use the glyexp package.
 }
 \section{Required packages}{
 

@@ -2,6 +2,7 @@
 % Please edit documentation in R/ttest.R
 \name{gly_wilcox}
 \alias{gly_wilcox}
+\alias{gly_wilcox_}
 \title{Wilcoxon rank-sum test for Differential Expression Analysis}
 \usage{
 gly_wilcox(
@@ -10,6 +11,15 @@ gly_wilcox(
   p_adj_method = "BH",
   ref_group = NULL,
   add_info = TRUE,
+  return_raw = FALSE,
+  ...
+)
+
+gly_wilcox_(
+  expr_mat,
+  groups,
+  p_adj_method = "BH",
+  ref_group = NULL,
   return_raw = FALSE,
   ...
 )
@@ -28,12 +38,18 @@ If NULL, no adjustment is performed.}
 If NULL (default), the first level of the group factor is used as the reference.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.}
+will be added to the result tibble. If FALSE, only the statistical results are returned.
+Only applicable to \code{gly_wilcox()}.}
 
 \item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
 If TRUE, returns raw statistical model objects as a list.}
 
 \item{...}{Additional arguments passed to \code{stats::wilcox.test()}.}
+
+\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+
+\item{groups}{A factor vector specifying group membership for each sample.
+Must have exactly 2 levels.}
 }
 \value{
 A tibble with Wilcoxon test results including log2 fold change (log2fc),
@@ -47,6 +63,12 @@ P-values are adjusted for multiple testing using the method specified by \code{p
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1)) before
 statistical testing. Exactly 2 groups are required in the grouping variable.
+
+\code{gly_wilcox()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
+the \code{add_info} parameter for joining experiment metadata.
+
+\code{gly_wilcox_()} is the underlying API that works with matrices and factor vectors directly,
+providing more flexibility for users who don't use the glyexp package.
 }
 \seealso{
 \code{\link[stats:wilcox.test]{stats::wilcox.test()}}

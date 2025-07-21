@@ -6,14 +6,15 @@
 #' and merge heights.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
 #' @param on A character string specifying what to cluster. Either "variable" (default) to cluster
 #'   variables/features, or "sample" to cluster samples/observations.
-
 #' @param k_values A numeric vector specifying the number of clusters to cut the tree into.
 #'   Default is c(2, 3, 4, 5). If NULL, no cluster assignments are returned.
 #' @param scale A logical indicating whether to scale the data before clustering. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
+#'   Only applicable to `gly_hclust()`.
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw hclust object.
 #' @param ... Additional arguments passed to `stats::dist()` and `stats::hclust()`.
@@ -30,6 +31,12 @@
 #' clustering. When `on = "variable"` (default), variables are clustered based on their
 #' expression patterns across samples. When `on = "sample"`, samples are clustered based
 #' on their expression profiles across variables.
+#'
+#' `gly_hclust()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_hclust_()` is the underlying API that works with matrices directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' **Distance Calculation:**
 #' Distance is calculated using `stats::dist()` with the specified method.
@@ -71,6 +78,39 @@ gly_hclust <- function(
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
+
+  # Call the underlying API
+  result <- gly_hclust_(expr_mat, on, k_values, scale, return_raw, ...)
+
+  # If raw results requested, return directly (no add_info processing needed)
+  if (return_raw) {
+    return(result)
+  }
+
+  # Process results with add_info logic
+  result <- .process_results_add_info(result, exp, add_info)
+
+  structure(result, class = c("glystats_hclust_res", "glystats_res"))
+}
+
+#' @rdname gly_hclust
+#' @export
+gly_hclust_ <- function(
+  expr_mat,
+  on = "variable",
+  k_values = c(2, 3, 4, 5),
+  scale = TRUE,
+  return_raw = FALSE,
+  ...
+) {
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_choice(on, c("variable", "sample"))
+  if (!is.null(k_values)) {
+    checkmate::assert_integerish(k_values, lower = 2, min.len = 1)
+  }
+  checkmate::assert_logical(scale, len = 1)
+  checkmate::assert_logical(return_raw, len = 1)
 
   # Prepare data for clustering based on 'on' parameter
   if (on == "sample") {
@@ -178,6 +218,6 @@ gly_hclust <- function(
     )
   }
 
-  result <- .process_results_add_info(result, exp, add_info)
+  # Add S3 class
   structure(result, class = c("glystats_hclust_res", "glystats_res"))
 }

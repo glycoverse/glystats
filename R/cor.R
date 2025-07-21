@@ -5,6 +5,7 @@
 #' with optional multiple testing correction.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
 #' @param on A character string specifying what to correlate. Either "variable" (default) to correlate
 #'   variables/features, or "sample" to correlate samples/observations.
 #' @param method A character string indicating which correlation coefficient is to be computed.
@@ -12,7 +13,6 @@
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'   See `p.adjust.methods` for available methods. Default is "BH".
 #'   If NULL, no adjustment is performed.
-
 #' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
 #'   If TRUE, returns raw rcorr object.
 #' @param ... Additional arguments passed to `Hmisc::rcorr()`.
@@ -25,6 +25,11 @@
 #' correlation analysis. When `on = "variable"` (default), correlations are calculated between
 #' variables across samples. When `on = "sample"`, correlations are calculated between
 #' samples across variables.
+#'
+#' `gly_cor()` is the top-level API that works with `glyexp::experiment()` objects.
+#'
+#' `gly_cor_()` is the underlying API that works with matrices directly,
+#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' **Correlation Calculation:**
 #' Correlation coefficients and p-values are calculated using `Hmisc::rcorr()` which is
@@ -58,13 +63,36 @@ gly_cor <- function(
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
   checkmate::assert_logical(return_raw, len = 1)
 
+  # Extract data from experiment object
+  expr_mat <- glyexp::get_expr_mat(exp)
+
+  # Call the underlying API
+  result <- gly_cor_(expr_mat, on, method, p_adj_method, return_raw, ...)
+
+  return(result)
+}
+
+#' @rdname gly_cor
+#' @export
+gly_cor_ <- function(
+  expr_mat,
+  on = "variable",
+  method = "pearson",
+  p_adj_method = "BH",
+  return_raw = FALSE,
+  ...
+) {
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_choice(on, c("variable", "sample"))
+  checkmate::assert_choice(method, c("pearson", "spearman"))
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(return_raw, len = 1)
+
   # Check if Hmisc is available
   if (!requireNamespace("Hmisc", quietly = TRUE)) {
     stop("Package 'Hmisc' is required for gly_cor. Please install it with: install.packages('Hmisc')")
   }
-
-  # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
 
   # Prepare data for correlation based on 'on' parameter
   # expr_mat is variables x samples (variables as rows, samples as columns)
@@ -123,5 +151,6 @@ gly_cor <- function(
     result_tbl$p_adj <- stats::p.adjust(result_tbl$p_value, method = p_adj_method)
   }
 
+  # Add S3 class
   structure(result_tbl, class = c("glystats_cor_res", "glystats_res", class(result_tbl)))
 }

@@ -88,3 +88,26 @@ test_that("gly_plsda validates inputs", {
     "Assertion on 'ncomp' failed"
   )
 })
+
+test_that("gly_plsda_ works correctly", {
+  skip_if_not_installed("mixOmics")
+
+  # Create test data with good Topliss ratio
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(60)) + 1, nrow = 6, ncol = 10)  # 6 vars, 10 samples
+  rownames(expr_mat) <- paste0("var", 1:6)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+  groups <- factor(rep(c("A", "B"), each = 5))
+
+  # Test function execution
+  suppressMessages({
+    result <- gly_plsda_(expr_mat, groups)
+  })
+
+  # Verify results
+  expect_s3_class(result, "glystats_plsda_res")
+  expect_type(result, "list")
+  expect_setequal(names(result), c("samples", "variables", "variance", "vip"))
+  expect_true(tibble::is_tibble(result$samples))
+  expect_equal(nrow(result$samples), 10)
+})
