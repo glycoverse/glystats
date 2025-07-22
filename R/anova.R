@@ -82,7 +82,7 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
   result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
 
   # Add S3 class to the entire list
-  structure(result, class = c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_anova_res", "glystats_res", class(result)))
 }
 
 #' @rdname gly_anova
@@ -114,7 +114,7 @@ gly_anova_ <- function(
   }
 
   # Add S3 class to the entire list
-  structure(result, class = c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_anova_res", "glystats_res", class(result)))
 }
 
 #' Kruskal-Wallis test for Differential Expression Analysis
@@ -207,7 +207,7 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
 
   # Add S3 class to the entire list
-  structure(result, class = c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_kruskal_res", "glystats_res", class(result)))
 }
 
 #' @rdname gly_kruskal
@@ -242,7 +242,7 @@ gly_kruskal_ <- function(
   }
 
   # Add S3 class to the entire list
-  structure(result, class = c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_kruskal_res", "glystats_res", class(result)))
 }
 
 # Internal helper functions for multi-group analysis (ANOVA and Kruskal-Wallis)

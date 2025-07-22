@@ -105,7 +105,7 @@ gly_limma <- function(
   result <- .process_results_add_info(result, exp, add_info)
 
   # Add S3 class
-  structure(result, class = c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_limma_res", "glystats_res", class(result)))
 }
 
 #' @rdname gly_limma
@@ -153,11 +153,7 @@ gly_limma_ <- function(
   }
 
   # Add S3 class
-  if (n_groups == 2) {
-    structure(result, class = c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res", class(result)))
-  } else {
-    structure(result, class = c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res", class(result)))
-  }
+  structure(result, class = c("glystats_limma_res", "glystats_res", class(result)))
 }
 
 # Internal helper functions for limma analysis

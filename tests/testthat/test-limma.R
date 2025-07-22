@@ -11,7 +11,7 @@ test_that("gly_limma works with limma method", {
   result <- suppressMessages(gly_limma(exp_2group))
 
   # Test core functionality
-  expect_s3_class(result, c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res"))
+  expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
   expect_equal(nrow(result), 10)
   expect_true("p_adj" %in% colnames(result))  # p_adj should exist
   expect_true("log2fc" %in% colnames(result))  # log2fc should exist
@@ -95,7 +95,7 @@ test_that("gly_limma works with real data", {
     glyexp::slice_sample_var(n = 20)  # Use reasonable subset for testing
 
   result <- suppressMessages(gly_limma(exp_2group))
-  expect_s3_class(result, c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res"))
+  expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
   expect_true(tibble::is_tibble(result))
   expect_true("log2fc" %in% colnames(result))
   expect_true("p_adj" %in% colnames(result))
@@ -113,7 +113,7 @@ test_that("gly_limma works with multi-group data", {
   result <- suppressMessages(gly_limma(exp_3group))
 
   # Test core functionality
-  expect_s3_class(result, c("glystats_dea_res_limma", "glystats_dea_res", "glystats_res"))
+  expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
   expect_true(tibble::is_tibble(result))
   expect_true("contrast" %in% colnames(result))  # Should have contrast column
   expect_true("log2fc" %in% colnames(result))

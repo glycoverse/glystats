@@ -79,7 +79,7 @@ gly_ttest <- function(
   result <- .process_results_add_info(result, exp, add_info)
 
   # Add S3 class
-  structure(result, class = c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_ttest_res", "glystats_res", class(result)))
 }
 
 #' @rdname gly_ttest
@@ -114,7 +114,7 @@ gly_ttest_ <- function(
   }
 
   # Add S3 class
-  structure(result, class = c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_ttest_res", "glystats_res", class(result)))
 }
 
 #' Wilcoxon rank-sum test for Differential Expression Analysis
@@ -205,7 +205,7 @@ gly_wilcox <- function(
   result <- .process_results_add_info(result, exp, add_info)
 
   # Add S3 class
-  structure(result, class = c("glystats_dea_res_wilcoxon", "glystats_dea_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_wilcox_res", "glystats_res", class(result)))
 }
 
 #' @rdname gly_wilcox
@@ -240,7 +240,7 @@ gly_wilcox_ <- function(
   }
 
   # Add S3 class
-  structure(result, class = c("glystats_dea_res_wilcoxon", "glystats_dea_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_wilcox_res", "glystats_res", class(result)))
 }
 
 # Internal helper functions for t-test and Wilcoxon test

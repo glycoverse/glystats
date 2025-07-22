@@ -9,7 +9,7 @@ test_that("gly_anova works with anova method", {
 
   # Test core functionality - should return a list with two tibbles and S3 class
   expect_type(result, "list")
-  expect_s3_class(result, c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res"))
+  expect_s3_class(result, c("glystats_anova_res", "glystats_res"))
   expect_named(result, c("main_test", "post_hoc_test"))
 
   # Test main_test tibble
@@ -36,7 +36,7 @@ test_that("gly_kruskal works with kruskal method", {
 
   # Test core functionality - should return a list with two tibbles and S3 class
   expect_type(result, "list")
-  expect_s3_class(result, c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res"))
+  expect_s3_class(result, c("glystats_kruskal_res", "glystats_res"))
   expect_named(result, c("main_test", "post_hoc_test"))
 
   # Test main_test tibble
@@ -98,7 +98,7 @@ test_that("gly_anova works with real data", {
   # This test uses the full test_gp_exp to ensure integration works
   result <- suppressMessages(gly_anova(test_gp_exp))
   expect_type(result, "list")
-  expect_s3_class(result, c("glystats_dea_res_anova", "glystats_dea_res", "glystats_res"))
+  expect_s3_class(result, c("glystats_anova_res", "glystats_res"))
   expect_named(result, c("main_test", "post_hoc_test"))
   expect_true(tibble::is_tibble(result$main_test))
   expect_true("post_hoc" %in% colnames(result$main_test))
@@ -109,7 +109,7 @@ test_that("gly_kruskal works with real data", {
   # This test uses the full test_gp_exp to ensure integration works
   result <- suppressMessages(gly_kruskal(test_gp_exp))
   expect_type(result, "list")
-  expect_s3_class(result, c("glystats_dea_res_kruskal", "glystats_dea_res", "glystats_res"))
+  expect_s3_class(result, c("glystats_kruskal_res", "glystats_res"))
   expect_named(result, c("main_test", "post_hoc_test"))
   expect_true(tibble::is_tibble(result$main_test))
   expect_true("post_hoc" %in% colnames(result$main_test))
@@ -130,7 +130,7 @@ test_that("gly_anova_ works correctly", {
   })
 
   # Verify results
-  expect_s3_class(result, "glystats_dea_res_anova")
+  expect_s3_class(result, "glystats_anova_res")
   expect_type(result, "list")
   expect_named(result, c("main_test", "post_hoc_test"))
   expect_true(tibble::is_tibble(result$main_test))
@@ -151,7 +151,7 @@ test_that("gly_kruskal_ works correctly", {
   })
 
   # Verify results
-  expect_s3_class(result, "glystats_dea_res_kruskal")
+  expect_s3_class(result, "glystats_kruskal_res")
   expect_type(result, "list")
   expect_named(result, c("main_test", "post_hoc_test"))
   expect_true(tibble::is_tibble(result$main_test))

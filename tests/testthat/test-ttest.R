@@ -8,7 +8,7 @@ test_that("gly_ttest works with t-test method", {
   result <- suppressMessages(gly_ttest(exp_2group))
 
   # Test core functionality
-  expect_s3_class(result, c("glystats_dea_res_ttest", "glystats_dea_res", "glystats_res"))
+  expect_s3_class(result, c("glystats_ttest_res", "glystats_res"))
   expect_equal(nrow(result), 10)
   expect_true("p_adj" %in% colnames(result))  # p_adj should exist
   expect_true("log2fc" %in% colnames(result))  # log2fc should exist
@@ -25,7 +25,7 @@ test_that("gly_wilcox works with wilcoxon method", {
   result <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group)))
 
   # Test core functionality
-  expect_s3_class(result, c("glystats_dea_res_wilcoxon", "glystats_dea_res", "glystats_res"))
+  expect_s3_class(result, c("glystats_wilcox_res", "glystats_res"))
   expect_equal(nrow(result), 10)
   expect_true("log2fc" %in% colnames(result))  # Wilcoxon should now have log2fc
   expect_type(result$log2fc, "double")  # log2fc should be numeric
@@ -45,7 +45,7 @@ test_that("gly_ttest_ works correctly", {
   })
 
   # Verify results
-  expect_s3_class(result, "glystats_dea_res_ttest")
+  expect_s3_class(result, "glystats_ttest_res")
   expect_true(nrow(result) > 0)
   expect_true("log2fc" %in% colnames(result))
   expect_equal(nrow(result), 10)
@@ -65,7 +65,7 @@ test_that("gly_wilcox_ works correctly", {
   })
 
   # Verify results
-  expect_s3_class(result, "glystats_dea_res_wilcoxon")
+  expect_s3_class(result, "glystats_wilcox_res")
   expect_true(nrow(result) > 0)
   expect_true("log2fc" %in% colnames(result))
   expect_equal(nrow(result), 10)
