@@ -1,3 +1,9 @@
+# glystats 0.2.1
+
+## Minor improvements
+
+* Change S3 class of the results of `gly_anova()`, `gly_kruskal()`, `gly_limma()`, `gly_ttest()`, and `gly_wilcox()`.
+
 # glystats 0.2.0
 
 ## Breaking changes
