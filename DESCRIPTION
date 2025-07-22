@@ -45,7 +45,8 @@ Imports:
     broom,
     purrr,
     stringr,
-    withr
+    withr,
+    survival
 Depends: 
     R (>= 2.10)
 Remotes:
