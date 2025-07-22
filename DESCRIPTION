@@ -37,7 +37,6 @@ Imports:
     dplyr,
     tidyselect,
     magrittr,
-    parameters,
     janitor,
     checkmate,
     cli,

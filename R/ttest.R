@@ -291,8 +291,7 @@ gly_wilcox_ <- function(
     test_result = mod_list
   ) %>%
     dplyr::mutate(
-      params = purrr::map(.data$test_result, ~ parameters::model_parameters(.x)),
-      params = purrr::map(.data$params, ~ parameters::standardize_names(.x)),
+      params = purrr::map(.data$test_result, ~ broom::tidy(.x)),
     ) %>%
     dplyr::select(all_of(c("variable", "params"))) %>%
     tidyr::unnest(all_of("params")) %>%
@@ -300,7 +299,7 @@ gly_wilcox_ <- function(
     janitor::clean_names()
 
   if (!is.null(p_adj_method)) {
-    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
+    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p_value, method = p_adj_method))
   }
 
   # Calculate log2 fold change

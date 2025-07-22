@@ -396,10 +396,7 @@ gly_kruskal_ <- function(
     variable = var_names,
     test_result = main_test_raw
   ) %>%
-    dplyr::mutate(
-      params = purrr::map(.data$test_result, ~ parameters::model_parameters(.x)),
-      params = purrr::map(.data$params, ~ parameters::standardize_names(.x)),
-    ) %>%
+    dplyr::mutate(params = purrr::map(.data$test_result, ~ broom::tidy(.x))) %>%
     dplyr::select(all_of(c("variable", "params"))) %>%
     tidyr::unnest(all_of("params")) %>%
     dplyr::ungroup() %>%
@@ -409,11 +406,11 @@ gly_kruskal_ <- function(
   # For Kruskal-Wallis, keep all results (there's only one row per variable anyway)
   if (identical(.f, stats::aov)) {
     result_tbl <- result_tbl %>%
-      dplyr::filter(.data$parameter == "group")
+      dplyr::filter(.data$term == "group")
   }
 
   if (!is.null(p_adj_method)) {
-    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
+    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p_value, method = p_adj_method))
   }
 
   result_tbl

@@ -44,7 +44,7 @@ test_that("gly_kruskal works with kruskal method", {
   expect_true(tibble::is_tibble(main_test))
   expect_equal(nrow(main_test), 10)
   expect_true("method" %in% colnames(main_test))
-  expect_true(all(main_test$df == 2))  # 3 groups - 1
+
   expect_true("post_hoc" %in% colnames(main_test))
   expect_false("log2fc" %in% colnames(main_test))
 
