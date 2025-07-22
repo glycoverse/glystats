@@ -1,3 +1,9 @@
+# glystats 0.2.2
+
+## Bug fixes
+
+* Fix a bug in test.
+
 # glystats 0.2.1
 
 ## Minor improvements
