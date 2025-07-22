@@ -2,6 +2,8 @@
 
 export(gly_anova)
 export(gly_anova_)
+export(gly_consensus_clustering)
+export(gly_consensus_clustering_)
 export(gly_cor)
 export(gly_cor_)
 export(gly_enrich_go)
