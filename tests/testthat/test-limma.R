@@ -260,7 +260,7 @@ test_that("gly_limma_ works correctly", {
   })
 
   # Verify results
-  expect_s3_class(result, "glystats_dea_res_limma")
+  expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
   expect_true(tibble::is_tibble(result))
   expect_true("log2fc" %in% colnames(result))
   expect_true("p" %in% colnames(result))  # limma uses "p" not "p_value"
