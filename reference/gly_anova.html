@@ -13,7 +13,7 @@ P-values are adjusted for multiple testing using the method specified by p_adj_m
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,6 +22,7 @@ P-values are adjusted for multiple testing using the method specified by p_adj_m
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -52,7 +53,9 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  return_raw <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">gly_anova_</span><span class="op">(</span><span class="va">expr_mat</span>, <span class="va">groups</span>, p_adj_method <span class="op">=</span> <span class="st">"BH"</span>, return_raw <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,7 +79,8 @@ If NULL, no adjustment is performed.</p></dd>
 
 <dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
 <dd><p>A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.</p></dd>
+will be added to the result tibble. If FALSE, only the statistical results are returned.
+Only applicable to <code>gly_anova()</code>.</p></dd>
 
 
 <dt id="arg-return-raw">return_raw<a class="anchor" aria-label="anchor" href="#arg-return-raw"></a></dt>
@@ -87,16 +91,31 @@ If TRUE, returns raw statistical model objects as a list.</p></dd>
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://rdrr.io/r/stats/aov.html" class="external-link">stats::aov()</a></code>.</p></dd>
 
+
+<dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
+<dd><p>A numeric matrix with variables as rows and samples as columns.</p></dd>
+
+
+<dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
+<dd><p>A factor vector specifying group membership for each sample.
+Must have at least 2 levels.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble with ANOVA results and a post_hoc column indicating significant group pairs,
-or a list of <code>aov</code> models and <code>TukeyHSD</code> objects if <code>return_raw</code> is TRUE.</p>
+    <p>A list containing two tibbles: <code>main_test</code> with ANOVA results and a post_hoc column
+indicating significant group pairs, and <code>post_hoc_test</code> with detailed pairwise
+comparison results in long format (variable, group1, group2, p_value, p_adj columns).
+If <code>return_raw</code> is TRUE, returns a list of <code>aov</code> models and <code>TukeyHSD</code> objects.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The function performs log2 transformation on the expression data (log2(x + 1)) before
 statistical testing. At least 2 groups are required in the grouping variable.</p>
+<p><code>gly_anova()</code> is the top-level API that works with <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects and supports
+the <code>add_info</code> parameter for joining experiment metadata.</p>
+<p><code>gly_anova_()</code> is the underlying API that works with matrices and factor vectors directly,
+providing more flexibility for users who don't use the glyexp package.</p>
 <p><strong>Post-hoc Test:</strong>
 Tukey's HSD test for pairwise comparisons (<code><a href="https://rdrr.io/r/stats/TukeyHSD.html" class="external-link">stats::TukeyHSD()</a></code>) is performed
 for variables with significant main effects (p_adj &lt; 0.05).</p>

@@ -13,7 +13,7 @@ power between two groups."><meta property="og:image" content="https://glycoverse
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,6 +22,7 @@ power between two groups."><meta property="og:image" content="https://glycoverse
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -51,7 +52,9 @@ power between two groups.</p>
 <span>  pos_class <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  return_raw <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">gly_roc_</span><span class="op">(</span><span class="va">expr_mat</span>, <span class="va">groups</span>, pos_class <span class="op">=</span> <span class="cn">NULL</span>, return_raw <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,12 +79,22 @@ used as the positive class.</p></dd>
 
 <dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
 <dd><p>A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.</p></dd>
+will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
+Only applicable to <code>gly_roc()</code>.</p></dd>
 
 
 <dt id="arg-return-raw">return_raw<a class="anchor" aria-label="anchor" href="#arg-return-raw"></a></dt>
 <dd><p>A logical value. If FALSE (default), returns processed results with
 AUC values and threshold coordinates. If TRUE, returns raw pROC objects as a list.</p></dd>
+
+
+<dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
+<dd><p>A numeric matrix with variables as rows and samples as columns.</p></dd>
+
+
+<dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
+<dd><p>A factor vector specifying group membership for each sample.
+Must have exactly 2 levels.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -102,6 +115,10 @@ If <code>return_raw</code> is TRUE, returns a list of <code>pROC</code> objects.
 and the binary group labels as response.</p>
 <p>The function requires exactly 2 groups in the specified grouping variable. If more than
 2 groups are present, an error will be thrown.</p>
+<p><code>gly_roc()</code> is the top-level API that works with <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects and supports
+the <code>add_info</code> parameter for joining experiment metadata.</p>
+<p><code>gly_roc_()</code> is the underlying API that works with matrices and factor vectors directly,
+providing more flexibility for users who don't use the glyexp package.</p>
 <p><strong>Underlying Function:</strong></p><ul><li><p>ROC analysis is performed using <code><a href="https://rdrr.io/pkg/pROC/man/roc.html" class="external-link">pROC::roc()</a></code></p></li>
 <li><p>Coordinates are extracted using <code><a href="https://rdrr.io/pkg/pROC/man/coords.html" class="external-link">pROC::coords()</a></code></p></li>
 </ul></div>
