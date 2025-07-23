@@ -10,11 +10,10 @@ gly_kruskal(
   group_col = "group",
   p_adj_method = "BH",
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
-gly_kruskal_(expr_mat, groups, p_adj_method = "BH", return_raw = FALSE, ...)
+gly_kruskal_(expr_mat, groups, p_adj_method = "BH", ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -30,9 +29,6 @@ If NULL, no adjustment is performed.}
 will be added to the result tibble. If FALSE, only the statistical results are returned.
 Only applicable to \code{gly_kruskal()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw statistical model objects as a list.}
-
 \item{...}{Additional arguments passed to \code{stats::kruskal.test()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
@@ -41,10 +37,14 @@ If TRUE, returns raw statistical model objects as a list.}
 Must have at least 2 levels.}
 }
 \value{
-A list containing two tibbles: \code{main_test} with Kruskal-Wallis test results and a post_hoc column
-indicating significant group pairs, and \code{post_hoc_test} with detailed pairwise
-comparison results in long format (variable, group1, group2, p_value, p_adj columns).
-If \code{return_raw} is TRUE, returns a list of \code{kruskal.test} objects and \code{dunnTest} objects.
+A list containing four elements:
+\itemize{
+\item \code{main_test}: A tibble with Kruskal-Wallis test results and a \code{post_hoc} column indicating significant group pairs.
+\item \code{post_hoc_test}: A tibble with detailed pairwise comparison results in long format
+(variable, group1, group2, p_value, p_adj columns).
+\item \code{raw_main_test}: A list of raw \code{kruskal.test} objects.
+\item \code{raw_post_hoc_test}: A list of raw \code{dunnTest} objects.
+}
 }
 \description{
 Perform Kruskal-Wallis test for glycomics or glycoproteomics data.

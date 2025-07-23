@@ -17,8 +17,6 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #'  Only applicable to `gly_anova()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::aov()`.
 #'
 #' @details
@@ -36,25 +34,21 @@
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A list containing two tibbles: `main_test` with ANOVA results and a post_hoc column
-#' indicating significant group pairs, and `post_hoc_test` with detailed pairwise
-#' comparison results in long format (variable, group1, group2, p_value, p_adj columns).
-#' If `return_raw` is TRUE, returns a list of `aov` models and `TukeyHSD` objects.
+#' A list containing four elements:
+#'   - `main_test`: A tibble with ANOVA results and a `post_hoc` column indicating significant group pairs.
+#'   - `post_hoc_test`: A tibble with detailed pairwise comparison results in long format
+#'     (variable, group1, group2, p_value, p_adj columns).
+#'   - `raw_main_test`: A list of raw `aov` model objects.
+#'   - `raw_post_hoc_test`: A list of raw `TukeyHSD` objects.
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
-#'
-#' @importFrom magrittr %>%
-#' @importFrom rlang .data
-#' @importFrom tidyselect all_of
-#'
 #' @export
-gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
+gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, ...) {
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_string(group_col)
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -71,12 +65,7 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
   groups <- group_info$groups
 
   # Call the underlying API
-  result <- gly_anova_(expr_mat, groups, p_adj_method, return_raw, ...)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
+  result <- gly_anova_(expr_mat, groups, p_adj_method, ...)
 
   # Process results with add_info logic for main_test
   result$main_test <- .process_tibble_add_info(result$main_test, exp, add_info)
@@ -89,27 +78,38 @@ gly_anova_ <- function(
   expr_mat,
   groups,
   p_adj_method = "BH",
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Validate group count
   if (length(levels(groups)) < 2) {
     cli::cli_abort("groups must have at least 2 levels for ANOVA")
   }
 
-  # Perform ANOVA
-  result <- .gly_dea_multi_groups(expr_mat, groups, stats::aov, stats::TukeyHSD, p_adj_method, return_raw, ...)
+  # Prepare data
+  data <- .prepare_multi_group_data(expr_mat, groups)
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(result)
-  }
+  # Generate raw results
+  raw_main_test <- .generate_raw_main_results(data, stats::aov, ...)
+  raw_post_hoc_test <- .generate_raw_posthoc_results(raw_main_test, data, stats::aov, p_adj_method)
+
+  # Tibblify results
+  main_test <- .tibblify_main_test_results(raw_main_test, stats::aov, p_adj_method)
+  post_hoc_vec <- .format_posthoc_results(raw_post_hoc_test, stats::aov, main_test$variable)
+  main_test$post_hoc <- post_hoc_vec
+  post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
+
+  # Assemble final result
+  result <- list(
+    main_test = main_test,
+    post_hoc_test = post_hoc_test,
+    raw_main_test = raw_main_test,
+    raw_post_hoc_test = raw_post_hoc_test
+  )
 
   # Add S3 class to the entire list
   structure(result, class = c("glystats_anova_res", "glystats_res", class(result)))
@@ -134,8 +134,6 @@ gly_anova_ <- function(
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #'  Only applicable to `gly_kruskal()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::kruskal.test()`.
 #'
 #' @section Required packages:
@@ -156,25 +154,21 @@ gly_anova_ <- function(
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A list containing two tibbles: `main_test` with Kruskal-Wallis test results and a post_hoc column
-#' indicating significant group pairs, and `post_hoc_test` with detailed pairwise
-#' comparison results in long format (variable, group1, group2, p_value, p_adj columns).
-#' If `return_raw` is TRUE, returns a list of `kruskal.test` objects and `dunnTest` objects.
+#' A list containing four elements:
+#'   - `main_test`: A tibble with Kruskal-Wallis test results and a `post_hoc` column indicating significant group pairs.
+#'   - `post_hoc_test`: A tibble with detailed pairwise comparison results in long format
+#'     (variable, group1, group2, p_value, p_adj columns).
+#'   - `raw_main_test`: A list of raw `kruskal.test` objects.
+#'   - `raw_post_hoc_test`: A list of raw `dunnTest` objects.
 #'
 #' @seealso [stats::kruskal.test()], [FSA::dunnTest()]
-#'
-#' @importFrom magrittr %>%
-#' @importFrom rlang .data
-#' @importFrom tidyselect all_of
-#'
 #' @export
-gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, return_raw = FALSE, ...) {
+gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, ...) {
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_string(group_col)
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Check package availability
   .check_pkg_available("FSA")
@@ -194,12 +188,7 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   groups <- group_info$groups
 
   # Call the underlying API
-  result <- gly_kruskal_(expr_mat, groups, p_adj_method, return_raw, ...)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
+  result <- gly_kruskal_(expr_mat, groups, p_adj_method, ...)
 
   # Process results with add_info logic for main_test
   result$main_test <- .process_tibble_add_info(result$main_test, exp, add_info)
@@ -212,7 +201,6 @@ gly_kruskal_ <- function(
   expr_mat,
   groups,
   p_adj_method = "BH",
-  return_raw = FALSE,
   ...
 ) {
   # Check package availability
@@ -222,38 +210,38 @@ gly_kruskal_ <- function(
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Validate group count
   if (length(levels(groups)) < 2) {
     cli::cli_abort("groups must have at least 2 levels for Kruskal-Wallis test")
   }
 
-  # Perform Kruskal-Wallis test
-  result <- .gly_dea_multi_groups(expr_mat, groups, stats::kruskal.test, FSA::dunnTest, p_adj_method, return_raw, ...)
+  # Prepare data
+  data <- .prepare_multi_group_data(expr_mat, groups)
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(result)
-  }
+  # Generate raw results
+  raw_main_test <- .generate_raw_main_results(data, stats::kruskal.test, ...)
+  raw_post_hoc_test <- .generate_raw_posthoc_results(raw_main_test, data, stats::kruskal.test, p_adj_method)
+
+  # Tibblify results
+  main_test <- .tibblify_main_test_results(raw_main_test, stats::kruskal.test, p_adj_method)
+  post_hoc_vec <- .format_posthoc_results(raw_post_hoc_test, stats::kruskal.test, main_test$variable)
+  main_test$post_hoc <- post_hoc_vec
+  post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::kruskal.test)
+
+  # Assemble final result
+  result <- list(
+    main_test = main_test,
+    post_hoc_test = post_hoc_test,
+    raw_main_test = raw_main_test,
+    raw_post_hoc_test = raw_post_hoc_test
+  )
 
   # Add S3 class to the entire list
   structure(result, class = c("glystats_kruskal_res", "glystats_res", class(result)))
 }
 
 # Internal helper functions for multi-group analysis (ANOVA and Kruskal-Wallis)
-
-# Multi-group analysis function
-.gly_dea_multi_groups <- function(expr_mat, groups, .f, .ph, p_adj_method, return_raw = FALSE, ...) {
-  if (length(levels(groups)) < 2) {
-    cli::cli_abort("Multi-group analysis requires at least 2 groups")
-  }
-  mod_list <- .gly_dea_multi_groups_raw(expr_mat, groups, .f, p_adj_method, ...)
-  if (return_raw) {
-    return(mod_list)
-  }
-  .gly_dea_multi_groups_tibblify(mod_list, .f, p_adj_method)
-}
 
 # Helper function to perform raw post-hoc tests (returns raw objects)
 .perform_raw_posthoc_test <- function(data_nested, .f) {
@@ -356,33 +344,7 @@ gly_kruskal_ <- function(
     dplyr::mutate(log_value = log2(.data$value + 1))
 }
 
-# Generate raw model list for multi-group analysis
-.gly_dea_multi_groups_raw <- function(expr_mat, groups, .f, p_adj_method, ...) {
-  data <- .prepare_multi_group_data(expr_mat, groups)
-  main_test_list <- .generate_raw_main_results(data, .f, ...)
-  posthoc_raw <- .generate_raw_posthoc_results(main_test_list, data, .f, p_adj_method)
 
-  list(
-    main_test = main_test_list,
-    post_hoc = posthoc_raw
-  )
-}
-
-# Convert raw model list to tibble for multi-group analysis
-.gly_dea_multi_groups_tibblify <- function(mod_list, .f, p_adj_method) {
-  main_test_tbl <- .tibblify_main_test_results(mod_list$main_test, .f, p_adj_method)
-  post_hoc_vec <- .format_posthoc_results(mod_list$post_hoc, .f, main_test_tbl$variable)
-  main_test_tbl$post_hoc <- post_hoc_vec
-
-  # Create post-hoc test tibble in long format
-  post_hoc_test_tbl <- .tibblify_posthoc_results(mod_list$post_hoc, .f)
-
-  # Return list with both tibbles
-  list(
-    main_test = main_test_tbl,
-    post_hoc_test = post_hoc_test_tbl
-  )
-}
 
 # Helper function to convert main test raw results to tibble
 .tibblify_main_test_results <- function(main_test_raw, .f, p_adj_method) {

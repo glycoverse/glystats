@@ -5,16 +5,9 @@
 \alias{gly_anova_}
 \title{One-way ANOVA for Differential Expression Analysis}
 \usage{
-gly_anova(
-  exp,
-  group_col = "group",
-  p_adj_method = "BH",
-  add_info = TRUE,
-  return_raw = FALSE,
-  ...
-)
+gly_anova(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, ...)
 
-gly_anova_(expr_mat, groups, p_adj_method = "BH", return_raw = FALSE, ...)
+gly_anova_(expr_mat, groups, p_adj_method = "BH", ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -30,9 +23,6 @@ If NULL, no adjustment is performed.}
 will be added to the result tibble. If FALSE, only the statistical results are returned.
 Only applicable to \code{gly_anova()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw statistical model objects as a list.}
-
 \item{...}{Additional arguments passed to \code{stats::aov()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
@@ -41,10 +31,14 @@ If TRUE, returns raw statistical model objects as a list.}
 Must have at least 2 levels.}
 }
 \value{
-A list containing two tibbles: \code{main_test} with ANOVA results and a post_hoc column
-indicating significant group pairs, and \code{post_hoc_test} with detailed pairwise
-comparison results in long format (variable, group1, group2, p_value, p_adj columns).
-If \code{return_raw} is TRUE, returns a list of \code{aov} models and \code{TukeyHSD} objects.
+A list containing four elements:
+\itemize{
+\item \code{main_test}: A tibble with ANOVA results and a \code{post_hoc} column indicating significant group pairs.
+\item \code{post_hoc_test}: A tibble with detailed pairwise comparison results in long format
+(variable, group1, group2, p_value, p_adj columns).
+\item \code{raw_main_test}: A list of raw \code{aov} model objects.
+\item \code{raw_post_hoc_test}: A list of raw \code{TukeyHSD} objects.
+}
 }
 \description{
 Perform one-way ANOVA for glycomics or glycoproteomics data.

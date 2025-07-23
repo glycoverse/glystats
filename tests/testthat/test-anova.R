@@ -10,7 +10,7 @@ test_that("gly_anova works with anova method", {
   # Test core functionality - should return a list with two tibbles and S3 class
   expect_type(result, "list")
   expect_s3_class(result, c("glystats_anova_res", "glystats_res"))
-  expect_named(result, c("main_test", "post_hoc_test"))
+  expect_named(result, c("main_test", "post_hoc_test", "raw_main_test", "raw_post_hoc_test"))
 
   # Test main_test tibble
   main_test <- result$main_test
@@ -37,7 +37,7 @@ test_that("gly_kruskal works with kruskal method", {
   # Test core functionality - should return a list with two tibbles and S3 class
   expect_type(result, "list")
   expect_s3_class(result, c("glystats_kruskal_res", "glystats_res"))
-  expect_named(result, c("main_test", "post_hoc_test"))
+  expect_named(result, c("main_test", "post_hoc_test", "raw_main_test", "raw_post_hoc_test"))
 
   # Test main_test tibble
   main_test <- result$main_test
@@ -99,7 +99,7 @@ test_that("gly_anova works with real data", {
   result <- suppressMessages(gly_anova(test_gp_exp))
   expect_type(result, "list")
   expect_s3_class(result, c("glystats_anova_res", "glystats_res"))
-  expect_named(result, c("main_test", "post_hoc_test"))
+  expect_named(result, c("main_test", "post_hoc_test", "raw_main_test", "raw_post_hoc_test"))
   expect_true(tibble::is_tibble(result$main_test))
   expect_true("post_hoc" %in% colnames(result$main_test))
   expect_true(tibble::is_tibble(result$post_hoc_test))
@@ -110,7 +110,7 @@ test_that("gly_kruskal works with real data", {
   result <- suppressMessages(gly_kruskal(test_gp_exp))
   expect_type(result, "list")
   expect_s3_class(result, c("glystats_kruskal_res", "glystats_res"))
-  expect_named(result, c("main_test", "post_hoc_test"))
+  expect_named(result, c("main_test", "post_hoc_test", "raw_main_test", "raw_post_hoc_test"))
   expect_true(tibble::is_tibble(result$main_test))
   expect_true("post_hoc" %in% colnames(result$main_test))
   expect_true(tibble::is_tibble(result$post_hoc_test))
@@ -132,7 +132,7 @@ test_that("gly_anova_ works correctly", {
   # Verify results
   expect_s3_class(result, "glystats_anova_res")
   expect_type(result, "list")
-  expect_named(result, c("main_test", "post_hoc_test"))
+  expect_named(result, c("main_test", "post_hoc_test", "raw_main_test", "raw_post_hoc_test"))
   expect_true(tibble::is_tibble(result$main_test))
   expect_equal(nrow(result$main_test), 10)
 })
@@ -153,7 +153,7 @@ test_that("gly_kruskal_ works correctly", {
   # Verify results
   expect_s3_class(result, "glystats_kruskal_res")
   expect_type(result, "list")
-  expect_named(result, c("main_test", "post_hoc_test"))
+  expect_named(result, c("main_test", "post_hoc_test", "raw_main_test", "raw_post_hoc_test"))
   expect_true(tibble::is_tibble(result$main_test))
   expect_equal(nrow(result$main_test), 10)
 })
