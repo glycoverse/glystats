@@ -11,18 +11,10 @@ gly_ttest(
   p_adj_method = "BH",
   ref_group = NULL,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
-gly_ttest_(
-  expr_mat,
-  groups,
-  p_adj_method = "BH",
-  ref_group = NULL,
-  return_raw = FALSE,
-  ...
-)
+gly_ttest_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -41,9 +33,6 @@ If NULL (default), the first level of the group factor is used as the reference.
 will be added to the result tibble. If FALSE, only the statistical results are returned.
 Only applicable to \code{gly_ttest()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw statistical model objects as a list.}
-
 \item{...}{Additional arguments passed to \code{stats::t.test()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
@@ -52,8 +41,12 @@ If TRUE, returns raw statistical model objects as a list.}
 Must have exactly 2 levels.}
 }
 \value{
-A tibble with t-test results including log2 fold change (log2fc),
-or a list of \code{t.test} models if \code{return_raw} is TRUE.
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A tibble with t-test results including log2 fold change (log2fc)
+\item \code{raw_result}: A list of \code{t.test} model objects
+The list has classes \code{glystats_ttest_res} and \code{glystats_res}.
+}
 }
 \description{
 Perform two-sample t-test for glycomics or glycoproteomics data.

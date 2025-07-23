@@ -9,10 +9,17 @@ test_that("gly_ttest works with t-test method", {
 
   # Test core functionality
   expect_s3_class(result, c("glystats_ttest_res", "glystats_res"))
-  expect_equal(nrow(result), 10)
-  expect_true("p_adj" %in% colnames(result))  # p_adj should exist
-  expect_true("log2fc" %in% colnames(result))  # log2fc should exist
-  expect_type(result$log2fc, "double")  # log2fc should be numeric
+  expect_type(result, "list")
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+  expect_equal(nrow(result$tidy_result), 10)
+  expect_true("p_adj" %in% colnames(result$tidy_result))  # p_adj should exist
+  expect_true("log2fc" %in% colnames(result$tidy_result))  # log2fc should exist
+  expect_type(result$tidy_result$log2fc, "double")  # log2fc should be numeric
+
+  # Test raw_result
+  expect_type(result$raw_result, "list")
+  expect_equal(length(result$raw_result), 10)
+  expect_true(all(purrr::map_lgl(result$raw_result, ~ inherits(.x, "htest"))))
 })
 
 test_that("gly_wilcox works with wilcoxon method", {
@@ -26,9 +33,16 @@ test_that("gly_wilcox works with wilcoxon method", {
 
   # Test core functionality
   expect_s3_class(result, c("glystats_wilcox_res", "glystats_res"))
-  expect_equal(nrow(result), 10)
-  expect_true("log2fc" %in% colnames(result))  # Wilcoxon should now have log2fc
-  expect_type(result$log2fc, "double")  # log2fc should be numeric
+  expect_type(result, "list")
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+  expect_equal(nrow(result$tidy_result), 10)
+  expect_true("log2fc" %in% colnames(result$tidy_result))  # Wilcoxon should now have log2fc
+  expect_type(result$tidy_result$log2fc, "double")  # log2fc should be numeric
+
+  # Test raw_result
+  expect_type(result$raw_result, "list")
+  expect_equal(length(result$raw_result), 10)
+  expect_true(all(purrr::map_lgl(result$raw_result, ~ inherits(.x, "htest"))))
 })
 
 test_that("gly_ttest_ works correctly", {
@@ -46,9 +60,11 @@ test_that("gly_ttest_ works correctly", {
 
   # Verify results
   expect_s3_class(result, "glystats_ttest_res")
-  expect_true(nrow(result) > 0)
-  expect_true("log2fc" %in% colnames(result))
-  expect_equal(nrow(result), 10)
+  expect_type(result, "list")
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+  expect_true(nrow(result$tidy_result) > 0)
+  expect_true("log2fc" %in% colnames(result$tidy_result))
+  expect_equal(nrow(result$tidy_result), 10)
 })
 
 test_that("gly_wilcox_ works correctly", {
@@ -66,9 +82,11 @@ test_that("gly_wilcox_ works correctly", {
 
   # Verify results
   expect_s3_class(result, "glystats_wilcox_res")
-  expect_true(nrow(result) > 0)
-  expect_true("log2fc" %in% colnames(result))
-  expect_equal(nrow(result), 10)
+  expect_type(result, "list")
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+  expect_true(nrow(result$tidy_result) > 0)
+  expect_true("log2fc" %in% colnames(result$tidy_result))
+  expect_equal(nrow(result$tidy_result), 10)
 })
 
 test_that("gly_ttest and gly_wilcox basic functionality works", {
@@ -128,8 +146,8 @@ test_that("gly_ttest ref_group parameter works", {
   result_ref_c <- suppressMessages(gly_ttest(exp_2group, ref_group = "C"))
 
   # Check that log2fc values are negated when reference group changes
-  expect_equal(result_default$log2fc, -result_ref_h$log2fc, tolerance = 1e-10)
-  expect_equal(result_default$log2fc, result_ref_c$log2fc, tolerance = 1e-10)
+  expect_equal(result_default$tidy_result$log2fc, -result_ref_h$tidy_result$log2fc, tolerance = 1e-10)
+  expect_equal(result_default$tidy_result$log2fc, result_ref_c$tidy_result$log2fc, tolerance = 1e-10)
 
   # Test invalid ref_group
   expect_error(suppressMessages(gly_ttest(exp_2group, ref_group = "invalid")),
@@ -152,8 +170,8 @@ test_that("gly_wilcox ref_group parameter works", {
   result_ref_m <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group, ref_group = "M")))
 
   # Check that log2fc values are negated when reference group changes
-  expect_equal(result_default$log2fc, -result_ref_y$log2fc, tolerance = 1e-10)
-  expect_equal(result_default$log2fc, result_ref_m$log2fc, tolerance = 1e-10)
+  expect_equal(result_default$tidy_result$log2fc, -result_ref_y$tidy_result$log2fc, tolerance = 1e-10)
+  expect_equal(result_default$tidy_result$log2fc, result_ref_m$tidy_result$log2fc, tolerance = 1e-10)
 
   # Test invalid ref_group
   expect_error(suppressMessages(gly_wilcox(exp_2group, ref_group = "invalid")),

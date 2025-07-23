@@ -16,9 +16,9 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
   # Test gly_ttest
   result_ttest_no_info <- suppressMessages(gly_ttest(exp_2group, add_info = FALSE))
   result_ttest_with_info <- suppressMessages(gly_ttest(exp_2group, add_info = TRUE))
-  
-  expect_true(ncol(result_ttest_no_info) < ncol(result_ttest_with_info))
-  expect_true("variable" %in% colnames(result_ttest_with_info))
+
+  expect_true(ncol(result_ttest_no_info$tidy_result) < ncol(result_ttest_with_info$tidy_result))
+  expect_true("variable" %in% colnames(result_ttest_with_info$tidy_result))
 })
 
 test_that("add_info parameter works correctly for functions returning tibbles with sample column", {

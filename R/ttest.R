@@ -18,8 +18,6 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #'  Only applicable to `gly_ttest()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::t.test()`.
 #'
 #' @details
@@ -32,8 +30,10 @@
 #' `gly_ttest_()` is the underlying API that works with matrices and factor vectors directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
-#' @returns A tibble with t-test results including log2 fold change (log2fc),
-#'   or a list of `t.test` models if `return_raw` is TRUE.
+#' @returns A list with two elements:
+#' - `tidy_result`: A tibble with t-test results including log2 fold change (log2fc)
+#' - `raw_result`: A list of `t.test` model objects
+#' The list has classes `glystats_ttest_res` and `glystats_res`.
 #' @seealso [stats::t.test()]
 #' @export
 gly_ttest <- function(
@@ -42,7 +42,6 @@ gly_ttest <- function(
   p_adj_method = "BH",
   ref_group = NULL,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -50,7 +49,6 @@ gly_ttest <- function(
   checkmate::assert_string(group_col)
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -68,15 +66,11 @@ gly_ttest <- function(
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Call the underlying API
-  result <- gly_ttest_(expr_mat, groups, p_adj_method, ref_group, return_raw, ...)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
+  result <- gly_ttest_(expr_mat, groups, p_adj_method, ref_group, ...)
 
   # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_ttest
@@ -86,14 +80,12 @@ gly_ttest_ <- function(
   groups,
   p_adj_method = "BH",
   ref_group = NULL,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Validate group count
   if (length(levels(groups)) != 2) {
@@ -103,15 +95,10 @@ gly_ttest_ <- function(
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Perform t-test
-  result <- .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, ref_group, return_raw, ...)
-
-  # Return raw results if requested
-  if (return_raw) {
-    return(result)
-  }
+  result <- .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, ref_group, ...)
 
   # Add S3 class
-  structure(result, class = c("glystats_ttest_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_ttest_res", "glystats_res"))
 }
 
 #' Wilcoxon rank-sum test for Differential Expression Analysis
@@ -134,8 +121,6 @@ gly_ttest_ <- function(
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #'  Only applicable to `gly_wilcox()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw statistical model objects as a list.
 #' @param ... Additional arguments passed to `stats::wilcox.test()`.
 #'
 #' @details
@@ -149,8 +134,10 @@ gly_ttest_ <- function(
 #' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @returns
-#' A tibble with Wilcoxon test results including log2 fold change (log2fc),
-#' or a list of `wilcox.test` models if `return_raw` is TRUE.
+#' A list with two elements:
+#' - `tidy_result`: A tibble with Wilcoxon test results including log2 fold change (log2fc)
+#' - `raw_result`: A list of `wilcox.test` model objects
+#' The list has classes `glystats_wilcox_res` and `glystats_res`.
 #'
 #' @seealso [stats::wilcox.test()]
 #'
@@ -165,7 +152,6 @@ gly_wilcox <- function(
   p_adj_method = "BH",
   ref_group = NULL,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -173,7 +159,6 @@ gly_wilcox <- function(
   checkmate::assert_string(group_col)
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -191,15 +176,11 @@ gly_wilcox <- function(
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Call the underlying API
-  result <- gly_wilcox_(expr_mat, groups, p_adj_method, ref_group, return_raw, ...)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
+  result <- gly_wilcox_(expr_mat, groups, p_adj_method, ref_group, ...)
 
   # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_wilcox
@@ -209,14 +190,12 @@ gly_wilcox_ <- function(
   groups,
   p_adj_method = "BH",
   ref_group = NULL,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Validate group count
   if (length(levels(groups)) != 2) {
@@ -226,20 +205,15 @@ gly_wilcox_ <- function(
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Perform Wilcoxon test
-  result <- .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, ref_group, return_raw, ...)
-
-  # Return raw results if requested
-  if (return_raw) {
-    return(result)
-  }
+  result <- .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, ref_group, ...)
 
   # Add S3 class
-  structure(result, class = c("glystats_wilcox_res", "glystats_res", class(result)))
+  structure(result, class = c("glystats_wilcox_res", "glystats_res"))
 }
 
 # Internal helper functions for t-test and Wilcoxon test
 
-.gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, ref_group, return_raw = FALSE, ...) {
+.gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, ref_group, ...) {
   # Reorder groups if ref_group is specified
   if (!is.null(ref_group)) {
     groups <- .reorder_groups_for_ref(groups, ref_group)
@@ -247,10 +221,13 @@ gly_wilcox_ <- function(
   cli::cli_alert_info("Reference group: {.val {levels(groups)[1]}}")
 
   mod_list <- .gly_dea_2groups_raw(expr_mat, groups, .f, ...)
-  if (return_raw) {
-    return(mod_list)
-  }
-  .gly_dea_2groups_tibblify(mod_list, .f, p_adj_method, expr_mat, groups)
+  tidy_result <- .gly_dea_2groups_tibblify(mod_list, .f, p_adj_method, expr_mat, groups)
+
+  # Return list with both tidy and raw results
+  list(
+    tidy_result = tidy_result,
+    raw_result = mod_list
+  )
 }
 
 # Generate raw model list for 2-group analysis
