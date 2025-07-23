@@ -183,23 +183,23 @@
     return(results)
   }
 
+  old_class <- class(results)
+
   # If results is a tibble, process it directly
   if (tibble::is_tibble(results)) {
-    return(.process_tibble_add_info(results, exp, add_info))
-  }
-
-  # If results is a list, process each tibble in the list
-  if (is.list(results)) {
-    processed_results <- purrr::map(results, function(item) {
+    new_results <- .process_tibble_add_info(results, exp, add_info)
+  } else if (is.list(results)) {
+    new_results <- purrr::map(results, function(item) {
       if (tibble::is_tibble(item)) {
         .process_tibble_add_info(item, exp, add_info)
       } else {
         item
       }
     })
-    return(processed_results)
+  } else {
+    cli::cli_abort("Results must be a tibble or a list of tibbles.")
   }
 
-  # If results is neither tibble nor list, return as is
-  return(results)
+  class(new_results) <- old_class
+  return(new_results)
 }

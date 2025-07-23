@@ -29,15 +29,25 @@
 #' @seealso [Rtsne::Rtsne()]
 #' @export
 gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, return_raw = FALSE, ...) {
-
-  .check_pkg_available("Rtsne")
-
+  checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_logical(add_info, len = 1)
   checkmate::assert_logical(return_raw, len = 1)
 
-  # Extract expression matrix and sample info
-  mat <- t(exp$expr_mat)  # Samples as rows, variables as columns
-  sample_info <- exp$sample_info
+  expr_mat <- glyexp::get_expr_mat(exp)
+  result <- gly_tsne_(expr_mat, dims, perplexity, return_raw, ...)
+
+  .process_results_add_info(result, exp, add_info)
+}
+
+#' @rdname gly_tsne
+#' @export
+gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, return_raw = FALSE, ...) {
+  .check_pkg_available("Rtsne")
+
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  checkmate::assert_logical(return_raw, len = 1)
+
+  mat <- t(expr_mat)  # Samples as rows, variables as columns
 
   # Check if perplexity is appropriate for the number of samples
   # Perplexity should be smaller than the number of samples
@@ -72,57 +82,6 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, return_raw
     tsne2 = tsne_res$Y[, 2]
   )
 
-  # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
-  # Set S3 class
-  structure(result, class = c("glystats_tsne_res", "glystats_res", class(result)))
-}
-
-#' @rdname gly_tsne
-#' @export
-gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, return_raw = FALSE, ...) {
-  .check_pkg_available("Rtsne")
-
-  checkmate::assert_matrix(expr_mat, mode = "numeric")
-  checkmate::assert_logical(return_raw, len = 1)
-
-  # Prepare data (samples as rows, variables as columns)
-  mat <- t(expr_mat)
-
-  # Check if perplexity is appropriate for the number of samples
-  max_perplexity <- floor((nrow(mat) - 1) / 3)
-  if (perplexity >= nrow(mat) || perplexity > max_perplexity) {
-    cli::cli_warn("Perplexity should be smaller than the number of samples.")
-    perplexity <- max(1, max_perplexity)
-    cli::cli_inform("Setting perplexity to {perplexity}.")
-  }
-
-  # Apply log transformation
-  mat <- log(mat + 1)
-
-  # Perform t-SNE
-  tsne_res <- Rtsne::Rtsne(
-    X = mat,
-    dims = dims,
-    perplexity = perplexity,
-    ...
-  )
-
-  # Return raw results if requested
-  if (return_raw) {
-    return(tsne_res)
-  }
-
-  # Create result tibble
-  tsne_coords <- tsne_res$Y
-  colnames(tsne_coords) <- paste0("tsne", seq_len(ncol(tsne_coords)))
-
-  result_tbl <- tibble::tibble(
-    sample = rownames(mat)
-  ) %>%
-    dplyr::bind_cols(tibble::as_tibble(tsne_coords))
-
   # Add S3 class
-  structure(result_tbl, class = c("glystats_tsne_res", "glystats_res", class(result_tbl)))
+  structure(result, class = c("glystats_tsne_res", "glystats_res", class(result)))
 }

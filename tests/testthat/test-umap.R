@@ -35,19 +35,6 @@ test_that("gly_umap works with custom parameters", {
   expect_true(all(c("umap1", "umap2", "sample") %in% names(result)))
 })
 
-test_that("gly_umap handles n_neighbors adjustment", {
-  skip_if_not_installed("uwot")
-  
-  # Should work and adjust n_neighbors automatically when too large
-  expect_warning(
-    result <- suppressMessages(gly_umap(test_gp_exp, n_neighbors = 50)),
-    "n_neighbors should be smaller"
-  )
-  
-  expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
-  expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
-})
-
 test_that("gly_umap works with more than 2 components", {
   skip_if_not_installed("uwot")
   
@@ -61,19 +48,6 @@ test_that("gly_umap works with more than 2 components", {
   expect_type(result$umap1, "double")
   expect_type(result$umap2, "double")
   expect_type(result$umap3, "double")
-})
-
-test_that("gly_umap works with default n_neighbors", {
-  skip_if_not_installed("uwot")
-  
-  # Test with default n_neighbors (15) - should trigger warning and adjustment
-  expect_warning(
-    result <- suppressMessages(gly_umap(test_gp_exp)),
-    "n_neighbors should be smaller"
-  )
-  
-  expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
-  expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
 })
 
 test_that("gly_umap has consistent sample names", {

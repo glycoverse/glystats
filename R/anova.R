@@ -79,10 +79,8 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
   }
 
   # Process results with add_info logic for main_test
-  result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
-
-  # Add S3 class to the entire list
-  structure(result, class = c("glystats_anova_res", "glystats_res", class(result)))
+  result$main_test <- .process_tibble_add_info(result$main_test, exp, add_info)
+  result
 }
 
 #' @rdname gly_anova
@@ -204,10 +202,8 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   }
 
   # Process results with add_info logic for main_test
-  result$main_test <- .process_results_add_info(result$main_test, exp, add_info)
-
-  # Add S3 class to the entire list
-  structure(result, class = c("glystats_kruskal_res", "glystats_res", class(result)))
+  result$main_test <- .process_tibble_add_info(result$main_test, exp, add_info)
+  result
 }
 
 #' @rdname gly_kruskal

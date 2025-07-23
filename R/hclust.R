@@ -88,9 +88,7 @@ gly_hclust <- function(
   }
 
   # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
-  structure(result, class = c("glystats_hclust_res", "glystats_res"))
+  .process_results_add_info(result, exp, add_info)
 }
 
 #' @rdname gly_hclust

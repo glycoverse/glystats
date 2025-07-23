@@ -53,9 +53,7 @@ gly_enrich_go <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   checkmate::assert_logical(return_raw, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
-  result <- gly_enrich_go_(genes, return_raw, ...)
-
-  return(result)
+  gly_enrich_go_(genes, return_raw, ...)
 }
 
 #' @rdname gly_enrich_go
@@ -94,9 +92,7 @@ gly_enrich_kegg <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   checkmate::assert_logical(return_raw, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
-  result <- gly_enrich_kegg_(genes, return_raw, ...)
-
-  return(result)
+  gly_enrich_kegg_(genes, return_raw, ...)
 }
 
 #' @rdname gly_enrich_go
@@ -134,9 +130,7 @@ gly_enrich_reactome <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
   checkmate::assert_logical(return_raw, len = 1)
 
   uniprot_ids <- .extract_genes_from_exp(exp)
-  result <- gly_enrich_reactome_(uniprot_ids, return_raw, ...)
-
-  return(result)
+  gly_enrich_reactome_(uniprot_ids, return_raw, ...)
 }
 
 #' @rdname gly_enrich_go

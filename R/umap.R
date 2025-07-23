@@ -30,80 +30,45 @@
 #'   or raw umap result matrix when return_raw = TRUE.
 #' @seealso [uwot::umap()]
 #' @export
-gly_umap <- function(exp,
-                     n_neighbors = 15,
-                     n_components = 2,
-                     min_dist = 0.1,
-                     spread = 1.0,
-                     add_info = TRUE,
-                     return_raw = FALSE,
-                     ...) {
-
+gly_umap <- function(
+  exp,
+  n_neighbors = 15,
+  n_components = 2,
+  min_dist = 0.1,
+  spread = 1,
+  add_info = TRUE,
+  return_raw = FALSE,
+  ...
+) {
   .check_pkg_available("uwot")
+  checkmate::assert_class(exp, "glyexp_experiment")
+  checkmate::assert_flag(add_info)
 
-  checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
+  expr_mat <- glyexp::get_expr_mat(exp)
+  result <- gly_umap_(expr_mat, n_components, n_neighbors, min_dist, spread, return_raw, ...)
 
-  # Extract expression matrix and sample info
-  mat <- t(exp$expr_mat)  # Samples as rows, variables as columns
-  sample_info <- exp$sample_info
-
-  # Check if n_neighbors is appropriate for the number of samples
-  if (n_neighbors >= nrow(mat)) {
-    cli::cli_warn("n_neighbors should be smaller than the number of samples.")
-    n_neighbors <- max(1, nrow(mat) - 1)
-    cli::cli_inform("Setting n_neighbors to {n_neighbors}.")
-  }
-
-  # Apply log transformation (common for expression data)
-  mat <- log(mat + 1)
-
-  # Capture output to avoid console messages
-  umap_res <- suppressMessages(
-    uwot::umap(
-      X = mat,
-      n_neighbors = n_neighbors,
-      n_components = n_components,
-      min_dist = min_dist,
-      spread = spread,
-      verbose = FALSE,
-      ...
-    )
-  )
-
-  # Return raw results if requested
-  if (return_raw) {
-    return(umap_res)
-  }
-
-  # Create result tibble
-  result <- tibble::tibble(
-    sample = rownames(mat),
-    umap1 = umap_res[, 1],
-    umap2 = umap_res[, 2]
-  )
-
-  # Handle more than 2 components
-  if (n_components > 2) {
-    for (i in 3:n_components) {
-      result[[paste0("umap", i)]] <- umap_res[, i]
-    }
-  }
-
-  # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
-  # Set S3 class
-  structure(result, class = c("glystats_umap_res", "glystats_res", class(result)))
+  .process_results_add_info(result, exp, add_info)
 }
 
 #' @rdname gly_umap
 #' @export
-gly_umap_ <- function(expr_mat, n_components = 2, return_raw = FALSE, ...) {
+gly_umap_ <- function(
+  expr_mat,
+  n_components = 2,
+  n_neighbors = 15,
+  min_dist = 0.1,
+  spread = 1,
+  return_raw = FALSE,
+  ...
+) {
   .check_pkg_available("uwot")
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  checkmate::assert_logical(return_raw, len = 1)
+  checkmate::assert_int(n_components, lower = 1)
+  checkmate::assert_int(n_neighbors, lower = 1)
+  checkmate::assert_number(min_dist, lower = 0, upper = 1)
+  checkmate::assert_number(spread, lower = 0)
+  checkmate::assert_flag(return_raw)
 
   # Prepare data (samples as rows, variables as columns)
   mat <- t(expr_mat)
@@ -115,6 +80,10 @@ gly_umap_ <- function(expr_mat, n_components = 2, return_raw = FALSE, ...) {
   umap_res <- uwot::umap(
     X = mat,
     n_components = n_components,
+    n_neighbors = n_neighbors,
+    min_dist = min_dist,
+    spread = spread,
+    verbose = FALSE,
     ...
   )
 

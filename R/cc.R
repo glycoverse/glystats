@@ -78,8 +78,7 @@ gly_consensus_clustering <- function(
     return(result)
   }
 
-  result <- .process_results_add_info(result, exp, add_info)
-  structure(result, class = c("glystats_cc_res", "glystats_res", class(result)))
+  .process_results_add_info(result, exp, add_info)
 }
 
 #' @rdname gly_consensus_clustering

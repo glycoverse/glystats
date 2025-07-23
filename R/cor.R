@@ -67,9 +67,7 @@ gly_cor <- function(
   expr_mat <- glyexp::get_expr_mat(exp)
 
   # Call the underlying API
-  result <- gly_cor_(expr_mat, on, method, p_adj_method, return_raw, ...)
-
-  return(result)
+  gly_cor_(expr_mat, on, method, p_adj_method, return_raw, ...)
 }
 
 #' @rdname gly_cor

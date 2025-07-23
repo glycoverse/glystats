@@ -70,12 +70,6 @@ test_that("gly_tsne has consistent sample names", {
   expect_equal(sort(result$sample), sort(colnames(test_gp_exp$expr_mat)))
 })
 
-test_that("gly_tsne requires Rtsne package", {
-  # Test that the function would fail if Rtsne is not available
-  # This is tested by verifying the error message structure exists
-  expect_true(any(grepl("Rtsne", deparse(body(gly_tsne)))))
-})
-
 test_that("gly_tsne_ works correctly", {
   skip_if_not_installed("Rtsne")
 

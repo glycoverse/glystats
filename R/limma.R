@@ -102,10 +102,7 @@ gly_limma <- function(
   }
 
   # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
-  # Add S3 class
-  structure(result, class = c("glystats_limma_res", "glystats_res", class(result)))
+  .process_results_add_info(result, exp, add_info)
 }
 
 #' @rdname gly_limma

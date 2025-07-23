@@ -66,10 +66,7 @@ gly_cox <- function(
   }
 
   # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
-  # Ensure S3 class is preserved
-  structure(result, class = c("glystats_cox_res", "glystats_res", class(result)))
+  .process_results_add_info(result, exp, add_info)
 }
 
 #' @rdname gly_cox

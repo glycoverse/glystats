@@ -16,7 +16,15 @@ gly_umap(
   ...
 )
 
-gly_umap_(expr_mat, n_components = 2, return_raw = FALSE, ...)
+gly_umap_(
+  expr_mat,
+  n_components = 2,
+  n_neighbors = 15,
+  min_dist = 0.1,
+  spread = 1,
+  return_raw = FALSE,
+  ...
+)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}

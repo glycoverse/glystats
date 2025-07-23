@@ -95,9 +95,7 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, add_inf
   }
 
   # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
-  structure(result, class = c("glystats_plsda_res", "glystats_res"))
+  .process_results_add_info(result, exp, add_info)
 }
 
 #' @rdname gly_plsda

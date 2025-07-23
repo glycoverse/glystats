@@ -45,9 +45,7 @@ gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   result <- gly_fold_change_(expr_mat, groups)
 
   # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
-  structure(result, class = c("glystats_fc_res", class(result)))
+  .process_results_add_info(result, exp, add_info)
 }
 
 #' @rdname gly_fold_change
@@ -73,5 +71,5 @@ gly_fold_change_ <- function(expr_mat, groups) {
   result <- tibble::tibble(variable = rownames(expr_mat), log2fc = log2fc)
 
   # Add S3 class
-  structure(result, class = c("glystats_fc_res", class(result)))
+  structure(result, class = c("glystats_fc_res", "glystats_res", class(result)))
 }

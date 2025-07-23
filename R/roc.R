@@ -88,9 +88,7 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE,
   }
 
   # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
-  structure(result, class = c("glystats_roc_res", "glystats_res"))
+  .process_results_add_info(result, exp, add_info)
 }
 
 #' @rdname gly_roc

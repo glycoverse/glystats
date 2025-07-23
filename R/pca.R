@@ -51,9 +51,7 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, return_ra
   }
 
   # Process results with add_info logic
-  result <- .process_results_add_info(result, exp, add_info)
-
-  structure(result, class = c("glystats_pca_res", "glystats_res"))
+  .process_results_add_info(result, exp, add_info)
 }
 
 #' @rdname gly_pca
