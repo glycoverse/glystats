@@ -1,3 +1,11 @@
+# glystats 0.2.3
+
+## Minor improvements and bug fixes
+
+* Make the parameters of `gly_umap()` and `gly_umap_()` consistent.
+* Fix a bug that some functions returned values with duplicated S3 classes.
+* Fix inconsistent behaviours between `gly_tsne()` and `gly_tsne_()`.
+
 # glystats 0.2.2
 
 ## Bug fixes
