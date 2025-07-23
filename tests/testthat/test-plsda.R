@@ -9,31 +9,39 @@ test_that("gly_plsda works with valid Topliss ratio", {
 
   expect_s3_class(plsda_res, c("glystats_plsda_res", "glystats_res"))
   expect_type(plsda_res, "list")
-  expect_setequal(names(plsda_res), c("samples", "variables", "variance", "vip"))
+  expect_setequal(names(plsda_res), c("tidy_result", "raw_result"))
+
+  # Check tidy_result structure
+  expect_s3_class(plsda_res$tidy_result, c("glystats_plsda_res", "glystats_res"))
+  expect_type(plsda_res$tidy_result, "list")
+  expect_setequal(names(plsda_res$tidy_result), c("samples", "variables", "variance", "vip"))
 
   # Check samples tibble
-  expect_s3_class(plsda_res$samples, "tbl_df")
-  expect_true("group" %in% colnames(plsda_res$samples))
-  expect_true("comp1" %in% colnames(plsda_res$samples))
-  expect_true("comp2" %in% colnames(plsda_res$samples))
+  expect_s3_class(plsda_res$tidy_result$samples, "tbl_df")
+  expect_true("group" %in% colnames(plsda_res$tidy_result$samples))
+  expect_true("comp1" %in% colnames(plsda_res$tidy_result$samples))
+  expect_true("comp2" %in% colnames(plsda_res$tidy_result$samples))
 
   # Check variables tibble
-  expect_s3_class(plsda_res$variables, "tbl_df")
-  expect_true("variable" %in% colnames(plsda_res$variables))
-  expect_true("comp1" %in% colnames(plsda_res$variables))
-  expect_true("comp2" %in% colnames(plsda_res$variables))
+  expect_s3_class(plsda_res$tidy_result$variables, "tbl_df")
+  expect_true("variable" %in% colnames(plsda_res$tidy_result$variables))
+  expect_true("comp1" %in% colnames(plsda_res$tidy_result$variables))
+  expect_true("comp2" %in% colnames(plsda_res$tidy_result$variables))
 
   # Check variance tibble
-  expect_s3_class(plsda_res$variance, "tbl_df")
-  expect_true("component" %in% colnames(plsda_res$variance))
-  expect_true("prop_var_explained" %in% colnames(plsda_res$variance))
-  expect_true("cumulative_prop_var" %in% colnames(plsda_res$variance))
+  expect_s3_class(plsda_res$tidy_result$variance, "tbl_df")
+  expect_true("component" %in% colnames(plsda_res$tidy_result$variance))
+  expect_true("prop_var_explained" %in% colnames(plsda_res$tidy_result$variance))
+  expect_true("cumulative_prop_var" %in% colnames(plsda_res$tidy_result$variance))
 
   # Check VIP tibble
-  expect_s3_class(plsda_res$vip, "tbl_df")
-  expect_true("variable" %in% colnames(plsda_res$vip))
-  expect_true("VIP" %in% colnames(plsda_res$vip))
-  expect_true(all(plsda_res$vip$VIP >= 0))  # VIP scores should be non-negative
+  expect_s3_class(plsda_res$tidy_result$vip, "tbl_df")
+  expect_true("variable" %in% colnames(plsda_res$tidy_result$vip))
+  expect_true("VIP" %in% colnames(plsda_res$tidy_result$vip))
+  expect_true(all(plsda_res$tidy_result$vip$VIP >= 0))  # VIP scores should be non-negative
+
+  # Check raw_result
+  expect_s3_class(plsda_res$raw_result, "mixo_plsda")
 })
 
 test_that("gly_plsda validates Topliss ratio", {
@@ -60,16 +68,16 @@ test_that("gly_plsda validates Topliss ratio", {
   )
 })
 
-test_that("gly_plsda return_raw works", {
+test_that("gly_plsda raw_result is accessible", {
   # Skip test if mixOmics is not available
   skip_if_not_installed("mixOmics")
 
-  # Test return_raw with valid dataset
+  # Test raw_result access with valid dataset
   suppressMessages({
-    plsda_raw <- gly_plsda(exp_multigroup_valid(), return_raw = TRUE)
+    plsda_res <- gly_plsda(exp_multigroup_valid())
   })
 
-  expect_s3_class(plsda_raw, "mixo_plsda")
+  expect_s3_class(plsda_res$raw_result, "mixo_plsda")
 })
 
 test_that("gly_plsda validates inputs", {
@@ -104,10 +112,38 @@ test_that("gly_plsda_ works correctly", {
     result <- gly_plsda_(expr_mat, groups)
   })
 
-  # Verify results
-  expect_s3_class(result, "glystats_plsda_res")
+  # Verify results structure
+  expect_s3_class(result, c("glystats_plsda_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("samples", "variables", "variance", "vip"))
-  expect_true(tibble::is_tibble(result$samples))
-  expect_equal(nrow(result$samples), 10)
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+
+  # Check tidy_result
+  expect_s3_class(result$tidy_result, c("glystats_plsda_res", "glystats_res"))
+  expect_type(result$tidy_result, "list")
+  expect_setequal(names(result$tidy_result), c("samples", "variables", "variance", "vip"))
+  expect_true(tibble::is_tibble(result$tidy_result$samples))
+  expect_equal(nrow(result$tidy_result$samples), 10)
+
+  # Check raw_result
+  expect_s3_class(result$raw_result, "mixo_plsda")
+})
+
+test_that("gly_plsda add_info works", {
+  skip_if_not_installed("mixOmics")
+
+  # Test with add_info = TRUE (default)
+  suppressMessages({
+    plsda_with_info <- gly_plsda(exp_multigroup_valid(), add_info = TRUE)
+  })
+
+  # Test with add_info = FALSE
+  suppressMessages({
+    plsda_without_info <- gly_plsda(exp_multigroup_valid(), add_info = FALSE)
+  })
+
+  # Results should be different when add_info is different
+  expect_false(identical(
+    plsda_with_info$tidy_result$samples,
+    plsda_without_info$tidy_result$samples
+  ))
 })

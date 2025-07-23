@@ -11,11 +11,10 @@ gly_plsda(
   ncomp = 2,
   scale = TRUE,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
-gly_plsda_(expr_mat, groups, ncomp = 2, scale = TRUE, return_raw = FALSE, ...)
+gly_plsda_(expr_mat, groups, ncomp = 2, scale = TRUE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -31,9 +30,6 @@ that contains group labels. Default is "group".}
 will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.
 Only applicable to \code{gly_plsda()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw mixOmics plsda object.}
-
 \item{...}{Additional arguments passed to \code{mixOmics::plsda()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
@@ -41,13 +37,16 @@ If TRUE, returns raw mixOmics plsda object.}
 \item{groups}{A factor vector specifying group membership for each sample.}
 }
 \value{
-A list containing four tibbles (when return_raw = FALSE):
+A list containing:
+\itemize{
+\item \code{tidy_result}: A list of tibbles with PLS-DA results:
 \itemize{
 \item \code{samples}: PLS-DA scores for each sample with group information
 \item \code{variables}: PLS-DA loadings for each variable
 \item \code{variance}: PLS-DA explained variance information
 \item \code{vip}: Variable Importance in Projection (VIP) scores for each variable
-When return_raw = TRUE, returns the raw mixOmics plsda object.
+}
+\item \code{raw_result}: The raw mixOmics plsda object from \code{mixOmics::plsda()}
 }
 }
 \description{
