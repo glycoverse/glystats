@@ -5,16 +5,9 @@
 \alias{gly_pca_}
 \title{Principal Component Analysis (PCA)}
 \usage{
-gly_pca(
-  exp,
-  center = TRUE,
-  scale = TRUE,
-  add_info = TRUE,
-  return_raw = FALSE,
-  ...
-)
+gly_pca(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...)
 
-gly_pca_(expr_mat, center = TRUE, scale = TRUE, return_raw = FALSE, ...)
+gly_pca_(expr_mat, center = TRUE, scale = TRUE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -27,20 +20,20 @@ gly_pca_(expr_mat, center = TRUE, scale = TRUE, return_raw = FALSE, ...)
 will be added to the result tibbles. If FALSE, only the PCA results are returned.
 Only applicable to \code{gly_pca()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw prcomp object.}
-
 \item{...}{Additional arguments passed to \code{prcomp()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A list containing three tibbles (when return_raw = FALSE):
+A list containing:
+\itemize{
+\item \code{tidy_result}: A list of tibbles with PCA results:
 \itemize{
 \item \code{samples}: PCA scores for each sample
 \item \code{variables}: PCA loadings for each variable
 \item \code{eigenvalues}: PCA eigenvalues
-When return_raw = TRUE, returns the raw prcomp object.
+}
+\item \code{raw_result}: The raw prcomp object from \code{stats::prcomp()}
 }
 }
 \description{

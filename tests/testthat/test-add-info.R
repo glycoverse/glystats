@@ -31,15 +31,15 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
   result_pca_with_info <- suppressMessages(gly_pca(exp_subset, add_info = TRUE))
   
   # Check samples tibble
-  expect_true(ncol(result_pca_no_info$samples) < ncol(result_pca_with_info$samples))
-  expect_true("sample" %in% colnames(result_pca_with_info$samples))
-  
+  expect_true(ncol(result_pca_no_info$tidy_result$samples) < ncol(result_pca_with_info$tidy_result$samples))
+  expect_true("sample" %in% colnames(result_pca_with_info$tidy_result$samples))
+
   # Check variables tibble
-  expect_true(ncol(result_pca_no_info$variables) < ncol(result_pca_with_info$variables))
-  expect_true("variable" %in% colnames(result_pca_with_info$variables))
-  
+  expect_true(ncol(result_pca_no_info$tidy_result$variables) < ncol(result_pca_with_info$tidy_result$variables))
+  expect_true("variable" %in% colnames(result_pca_with_info$tidy_result$variables))
+
   # Check eigenvalues tibble (should be the same since it doesn't have variable/sample columns)
-  expect_equal(ncol(result_pca_no_info$eigenvalues), ncol(result_pca_with_info$eigenvalues))
+  expect_equal(ncol(result_pca_no_info$tidy_result$eigenvalues), ncol(result_pca_with_info$tidy_result$eigenvalues))
 })
 
 test_that("add_info parameter works correctly for ROC analysis", {
