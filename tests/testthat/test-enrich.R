@@ -9,6 +9,11 @@ test_that("gly_enrich_go works with protein column (integration)", {
 
   result <- suppressMessages(gly_enrich_go(exp_with_protein))
   expect_s3_class(result, "glystats_go_ora_res")
+  expect_s3_class(result, "glystats_res")
+  expect_true(is.list(result))
+  expect_named(result, c("tidy_result", "raw_result"))
+  expect_s3_class(result$tidy_result, "glystats_go_ora_res")
+  expect_s3_class(result$tidy_result, "glystats_res")
 })
 
 test_that("gly_enrich_go works with protein column and returns properly formatted results", {
@@ -23,7 +28,10 @@ test_that("gly_enrich_go works with protein column and returns properly formatte
     exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
     result <- gly_enrich_go(exp_with_protein)
     expect_s3_class(result, "glystats_go_ora_res")
-    expect_true("id" %in% colnames(result))  # Check column name cleaning works
+    expect_s3_class(result, "glystats_res")
+    expect_true(is.list(result))
+    expect_named(result, c("tidy_result", "raw_result"))
+    expect_true("id" %in% colnames(result$tidy_result))  # Check column name cleaning works
   },
   enrichGO = function(...) mock_result,
   .package = "clusterProfiler"
@@ -62,11 +70,14 @@ test_that("gly_enrich_go filters out NA proteins", {
     exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
     exp_with_nas <- exp_with_protein |>
       glyexp::mutate_var(protein = ifelse(seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0,
-                                         NA_character_, protein))
+                                          NA_character_, protein))
 
     result <- gly_enrich_go(exp_with_nas)
 
     expect_s3_class(result, "glystats_go_ora_res")
+    expect_s3_class(result, "glystats_res")
+    expect_true(is.list(result))
+    expect_named(result, c("tidy_result", "raw_result"))
     # Check that NA values were filtered out
     expect_true(all(!is.na(captured_genes)))
   },
@@ -98,6 +109,9 @@ test_that("gly_enrich_kegg works with protein column (integration)", {
   skip_if(inherits(result, "try-error"), "Network connection to KEGG failed")
 
   expect_s3_class(result, "glystats_kegg_ora_res")
+  expect_s3_class(result, "glystats_res")
+  expect_true(is.list(result))
+  expect_named(result, c("tidy_result", "raw_result"))
 })
 
 test_that("gly_enrich_kegg works with protein column and returns properly formatted results", {
@@ -112,7 +126,10 @@ test_that("gly_enrich_kegg works with protein column and returns properly format
     exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
     result <- gly_enrich_kegg(exp_with_protein)
     expect_s3_class(result, "glystats_kegg_ora_res")
-    expect_true("id" %in% colnames(result))  # Check column name cleaning works
+    expect_s3_class(result, "glystats_res")
+    expect_true(is.list(result))
+    expect_named(result, c("tidy_result", "raw_result"))
+    expect_true("id" %in% colnames(result$tidy_result))  # Check column name cleaning works
   },
   enrichKEGG = function(...) mock_result,
   .package = "clusterProfiler"
@@ -151,11 +168,14 @@ test_that("gly_enrich_kegg filters out NA proteins", {
     exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
     exp_with_nas <- exp_with_protein |>
       glyexp::mutate_var(protein = ifelse(seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0,
-                                         NA_character_, protein))
+                                          NA_character_, protein))
 
     result <- gly_enrich_kegg(exp_with_nas)
 
     expect_s3_class(result, "glystats_kegg_ora_res")
+    expect_s3_class(result, "glystats_res")
+    expect_true(is.list(result))
+    expect_named(result, c("tidy_result", "raw_result"))
     # Check that NA values were filtered out
     expect_true(all(!is.na(captured_genes)))
   },
@@ -187,6 +207,9 @@ test_that("gly_enrich_reactome works with protein column (integration)", {
   skip_if(inherits(result, "try-error"), "Network connection to Reactome failed")
 
   expect_s3_class(result, "glystats_reactome_ora_res")
+  expect_s3_class(result, "glystats_res")
+  expect_true(is.list(result))
+  expect_named(result, c("tidy_result", "raw_result"))
 })
 
 test_that("gly_enrich_reactome works with protein column and returns properly formatted results", {
@@ -201,7 +224,10 @@ test_that("gly_enrich_reactome works with protein column and returns properly fo
     exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
     result <- gly_enrich_reactome(exp_with_protein)
     expect_s3_class(result, "glystats_reactome_ora_res")
-    expect_true("id" %in% colnames(result))  # Check column name cleaning works
+    expect_s3_class(result, "glystats_res")
+    expect_true(is.list(result))
+    expect_named(result, c("tidy_result", "raw_result"))
+    expect_true("id" %in% colnames(result$tidy_result))  # Check column name cleaning works
   },
   enrichPathway = function(...) mock_result,
   .package = "ReactomePA"
@@ -241,11 +267,14 @@ test_that("gly_enrich_reactome filters out NA proteins", {
       exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
       exp_with_nas <- exp_with_protein |>
         glyexp::mutate_var(protein = ifelse(seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0,
-                                           NA_character_, protein))
+                                            NA_character_, protein))
 
       suppressMessages(result <- gly_enrich_reactome(exp_with_nas))
 
       expect_s3_class(result, "glystats_reactome_ora_res")
+      expect_s3_class(result, "glystats_res")
+      expect_true(is.list(result))
+      expect_named(result, c("tidy_result", "raw_result"))
       # Check that NA values were filtered out
       expect_true(all(!is.na(captured_uniprot_ids)))
     },
@@ -260,8 +289,8 @@ test_that("gly_enrich_reactome filters out NA proteins", {
     .package = "ReactomePA"
     )
   },
-  bitr = function(geneID, ...) {
-    captured_uniprot_ids <<- geneID
+  bitr = function(gene_id, ...) {
+    captured_uniprot_ids <<- gene_id
     data.frame(UNIPROT = character(0), ENTREZID = character(0), stringsAsFactors = FALSE)
   },
   .package = "clusterProfiler"
@@ -282,7 +311,10 @@ test_that("gly_enrich_go_ works correctly", {
   with_mocked_bindings({
     result <- gly_enrich_go_(proteins)
     expect_s3_class(result, "glystats_go_ora_res")
-    expect_true("id" %in% colnames(result))
+    expect_s3_class(result, "glystats_res")
+    expect_true(is.list(result))
+    expect_named(result, c("tidy_result", "raw_result"))
+    expect_true("id" %in% colnames(result$tidy_result))
   },
   enrichGO = function(...) mock_result,
   .package = "clusterProfiler"
@@ -303,7 +335,10 @@ test_that("gly_enrich_kegg_ works correctly", {
   with_mocked_bindings({
     result <- gly_enrich_kegg_(proteins)
     expect_s3_class(result, "glystats_kegg_ora_res")
-    expect_true("id" %in% colnames(result))
+    expect_s3_class(result, "glystats_res")
+    expect_true(is.list(result))
+    expect_named(result, c("tidy_result", "raw_result"))
+    expect_true("id" %in% colnames(result$tidy_result))
   },
   enrichKEGG = function(...) mock_result,
   .package = "clusterProfiler"
@@ -325,7 +360,10 @@ test_that("gly_enrich_reactome_ works correctly", {
     with_mocked_bindings({
       result <- gly_enrich_reactome_(proteins)
       expect_s3_class(result, "glystats_reactome_ora_res")
-      expect_true("id" %in% colnames(result))
+      expect_s3_class(result, "glystats_res")
+      expect_true(is.list(result))
+      expect_named(result, c("tidy_result", "raw_result"))
+      expect_true("id" %in% colnames(result$tidy_result))
     },
     enrichPathway = function(...) mock_result,
     .package = "ReactomePA"

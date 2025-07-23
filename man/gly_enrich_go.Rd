@@ -9,17 +9,17 @@
 \alias{gly_enrich_reactome_}
 \title{GO, KEGG, and Reactome over-representation analysis (ORA)}
 \usage{
-gly_enrich_go(exp, add_info = TRUE, return_raw = FALSE, ...)
+gly_enrich_go(exp, add_info = TRUE, ...)
 
-gly_enrich_go_(proteins, return_raw = FALSE, ...)
+gly_enrich_go_(proteins, ...)
 
-gly_enrich_kegg(exp, add_info = TRUE, return_raw = FALSE, ...)
+gly_enrich_kegg(exp, add_info = TRUE, ...)
 
-gly_enrich_kegg_(proteins, return_raw = FALSE, ...)
+gly_enrich_kegg_(proteins, ...)
 
-gly_enrich_reactome(exp, add_info = TRUE, return_raw = FALSE, ...)
+gly_enrich_reactome(exp, add_info = TRUE, ...)
 
-gly_enrich_reactome_(proteins, return_raw = FALSE, ...)
+gly_enrich_reactome_(proteins, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object.}
@@ -28,15 +28,17 @@ gly_enrich_reactome_(proteins, return_raw = FALSE, ...)
 since enrichment results do not contain variable or sample columns.
 Only applicable to top-level APIs.}
 
-\item{return_raw}{A logical value indicating whether to return raw clusterProfiler enrichResult objects.}
-
 \item{...}{Additional arguments passed to \code{clusterProfiler::enrichGO()}, \code{clusterProfiler::enrichKEGG()}, or \code{ReactomePA::enrichPathway()}.}
 
 \item{proteins}{A character vector of UniProt accession IDs.}
 }
 \value{
-A tibble of GO, KEGG, or Reactome enrichment results (when return_raw = FALSE),
-or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A tibble with enrichment results
+\item \code{raw_result}: The raw clusterProfiler enrichResult object
+The list has classes \code{glystats_go_ora_res}/\code{glystats_kegg_ora_res}/\code{glystats_reactome_ora_res} and \code{glystats_res}.
+}
 }
 \description{
 Perform GO, KEGG, and Reactome ORA for proteins/genes.

@@ -8,7 +8,6 @@
 #' @param add_info A logical value. This parameter is included for API consistency but has no effect
 #'  since enrichment results do not contain variable or sample columns.
 #'  Only applicable to top-level APIs.
-#' @param return_raw A logical value indicating whether to return raw clusterProfiler enrichResult objects.
 #' @param ... Additional arguments passed to `clusterProfiler::enrichGO()`, `clusterProfiler::enrichKEGG()`, or `ReactomePA::enrichPathway()`.
 #'
 #' @section Required packages:
@@ -41,31 +40,31 @@
 #' **Reactome Analysis:**
 #' Converts UniProt IDs to Entrez IDs and uses `ReactomePA::enrichPathway()`.
 #'
-#' @return A tibble of GO, KEGG, or Reactome enrichment results (when return_raw = FALSE),
-#'   or raw clusterProfiler enrichResult objects (when return_raw = TRUE).
+#' @return A list with two elements:
+#'  - `tidy_result`: A tibble with enrichment results
+#'  - `raw_result`: The raw clusterProfiler enrichResult object
+#' The list has classes `glystats_go_ora_res`/`glystats_kegg_ora_res`/`glystats_reactome_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichGO()], [clusterProfiler::enrichKEGG()], [ReactomePA::enrichPathway()]
 #' @export
-gly_enrich_go <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
+gly_enrich_go <- function(exp, add_info = TRUE, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("org.Hs.eg.db")
 
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
-  gly_enrich_go_(genes, return_raw, ...)
+  gly_enrich_go_(genes, ...)
 }
 
 #' @rdname gly_enrich_go
 #' @export
-gly_enrich_go_ <- function(proteins, return_raw = FALSE, ...) {
+gly_enrich_go_ <- function(proteins, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("org.Hs.eg.db")
 
   checkmate::assert_character(proteins, min.len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
-  res <- clusterProfiler::enrichGO(
+  raw_result <- clusterProfiler::enrichGO(
     gene = proteins,
     OrgDb = "org.Hs.eg.db",
     keyType = "UNIPROT",
@@ -73,75 +72,79 @@ gly_enrich_go_ <- function(proteins, return_raw = FALSE, ...) {
     ...
   )
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(res)
-  }
+  tidy_result <- tibble::as_tibble(raw_result)
+  tidy_result <- janitor::clean_names(tidy_result)
+  tidy_result <- structure(tidy_result, class = c("glystats_go_ora_res", "glystats_res", class(tidy_result)))
 
-  res <- tibble::as_tibble(res)
-  res <- janitor::clean_names(res)
-  structure(res, class = c("glystats_go_ora_res", class(res)))
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = raw_result
+    ),
+    class = c("glystats_go_ora_res", "glystats_res")
+  )
 }
 
 #' @rdname gly_enrich_go
 #' @export
-gly_enrich_kegg <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
+gly_enrich_kegg <- function(exp, add_info = TRUE, ...) {
   .check_pkg_available("clusterProfiler")
 
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
-  gly_enrich_kegg_(genes, return_raw, ...)
+  gly_enrich_kegg_(genes, ...)
 }
 
 #' @rdname gly_enrich_go
 #' @export
-gly_enrich_kegg_ <- function(proteins, return_raw = FALSE, ...) {
+gly_enrich_kegg_ <- function(proteins, ...) {
   .check_pkg_available("clusterProfiler")
 
   checkmate::assert_character(proteins, min.len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
-  res <- clusterProfiler::enrichKEGG(
+  raw_result <- clusterProfiler::enrichKEGG(
     gene = proteins,
     keyType = "uniprot",
     ...
   )
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(res)
-  }
+  tidy_result <- tibble::as_tibble(raw_result)
+  tidy_result <- janitor::clean_names(tidy_result)
+  tidy_result <- structure(tidy_result, class = c("glystats_kegg_ora_res", "glystats_res", class(tidy_result)))
 
-  res <- tibble::as_tibble(res)
-  res <- janitor::clean_names(res)
-  structure(res, class = c("glystats_kegg_ora_res", class(res)))
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = raw_result
+    ),
+    class = c("glystats_kegg_ora_res", "glystats_res")
+  )
 }
 
 #' @rdname gly_enrich_go
 #' @export
-gly_enrich_reactome <- function(exp, add_info = TRUE, return_raw = FALSE, ...) {
+gly_enrich_reactome <- function(exp, add_info = TRUE, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("ReactomePA")
   .check_pkg_available("org.Hs.eg.db")
 
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   uniprot_ids <- .extract_genes_from_exp(exp)
-  gly_enrich_reactome_(uniprot_ids, return_raw, ...)
+  gly_enrich_reactome_(uniprot_ids, ...)
 }
 
 #' @rdname gly_enrich_go
 #' @export
-gly_enrich_reactome_ <- function(proteins, return_raw = FALSE, ...) {
+gly_enrich_reactome_ <- function(proteins, ...) {
   .check_pkg_available("clusterProfiler")
   .check_pkg_available("ReactomePA")
   .check_pkg_available("org.Hs.eg.db")
 
   checkmate::assert_character(proteins, min.len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Convert UniProt to Entrez IDs
   suppressWarnings(suppressMessages(
@@ -160,21 +163,25 @@ gly_enrich_reactome_ <- function(proteins, return_raw = FALSE, ...) {
   }
 
   # Perform Reactome pathway analysis
-  res <- ReactomePA::enrichPathway(
+  raw_result <- ReactomePA::enrichPathway(
     gene = entrez_ids,
     organism = "human",
     readable = TRUE,
     ...
   )
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(res)
-  }
+  tidy_result <- tibble::as_tibble(raw_result)
+  tidy_result <- janitor::clean_names(tidy_result)
+  tidy_result <- structure(tidy_result, class = c("glystats_reactome_ora_res", "glystats_res", class(tidy_result)))
 
-  res <- tibble::as_tibble(res)
-  res <- janitor::clean_names(res)
-  structure(res, class = c("glystats_reactome_ora_res", class(res)))
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = raw_result
+    ),
+    class = c("glystats_reactome_ora_res", "glystats_res")
+  )
 }
 
 # Extract genes from experiment object helper function
