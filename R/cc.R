@@ -24,8 +24,6 @@
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the consensus clustering results are returned.
 #'  Only applicable to `gly_consensus_clustering()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw ConsensusClusterPlus object.
 #' @param ... Additional arguments passed to `ConsensusClusterPlus::ConsensusClusterPlus()`.
 #'
 #' @section Required packages:
@@ -48,11 +46,13 @@
 #' 1. Perform consensus clustering for k = 2 to max_k using ConsensusClusterPlus
 #' 2. Return cluster assignments for all k values in long format
 #'
-#' @return A tibble with three columns (when return_raw = FALSE):
-#'  - First column: sample or variable names (depending on `on` parameter)
-#'  - `k`: Number of clusters
-#'  - `cluster`: Cluster assignments for the corresponding k
-#' When return_raw = TRUE, returns the raw ConsensusClusterPlus object.
+#' @return A list with two elements:
+#'  - `tidy_result`: A tibble with three columns:
+#'    - First column: sample or variable names (depending on `on` parameter)
+#'    - `k`: Number of clusters
+#'    - `cluster`: Cluster assignments for the corresponding k
+#'  - `raw_result`: The raw ConsensusClusterPlus object
+#' The list has classes `glystats_cc_res` and `glystats_res`.
 #'
 #' @seealso [ConsensusClusterPlus::ConsensusClusterPlus()]
 #' @export
@@ -66,19 +66,14 @@ gly_consensus_clustering <- function(
   scale = TRUE,
   output_file = NULL,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   checkmate::assert_class(exp, "glyexp_experiment")
 
   expr_mat <- glyexp::get_expr_mat(exp)
-  result <- gly_consensus_clustering_(expr_mat, on, max_k, reps, p_item, cluster_alg, scale, output_file, return_raw, ...)
-
-  if (return_raw) {
-    return(result)
-  }
-
-  .process_results_add_info(result, exp, add_info)
+  result <- gly_consensus_clustering_(expr_mat, on, max_k, reps, p_item, cluster_alg, scale, output_file, ...)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_consensus_clustering
@@ -92,7 +87,6 @@ gly_consensus_clustering_ <- function(
   cluster_alg = "hc",
   scale = TRUE,
   output_file = NULL,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -104,7 +98,6 @@ gly_consensus_clustering_ <- function(
   checkmate::assert_choice(cluster_alg, c("hc", "km", "pam"))
   checkmate::assert_logical(scale, len = 1)
   checkmate::assert_character(output_file, len = 1, null.ok = TRUE)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Check if required packages are available
   .check_pkg_available("ConsensusClusterPlus", "BiocManager::install('ConsensusClusterPlus')")
@@ -141,11 +134,6 @@ gly_consensus_clustering_ <- function(
     }
   )
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(cc_res)
-  }
-
   # Extract cluster assignments for all k values
   cluster_results <- purrr::map_dfr(2:max_k, function(k) {
     clusters <- cc_res[[k]]$consensusClass
@@ -159,8 +147,17 @@ gly_consensus_clustering_ <- function(
   # Set the appropriate column name based on clustering type
   colnames(cluster_results)[1] <- on
 
-  # Add S3 class
-  structure(cluster_results, class = c("glystats_cc_res", "glystats_res", class(cluster_results)))
+  # Add S3 class to tidy result
+  tidy_result <- structure(cluster_results, class = c("glystats_cc_res", "glystats_res", class(cluster_results)))
+
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = cc_res
+    ),
+    class = c("glystats_cc_res", "glystats_res")
+  )
 }
 
 .cc_no_output <- function(mat, ...) {

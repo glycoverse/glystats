@@ -6,27 +6,38 @@ test_that("gly_consensus_clustering works with basic parameters (default: cluste
 
   result <- suppressMessages(gly_consensus_clustering(exp_subset, max_k = 4, reps = 50))
 
-  # Check that result is a tibble with expected structure
-  expect_s3_class(result, "tbl_df")
+  # Check that result is a list with expected structure
+  expect_type(result, "list")
   expect_s3_class(result, "glystats_cc_res")
   expect_s3_class(result, "glystats_res")
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+
+  # Check tidy_result is a tibble with expected structure
+  tidy_result <- result$tidy_result
+  expect_s3_class(tidy_result, "tbl_df")
+  expect_s3_class(tidy_result, "glystats_cc_res")
+  expect_s3_class(tidy_result, "glystats_res")
 
   # Check columns (should cluster samples by default)
-  expect_true("sample" %in% colnames(result))
-  expect_true("k" %in% colnames(result))
-  expect_true("cluster" %in% colnames(result))
+  expect_true("sample" %in% colnames(tidy_result))
+  expect_true("k" %in% colnames(tidy_result))
+  expect_true("cluster" %in% colnames(tidy_result))
 
   # Check that we have the right number of rows (number of samples * number of k values)
   # For max_k = 4, we have k = 2, 3, 4, so 3 k values * 8 samples = 24 rows
-  expect_equal(nrow(result), 8 * 3)
+  expect_equal(nrow(tidy_result), 8 * 3)
 
   # Check that k values are correct
-  expect_true(all(result$k %in% 2:4))
+  expect_true(all(tidy_result$k %in% 2:4))
   # Check that cluster assignments are valid integers for each k
   for (k_val in 2:4) {
-    k_subset <- result[result$k == k_val, ]
+    k_subset <- tidy_result[tidy_result$k == k_val, ]
     expect_true(all(k_subset$cluster %in% 1:k_val))
   }
+
+  # Check raw_result is a list (ConsensusClusterPlus result)
+  expect_type(result$raw_result, "list")
 })
 
 test_that("gly_consensus_clustering works with on parameter", {
@@ -37,14 +48,14 @@ test_that("gly_consensus_clustering works with on parameter", {
   # Test clustering samples (default)
   result_sample <- suppressMessages(gly_consensus_clustering(exp_subset, on = "sample", max_k = 3, reps = 50))
   expect_s3_class(result_sample, "glystats_cc_res")
-  expect_true("sample" %in% colnames(result_sample))
-  expect_equal(nrow(result_sample), 6 * 2)  # 6 samples * 2 k values (k=2,3)
+  expect_true("sample" %in% colnames(result_sample$tidy_result))
+  expect_equal(nrow(result_sample$tidy_result), 6 * 2)  # 6 samples * 2 k values (k=2,3)
 
   # Test clustering variables
   result_var <- suppressMessages(gly_consensus_clustering(exp_subset, on = "variable", max_k = 3, reps = 50))
   expect_s3_class(result_var, "glystats_cc_res")
-  expect_true("variable" %in% colnames(result_var))
-  expect_equal(nrow(result_var), 8 * 2)  # 8 variables * 2 k values (k=2,3)
+  expect_true("variable" %in% colnames(result_var$tidy_result))
+  expect_equal(nrow(result_var$tidy_result), 8 * 2)  # 8 variables * 2 k values (k=2,3)
 
   # Results should be different
   expect_false(identical(result_sample, result_var))
@@ -63,8 +74,8 @@ test_that("gly_consensus_clustering works with different parameters", {
   expect_s3_class(result_max_k5, "glystats_cc_res")
 
   # Different max_k should give different number of rows
-  expect_equal(nrow(result_max_k3), 8 * 2)  # k=2,3
-  expect_equal(nrow(result_max_k5), 8 * 4)  # k=2,3,4,5
+  expect_equal(nrow(result_max_k3$tidy_result), 8 * 2)  # k=2,3
+  expect_equal(nrow(result_max_k5$tidy_result), 8 * 4)  # k=2,3,4,5
 
   # Test different clustering algorithms
   result_hc <- suppressMessages(gly_consensus_clustering(exp_subset, cluster_alg = "hc", max_k = 3, reps = 30))
@@ -87,8 +98,8 @@ test_that("gly_consensus_clustering scale parameter works", {
   expect_s3_class(result_unscaled, "glystats_cc_res")
 
   # Both should have same structure
-  expect_equal(nrow(result_scaled), nrow(result_unscaled))
-  expect_equal(colnames(result_scaled), colnames(result_unscaled))
+  expect_equal(nrow(result_scaled$tidy_result), nrow(result_unscaled$tidy_result))
+  expect_equal(colnames(result_scaled$tidy_result), colnames(result_unscaled$tidy_result))
 })
 
 test_that("gly_consensus_clustering add_info parameter works", {
@@ -101,31 +112,33 @@ test_that("gly_consensus_clustering add_info parameter works", {
   result_with_info <- suppressMessages(gly_consensus_clustering(exp_subset, add_info = TRUE, max_k = 3, reps = 30))
 
   # With add_info = FALSE, should have fewer columns
-  expect_true(ncol(result_no_info) < ncol(result_with_info))
-  expect_true("sample" %in% colnames(result_with_info))
+  expect_true(ncol(result_no_info$tidy_result) < ncol(result_with_info$tidy_result))
+  expect_true("sample" %in% colnames(result_with_info$tidy_result))
 
   # Test with variable clustering
   result_var_no_info <- suppressMessages(gly_consensus_clustering(exp_subset, on = "variable", add_info = FALSE, max_k = 3, reps = 30))
   result_var_with_info <- suppressMessages(gly_consensus_clustering(exp_subset, on = "variable", add_info = TRUE, max_k = 3, reps = 30))
 
-  expect_true(ncol(result_var_no_info) < ncol(result_var_with_info))
-  expect_true("variable" %in% colnames(result_var_with_info))
+  expect_true(ncol(result_var_no_info$tidy_result) < ncol(result_var_with_info$tidy_result))
+  expect_true("variable" %in% colnames(result_var_with_info$tidy_result))
 })
 
-test_that("gly_consensus_clustering return_raw parameter works", {
+test_that("gly_consensus_clustering returns both tidy and raw results", {
   exp_subset <- test_gp_exp |>
     glyexp::slice_sample_var(n = 5) |>
     glyexp::slice_sample_obs(n = 6)
 
-  # Test return_raw = TRUE
-  result_raw <- suppressMessages(gly_consensus_clustering(exp_subset, return_raw = TRUE, max_k = 3, reps = 30))
+  # Test that function returns both tidy and raw results
+  result <- suppressMessages(gly_consensus_clustering(exp_subset, max_k = 3, reps = 30))
 
-  # Should return a list (ConsensusClusterPlus result)
-  expect_type(result_raw, "list")
-  expect_false(inherits(result_raw, "glystats_cc_res"))
+  # Should return a list with both tidy_result and raw_result
+  expect_type(result, "list")
+  expect_s3_class(result, "glystats_cc_res")
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
 
-  # Should have elements for each k value
-  expect_true(length(result_raw) >= 3)
+  # raw_result should have elements for each k value
+  expect_true(length(result$raw_result) >= 3)
 })
 
 test_that("gly_consensus_clustering input validation works", {
@@ -142,7 +155,6 @@ test_that("gly_consensus_clustering input validation works", {
   expect_error(gly_consensus_clustering(exp_subset, cluster_alg = "invalid"))  # Invalid algorithm
   expect_error(gly_consensus_clustering(exp_subset, scale = "yes"))
   expect_error(gly_consensus_clustering(exp_subset, add_info = "yes"))
-  expect_error(gly_consensus_clustering(exp_subset, return_raw = "yes"))
 })
 
 test_that("gly_consensus_clustering_ works correctly", {
@@ -159,19 +171,24 @@ test_that("gly_consensus_clustering_ works correctly", {
 
   # Verify results
   expect_s3_class(result, "glystats_cc_res")
-  expect_true(tibble::is_tibble(result))
-  expect_true("sample" %in% colnames(result))
-  expect_true("k" %in% colnames(result))
-  expect_true("cluster" %in% colnames(result))
-  expect_equal(nrow(result), 10 * 2)  # 10 samples * 2 k values (k=2,3)
+  expect_type(result, "list")
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+
+  tidy_result <- result$tidy_result
+  expect_true(tibble::is_tibble(tidy_result))
+  expect_true("sample" %in% colnames(tidy_result))
+  expect_true("k" %in% colnames(tidy_result))
+  expect_true("cluster" %in% colnames(tidy_result))
+  expect_equal(nrow(tidy_result), 10 * 2)  # 10 samples * 2 k values (k=2,3)
 
   # Test clustering variables
   suppressMessages({
     result_var <- gly_consensus_clustering_(expr_mat, on = "variable", max_k = 3, reps = 30)
   })
 
-  expect_true("variable" %in% colnames(result_var))
-  expect_equal(nrow(result_var), 10 * 2)  # 10 variables * 2 k values (k=2,3)
+  expect_true("variable" %in% colnames(result_var$tidy_result))
+  expect_equal(nrow(result_var$tidy_result), 10 * 2)  # 10 variables * 2 k values (k=2,3)
 })
 
 test_that("gly_consensus_clustering handles edge cases", {
@@ -183,8 +200,8 @@ test_that("gly_consensus_clustering handles edge cases", {
   result <- suppressMessages(gly_consensus_clustering(exp_minimal, max_k = 3, reps = 20))
 
   expect_s3_class(result, "glystats_cc_res")
-  expect_equal(nrow(result), 5 * 2)  # 5 samples * 2 k values (k=2,3)
-  expect_true(all(result$k %in% 2:3))
+  expect_equal(nrow(result$tidy_result), 5 * 2)  # 5 samples * 2 k values (k=2,3)
+  expect_true(all(result$tidy_result$k %in% 2:3))
 })
 
 test_that("gly_consensus_clustering long format structure is correct", {
@@ -193,19 +210,20 @@ test_that("gly_consensus_clustering long format structure is correct", {
     glyexp::slice_sample_obs(n = 6)
 
   result <- suppressMessages(gly_consensus_clustering(exp_subset, max_k = 4, reps = 30))
+  tidy_result <- result$tidy_result
 
   # Check that each sample appears for each k value
-  samples <- unique(result$sample)
-  k_values <- unique(result$k)
+  samples <- unique(tidy_result$sample)
+  k_values <- unique(tidy_result$k)
 
   expect_equal(length(samples), 6)
   expect_equal(length(k_values), 3)  # k = 2, 3, 4
-  expect_equal(nrow(result), 6 * 3)  # 6 samples * 3 k values
+  expect_equal(nrow(tidy_result), 6 * 3)  # 6 samples * 3 k values
 
   # Check that each sample-k combination appears exactly once
   for (sample in samples) {
     for (k in k_values) {
-      sample_k_rows <- result[result$sample == sample & result$k == k, ]
+      sample_k_rows <- tidy_result[tidy_result$sample == sample & tidy_result$k == k, ]
       expect_equal(nrow(sample_k_rows), 1)
     }
   }
@@ -230,7 +248,7 @@ test_that("gly_consensus_clustering output_file parameter works correctly", {
 
     # Check that result is still valid
     expect_s3_class(result1, "glystats_cc_res")
-    expect_true("sample" %in% colnames(result1))
+    expect_true("sample" %in% colnames(result1$tidy_result))
   })
 
   # Test output_file with specific path
@@ -250,7 +268,7 @@ test_that("gly_consensus_clustering output_file parameter works correctly", {
 
     # Check that result is still valid
     expect_s3_class(result2, "glystats_cc_res")
-    expect_true("sample" %in% colnames(result2))
+    expect_true("sample" %in% colnames(result2$tidy_result))
   })
 
   # Test output_file with subdirectory
@@ -268,6 +286,6 @@ test_that("gly_consensus_clustering output_file parameter works correctly", {
 
     # Check that result is still valid
     expect_s3_class(result3, "glystats_cc_res")
-    expect_true("sample" %in% colnames(result3))
+    expect_true("sample" %in% colnames(result3$tidy_result))
   })
 })

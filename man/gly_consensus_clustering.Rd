@@ -15,7 +15,6 @@ gly_consensus_clustering(
   scale = TRUE,
   output_file = NULL,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
@@ -28,7 +27,6 @@ gly_consensus_clustering_(
   cluster_alg = "hc",
   scale = TRUE,
   output_file = NULL,
-  return_raw = FALSE,
   ...
 )
 }
@@ -62,20 +60,21 @@ The function will create any necessary parent directories.}
 will be added to the result tibbles. If FALSE, only the consensus clustering results are returned.
 Only applicable to \code{gly_consensus_clustering()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw ConsensusClusterPlus object.}
-
 \item{...}{Additional arguments passed to \code{ConsensusClusterPlus::ConsensusClusterPlus()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A tibble with three columns (when return_raw = FALSE):
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A tibble with three columns:
 \itemize{
 \item First column: sample or variable names (depending on \code{on} parameter)
 \item \code{k}: Number of clusters
 \item \code{cluster}: Cluster assignments for the corresponding k
-When return_raw = TRUE, returns the raw ConsensusClusterPlus object.
+}
+\item \code{raw_result}: The raw ConsensusClusterPlus object
+The list has classes \code{glystats_cc_res} and \code{glystats_res}.
 }
 }
 \description{
