@@ -11,11 +11,10 @@ gly_cox(
   event_col = "event",
   p_adj_method = "BH",
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
-gly_cox_(expr_mat, time, event, p_adj_method = "BH", return_raw = FALSE, ...)
+gly_cox_(expr_mat, time, event, p_adj_method = "BH", ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -34,9 +33,6 @@ If NULL, no adjustment is performed.}
 will be added to the result tibble. If FALSE, only the Cox model results are returned.
 Only applicable to \code{gly_cox()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw Cox model objects as a list.}
-
 \item{...}{Additional arguments passed to \code{survival::coxph()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
@@ -46,8 +42,11 @@ If TRUE, returns raw Cox model objects as a list.}
 \item{event}{A numeric vector specifying the event indicator for each sample (1 for event, 0 for censoring).}
 }
 \value{
-A tibble with Cox model results including hazard ratio (hr) and p-value (p_value),
-or a list of \code{coxph} models if \code{return_raw} is TRUE.
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A tibble with Cox model results including hazard ratio (hr) and p-value (p_value).
+\item \code{raw_result}: A list of raw \code{coxph} model objects.
+}
 }
 \description{
 Fit a Cox proportional hazards model for each variable in the expression data,

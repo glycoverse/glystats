@@ -17,8 +17,6 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'   will be added to the result tibble. If FALSE, only the Cox model results are returned.
 #'   Only applicable to `gly_cox()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw Cox model objects as a list.
 #' @param ... Additional arguments passed to `survival::coxph()`.
 #'
 #' @details
@@ -30,8 +28,9 @@
 #'
 #' P-values are adjusted by Benjamini-Hochberg method by default.
 #'
-#' @returns A tibble with Cox model results including hazard ratio (hr) and p-value (p_value),
-#'   or a list of `coxph` models if `return_raw` is TRUE.
+#' @returns A list with two elements:
+#'  - `tidy_result`: A tibble with Cox model results including hazard ratio (hr) and p-value (p_value).
+#'  - `raw_result`: A list of raw `coxph` model objects.
 #'
 #' @seealso [survival::coxph()], [survival::Surv()]
 #' @export
@@ -41,7 +40,6 @@ gly_cox <- function(
   event_col = "event",
   p_adj_method = "BH",
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -58,15 +56,9 @@ gly_cox <- function(
   event <- sample_info[[event_col]]
 
   # Call the underlying API
-  result <- gly_cox_(expr_mat, time, event, p_adj_method, return_raw, ...)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
-
-  # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  result <- gly_cox_(expr_mat, time, event, p_adj_method, ...)
+  result <- .process_results_add_info(result, exp, add_info)
+  result
 }
 
 #' @rdname gly_cox
@@ -76,7 +68,6 @@ gly_cox_ <- function(
   time,
   event,
   p_adj_method = "BH",
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -84,7 +75,6 @@ gly_cox_ <- function(
   checkmate::assert_numeric(time, min.len = 1)
   checkmate::assert_numeric(event, min.len = 1)
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Check dimensions match
   if (ncol(expr_mat) != length(time)) {
@@ -102,15 +92,17 @@ gly_cox_ <- function(
     survival::coxph(survival::Surv(time, event) ~ x, ...)
   })
 
-  if (return_raw) {
-    return(cox_models)
-  }
-
   # Extract results and convert to tibble
-  res <- .gly_cox_tibblify(cox_models, p_adj_method)
+  tidy_result <- .gly_cox_tibblify(cox_models, p_adj_method)
 
-  # Add S3 class
-  structure(res, class = c("glystats_cox_res", "glystats_res", class(res)))
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = cox_models
+    ),
+    class = c("glystats_cox_res", "glystats_res")
+  )
 }
 
 .gly_cox_tibblify <- function(cox_models, p_adj_method) {

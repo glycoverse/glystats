@@ -32,21 +32,31 @@ test_that("gly_cox works with basic survival data", {
   
   # Test gly_cox function
   result <- suppressMessages(gly_cox(exp))
-  
+
   # Check result structure
   expect_s3_class(result, c("glystats_cox_res", "glystats_res"))
-  expect_true(tibble::is_tibble(result))
-  expect_equal(nrow(result), 10)
-  
-  # Check required columns
-  expect_true("variable" %in% colnames(result))
-  expect_true("coefficient" %in% colnames(result))
-  expect_true("hr" %in% colnames(result))
-  expect_true("p" %in% colnames(result))
-  expect_true("p_adj" %in% colnames(result))
-  
+  expect_type(result, "list")
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+
+  # Check tidy_result structure
+  expect_true(tibble::is_tibble(result$tidy_result))
+  expect_equal(nrow(result$tidy_result), 10)
+
+  # Check required columns in tidy_result
+  expect_true("variable" %in% colnames(result$tidy_result))
+  expect_true("coefficient" %in% colnames(result$tidy_result))
+  expect_true("hr" %in% colnames(result$tidy_result))
+  expect_true("p" %in% colnames(result$tidy_result))
+  expect_true("p_adj" %in% colnames(result$tidy_result))
+
   # Check that add_info worked (variable info should be joined)
-  expect_true("type" %in% colnames(result))
+  expect_true("type" %in% colnames(result$tidy_result))
+
+  # Check raw_result structure
+  expect_type(result$raw_result, "list")
+  expect_length(result$raw_result, 10)
+  expect_true(all(purrr::map_lgl(result$raw_result, ~ inherits(.x, "coxph"))))
 })
 
 test_that("gly_cox_ works with matrix input", {
@@ -61,38 +71,47 @@ test_that("gly_cox_ works with matrix input", {
   
   # Test function execution
   result <- suppressMessages(gly_cox_(expr_mat, time, event))
-  
+
   # Verify results
   expect_s3_class(result, c("glystats_cox_res", "glystats_res"))
-  expect_equal(nrow(result), 10)
-  expect_true("coefficient" %in% colnames(result))
-  expect_true("hr" %in% colnames(result))
-  expect_true("p" %in% colnames(result))
-  expect_true("p_adj" %in% colnames(result))
+  expect_type(result, "list")
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+
+  # Check tidy_result
+  expect_equal(nrow(result$tidy_result), 10)
+  expect_true("coefficient" %in% colnames(result$tidy_result))
+  expect_true("hr" %in% colnames(result$tidy_result))
+  expect_true("p" %in% colnames(result$tidy_result))
+  expect_true("p_adj" %in% colnames(result$tidy_result))
+
+  # Check raw_result
+  expect_type(result$raw_result, "list")
+  expect_length(result$raw_result, 10)
 })
 
-test_that("gly_cox return_raw parameter works", {
+test_that("gly_cox returns list with tidy and raw results", {
   # Create test survival data
   set.seed(789)
-  
+
   # Create expression matrix (5 variables, 15 samples)
   expr_mat <- matrix(rnorm(75), nrow = 5, ncol = 15)
   rownames(expr_mat) <- paste0("var", 1:5)
   colnames(expr_mat) <- paste0("sample", 1:15)
-  
+
   # Create sample info with survival data
   sample_info <- tibble::tibble(
     sample = paste0("sample", 1:15),
     time = rexp(15, rate = 0.15),
     event = rbinom(15, 1, 0.8)
   )
-  
+
   # Create variable info
   var_info <- tibble::tibble(
     variable = paste0("var", 1:5),
     type = rep("marker", 5)
   )
-  
+
   # Create experiment object
   exp <- glyexp::experiment(
     expr_mat = expr_mat,
@@ -101,18 +120,25 @@ test_that("gly_cox return_raw parameter works", {
     exp_type = "glycomics",
     glycan_type = "N"
   )
-  
-  # Test return_raw = TRUE
-  raw_result <- suppressMessages(gly_cox(exp, return_raw = TRUE))
-  
-  # Check that raw result is a list of coxph objects
-  expect_type(raw_result, "list")
-  expect_length(raw_result, 5)
-  expect_true(all(purrr::map_lgl(raw_result, ~ inherits(.x, "coxph"))))
-  
-  # Test return_raw = FALSE (default)
-  processed_result <- suppressMessages(gly_cox(exp, return_raw = FALSE))
-  expect_s3_class(processed_result, c("glystats_cox_res", "glystats_res"))
+
+  # Test gly_cox function
+  result <- suppressMessages(gly_cox(exp))
+
+  # Check result structure
+  expect_s3_class(result, c("glystats_cox_res", "glystats_res"))
+  expect_type(result, "list")
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+
+  # Check tidy_result
+  expect_true(tibble::is_tibble(result$tidy_result))
+  expect_equal(nrow(result$tidy_result), 5)
+  expect_true("type" %in% colnames(result$tidy_result))  # add_info worked
+
+  # Check raw_result
+  expect_type(result$raw_result, "list")
+  expect_length(result$raw_result, 5)
+  expect_true(all(purrr::map_lgl(result$raw_result, ~ inherits(.x, "coxph"))))
 })
 
 test_that("gly_cox add_info parameter works", {
@@ -149,13 +175,13 @@ test_that("gly_cox add_info parameter works", {
   
   # Test add_info = TRUE (default)
   result_with_info <- suppressMessages(gly_cox(exp, add_info = TRUE))
-  expect_true("category" %in% colnames(result_with_info))
-  expect_true("importance" %in% colnames(result_with_info))
-  
+  expect_true("category" %in% colnames(result_with_info$tidy_result))
+  expect_true("importance" %in% colnames(result_with_info$tidy_result))
+
   # Test add_info = FALSE
   result_without_info <- suppressMessages(gly_cox(exp, add_info = FALSE))
-  expect_false("category" %in% colnames(result_without_info))
-  expect_false("importance" %in% colnames(result_without_info))
+  expect_false("category" %in% colnames(result_without_info$tidy_result))
+  expect_false("importance" %in% colnames(result_without_info$tidy_result))
 })
 
 test_that("gly_cox custom time and event columns work", {
@@ -194,10 +220,13 @@ test_that("gly_cox custom time and event columns work", {
 
   # Check result structure
   expect_s3_class(result, c("glystats_cox_res", "glystats_res"))
-  expect_equal(nrow(result), 5)
-  expect_true("coefficient" %in% colnames(result))
-  expect_true("hr" %in% colnames(result))
-  expect_true("p" %in% colnames(result))
+  expect_type(result, "list")
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+  expect_equal(nrow(result$tidy_result), 5)
+  expect_true("coefficient" %in% colnames(result$tidy_result))
+  expect_true("hr" %in% colnames(result$tidy_result))
+  expect_true("p" %in% colnames(result$tidy_result))
 })
 
 test_that("gly_cox p-value adjustment methods work", {
@@ -237,14 +266,14 @@ test_that("gly_cox p-value adjustment methods work", {
   result_none <- suppressMessages(gly_cox(exp, p_adj_method = NULL))
 
   # Check that p_adj column exists for BH and bonferroni
-  expect_true("p_adj" %in% colnames(result_bh))
-  expect_true("p_adj" %in% colnames(result_bonf))
+  expect_true("p_adj" %in% colnames(result_bh$tidy_result))
+  expect_true("p_adj" %in% colnames(result_bonf$tidy_result))
 
   # Check that p_adj column doesn't exist when p_adj_method is NULL
-  expect_false("p_adj" %in% colnames(result_none))
+  expect_false("p_adj" %in% colnames(result_none$tidy_result))
 
   # Check that adjusted p-values are different between methods
-  expect_false(identical(result_bh$p_adj, result_bonf$p_adj))
+  expect_false(identical(result_bh$tidy_result$p_adj, result_bonf$tidy_result$p_adj))
 })
 
 test_that("gly_cox error handling works", {
@@ -345,16 +374,19 @@ test_that("gly_cox works with test_gp_exp data", {
 
   # Check result structure
   expect_s3_class(result, c("glystats_cox_res", "glystats_res"))
-  expect_equal(nrow(result), 10)
+  expect_type(result, "list")
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+  expect_equal(nrow(result$tidy_result), 10)
 
   # Check that variable info was joined (add_info = TRUE by default)
-  expect_true("protein" %in% colnames(result))
-  expect_true("gene" %in% colnames(result))
+  expect_true("protein" %in% colnames(result$tidy_result))
+  expect_true("gene" %in% colnames(result$tidy_result))
 
   # Check that results are reasonable
-  expect_true(all(is.finite(result$coefficient)))
-  expect_true(all(result$p >= 0 & result$p <= 1))
-  expect_true(all(result$p_adj >= 0 & result$p_adj <= 1))
+  expect_true(all(is.finite(result$tidy_result$coefficient)))
+  expect_true(all(result$tidy_result$p >= 0 & result$tidy_result$p <= 1))
+  expect_true(all(result$tidy_result$p_adj >= 0 & result$tidy_result$p_adj <= 1))
 })
 
 test_that("gly_cox input validation works", {
@@ -389,12 +421,15 @@ test_that("gly_cox handles edge cases", {
   # This should work normally
   result <- suppressMessages(gly_cox_(expr_mat, time, event))
   expect_s3_class(result, c("glystats_cox_res", "glystats_res"))
-  expect_equal(nrow(result), 4)
-  expect_true("variable" %in% colnames(result))
+  expect_type(result, "list")
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+  expect_equal(nrow(result$tidy_result), 4)
+  expect_true("variable" %in% colnames(result$tidy_result))
 
   # Test with all events = 1 (no censoring) - also use larger sample
   event_all <- rep(1, 20)
   result_all_events <- suppressMessages(gly_cox_(expr_mat, time, event_all))
   expect_s3_class(result_all_events, c("glystats_cox_res", "glystats_res"))
-  expect_equal(nrow(result_all_events), 4)
+  expect_equal(nrow(result_all_events$tidy_result), 4)
 })
