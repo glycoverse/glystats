@@ -12,13 +12,15 @@ test_that("gly_limma works with limma method", {
 
   # Test core functionality
   expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
-  expect_equal(nrow(result), 10)
-  expect_true("p_adj" %in% colnames(result))  # p_adj should exist
-  expect_true("log2fc" %in% colnames(result))  # log2fc should exist
-  expect_type(result$log2fc, "double")  # log2fc should be numeric
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+  expect_equal(nrow(result$tidy_result), 10)
+  expect_true("p_adj" %in% colnames(result$tidy_result))  # p_adj should exist
+  expect_true("log2fc" %in% colnames(result$tidy_result))  # log2fc should exist
+  expect_type(result$tidy_result$log2fc, "double")  # log2fc should be numeric
   # coefficient列已被重命名为log2fc，所以不需要单独的coefficient列
-  expect_true("t" %in% colnames(result))  # t-statistic
-  expect_true("b" %in% colnames(result))  # log-odds (B-statistic)
+  expect_true("t" %in% colnames(result$tidy_result))  # t-statistic
+  expect_true("b" %in% colnames(result$tidy_result))  # log-odds (B-statistic)
 })
 
 test_that("gly_limma basic functionality works", {
@@ -77,8 +79,8 @@ test_that("gly_limma ref_group parameter works", {
   result_ref_c <- suppressMessages(gly_limma(exp_2group, ref_group = "C"))
 
   # Check that log2fc values are negated when reference group changes
-  expect_equal(result_default$log2fc, -result_ref_h$log2fc, tolerance = 1e-10)
-  expect_equal(result_default$log2fc, result_ref_c$log2fc, tolerance = 1e-10)
+  expect_equal(result_default$tidy_result$log2fc, -result_ref_h$tidy_result$log2fc, tolerance = 1e-10)
+  expect_equal(result_default$tidy_result$log2fc, result_ref_c$tidy_result$log2fc, tolerance = 1e-10)
 
   # Test invalid ref_group
   expect_error(suppressMessages(gly_limma(exp_2group, ref_group = "invalid")),
@@ -96,9 +98,9 @@ test_that("gly_limma works with real data", {
 
   result <- suppressMessages(gly_limma(exp_2group))
   expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
-  expect_true(tibble::is_tibble(result))
-  expect_true("log2fc" %in% colnames(result))
-  expect_true("p_adj" %in% colnames(result))
+  expect_true(tibble::is_tibble(result$tidy_result))
+  expect_true("log2fc" %in% colnames(result$tidy_result))
+  expect_true("p_adj" %in% colnames(result$tidy_result))
 })
 
 test_that("gly_limma works with multi-group data", {
@@ -114,17 +116,17 @@ test_that("gly_limma works with multi-group data", {
 
   # Test core functionality
   expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
-  expect_true(tibble::is_tibble(result))
-  expect_true("contrast" %in% colnames(result))  # Should have contrast column
-  expect_true("log2fc" %in% colnames(result))
-  expect_true("p_adj" %in% colnames(result))
+  expect_true(tibble::is_tibble(result$tidy_result))
+  expect_true("contrast" %in% colnames(result$tidy_result))  # Should have contrast column
+  expect_true("log2fc" %in% colnames(result$tidy_result))
+  expect_true("p_adj" %in% colnames(result$tidy_result))
 
   # Should have 3 pairwise comparisons: C_vs_H, C_vs_M, H_vs_M
-  expect_equal(length(unique(result$contrast)), 3)
-  expect_true(all(c("C_vs_H", "C_vs_M", "H_vs_M") %in% result$contrast))
+  expect_equal(length(unique(result$tidy_result$contrast)), 3)
+  expect_true(all(c("C_vs_H", "C_vs_M", "H_vs_M") %in% result$tidy_result$contrast))
 
   # Each contrast should have the same number of variables
-  expect_equal(nrow(result), 10 * 3)  # 10 variables * 3 contrasts
+  expect_equal(nrow(result$tidy_result), 10 * 3)  # 10 variables * 3 contrasts
 })
 
 test_that("gly_limma multi-group generates correct contrasts", {
@@ -139,11 +141,11 @@ test_that("gly_limma multi-group generates correct contrasts", {
   result <- suppressMessages(gly_limma(exp_4group))
 
   # Should have 6 pairwise comparisons for 4 groups: C(4,2) = 6
-  expect_equal(length(unique(result$contrast)), 6)
+  expect_equal(length(unique(result$tidy_result$contrast)), 6)
 
   # Check all expected contrasts are present
   expected_contrasts <- c("C_vs_H", "C_vs_M", "C_vs_Y", "H_vs_M", "H_vs_Y", "M_vs_Y")
-  expect_setequal(unique(result$contrast), expected_contrasts)
+  expect_setequal(unique(result$tidy_result$contrast), expected_contrasts)
 })
 
 test_that("gly_limma custom contrasts work with hyphen format", {
@@ -160,9 +162,9 @@ test_that("gly_limma custom contrasts work with hyphen format", {
   result <- suppressMessages(gly_limma(exp_4group, contrasts = custom_contrasts))
 
   # Should have exactly 3 contrasts as specified
-  expect_equal(length(unique(result$contrast)), 3)
-  expect_setequal(unique(result$contrast), c("H_vs_C", "H_vs_M", "H_vs_Y"))
-  expect_equal(nrow(result), 5 * 3)  # 5 variables * 3 contrasts
+  expect_equal(length(unique(result$tidy_result$contrast)), 3)
+  expect_setequal(unique(result$tidy_result$contrast), c("H_vs_C", "H_vs_M", "H_vs_Y"))
+  expect_equal(nrow(result$tidy_result), 5 * 3)  # 5 variables * 3 contrasts
 })
 
 test_that("gly_limma custom contrasts work with _vs_ format", {
@@ -179,9 +181,9 @@ test_that("gly_limma custom contrasts work with _vs_ format", {
   result <- suppressMessages(gly_limma(exp_4group, contrasts = custom_contrasts))
 
   # Should have exactly 3 contrasts as specified
-  expect_equal(length(unique(result$contrast)), 3)
-  expect_setequal(unique(result$contrast), c("H_vs_C", "M_vs_C", "Y_vs_C"))
-  expect_equal(nrow(result), 5 * 3)  # 5 variables * 3 contrasts
+  expect_equal(length(unique(result$tidy_result$contrast)), 3)
+  expect_setequal(unique(result$tidy_result$contrast), c("H_vs_C", "M_vs_C", "Y_vs_C"))
+  expect_equal(nrow(result$tidy_result), 5 * 3)  # 5 variables * 3 contrasts
 })
 
 test_that("gly_limma contrasts error handling works", {
@@ -240,8 +242,8 @@ test_that("gly_limma handles group names with hyphens correctly", {
 
   # Test that _vs_ format works
   result <- suppressMessages(gly_limma(exp_hyphen_modified, contrasts = c("High-dose_vs_Control-1")))
-  expect_equal(length(unique(result$contrast)), 1)
-  expect_equal(unique(result$contrast), "High-dose_vs_Control-1")
+  expect_equal(length(unique(result$tidy_result$contrast)), 1)
+  expect_equal(unique(result$tidy_result$contrast), "High-dose_vs_Control-1")
 })
 
 test_that("gly_limma_ works correctly", {
@@ -261,8 +263,10 @@ test_that("gly_limma_ works correctly", {
 
   # Verify results
   expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
-  expect_true(tibble::is_tibble(result))
-  expect_true("log2fc" %in% colnames(result))
-  expect_true("p" %in% colnames(result))  # limma uses "p" not "p_value"
-  expect_equal(nrow(result), 10)
+  expect_true("tidy_result" %in% names(result))
+  expect_true("raw_result" %in% names(result))
+  expect_true(tibble::is_tibble(result$tidy_result))
+  expect_true("log2fc" %in% colnames(result$tidy_result))
+  expect_true("p" %in% colnames(result$tidy_result))  # limma uses "p" not "p_value"
+  expect_equal(nrow(result$tidy_result), 10)
 })

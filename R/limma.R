@@ -22,8 +22,7 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #'  Only applicable to `gly_limma()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw limma fit objects as a list.
+
 #' @param ... Additional arguments passed to `limma::lmFit()`.
 #'
 #' @details
@@ -49,9 +48,10 @@
 #' This function requires the following packages to be installed:
 #' - `limma` for linear model fitting and empirical Bayes moderation
 #'
-#' @returns A tibble with limma results including log2 fold change (log2fc).
-#'   For multi-group comparisons, includes a "contrast" column indicating the comparison.
-#'   If `return_raw` is TRUE, returns raw limma fit objects as a list.
+#' @returns A list with two elements:
+#'  - `tidy_result`: A tibble with limma results including log2 fold change (log2fc).
+#'    For multi-group comparisons, includes a "contrast" column indicating the comparison.
+#'  - `raw_result`: The raw limma fit object(s).
 #' @seealso [limma::lmFit()], [limma::eBayes()], [limma::makeContrasts()]
 #' @export
 gly_limma <- function(
@@ -61,7 +61,6 @@ gly_limma <- function(
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -70,7 +69,6 @@ gly_limma <- function(
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
   checkmate::assert_character(contrasts, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Check package availability
   .check_pkg_available("limma")
@@ -88,21 +86,16 @@ gly_limma <- function(
     method = "limma"
   )
   groups <- group_info$groups
-  n_groups <- length(levels(groups))
 
   # Validate ref_group parameter
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Call the underlying API
-  result <- gly_limma_(expr_mat, groups, p_adj_method, ref_group, contrasts, return_raw, ...)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
+  result <- gly_limma_(expr_mat, groups, p_adj_method, ref_group, contrasts, ...)
 
   # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_limma
@@ -113,7 +106,6 @@ gly_limma_ <- function(
   p_adj_method = "BH",
   ref_group = NULL,
   contrasts = NULL,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -121,7 +113,6 @@ gly_limma_ <- function(
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
   checkmate::assert_character(contrasts, null.ok = TRUE)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Check package availability
   .check_pkg_available("limma")
@@ -138,25 +129,19 @@ gly_limma_ <- function(
   # Perform limma analysis based on number of groups
   if (n_groups == 2) {
     # Two-group comparison
-    result <- .gly_limma_2groups(expr_mat, groups, p_adj_method, ref_group, return_raw, ...)
+    result <- .gly_limma_2groups(expr_mat, groups, p_adj_method, ref_group, ...)
   } else {
     # Multi-group comparison
-    result <- .gly_limma_multigroups(expr_mat, groups, p_adj_method, contrasts, return_raw, ...)
+    result <- .gly_limma_multigroups(expr_mat, groups, p_adj_method, contrasts, ...)
   }
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(result)
-  }
-
-  # Add S3 class
-  structure(result, class = c("glystats_limma_res", "glystats_res", class(result)))
+  result
 }
 
 # Internal helper functions for limma analysis
 
 # Limma-specific 2-group analysis function
-.gly_limma_2groups <- function(expr_mat, groups, p_adj_method, ref_group, return_raw = FALSE, ...) {
+.gly_limma_2groups <- function(expr_mat, groups, p_adj_method, ref_group, ...) {
   # Reorder groups if ref_group is specified
   if (!is.null(ref_group)) {
     groups <- .reorder_groups_for_ref(groups, ref_group)
@@ -176,12 +161,17 @@ gly_limma_ <- function(
   # Apply empirical Bayes moderation
   fit <- limma::eBayes(fit)
 
-  if (return_raw) {
-    return(fit)
-  }
-
   # Extract results and convert to tibble
-  .gly_limma_tibblify(fit, p_adj_method, expr_mat, groups)
+  tidy_result <- .gly_limma_tibblify(fit, p_adj_method, expr_mat, groups)
+
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = fit
+    ),
+    class = c("glystats_limma_res", "glystats_res")
+  )
 }
 
 # Convert limma fit object to tibble
@@ -229,7 +219,7 @@ gly_limma_ <- function(
 }
 
 # Limma-specific multi-group analysis function
-.gly_limma_multigroups <- function(expr_mat, groups, p_adj_method, contrasts = NULL, return_raw = FALSE, ...) {
+.gly_limma_multigroups <- function(expr_mat, groups, p_adj_method, contrasts = NULL, ...) {
   group_levels <- levels(groups)
   n_groups <- length(group_levels)
 
@@ -279,12 +269,17 @@ gly_limma_ <- function(
   # Apply empirical Bayes moderation
   fit2 <- limma::eBayes(fit2)
 
-  if (return_raw) {
-    return(fit2)
-  }
-
   # Extract results and convert to tibble
-  .gly_limma_multi_tibblify(fit2, p_adj_method, contrast_pairs)
+  tidy_result <- .gly_limma_multi_tibblify(fit2, p_adj_method, contrast_pairs)
+
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = fit2
+    ),
+    class = c("glystats_limma_res", "glystats_res")
+  )
 }
 
 # Helper function to generate all pairwise contrasts

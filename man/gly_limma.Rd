@@ -12,7 +12,6 @@ gly_limma(
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
@@ -22,7 +21,6 @@ gly_limma_(
   p_adj_method = "BH",
   ref_group = NULL,
   contrasts = NULL,
-  return_raw = FALSE,
   ...
 )
 }
@@ -49,9 +47,6 @@ Use the second format if group names contain hyphens.}
 will be added to the result tibble. If FALSE, only the statistical results are returned.
 Only applicable to \code{gly_limma()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw limma fit objects as a list.}
-
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
@@ -60,9 +55,12 @@ If TRUE, returns raw limma fit objects as a list.}
 Must have at least 2 levels.}
 }
 \value{
-A tibble with limma results including log2 fold change (log2fc).
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A tibble with limma results including log2 fold change (log2fc).
 For multi-group comparisons, includes a "contrast" column indicating the comparison.
-If \code{return_raw} is TRUE, returns raw limma fit objects as a list.
+\item \code{raw_result}: The raw limma fit object(s).
+}
 }
 \description{
 Perform differential expression analysis using linear models with empirical Bayes

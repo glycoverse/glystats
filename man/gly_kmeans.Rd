@@ -11,18 +11,10 @@ gly_kmeans(
   centers = 3,
   scale = TRUE,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
-gly_kmeans_(
-  expr_mat,
-  on = "variable",
-  centers = 3,
-  scale = TRUE,
-  return_raw = FALSE,
-  ...
-)
+gly_kmeans_(expr_mat, on = "variable", centers = 3, scale = TRUE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -39,19 +31,15 @@ Default is 3.}
 will be added to the result tibbles. If FALSE, only the clustering results are returned.
 Only applicable to \code{gly_kmeans()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw kmeans object.}
-
 \item{...}{Additional arguments passed to \code{stats::kmeans()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A tibble with two columns (when return_raw = FALSE):
+A list with two elements:
 \itemize{
-\item First column: variable or sample names (depending on \code{on} parameter)
-\item Second column: cluster assignments
-When return_raw = TRUE, returns the raw kmeans object.
+\item \code{tidy_result}: A tibble with cluster assignments.
+\item \code{raw_result}: The raw kmeans object from \code{stats::kmeans()}.
 }
 }
 \description{
