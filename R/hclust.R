@@ -15,8 +15,6 @@
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
 #'   Only applicable to `gly_hclust()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw hclust object.
 #' @param ... Additional arguments passed to `stats::dist()` and `stats::hclust()`.
 #'   Note: if both functions need a `method` parameter, use `dist.method` for distance
 #'   and `hclust.method` for clustering method.
@@ -48,12 +46,13 @@
 #' The dendrogram is cut at different heights to produce cluster assignments for
 #' the specified k values using `stats::cutree()`.
 #'
-#' @return A list containing multiple tibbles (when return_raw = FALSE):
-#'  - `clusters`: Cluster assignments for different k values (variables or samples depending on `on` parameter)
-#'  - `dendrogram`: Dendrogram segment data for plotting (if ggdendro is available)
-#'  - `heights`: Merge heights and steps for the clustering process
-#'  - `labels`: Labels and their positions (if ggdendro is available)
-#' When return_raw = TRUE, returns the raw hclust object.
+#' @return A list containing:
+#'  - `tidy_result`: A list of tibbles with clustering results:
+#'    - `clusters`: Cluster assignments for different k values (variables or samples depending on `on` parameter)
+#'    - `dendrogram`: Dendrogram segment data for plotting (if ggdendro is available)
+#'    - `heights`: Merge heights and steps for the clustering process
+#'    - `labels`: Labels and their positions (if ggdendro is available)
+#'  - `raw_result`: The raw hclust object from `stats::hclust()`
 #'
 #' @seealso [stats::hclust()], [stats::dist()], [stats::cutree()]
 #' @export
@@ -63,7 +62,6 @@ gly_hclust <- function(
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -74,21 +72,14 @@ gly_hclust <- function(
   }
   checkmate::assert_logical(scale, len = 1)
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
 
   # Call the underlying API
-  result <- gly_hclust_(expr_mat, on, k_values, scale, return_raw, ...)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
-
-  # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  result <- gly_hclust_(expr_mat, on, k_values, scale, ...)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_hclust
@@ -98,7 +89,6 @@ gly_hclust_ <- function(
   on = "variable",
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -108,7 +98,6 @@ gly_hclust_ <- function(
     checkmate::assert_integerish(k_values, lower = 2, min.len = 1)
   }
   checkmate::assert_logical(scale, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Prepare data for clustering based on 'on' parameter
   if (on == "sample") {
@@ -155,13 +144,8 @@ gly_hclust_ <- function(
   # Perform hierarchical clustering
   hclust_res <- do.call(stats::hclust, c(list(d = dist_mat), hclust_args))
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(hclust_res)
-  }
-
   # Initialize result list
-  result <- list()
+  tidy_result <- list()
 
   # 1. Cluster assignments for different k values
   if (!is.null(k_values)) {
@@ -179,11 +163,11 @@ gly_hclust_ <- function(
 
     # Set the appropriate column name based on clustering type
     colnames(clusters_tbl)[1] <- cluster_type
-    result$clusters <- clusters_tbl
+    tidy_result$clusters <- clusters_tbl
   }
 
   # 2. Heights data
-  result$heights <- tibble::tibble(
+  tidy_result$heights <- tibble::tibble(
     merge_step = seq_along(hclust_res$height),
     height = hclust_res$height,
     n_clusters = length(hclust_res$labels) - seq_along(hclust_res$height) + 1
@@ -197,25 +181,34 @@ gly_hclust_ <- function(
         list(device = function() grDevices::pdf(NULL)),
         dendro_data <- ggdendro::dendro_data(hclust_res)
       )
-      result$dendrogram <- tibble::as_tibble(dendro_data$segments)
-      result$labels <- tibble::as_tibble(dendro_data$labels)
+      tidy_result$dendrogram <- tibble::as_tibble(dendro_data$segments)
+      tidy_result$labels <- tibble::as_tibble(dendro_data$labels)
     }, error = function(e) {
       cli::cli_warn("Failed to extract dendrogram data using ggdendro: {e$message}")
     })
   } else {
     # Create basic dendrogram data without ggdendro
     # This is a simplified version that provides basic information
-    result$dendrogram <- tibble::tibble(
+    tidy_result$dendrogram <- tibble::tibble(
       note = "Install 'ggdendro' package for enhanced dendrogram plotting data"
     )
 
-    result$labels <- tibble::tibble(
+    tidy_result$labels <- tibble::tibble(
       label = hclust_res$labels,
       x = seq_along(hclust_res$labels),
       y = 0
     )
   }
 
-  # Add S3 class
-  structure(result, class = c("glystats_hclust_res", "glystats_res"))
+  # Add S3 class to tidy_result
+  tidy_result <- structure(tidy_result, class = c("glystats_hclust_res", "glystats_res"))
+
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = hclust_res
+    ),
+    class = c("glystats_hclust_res", "glystats_res")
+  )
 }

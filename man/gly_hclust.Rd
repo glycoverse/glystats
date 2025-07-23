@@ -11,7 +11,6 @@ gly_hclust(
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
@@ -20,7 +19,6 @@ gly_hclust_(
   on = "variable",
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
-  return_raw = FALSE,
   ...
 )
 }
@@ -39,9 +37,6 @@ Default is c(2, 3, 4, 5). If NULL, no cluster assignments are returned.}
 will be added to the result tibbles. If FALSE, only the clustering results are returned.
 Only applicable to \code{gly_hclust()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw hclust object.}
-
 \item{...}{Additional arguments passed to \code{stats::dist()} and \code{stats::hclust()}.
 Note: if both functions need a \code{method} parameter, use \code{dist.method} for distance
 and \code{hclust.method} for clustering method.}
@@ -49,13 +44,16 @@ and \code{hclust.method} for clustering method.}
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A list containing multiple tibbles (when return_raw = FALSE):
+A list containing:
+\itemize{
+\item \code{tidy_result}: A list of tibbles with clustering results:
 \itemize{
 \item \code{clusters}: Cluster assignments for different k values (variables or samples depending on \code{on} parameter)
 \item \code{dendrogram}: Dendrogram segment data for plotting (if ggdendro is available)
 \item \code{heights}: Merge heights and steps for the clustering process
 \item \code{labels}: Labels and their positions (if ggdendro is available)
-When return_raw = TRUE, returns the raw hclust object.
+}
+\item \code{raw_result}: The raw hclust object from \code{stats::hclust()}
 }
 }
 \description{
