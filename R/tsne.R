@@ -10,8 +10,6 @@
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'  will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.
 #'  Only applicable to `gly_tsne()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw Rtsne object.
 #' @param ... Additional arguments passed to `Rtsne::Rtsne()`.
 #'
 #' @section Required packages:
@@ -24,28 +22,29 @@
 #' `gly_tsne_()` is the underlying API that works with matrices directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
-#' @return A tibble with t-SNE coordinates (tsne1, tsne2) when return_raw = FALSE,
-#'   or raw Rtsne object when return_raw = TRUE.
+#' @return A list with two elements:
+#' - `tidy_result`: A tibble with t-SNE coordinates (tsne1, tsne2) and sample names
+#' - `raw_result`: The raw Rtsne object
+#' The list has classes `glystats_tsne_res` and `glystats_res`.
 #' @seealso [Rtsne::Rtsne()]
 #' @export
-gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, return_raw = FALSE, ...) {
+gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
   checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   expr_mat <- glyexp::get_expr_mat(exp)
-  result <- gly_tsne_(expr_mat, dims, perplexity, return_raw, ...)
+  result <- gly_tsne_(expr_mat, dims, perplexity, ...)
 
-  .process_results_add_info(result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_tsne
 #' @export
-gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, return_raw = FALSE, ...) {
+gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, ...) {
   .check_pkg_available("Rtsne")
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  checkmate::assert_logical(return_raw, len = 1)
 
   mat <- t(expr_mat)  # Samples as rows, variables as columns
 
@@ -70,18 +69,19 @@ gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, return_raw = FALSE, .
     ...
   )
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(tsne_res)
-  }
-
-  # Create result tibble
-  result <- tibble::tibble(
+  # Create tidy result tibble
+  tidy_result <- tibble::tibble(
     sample = rownames(mat),
     tsne1 = tsne_res$Y[, 1],
     tsne2 = tsne_res$Y[, 2]
   )
 
-  # Add S3 class
-  structure(result, class = c("glystats_tsne_res", "glystats_res", class(result)))
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = tsne_res
+    ),
+    class = c("glystats_tsne_res", "glystats_res")
+  )
 }

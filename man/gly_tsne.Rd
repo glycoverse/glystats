@@ -5,16 +5,9 @@
 \alias{gly_tsne_}
 \title{t-Distributed Stochastic Neighbor Embedding (t-SNE)}
 \usage{
-gly_tsne(
-  exp,
-  dims = 2,
-  perplexity = 30,
-  add_info = TRUE,
-  return_raw = FALSE,
-  ...
-)
+gly_tsne(exp, dims = 2, perplexity = 30, add_info = TRUE, ...)
 
-gly_tsne_(expr_mat, dims = 2, perplexity = 30, return_raw = FALSE, ...)
+gly_tsne_(expr_mat, dims = 2, perplexity = 30, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -27,16 +20,17 @@ gly_tsne_(expr_mat, dims = 2, perplexity = 30, return_raw = FALSE, ...)
 will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.
 Only applicable to \code{gly_tsne()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw Rtsne object.}
-
 \item{...}{Additional arguments passed to \code{Rtsne::Rtsne()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A tibble with t-SNE coordinates (tsne1, tsne2) when return_raw = FALSE,
-or raw Rtsne object when return_raw = TRUE.
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A tibble with t-SNE coordinates (tsne1, tsne2) and sample names
+\item \code{raw_result}: The raw Rtsne object
+The list has classes \code{glystats_tsne_res} and \code{glystats_res}.
+}
 }
 \description{
 Perform t-SNE dimensionality reduction on the expression data.
