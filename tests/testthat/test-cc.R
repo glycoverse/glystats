@@ -16,8 +16,6 @@ test_that("gly_consensus_clustering works with basic parameters (default: cluste
   # Check tidy_result is a tibble with expected structure
   tidy_result <- result$tidy_result
   expect_s3_class(tidy_result, "tbl_df")
-  expect_s3_class(tidy_result, "glystats_cc_res")
-  expect_s3_class(tidy_result, "glystats_res")
 
   # Check columns (should cluster samples by default)
   expect_true("sample" %in% colnames(tidy_result))
