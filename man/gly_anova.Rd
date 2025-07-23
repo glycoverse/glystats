@@ -31,13 +31,19 @@ Only applicable to \code{gly_anova()}.}
 Must have at least 2 levels.}
 }
 \value{
-A list containing four elements:
+A list containing two elements:
+\itemize{
+\item \code{tidy_result}: A list containing:
 \itemize{
 \item \code{main_test}: A tibble with ANOVA results and a \code{post_hoc} column indicating significant group pairs.
 \item \code{post_hoc_test}: A tibble with detailed pairwise comparison results in long format
 (variable, group1, group2, p_value, p_adj columns).
-\item \code{raw_main_test}: A list of raw \code{aov} model objects.
-\item \code{raw_post_hoc_test}: A list of raw \code{TukeyHSD} objects.
+}
+\item \code{raw_result}: A list containing:
+\itemize{
+\item \code{main_test}: A list of raw \code{aov} model objects.
+\item \code{post_hoc_test}: A list of raw \code{TukeyHSD} objects.
+}
 }
 }
 \description{

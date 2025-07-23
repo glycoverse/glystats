@@ -34,12 +34,14 @@
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A list containing four elements:
-#'   - `main_test`: A tibble with ANOVA results and a `post_hoc` column indicating significant group pairs.
-#'   - `post_hoc_test`: A tibble with detailed pairwise comparison results in long format
-#'     (variable, group1, group2, p_value, p_adj columns).
-#'   - `raw_main_test`: A list of raw `aov` model objects.
-#'   - `raw_post_hoc_test`: A list of raw `TukeyHSD` objects.
+#' A list containing two elements:
+#'   - `tidy_result`: A list containing:
+#'     - `main_test`: A tibble with ANOVA results and a `post_hoc` column indicating significant group pairs.
+#'     - `post_hoc_test`: A tibble with detailed pairwise comparison results in long format
+#'       (variable, group1, group2, p_value, p_adj columns).
+#'   - `raw_result`: A list containing:
+#'     - `main_test`: A list of raw `aov` model objects.
+#'     - `post_hoc_test`: A list of raw `TukeyHSD` objects.
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
 #' @export
@@ -68,7 +70,7 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
   result <- gly_anova_(expr_mat, groups, p_adj_method, ...)
 
   # Process results with add_info logic for main_test
-  result$main_test <- .process_tibble_add_info(result$main_test, exp, add_info)
+  result$tidy_result$main_test <- .process_tibble_add_info(result$tidy_result$main_test, exp, add_info)
   result
 }
 
@@ -103,16 +105,29 @@ gly_anova_ <- function(
   main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
 
-  # Assemble final result
-  result <- list(
+  # Assemble tidy results
+  tidy_result <- list(
     main_test = main_test,
-    post_hoc_test = post_hoc_test,
-    raw_main_test = raw_main_test,
-    raw_post_hoc_test = raw_post_hoc_test
+    post_hoc_test = post_hoc_test
   )
 
-  # Add S3 class to the entire list
-  structure(result, class = c("glystats_anova_res", "glystats_res", class(result)))
+  # Assemble raw results
+  raw_result <- list(
+    main_test = raw_main_test,
+    post_hoc_test = raw_post_hoc_test
+  )
+
+  # Add S3 class to tidy_result
+  tidy_result <- structure(tidy_result, class = c("glystats_anova_res", "glystats_res"))
+
+  # Assemble final result
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = raw_result
+    ),
+    class = c("glystats_anova_res", "glystats_res")
+  )
 }
 
 #' Kruskal-Wallis test for Differential Expression Analysis
@@ -154,12 +169,14 @@ gly_anova_ <- function(
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A list containing four elements:
-#'   - `main_test`: A tibble with Kruskal-Wallis test results and a `post_hoc` column indicating significant group pairs.
-#'   - `post_hoc_test`: A tibble with detailed pairwise comparison results in long format
-#'     (variable, group1, group2, p_value, p_adj columns).
-#'   - `raw_main_test`: A list of raw `kruskal.test` objects.
-#'   - `raw_post_hoc_test`: A list of raw `dunnTest` objects.
+#' A list containing two elements:
+#'   - `tidy_result`: A list containing:
+#'     - `main_test`: A tibble with Kruskal-Wallis test results and a `post_hoc` column indicating significant group pairs.
+#'     - `post_hoc_test`: A tibble with detailed pairwise comparison results in long format
+#'       (variable, group1, group2, p_value, p_adj columns).
+#'   - `raw_result`: A list containing:
+#'     - `main_test`: A list of raw `kruskal.test` objects.
+#'     - `post_hoc_test`: A list of raw `dunnTest` objects.
 #'
 #' @seealso [stats::kruskal.test()], [FSA::dunnTest()]
 #' @export
@@ -191,7 +208,7 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   result <- gly_kruskal_(expr_mat, groups, p_adj_method, ...)
 
   # Process results with add_info logic for main_test
-  result$main_test <- .process_tibble_add_info(result$main_test, exp, add_info)
+  result$tidy_result$main_test <- .process_tibble_add_info(result$tidy_result$main_test, exp, add_info)
   result
 }
 
@@ -229,16 +246,29 @@ gly_kruskal_ <- function(
   main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::kruskal.test)
 
-  # Assemble final result
-  result <- list(
+  # Assemble tidy results
+  tidy_result <- list(
     main_test = main_test,
-    post_hoc_test = post_hoc_test,
-    raw_main_test = raw_main_test,
-    raw_post_hoc_test = raw_post_hoc_test
+    post_hoc_test = post_hoc_test
   )
 
-  # Add S3 class to the entire list
-  structure(result, class = c("glystats_kruskal_res", "glystats_res", class(result)))
+  # Assemble raw results
+  raw_result <- list(
+    main_test = raw_main_test,
+    post_hoc_test = raw_post_hoc_test
+  )
+
+  # Add S3 class to tidy_result
+  tidy_result <- structure(tidy_result, class = c("glystats_kruskal_res", "glystats_res"))
+
+  # Assemble final result
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = raw_result
+    ),
+    class = c("glystats_kruskal_res", "glystats_res")
+  )
 }
 
 # Internal helper functions for multi-group analysis (ANOVA and Kruskal-Wallis)
