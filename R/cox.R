@@ -57,7 +57,7 @@ gly_cox <- function(
 
   # Call the underlying API
   result <- gly_cox_(expr_mat, time, event, p_adj_method, ...)
-  result <- .process_results_add_info(result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
   result
 }
 
