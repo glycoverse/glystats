@@ -7,8 +7,6 @@
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
 #' @param n_neighbors Number of neighbors to consider for each point. Default is 15.
 #' @param n_components Number of output dimensions. Default is 2.
-#' @param min_dist Minimum distance between embedded points. Default is 0.1.
-#' @param spread Controls how tightly the embedding is packed. Default is 1.0.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'  will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.
 #'  Only applicable to `gly_umap()`.
@@ -34,8 +32,6 @@ gly_umap <- function(
   exp,
   n_neighbors = 15,
   n_components = 2,
-  min_dist = 0.1,
-  spread = 1,
   add_info = TRUE,
   return_raw = FALSE,
   ...
@@ -45,7 +41,7 @@ gly_umap <- function(
   checkmate::assert_flag(add_info)
 
   expr_mat <- glyexp::get_expr_mat(exp)
-  result <- gly_umap_(expr_mat, n_components, n_neighbors, min_dist, spread, return_raw, ...)
+  result <- gly_umap_(expr_mat, n_components, n_neighbors, return_raw, ...)
 
   .process_results_add_info(result, exp, add_info)
 }
@@ -54,20 +50,14 @@ gly_umap <- function(
 #' @export
 gly_umap_ <- function(
   expr_mat,
-  n_components = 2,
   n_neighbors = 15,
-  min_dist = 0.1,
-  spread = 1,
+  n_components = 2,
   return_raw = FALSE,
   ...
 ) {
   .check_pkg_available("uwot")
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  checkmate::assert_int(n_components, lower = 1)
-  checkmate::assert_int(n_neighbors, lower = 1)
-  checkmate::assert_number(min_dist, lower = 0, upper = 1)
-  checkmate::assert_number(spread, lower = 0)
   checkmate::assert_flag(return_raw)
 
   # Prepare data (samples as rows, variables as columns)
@@ -81,8 +71,6 @@ gly_umap_ <- function(
     X = mat,
     n_components = n_components,
     n_neighbors = n_neighbors,
-    min_dist = min_dist,
-    spread = spread,
     verbose = FALSE,
     ...
   )

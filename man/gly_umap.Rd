@@ -9,8 +9,6 @@ gly_umap(
   exp,
   n_neighbors = 15,
   n_components = 2,
-  min_dist = 0.1,
-  spread = 1,
   add_info = TRUE,
   return_raw = FALSE,
   ...
@@ -18,10 +16,8 @@ gly_umap(
 
 gly_umap_(
   expr_mat,
-  n_components = 2,
   n_neighbors = 15,
-  min_dist = 0.1,
-  spread = 1,
+  n_components = 2,
   return_raw = FALSE,
   ...
 )
@@ -32,10 +28,6 @@ gly_umap_(
 \item{n_neighbors}{Number of neighbors to consider for each point. Default is 15.}
 
 \item{n_components}{Number of output dimensions. Default is 2.}
-
-\item{min_dist}{Minimum distance between embedded points. Default is 0.1.}
-
-\item{spread}{Controls how tightly the embedding is packed. Default is 1.0.}
 
 \item{add_info}{A logical value. If TRUE (default), sample information from the experiment
 will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.
