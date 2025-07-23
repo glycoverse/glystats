@@ -72,7 +72,7 @@ gly_consensus_clustering <- function(
 
   expr_mat <- glyexp::get_expr_mat(exp)
   result <- gly_consensus_clustering_(expr_mat, on, max_k, reps, p_item, cluster_alg, scale, output_file, ...)
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result <- .process_results_add_info(result, exp, add_info)
   result
 }
 
