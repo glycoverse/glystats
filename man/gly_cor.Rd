@@ -5,21 +5,13 @@
 \alias{gly_cor_}
 \title{Correlation Analysis for Glycomics and Glycoproteomics Data}
 \usage{
-gly_cor(
-  exp,
-  on = "variable",
-  method = "pearson",
-  p_adj_method = "BH",
-  return_raw = FALSE,
-  ...
-)
+gly_cor(exp, on = "variable", method = "pearson", p_adj_method = "BH", ...)
 
 gly_cor_(
   expr_mat,
   on = "variable",
   method = "pearson",
   p_adj_method = "BH",
-  return_raw = FALSE,
   ...
 )
 }
@@ -36,22 +28,23 @@ One of "pearson" (default) or "spearman". Note: "kendall" is not supported by Hm
 See \code{p.adjust.methods} for available methods. Default is "BH".
 If NULL, no adjustment is performed.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw rcorr object.}
-
 \item{...}{Additional arguments passed to \code{Hmisc::rcorr()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A tibble with correlation results (when return_raw = FALSE):
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A tibble with correlation results:
 \itemize{
 \item First column: First element of the pair (variable1/sample1)
 \item Second column: Second element of the pair (variable2/sample2)
 \item \code{cor}: Correlation coefficient
 \item \code{p_value}: Raw p-value
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
-When return_raw = TRUE, returns the raw rcorr object.
+}
+\item \code{raw_result}: The raw rcorr object from Hmisc::rcorr()
+The list has classes \code{glystats_cor_res} and \code{glystats_res}.
 }
 }
 \description{
@@ -65,7 +58,7 @@ correlation analysis. When \code{on = "variable"} (default), correlations are ca
 variables across samples. When \code{on = "sample"}, correlations are calculated between
 samples across variables.
 
-\code{gly_cor()} is the top-level API that works with \code{glyexp::experiment()} objects.
+\code{gly_cor()} is the top-level API that works with \code{glyexp::experiment()} objects。
 
 \code{gly_cor_()} is the underlying API that works with matrices directly,
 providing more flexibility for users who don't use the glyexp package.
