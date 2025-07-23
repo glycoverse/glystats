@@ -14,7 +14,6 @@ test_that("gly_anova works with anova method", {
 
   # Test tidy_result structure
   expect_type(result$tidy_result, "list")
-  expect_s3_class(result$tidy_result, c("glystats_anova_res", "glystats_res"))
   expect_named(result$tidy_result, c("main_test", "post_hoc_test"))
 
   # Test main_test tibble
@@ -50,7 +49,6 @@ test_that("gly_kruskal works with kruskal method", {
 
   # Test tidy_result structure
   expect_type(result$tidy_result, "list")
-  expect_s3_class(result$tidy_result, c("glystats_kruskal_res", "glystats_res"))
   expect_named(result$tidy_result, c("main_test", "post_hoc_test"))
 
   # Test main_test tibble

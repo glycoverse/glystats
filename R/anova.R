@@ -68,9 +68,7 @@ gly_anova <- function(exp, group_col = "group", p_adj_method = "BH", add_info = 
 
   # Call the underlying API
   result <- gly_anova_(expr_mat, groups, p_adj_method, ...)
-
-  # Process results with add_info logic for main_test
-  result$tidy_result$main_test <- .process_tibble_add_info(result$tidy_result$main_test, exp, add_info)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
   result
 }
 
@@ -116,9 +114,6 @@ gly_anova_ <- function(
     main_test = raw_main_test,
     post_hoc_test = raw_post_hoc_test
   )
-
-  # Add S3 class to tidy_result
-  tidy_result <- structure(tidy_result, class = c("glystats_anova_res", "glystats_res"))
 
   # Assemble final result
   structure(
@@ -206,9 +201,7 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
 
   # Call the underlying API
   result <- gly_kruskal_(expr_mat, groups, p_adj_method, ...)
-
-  # Process results with add_info logic for main_test
-  result$tidy_result$main_test <- .process_tibble_add_info(result$tidy_result$main_test, exp, add_info)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
   result
 }
 
@@ -257,9 +250,6 @@ gly_kruskal_ <- function(
     main_test = raw_main_test,
     post_hoc_test = raw_post_hoc_test
   )
-
-  # Add S3 class to tidy_result
-  tidy_result <- structure(tidy_result, class = c("glystats_kruskal_res", "glystats_res"))
 
   # Assemble final result
   structure(
