@@ -14,8 +14,6 @@
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
 #'   Only applicable to `gly_kmeans()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw kmeans object.
 #' @param ... Additional arguments passed to `stats::kmeans()`.
 #'
 #' @section Required packages:
@@ -39,10 +37,9 @@
 #' **Clustering Method:**
 #' K-means clustering is performed using `stats::kmeans()` with the specified parameters.
 #'
-#' @return A tibble with two columns (when return_raw = FALSE):
-#'  - First column: variable or sample names (depending on `on` parameter)
-#'  - Second column: cluster assignments
-#' When return_raw = TRUE, returns the raw kmeans object.
+#' @returns A list with two elements:
+#'  - `tidy_result`: A tibble with cluster assignments.
+#'  - `raw_result`: The raw kmeans object from `stats::kmeans()`.
 #'
 #' @seealso [stats::kmeans()]
 #' @export
@@ -52,7 +49,6 @@ gly_kmeans <- function(
   centers = 3,
   scale = TRUE,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -64,21 +60,14 @@ gly_kmeans <- function(
   )
   checkmate::assert_logical(scale, len = 1)
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
 
   # Call the underlying API
-  result <- gly_kmeans_(expr_mat, on, centers, scale, return_raw, ...)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
-
-  # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  result <- gly_kmeans_(expr_mat, on, centers, scale, ...)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_kmeans
@@ -88,7 +77,6 @@ gly_kmeans_ <- function(
   on = "variable",
   centers = 3,
   scale = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -99,7 +87,6 @@ gly_kmeans_ <- function(
     checkmate::check_matrix(centers)
   )
   checkmate::assert_logical(scale, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Prepare data for clustering based on 'on' parameter
   if (on == "sample") {
@@ -126,11 +113,6 @@ gly_kmeans_ <- function(
     ...
   )
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(kmeans_res)
-  }
-
   # Create result tibble
   result_tbl <- tibble::tibble(
     x = rownames(mat),
@@ -140,6 +122,12 @@ gly_kmeans_ <- function(
   # Set the appropriate column name based on clustering type
   colnames(result_tbl)[1] <- cluster_type
 
-  # Add S3 class
-  structure(result_tbl, class = c("glystats_kmeans_res", "glystats_res", class(result_tbl)))
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = result_tbl,
+      raw_result = kmeans_res
+    ),
+    class = c("glystats_kmeans_res", "glystats_res")
+  )
 }
