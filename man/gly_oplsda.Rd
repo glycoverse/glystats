@@ -12,19 +12,10 @@ gly_oplsda(
   ortho_i = NA,
   scale = TRUE,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
-gly_oplsda_(
-  expr_mat,
-  groups,
-  pred_i = 1,
-  ortho_i = NA,
-  scale = TRUE,
-  return_raw = FALSE,
-  ...
-)
+gly_oplsda_(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -42,9 +33,6 @@ that contains group labels. Default is "group".}
 will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.
 Only applicable to \code{gly_oplsda()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw ropls opls object.}
-
 \item{...}{Additional arguments passed to \code{ropls::opls()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
@@ -52,13 +40,16 @@ If TRUE, returns raw ropls opls object.}
 \item{groups}{A factor vector specifying group membership for each sample.}
 }
 \value{
-A list containing four tibbles (when return_raw = FALSE):
+A list containing:
+\itemize{
+\item \code{tidy_result}: A list of tibbles with OPLS-DA results:
 \itemize{
 \item \code{samples}: OPLS-DA scores for each sample with group information
 \item \code{variables}: OPLS-DA loadings for each variable
 \item \code{variance}: OPLS-DA explained variance information
 \item \code{vip}: Variable Importance in Projection (VIP) scores for each variable
-When return_raw = TRUE, returns the raw ropls opls object.
+}
+\item \code{raw_result}: The raw ropls opls object from \code{ropls::opls()}
 }
 }
 \description{

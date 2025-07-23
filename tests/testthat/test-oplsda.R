@@ -11,29 +11,37 @@ test_that("gly_oplsda works with valid Topliss ratio", {
 
   expect_s3_class(oplsda_res, c("glystats_oplsda_res", "glystats_res"))
   expect_type(oplsda_res, "list")
-  expect_setequal(names(oplsda_res), c("samples", "variables", "variance", "vip"))
+  expect_setequal(names(oplsda_res), c("tidy_result", "raw_result"))
+
+  # Check tidy_result structure
+  expect_s3_class(oplsda_res$tidy_result, c("glystats_oplsda_res", "glystats_res"))
+  expect_type(oplsda_res$tidy_result, "list")
+  expect_setequal(names(oplsda_res$tidy_result), c("samples", "variables", "variance", "vip"))
 
   # Check samples tibble
-  expect_s3_class(oplsda_res$samples, "tbl_df")
-  expect_true("group" %in% colnames(oplsda_res$samples))
-  expect_true("p1" %in% colnames(oplsda_res$samples))  # predictive component 1
+  expect_s3_class(oplsda_res$tidy_result$samples, "tbl_df")
+  expect_true("group" %in% colnames(oplsda_res$tidy_result$samples))
+  expect_true("p1" %in% colnames(oplsda_res$tidy_result$samples))  # predictive component 1
 
   # Check variables tibble
-  expect_s3_class(oplsda_res$variables, "tbl_df")
-  expect_true("variable" %in% colnames(oplsda_res$variables))
-  expect_true("p1" %in% colnames(oplsda_res$variables))
+  expect_s3_class(oplsda_res$tidy_result$variables, "tbl_df")
+  expect_true("variable" %in% colnames(oplsda_res$tidy_result$variables))
+  expect_true("p1" %in% colnames(oplsda_res$tidy_result$variables))
 
   # Check variance tibble
-  expect_s3_class(oplsda_res$variance, "tbl_df")
-  expect_true("component" %in% colnames(oplsda_res$variance))
-  expect_true("prop_var_explained" %in% colnames(oplsda_res$variance))
-  expect_true("cumulative_prop_var" %in% colnames(oplsda_res$variance))
+  expect_s3_class(oplsda_res$tidy_result$variance, "tbl_df")
+  expect_true("component" %in% colnames(oplsda_res$tidy_result$variance))
+  expect_true("prop_var_explained" %in% colnames(oplsda_res$tidy_result$variance))
+  expect_true("cumulative_prop_var" %in% colnames(oplsda_res$tidy_result$variance))
 
   # Check VIP tibble
-  expect_s3_class(oplsda_res$vip, "tbl_df")
-  expect_true("variable" %in% colnames(oplsda_res$vip))
-  expect_true("VIP" %in% colnames(oplsda_res$vip))
-  expect_true(all(oplsda_res$vip$VIP >= 0))  # VIP scores should be non-negative
+  expect_s3_class(oplsda_res$tidy_result$vip, "tbl_df")
+  expect_true("variable" %in% colnames(oplsda_res$tidy_result$vip))
+  expect_true("VIP" %in% colnames(oplsda_res$tidy_result$vip))
+  expect_true(all(oplsda_res$tidy_result$vip$VIP >= 0))  # VIP scores should be non-negative
+
+  # Check raw_result
+  expect_s4_class(oplsda_res$raw_result, "opls")
 })
 
 test_that("gly_oplsda validates Topliss ratio", {
@@ -74,24 +82,24 @@ test_that("gly_oplsda works with orthogonal components", {
   expect_s3_class(oplsda_res, c("glystats_oplsda_res", "glystats_res"))
 
   # Check that orthogonal components are present if model was built successfully
-  if (ncol(oplsda_res$variables) > 0) {  # Model was built
+  if (ncol(oplsda_res$tidy_result$variables) > 0) {  # Model was built
     # May have orthogonal components in samples
-    expect_true("p1" %in% colnames(oplsda_res$samples))
+    expect_true("p1" %in% colnames(oplsda_res$tidy_result$samples))
   }
 })
 
-test_that("gly_oplsda return_raw works", {
+test_that("gly_oplsda raw_result is accessible", {
   # Skip test if ropls is not available
   skip_if_not_installed("ropls")
 
-  # Test return_raw with valid dataset
+  # Test raw_result access with valid dataset
   suppressMessages(suppressWarnings({
     capture.output({
-      oplsda_raw <- gly_oplsda(exp_topliss_valid(), return_raw = TRUE)
+      oplsda_res <- gly_oplsda(exp_topliss_valid())
     }, type = "output")
   }))
 
-  expect_s4_class(oplsda_raw, "opls")
+  expect_s4_class(oplsda_res$raw_result, "opls")
 })
 
 test_that("gly_oplsda validates inputs", {
@@ -144,7 +152,7 @@ test_that("gly_oplsda handles different scaling options", {
   expect_s3_class(oplsda_unscaled, c("glystats_oplsda_res", "glystats_res"))
 
   # Results should be different when scaling is different
-  expect_false(identical(oplsda_scaled$samples, oplsda_unscaled$samples))
+  expect_false(identical(oplsda_scaled$tidy_result$samples, oplsda_unscaled$tidy_result$samples))
 })
 
 test_that("gly_oplsda validates Topliss ratio with invalid data", {
@@ -172,6 +180,10 @@ test_that("gly_oplsda_ works correctly", {
     }, type = "output")
   }))
 
-  # Verify results
-  expect_s3_class(result, "glystats_oplsda_res")
+  # Verify results structure
+  expect_s3_class(result, c("glystats_oplsda_res", "glystats_res"))
+  expect_type(result, "list")
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+  expect_s3_class(result$tidy_result, c("glystats_oplsda_res", "glystats_res"))
+  expect_s4_class(result$raw_result, "opls")
 })

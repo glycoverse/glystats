@@ -14,8 +14,6 @@
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.
 #'  Only applicable to `gly_oplsda()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw ropls opls object.
 #' @param ... Additional arguments passed to `ropls::opls()`.
 #'
 #' @section Required packages:
@@ -37,15 +35,16 @@
 #' - Feature selection before analysis
 #' - Collecting more samples
 #'
-#' @return A list containing four tibbles (when return_raw = FALSE):
-#'  - `samples`: OPLS-DA scores for each sample with group information
-#'  - `variables`: OPLS-DA loadings for each variable
-#'  - `variance`: OPLS-DA explained variance information
-#'  - `vip`: Variable Importance in Projection (VIP) scores for each variable
-#' When return_raw = TRUE, returns the raw ropls opls object.
+#' @return A list containing:
+#'  - `tidy_result`: A list of tibbles with OPLS-DA results:
+#'    - `samples`: OPLS-DA scores for each sample with group information
+#'    - `variables`: OPLS-DA loadings for each variable
+#'    - `variance`: OPLS-DA explained variance information
+#'    - `vip`: Variable Importance in Projection (VIP) scores for each variable
+#'  - `raw_result`: The raw ropls opls object from `ropls::opls()`
 #' @seealso [ropls::opls()]
 #' @export
-gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale = TRUE, add_info = TRUE, return_raw = FALSE, ...) {
+gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale = TRUE, add_info = TRUE, ...) {
   # Check package availability
   .check_pkg_available("ropls")
 
@@ -58,7 +57,6 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
   }
   checkmate::assert_logical(scale, len = 1)
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -91,26 +89,19 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
   }
 
   # Call the underlying API
-  result <- gly_oplsda_(expr_mat, groups, pred_i, ortho_i, scale, return_raw, ...)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
-
-  # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  result <- gly_oplsda_(expr_mat, groups, pred_i, ortho_i, scale, ...)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_oplsda
 #' @export
-gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, return_raw = FALSE, ...) {
+gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, ...) {
   .check_pkg_available("ropls")
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Prepare data matrix (samples as rows, variables as columns)
   mat <- log(t(expr_mat) + 1)
@@ -141,16 +132,20 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
                               fig.pdfC = "none", info.txtC = "none", ...)
   }
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(oplsda_res)
-  }
-
   # Extract and format results
-  res <- .format_oplsda_results(oplsda_res, groups, NULL, FALSE)
+  tidy_result <- .format_oplsda_results(oplsda_res, groups, NULL, FALSE)
 
-  # Add S3 class
-  structure(res, class = c("glystats_oplsda_res", "glystats_res"))
+  # Add S3 class to tidy_result
+  tidy_result <- structure(tidy_result, class = c("glystats_oplsda_res", "glystats_res"))
+
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = oplsda_res
+    ),
+    class = c("glystats_oplsda_res", "glystats_res")
+  )
 }
 
 # Helper function to format OPLS-DA results
