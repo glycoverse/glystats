@@ -47,16 +47,16 @@ test_that("add_info parameter works correctly for ROC analysis", {
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
     glyexp::slice_sample_var(n = 5)
-  
+
   # Test gly_roc
   result_roc_no_info <- suppressMessages(gly_roc(exp_2group, add_info = FALSE))
   result_roc_with_info <- suppressMessages(gly_roc(exp_2group, add_info = TRUE))
-  
+
   # Check auc tibble
-  expect_true(ncol(result_roc_no_info$auc) < ncol(result_roc_with_info$auc))
-  expect_true("variable" %in% colnames(result_roc_with_info$auc))
-  
+  expect_true(ncol(result_roc_no_info$tidy_result$auc) < ncol(result_roc_with_info$tidy_result$auc))
+  expect_true("variable" %in% colnames(result_roc_with_info$tidy_result$auc))
+
   # Check coords tibble
-  expect_true(ncol(result_roc_no_info$coords) < ncol(result_roc_with_info$coords))
-  expect_true("variable" %in% colnames(result_roc_with_info$coords))
+  expect_true(ncol(result_roc_no_info$tidy_result$coords) < ncol(result_roc_with_info$tidy_result$coords))
+  expect_true("variable" %in% colnames(result_roc_with_info$tidy_result$coords))
 })

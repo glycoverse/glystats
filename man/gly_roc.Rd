@@ -5,15 +5,9 @@
 \alias{gly_roc_}
 \title{ROC Analysis for Glycomics and Glycoproteomics Data}
 \usage{
-gly_roc(
-  exp,
-  group_col = "group",
-  pos_class = NULL,
-  add_info = TRUE,
-  return_raw = FALSE
-)
+gly_roc(exp, group_col = "group", pos_class = NULL, add_info = TRUE)
 
-gly_roc_(expr_mat, groups, pos_class = NULL, return_raw = FALSE)
+gly_roc_(expr_mat, groups, pos_class = NULL)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -30,16 +24,15 @@ used as the positive class.}
 will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
 Only applicable to \code{gly_roc()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed results with
-AUC values and threshold coordinates. If TRUE, returns raw pROC objects as a list.}
-
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 
 \item{groups}{A factor vector specifying group membership for each sample.
 Must have exactly 2 levels.}
 }
 \value{
-A list containing two elements:
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A list containing two tibbles:
 \itemize{
 \item \code{auc}: A tibble containing AUC values for each variable, with columns:
 \itemize{
@@ -52,8 +45,10 @@ A list containing two elements:
 \item \code{threshold}: Threshold value
 \item \code{sensitivity}: Sensitivity (True Positive Rate)
 \item \code{specificity}: Specificity (True Negative Rate)
-If \code{return_raw} is TRUE, returns a list of \code{pROC} objects.
 }
+}
+\item \code{raw_result}: A list of \code{pROC} objects
+The list has classes \code{glystats_roc_res} and \code{glystats_res}.
 }
 }
 \description{

@@ -18,8 +18,6 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
 #'  Only applicable to `gly_roc()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed results with
-#'   AUC values and threshold coordinates. If TRUE, returns raw pROC objects as a list.
 #'
 #' @details
 #' For each variable, a ROC curve is computed using the expression values as predictor
@@ -42,19 +40,21 @@
 #' This function requires the `pROC` package to be installed for ROC curve computation.
 #'
 #' @returns
-#' A list containing two elements:
-#' - `auc`: A tibble containing AUC values for each variable, with columns:
-#'   - `variable`: Variable name
-#'   - `auc`: AUC value
-#' - `coords`: A tibble containing ROC curve coordinates with columns:
-#'   - `variable`: Variable name
-#'   - `threshold`: Threshold value
-#'   - `sensitivity`: Sensitivity (True Positive Rate)
-#'   - `specificity`: Specificity (True Negative Rate)
-#' If `return_raw` is TRUE, returns a list of `pROC` objects.
+#' A list with two elements:
+#' - `tidy_result`: A list containing two tibbles:
+#'   - `auc`: A tibble containing AUC values for each variable, with columns:
+#'     - `variable`: Variable name
+#'     - `auc`: AUC value
+#'   - `coords`: A tibble containing ROC curve coordinates with columns:
+#'     - `variable`: Variable name
+#'     - `threshold`: Threshold value
+#'     - `sensitivity`: Sensitivity (True Positive Rate)
+#'     - `specificity`: Specificity (True Negative Rate)
+#' - `raw_result`: A list of `pROC` objects
+#' The list has classes `glystats_roc_res` and `glystats_res`.
 #' @seealso [pROC::roc()], [pROC::coords()]
 #' @export
-gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE, return_raw = FALSE) {
+gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE) {
   .check_pkg_available("pROC")
 
   # Validate inputs
@@ -62,7 +62,6 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE,
   checkmate::assert_string(group_col)
   checkmate::assert_string(pos_class, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -80,27 +79,20 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE,
   groups <- group_info$groups
 
   # Call the underlying API
-  result <- gly_roc_(expr_mat, groups, pos_class, return_raw)
-
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
-
-  # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  result <- gly_roc_(expr_mat, groups, pos_class)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_roc
 #' @export
-gly_roc_ <- function(expr_mat, groups, pos_class = NULL, return_raw = FALSE) {
+gly_roc_ <- function(expr_mat, groups, pos_class = NULL) {
   .check_pkg_available("pROC")
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_string(pos_class, null.ok = TRUE)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Validate group count
   if (length(levels(groups)) != 2) {
@@ -124,13 +116,10 @@ gly_roc_ <- function(expr_mat, groups, pos_class = NULL, return_raw = FALSE) {
   response <- as.numeric(groups == pos_class)
   roc_objs <- purrr::map(
     rownames(expr_mat),
-    ~ suppressMessages(pROC::roc(response, expr_mat[.x,]))
+    ~ suppressMessages(pROC::roc(response, expr_mat[.x, ]))
   )
 
-  if (return_raw) {
-    return(roc_objs)
-  }
-
+  # Create tidy results
   roc_auc_tb <- tibble::tibble(
     variable = rownames(expr_mat),
     auc = purrr::map_dbl(roc_objs, ~ .x$auc)
@@ -141,9 +130,15 @@ gly_roc_ <- function(expr_mat, groups, pos_class = NULL, return_raw = FALSE) {
     rlang::set_names(rownames(expr_mat)) %>%
     dplyr::bind_rows(.id = "variable")
 
-  # Create result list
-  result <- list(auc = roc_auc_tb, coords = coords_tb)
+  # Create tidy result list
+  tidy_result <- list(auc = roc_auc_tb, coords = coords_tb)
 
-  # Add S3 class
-  structure(result, class = c("glystats_roc_res", "glystats_res"))
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = roc_objs
+    ),
+    class = c("glystats_roc_res", "glystats_res")
+  )
 }
