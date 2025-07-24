@@ -162,17 +162,23 @@ gly_consensus_clustering_ <- function(
 
 .cc_no_output <- function(mat, ...) {
   temp_dir <- withr::local_tempdir("consensus_temp")
-  suppressMessages(
+
+  # Capture and suppress all graphics output
+  suppressMessages({
     withr::with_dir(temp_dir, {
-      ConsensusClusterPlus::ConsensusClusterPlus(
-        d = t(mat),  # ConsensusClusterPlus expects samples as columns
-        title = "temp_consensus",
-        plot = NULL,
-        verbose = FALSE,
-        ...
-      )
+      # Temporarily redirect graphics to a null device
+      temp_pdf <- tempfile(fileext = ".pdf")
+      withr::with_pdf(temp_pdf, {
+        ConsensusClusterPlus::ConsensusClusterPlus(
+          d = t(mat),  # ConsensusClusterPlus expects samples as columns
+          title = "temp_consensus",
+          plot = "pdf",  # Use pdf but redirect to temp file
+          verbose = FALSE,
+          ...
+        )
+      })
     })
-  )
+  })
 }
 
 .cc_with_output <- function(mat, output_file, ...) {
