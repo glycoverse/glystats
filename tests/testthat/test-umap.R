@@ -2,61 +2,71 @@
 
 test_that("gly_umap works with default parameters", {
   skip_if_not_installed("uwot")
-  
+
   # Use appropriate n_neighbors for small dataset
   result <- gly_umap(test_gp_exp, n_neighbors = 3)
-  
+
   # Check basic structure
   expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
-  expect_s3_class(result, "tbl_df")
-  
-  # Check dimensions
-  expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
-  expect_true("umap1" %in% names(result))
-  expect_true("umap2" %in% names(result))
-  expect_true("sample" %in% names(result))
-  
+  expect_type(result, "list")
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+
+  # Check tidy_result structure
+  expect_s3_class(result$tidy_result, "tbl_df")
+  expect_equal(nrow(result$tidy_result), nrow(test_gp_exp$sample_info))
+  expect_true("umap1" %in% names(result$tidy_result))
+  expect_true("umap2" %in% names(result$tidy_result))
+  expect_true("sample" %in% names(result$tidy_result))
+
   # Check that coordinates are numeric
-  expect_type(result$umap1, "double")
-  expect_type(result$umap2, "double")
-  
+  expect_type(result$tidy_result$umap1, "double")
+  expect_type(result$tidy_result$umap2, "double")
+
   # Check that no missing values
-  expect_false(any(is.na(result$umap1)))
-  expect_false(any(is.na(result$umap2)))
+  expect_false(any(is.na(result$tidy_result$umap1)))
+  expect_false(any(is.na(result$tidy_result$umap2)))
+
+  # Check raw_result
+  expect_true(is.matrix(result$raw_result))
+  expect_equal(nrow(result$raw_result), nrow(test_gp_exp$sample_info))
+  expect_equal(ncol(result$raw_result), 2)
 })
 
 test_that("gly_umap works with custom parameters", {
   skip_if_not_installed("uwot")
-  
+
   result <- gly_umap(test_gp_exp, n_neighbors = 2, min_dist = 0.01, n_epochs = 50)
-  
+
   expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
-  expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
-  expect_true(all(c("umap1", "umap2", "sample") %in% names(result)))
+  expect_equal(nrow(result$tidy_result), nrow(test_gp_exp$sample_info))
+  expect_true(all(c("umap1", "umap2", "sample") %in% names(result$tidy_result)))
 })
 
 test_that("gly_umap works with more than 2 components", {
   skip_if_not_installed("uwot")
-  
+
   result <- gly_umap(test_gp_exp, n_neighbors = 3, n_components = 3)
-  
+
   expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
-  expect_equal(nrow(result), nrow(test_gp_exp$sample_info))
-  expect_true(all(c("umap1", "umap2", "umap3", "sample") %in% names(result)))
-  
+  expect_equal(nrow(result$tidy_result), nrow(test_gp_exp$sample_info))
+  expect_true(all(c("umap1", "umap2", "umap3", "sample") %in% names(result$tidy_result)))
+
   # Check that all coordinates are numeric
-  expect_type(result$umap1, "double")
-  expect_type(result$umap2, "double")
-  expect_type(result$umap3, "double")
+  expect_type(result$tidy_result$umap1, "double")
+  expect_type(result$tidy_result$umap2, "double")
+  expect_type(result$tidy_result$umap3, "double")
+
+  # Check raw_result has correct dimensions
+  expect_equal(ncol(result$raw_result), 3)
 })
 
 test_that("gly_umap has consistent sample names", {
   skip_if_not_installed("uwot")
-  
+
   result <- gly_umap(test_gp_exp, n_neighbors = 3)
-  
+
   # Should have same sample names as input expression matrix
-  expect_equal(sort(result$sample), sort(colnames(test_gp_exp$expr_mat)))
+  expect_equal(sort(result$tidy_result$sample), sort(colnames(test_gp_exp$expr_mat)))
 })
 
 test_that("gly_umap requires uwot package", {
@@ -76,14 +86,19 @@ test_that("gly_umap_ works correctly", {
 
   # Test function execution with appropriate n_neighbors
   suppressMessages({
-    result <- gly_umap_(expr_mat, n_components = 2, n_neighbors = 3)
+    result <- gly_umap_(expr_mat, n_neighbors = 3, n_components = 2)
   })
 
   # Verify results
   expect_s3_class(result, "glystats_umap_res")
-  expect_true(tibble::is_tibble(result))
-  expect_true("sample" %in% colnames(result))
-  expect_true("umap1" %in% colnames(result))
-  expect_true("umap2" %in% colnames(result))
-  expect_equal(nrow(result), 10)
+  expect_type(result, "list")
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+  expect_true(tibble::is_tibble(result$tidy_result))
+  expect_true("sample" %in% colnames(result$tidy_result))
+  expect_true("umap1" %in% colnames(result$tidy_result))
+  expect_true("umap2" %in% colnames(result$tidy_result))
+  expect_equal(nrow(result$tidy_result), 10)
+  expect_true(is.matrix(result$raw_result))
+  expect_equal(nrow(result$raw_result), 10)
+  expect_equal(ncol(result$raw_result), 2)
 })

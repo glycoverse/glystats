@@ -5,22 +5,9 @@
 \alias{gly_umap_}
 \title{Uniform Manifold Approximation and Projection (UMAP)}
 \usage{
-gly_umap(
-  exp,
-  n_neighbors = 15,
-  n_components = 2,
-  add_info = TRUE,
-  return_raw = FALSE,
-  ...
-)
+gly_umap(exp, n_neighbors = 15, n_components = 2, add_info = TRUE, ...)
 
-gly_umap_(
-  expr_mat,
-  n_neighbors = 15,
-  n_components = 2,
-  return_raw = FALSE,
-  ...
-)
+gly_umap_(expr_mat, n_neighbors = 15, n_components = 2, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -33,16 +20,17 @@ gly_umap_(
 will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.
 Only applicable to \code{gly_umap()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw umap result matrix.}
-
 \item{...}{Additional arguments passed to \code{uwot::umap()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A tibble with UMAP coordinates (umap1, umap2) when return_raw = FALSE,
-or raw umap result matrix when return_raw = TRUE.
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A tibble with UMAP coordinates (umap1, umap2, etc.) and sample names
+\item \code{raw_result}: The raw UMAP result matrix
+The list has classes \code{glystats_umap_res} and \code{glystats_res}.
+}
 }
 \description{
 Perform UMAP dimensionality reduction on the expression data.
