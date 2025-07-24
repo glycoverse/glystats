@@ -11,7 +11,7 @@ P-values are adjusted for multiple testing using the method specified by p_adj_m
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,7 +101,15 @@ Must have exactly 2 levels. Character vectors will be automatically converted to
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with Wilcoxon test results including log2 fold change (log2fc)</p></li>
+    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with Wilcoxon test results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>statistic</code>: Wilcoxon test statistic</p></li>
+<li><p><code>p_value</code>: Raw p-value from Wilcoxon test</p></li>
+<li><p><code>method</code>: Statistical method used</p></li>
+<li><p><code>alternative</code>: Alternative hypothesis</p></li>
+<li><p><code>p_adj</code>: Adjusted p-value (if p_adj_method is not NULL)</p></li>
+<li><p><code>log2fc</code>: Log2 fold change (log2(group2_mean / group1_mean))
+Additional columns from experiment metadata may be included if add_info = TRUE.</p></li>
+</ul></li>
 <li><p><code>raw_result</code>: A list of <code>wilcox.test</code> model objects
 The list has classes <code>glystats_wilcox_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>

@@ -13,7 +13,7 @@ and merge heights."><meta property="og:image" content="https://glycoverse.github
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -105,10 +105,18 @@ and <code>hclust.method</code> for clustering method.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing:</p><ul><li><p><code>tidy_result</code>: A list of tibbles with clustering results:</p><ul><li><p><code>clusters</code>: Cluster assignments for different k values (variables or samples depending on <code>on</code> parameter)</p></li>
-<li><p><code>dendrogram</code>: Dendrogram segment data for plotting (if ggdendro is available)</p></li>
-<li><p><code>heights</code>: Merge heights and steps for the clustering process</p></li>
-<li><p><code>labels</code>: Labels and their positions (if ggdendro is available)</p></li>
+    <p>A list containing:</p><ul><li><p><code>tidy_result</code>: A list of tibbles with clustering results:</p><ul><li><p><code>clusters</code>: Cluster assignments containing the following columns:</p><ul><li><p><code>variable</code> or <code>sample</code>: Variable or sample name (depending on <code>on</code> parameter)</p></li>
+<li><p><code>cluster_k2</code>, <code>cluster_k3</code>, etc.: Cluster assignments for different k values</p></li>
+</ul></li>
+<li><p><code>dendrogram</code>: Dendrogram segment data for plotting (if ggdendro is available) containing:</p><ul><li><p><code>x</code>, <code>y</code>, <code>xend</code>, <code>yend</code>: Segment coordinates for plotting</p></li>
+</ul></li>
+<li><p><code>heights</code>: Merge heights and steps containing the following columns:</p><ul><li><p><code>merge_step</code>: Step number in the clustering process</p></li>
+<li><p><code>height</code>: Height at which clusters are merged</p></li>
+<li><p><code>n_clusters</code>: Number of clusters remaining after this merge</p></li>
+</ul></li>
+<li><p><code>labels</code>: Labels and their positions (if ggdendro is available) containing:</p><ul><li><p><code>x</code>, <code>y</code>: Position coordinates</p></li>
+<li><p><code>label</code>: Label text</p></li>
+</ul></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw hclust object from <code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code></p></li>
 </ul></div>

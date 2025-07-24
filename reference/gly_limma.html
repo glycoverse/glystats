@@ -9,7 +9,7 @@ moderation from the limma package. Supports both two-group and multi-group compa
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,8 +114,15 @@ Must have at least 2 levels. Character vectors will be automatically converted t
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with limma results including log2 fold change (log2fc).
-For multi-group comparisons, includes a "contrast" column indicating the comparison.</p></li>
+    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with limma results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>log2fc</code>: Log2 fold change</p></li>
+<li><p><code>AveExpr</code>: Average expression level</p></li>
+<li><p><code>t</code>: t-statistic</p></li>
+<li><p><code>p</code>: Raw p-value</p></li>
+<li><p><code>p_adj</code>: Adjusted p-value (if p_adj_method is not NULL)</p></li>
+<li><p><code>b</code>: B-statistic (log-odds of differential expression)</p></li>
+<li><p><code>contrast</code>: Contrast name (for multi-group comparisons only)</p></li>
+</ul></li>
 <li><p><code>raw_result</code>: The raw limma fit object(s).</p></li>
 </ul></div>
     <div class="section level2">

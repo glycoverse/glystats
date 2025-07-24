@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,21 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="glystats-030">glystats 0.3.0<a class="anchor" aria-label="anchor" href="#glystats-030"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-3-0"></a></h3>
+<p>This version introduces new API for all functions. Briefly, the <code>return_raw</code> parameter is removed, and all functions now return a list with two elements: <code>tidy_result</code> and <code>raw_result</code>. The concrete types of <code>tidy_result</code> and <code>raw_result</code> depend. <code>tidy_result</code> can be a tibble, or a list of tibbles. <code>raw_result</code> can be a single object returned by the underlying statistical functions, or a list of such objects. This update makes <code>glystats</code> easier to use. And more importantly, it allows the <code>glyvis</code> package to access the raw results directly.</p>
+</div>
+<div class="section level3">
+<h3 id="minor-improvements-and-bug-fixes-0-3-0">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-3-0"></a></h3>
+<ul><li>Update the documentation of all functions to include the detailed column descriptions for the tibbles in <code>tidy_result</code>.</li>
+<li>All <code>gly_xxx_()</code> functions now accept a character vector as the <code>groups</code> parameter.</li>
+<li>Fix an issue that <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering()</a></code> sends plots to the plot panel when <code>output_file</code> is NULL. This is an inconsistent behavior compared to other functions, and it has been fixed.</li>
+<li>Update the documentation of <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering()</a></code> to emphasize the importance of <code>output_file</code>.</li>
+<li>Add an introduction vignette.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.3" id="glystats-023">glystats 0.2.3<a class="anchor" aria-label="anchor" href="#glystats-023"></a></h2>
 <div class="section level3">

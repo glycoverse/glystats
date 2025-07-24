@@ -9,7 +9,7 @@ The function uses mixOmics::plsda() to perform PLS-DA and returns tidy results."
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,10 +95,19 @@ Character vectors will be automatically converted to factors.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing:</p><ul><li><p><code>tidy_result</code>: A list of tibbles with PLS-DA results:</p><ul><li><p><code>samples</code>: PLS-DA scores for each sample with group information</p></li>
-<li><p><code>variables</code>: PLS-DA loadings for each variable</p></li>
-<li><p><code>variance</code>: PLS-DA explained variance information</p></li>
-<li><p><code>vip</code>: Variable Importance in Projection (VIP) scores for each variable</p></li>
+    <p>A list containing:</p><ul><li><p><code>tidy_result</code>: A list of tibbles with PLS-DA results:</p><ul><li><p><code>samples</code>: PLS-DA scores for each sample containing the following columns:</p><ul><li><p><code>sample</code>: Sample name</p></li>
+<li><p><code>group</code>: Group assignment</p></li>
+<li><p><code>comp1</code>, <code>comp2</code>, etc.: PLS-DA component scores</p></li>
+</ul></li>
+<li><p><code>variables</code>: PLS-DA loadings for each variable containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>comp1</code>, <code>comp2</code>, etc.: PLS-DA component loadings</p></li>
+</ul></li>
+<li><p><code>variance</code>: PLS-DA explained variance containing the following columns:</p><ul><li><p><code>comp</code>: Component name (comp1, comp2, etc.)</p></li>
+<li><p><code>explained_variance</code>: Percentage of variance explained by each component</p></li>
+</ul></li>
+<li><p><code>vip</code>: Variable Importance in Projection scores containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>vip</code>: VIP score</p></li>
+</ul></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw mixOmics plsda object from <code><a href="https://rdrr.io/pkg/mixOmics/man/plsda.html" class="external-link">mixOmics::plsda()</a></code></p></li>
 </ul></div>

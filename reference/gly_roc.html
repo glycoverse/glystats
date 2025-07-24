@@ -13,7 +13,7 @@ power between two groups."><meta property="og:image" content="https://glycoverse
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,13 +89,13 @@ Must have exactly 2 levels. Character vectors will be automatically converted to
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A list containing two tibbles:</p><ul><li><p><code>auc</code>: A tibble containing AUC values for each variable, with columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
-<li><p><code>auc</code>: AUC value</p></li>
+    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A list containing two tibbles:</p><ul><li><p><code>auc</code>: A tibble containing AUC values for each variable with the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>auc</code>: Area Under the Curve value</p></li>
 </ul></li>
-<li><p><code>coords</code>: A tibble containing ROC curve coordinates with columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
-<li><p><code>threshold</code>: Threshold value</p></li>
-<li><p><code>sensitivity</code>: Sensitivity (True Positive Rate)</p></li>
+<li><p><code>coords</code>: A tibble containing ROC curve coordinates with the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>threshold</code>: Threshold value for classification</p></li>
 <li><p><code>specificity</code>: Specificity (True Negative Rate)</p></li>
+<li><p><code>sensitivity</code>: Sensitivity (True Positive Rate)</p></li>
 </ul></li>
 </ul></li>
 <li><p><code>raw_result</code>: A list of <code>pROC</code> objects

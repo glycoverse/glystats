@@ -11,7 +11,7 @@ detect modules, and calculate module membership and eigenvalues."><meta property
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -124,8 +124,14 @@ to the modules tibble. Only applicable to <code>gly_wgcna()</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A list containing two tibbles:</p><ul><li><p><code>modules</code>: Module assignments and membership values for each variable</p></li>
-<li><p><code>eigenvalues</code>: Module eigenvalues (first principal component of module expression)</p></li>
+    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A list containing two tibbles:</p><ul><li><p><code>modules</code>: Module assignments and membership values containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>module</code>: Module assignment (color name)</p></li>
+<li><p><code>membership</code>: Module membership value (correlation with module eigengene)</p></li>
+</ul></li>
+<li><p><code>eigenvalues</code>: Module eigenvalues containing the following columns:</p><ul><li><p><code>module</code>: Module name (color name)</p></li>
+<li><p><code>sample</code>: Sample name</p></li>
+<li><p><code>eigenvalue</code>: Module eigenvalue (first principal component of module expression)</p></li>
+</ul></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw WGCNA blockwiseModules object
 The list has classes <code>glystats_wgcna_res</code> and <code>glystats_res</code>.</p></li>

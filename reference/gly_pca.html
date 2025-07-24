@@ -9,7 +9,7 @@ The function uses prcomp() to perform PCA and broom::tidy() to tidy the results.
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,9 +78,19 @@ Only applicable to <code>gly_pca()</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing:</p><ul><li><p><code>tidy_result</code>: A list of tibbles with PCA results:</p><ul><li><p><code>samples</code>: PCA scores for each sample</p></li>
-<li><p><code>variables</code>: PCA loadings for each variable</p></li>
-<li><p><code>eigenvalues</code>: PCA eigenvalues</p></li>
+    <p>A list containing:</p><ul><li><p><code>tidy_result</code>: A list of tibbles with PCA results:</p><ul><li><p><code>samples</code>: PCA scores for each sample containing the following columns:</p><ul><li><p><code>sample</code>: Sample name</p></li>
+<li><p><code>PC</code>: Principal component name (PC1, PC2, etc.)</p></li>
+<li><p><code>value</code>: Score value for the principal component</p></li>
+</ul></li>
+<li><p><code>variables</code>: PCA loadings for each variable containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>PC</code>: Principal component name (PC1, PC2, etc.)</p></li>
+<li><p><code>value</code>: Loading value for the principal component</p></li>
+</ul></li>
+<li><p><code>eigenvalues</code>: PCA eigenvalues containing the following columns:</p><ul><li><p><code>PC</code>: Principal component name (PC1, PC2, etc.)</p></li>
+<li><p><code>std.dev</code>: Standard deviation</p></li>
+<li><p><code>percent</code>: Percentage of variance explained</p></li>
+<li><p><code>cumulative</code>: Cumulative percentage of variance explained</p></li>
+</ul></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw prcomp object from <code><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">stats::prcomp()</a></code></p></li>
 </ul></div>

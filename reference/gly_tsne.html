@@ -9,7 +9,7 @@ The function uses Rtsne::Rtsne() to perform t-SNE analysis."><meta property="og:
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +78,10 @@ Only applicable to <code>gly_tsne()</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with t-SNE coordinates (tsne1, tsne2) and sample names</p></li>
+    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with t-SNE coordinates containing the following columns:</p><ul><li><p><code>sample</code>: Sample name</p></li>
+<li><p><code>tsne1</code>: First t-SNE dimension</p></li>
+<li><p><code>tsne2</code>: Second t-SNE dimension</p></li>
+</ul></li>
 <li><p><code>raw_result</code>: The raw Rtsne object
 The list has classes <code>glystats_tsne_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>

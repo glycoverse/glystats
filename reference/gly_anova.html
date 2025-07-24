@@ -13,7 +13,7 @@ P-values are adjusted for multiple testing using the method specified by p_adj_m
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,9 +92,22 @@ Must have at least 2 levels. Character vectors will be automatically converted t
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing two elements:</p><ul><li><p><code>tidy_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A tibble with ANOVA results and a <code>post_hoc</code> column indicating significant group pairs.</p></li>
-<li><p><code>post_hoc_test</code>: A tibble with detailed pairwise comparison results in long format
-(variable, group1, group2, p_value, p_adj columns).</p></li>
+    <p>A list containing two elements:</p><ul><li><p><code>tidy_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A tibble with ANOVA results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>term</code>: ANOVA term (usually "groups")</p></li>
+<li><p><code>df</code>: Degrees of freedom</p></li>
+<li><p><code>sumsq</code>: Sum of squares</p></li>
+<li><p><code>meansq</code>: Mean squares</p></li>
+<li><p><code>statistic</code>: F-statistic</p></li>
+<li><p><code>p_value</code>: Raw p-value from ANOVA</p></li>
+<li><p><code>p_adj</code>: Adjusted p-value (if p_adj_method is not NULL)</p></li>
+<li><p><code>post_hoc</code>: Significant group pairs from post-hoc test</p></li>
+</ul></li>
+<li><p><code>post_hoc_test</code>: A tibble with pairwise comparison results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+<li><p><code>group1</code>: First group in comparison</p></li>
+<li><p><code>group2</code>: Second group in comparison</p></li>
+<li><p><code>p_value</code>: Raw p-value from Tukey's HSD test</p></li>
+<li><p><code>p_adj</code>: Adjusted p-value from Tukey's HSD test</p></li>
+</ul></li>
 </ul></li>
 <li><p><code>raw_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A list of raw <code>aov</code> model objects.</p></li>
 <li><p><code>post_hoc_test</code>: A list of raw <code>TukeyHSD</code> objects.</p></li>
