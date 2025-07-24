@@ -10,3 +10,5 @@
 ^pkgdown$
 ^data-raw$
 ^\.cursor$
+^doc$
+^Meta$

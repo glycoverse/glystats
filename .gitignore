@@ -6,3 +6,6 @@
 .quarto
 docs
 /.cursor/
+inst/doc
+/doc/
+/Meta/

@@ -30,6 +30,8 @@ pak::pak("glycoverse/glystats")
 
 ## Documentation
 
+-   🚀 Get started:
+    [Here](https://glycoverse.github.io/glystats/articles/glystats.html)
 -   📚 Reference:
     [Here](https://glycoverse.github.io/glystats/reference/index.html)
 

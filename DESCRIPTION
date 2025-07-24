@@ -23,7 +23,11 @@ Suggests:
     Hmisc,
     limma,
     WGCNA,
-    ConsensusClusterPlus
+    ConsensusClusterPlus,
+    knitr,
+    rmarkdown,
+    glyclean (>= 0.6.2),
+    glyread (>= 0.4.2)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -48,5 +52,8 @@ Imports:
     survival
 Depends: 
     R (>= 2.10)
-Remotes:
-    glycoverse/glyexp
+Remotes:  
+    glycoverse/glyexp,
+    glycoverse/glyclean,
+    glycoverse/glyread
+VignetteBuilder: knitr
