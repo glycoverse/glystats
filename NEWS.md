@@ -1,3 +1,28 @@
+# glystats 0.3.0
+
+## Breaking changes
+
+This version introduces new API for all functions.
+Briefly, the `return_raw` parameter is removed,
+and all functions now return a list with two elements:
+`tidy_result` and `raw_result`.
+The concrete types of `tidy_result` and `raw_result` depend.
+`tidy_result` can be a tibble, or a list of tibbles.
+`raw_result` can be a single object returned by the underlying statistical functions,
+or a list of such objects.
+This update makes `glystats` easier to use.
+And more importantly, it allows the `glyvis` package to access the raw results directly.
+
+## Minor improvements and bug fixes
+
+* Update the documentation of all functions to include the detailed column descriptions
+  for the tibbles in `tidy_result`.
+* All `gly_xxx_()` functions now accept a character vector as the `groups` parameter.
+* Fix an issue that `gly_consensus_clustering()` sends plots to the plot panel when `output_file` is NULL.
+  This is an inconsistent behavior compared to other functions, and it has been fixed.
+* Update the documentation of `gly_consensus_clustering()` to emphasize the importance of `output_file`.
+* Add an introduction vignette.
+
 # glystats 0.2.3
 
 ## Minor improvements and bug fixes
