@@ -2,6 +2,10 @@
 #'
 #' Perform consensus clustering on the expression data using ConsensusClusterPlus.
 #' The function returns cluster assignments for all k values from 2 to max_k in long format.
+#' Setting `output_file` to visualize consensus CDF curves and consensus matrices,
+#' which helps you decide the optimal number of clusters.
+#' See [this tutorial](https://bioconductor.org/packages/release/bioc/vignettes/ConsensusClusterPlus/inst/doc/ConsensusClusterPlus.pdf)
+#' for more information.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
