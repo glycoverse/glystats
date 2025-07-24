@@ -35,9 +35,26 @@ A list containing two elements:
 \itemize{
 \item \code{tidy_result}: A list containing:
 \itemize{
-\item \code{main_test}: A tibble with ANOVA results and a \code{post_hoc} column indicating significant group pairs.
-\item \code{post_hoc_test}: A tibble with detailed pairwise comparison results in long format
-(variable, group1, group2, p_value, p_adj columns).
+\item \code{main_test}: A tibble with ANOVA results containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{term}: ANOVA term (usually "groups")
+\item \code{df}: Degrees of freedom
+\item \code{sumsq}: Sum of squares
+\item \code{meansq}: Mean squares
+\item \code{statistic}: F-statistic
+\item \code{p_value}: Raw p-value from ANOVA
+\item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
+\item \code{post_hoc}: Significant group pairs from post-hoc test
+}
+\item \code{post_hoc_test}: A tibble with pairwise comparison results containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{group1}: First group in comparison
+\item \code{group2}: Second group in comparison
+\item \code{p_value}: Raw p-value from Tukey's HSD test
+\item \code{p_adj}: Adjusted p-value from Tukey's HSD test
+}
 }
 \item \code{raw_result}: A list containing:
 \itemize{

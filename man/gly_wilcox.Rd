@@ -43,7 +43,17 @@ Must have exactly 2 levels. Character vectors will be automatically converted to
 \value{
 A list with two elements:
 \itemize{
-\item \code{tidy_result}: A tibble with Wilcoxon test results including log2 fold change (log2fc)
+\item \code{tidy_result}: A tibble with Wilcoxon test results containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{statistic}: Wilcoxon test statistic
+\item \code{p_value}: Raw p-value from Wilcoxon test
+\item \code{method}: Statistical method used
+\item \code{alternative}: Alternative hypothesis
+\item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
+\item \code{log2fc}: Log2 fold change (log2(group2_mean / group1_mean))
+Additional columns from experiment metadata may be included if add_info = TRUE.
+}
 \item \code{raw_result}: A list of \code{wilcox.test} model objects
 The list has classes \code{glystats_wilcox_res} and \code{glystats_res}.
 }

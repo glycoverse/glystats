@@ -27,7 +27,13 @@ Only applicable to \code{gly_umap()}.}
 \value{
 A list with two elements:
 \itemize{
-\item \code{tidy_result}: A tibble with UMAP coordinates (umap1, umap2, etc.) and sample names
+\item \code{tidy_result}: A tibble with UMAP coordinates containing the following columns:
+\itemize{
+\item \code{sample}: Sample name
+\item \code{umap1}: First UMAP dimension
+\item \code{umap2}: Second UMAP dimension
+\item \code{umap3}, \code{umap4}, etc.: Additional UMAP dimensions (if n_components > 2)
+}
 \item \code{raw_result}: The raw UMAP result matrix
 The list has classes \code{glystats_umap_res} and \code{glystats_res}.
 }

@@ -31,7 +31,20 @@
 #' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @returns A list with two elements:
-#' - `tidy_result`: A tibble with t-test results including log2 fold change (log2fc)
+#' - `tidy_result`: A tibble with t-test results containing the following columns:
+#'   - `variable`: Variable name
+#'   - `estimate`: Difference in group means (group2 - group1)
+#'   - `estimate1`: Mean of group 1
+#'   - `estimate2`: Mean of group 2
+#'   - `statistic`: t-statistic
+#'   - `p_value`: Raw p-value from t-test
+#'   - `parameter`: Degrees of freedom
+#'   - `conf_low`: Lower bound of 95% confidence interval
+#'   - `conf_high`: Upper bound of 95% confidence interval
+#'   - `method`: Statistical method used
+#'   - `alternative`: Alternative hypothesis
+#'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
+#'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #' - `raw_result`: A list of `t.test` model objects
 #' The list has classes `glystats_ttest_res` and `glystats_res`.
 #' @seealso [stats::t.test()]
@@ -136,7 +149,15 @@ gly_ttest_ <- function(
 #'
 #' @returns
 #' A list with two elements:
-#' - `tidy_result`: A tibble with Wilcoxon test results including log2 fold change (log2fc)
+#' - `tidy_result`: A tibble with Wilcoxon test results containing the following columns:
+#'   - `variable`: Variable name
+#'   - `statistic`: Wilcoxon test statistic
+#'   - `p_value`: Raw p-value from Wilcoxon test
+#'   - `method`: Statistical method used
+#'   - `alternative`: Alternative hypothesis
+#'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
+#'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
+#'   Additional columns from experiment metadata may be included if add_info = TRUE.
 #' - `raw_result`: A list of `wilcox.test` model objects
 #' The list has classes `glystats_wilcox_res` and `glystats_res`.
 #'

@@ -45,10 +45,29 @@ A list containing:
 \itemize{
 \item \code{tidy_result}: A list of tibbles with OPLS-DA results:
 \itemize{
-\item \code{samples}: OPLS-DA scores for each sample with group information
-\item \code{variables}: OPLS-DA loadings for each variable
-\item \code{variance}: OPLS-DA explained variance information
-\item \code{vip}: Variable Importance in Projection (VIP) scores for each variable
+\item \code{samples}: OPLS-DA scores for each sample containing the following columns:
+\itemize{
+\item \code{sample}: Sample name
+\item \code{group}: Group assignment
+\item \code{p1}, \code{p2}, etc.: Predictive component scores
+\item \code{o1}, \code{o2}, etc.: Orthogonal component scores
+}
+\item \code{variables}: OPLS-DA loadings for each variable containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{p1}, \code{p2}, etc.: Predictive component loadings
+\item \code{o1}, \code{o2}, etc.: Orthogonal component loadings
+}
+\item \code{variance}: OPLS-DA explained variance containing the following columns:
+\itemize{
+\item \code{component}: Component name (p1, o1, etc.)
+\item \code{explained_variance}: Percentage of variance explained by each component
+}
+\item \code{vip}: Variable Importance in Projection scores containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{vip}: VIP score
+}
 }
 \item \code{raw_result}: The raw ropls opls object from \code{ropls::opls()}
 }

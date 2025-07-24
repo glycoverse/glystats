@@ -38,7 +38,9 @@
 #' K-means clustering is performed using `stats::kmeans()` with the specified parameters.
 #'
 #' @returns A list with two elements:
-#'  - `tidy_result`: A tibble with cluster assignments.
+#'  - `tidy_result`: A tibble with cluster assignments containing the following columns:
+#'    - `variable` or `sample`: Variable or sample name (depending on `on` parameter)
+#'    - `cluster`: Cluster assignment
 #'  - `raw_result`: The raw kmeans object from `stats::kmeans()`.
 #'
 #' @seealso [stats::kmeans()]

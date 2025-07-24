@@ -47,8 +47,14 @@
 #'
 #' @return A list with two elements:
 #' - `tidy_result`: A list containing two tibbles:
-#'   - `modules`: Module assignments and membership values for each variable
-#'   - `eigenvalues`: Module eigenvalues (first principal component of module expression)
+#'   - `modules`: Module assignments and membership values containing the following columns:
+#'     - `variable`: Variable name
+#'     - `module`: Module assignment (color name)
+#'     - `membership`: Module membership value (correlation with module eigengene)
+#'   - `eigenvalues`: Module eigenvalues containing the following columns:
+#'     - `module`: Module name (color name)
+#'     - `sample`: Sample name
+#'     - `eigenvalue`: Module eigenvalue (first principal component of module expression)
 #' - `raw_result`: The raw WGCNA blockwiseModules object
 #' The list has classes `glystats_wgcna_res` and `glystats_res`.
 #'

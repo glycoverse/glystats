@@ -48,10 +48,26 @@ A list containing:
 \itemize{
 \item \code{tidy_result}: A list of tibbles with clustering results:
 \itemize{
-\item \code{clusters}: Cluster assignments for different k values (variables or samples depending on \code{on} parameter)
-\item \code{dendrogram}: Dendrogram segment data for plotting (if ggdendro is available)
-\item \code{heights}: Merge heights and steps for the clustering process
-\item \code{labels}: Labels and their positions (if ggdendro is available)
+\item \code{clusters}: Cluster assignments containing the following columns:
+\itemize{
+\item \code{variable} or \code{sample}: Variable or sample name (depending on \code{on} parameter)
+\item \code{cluster_k2}, \code{cluster_k3}, etc.: Cluster assignments for different k values
+}
+\item \code{dendrogram}: Dendrogram segment data for plotting (if ggdendro is available) containing:
+\itemize{
+\item \code{x}, \code{y}, \code{xend}, \code{yend}: Segment coordinates for plotting
+}
+\item \code{heights}: Merge heights and steps containing the following columns:
+\itemize{
+\item \code{merge_step}: Step number in the clustering process
+\item \code{height}: Height at which clusters are merged
+\item \code{n_clusters}: Number of clusters remaining after this merge
+}
+\item \code{labels}: Labels and their positions (if ggdendro is available) containing:
+\itemize{
+\item \code{x}, \code{y}: Position coordinates
+\item \code{label}: Label text
+}
 }
 \item \code{raw_result}: The raw hclust object from \code{stats::hclust()}
 }

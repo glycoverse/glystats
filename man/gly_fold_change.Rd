@@ -24,7 +24,11 @@ Only applicable to \code{gly_fold_change()}.}
 Must have exactly 2 levels. Character vectors will be automatically converted to factors.}
 }
 \value{
-A tibble with two columns: \code{variable} and \code{log2fc}.
+A tibble with fold change results containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{log2fc}: Log2 fold change (log2(group2_mean / group1_mean))
+}
 }
 \description{
 Calculate fold change for a given expression matrix and group information.

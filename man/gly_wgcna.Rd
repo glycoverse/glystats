@@ -64,8 +64,18 @@ A list with two elements:
 \itemize{
 \item \code{tidy_result}: A list containing two tibbles:
 \itemize{
-\item \code{modules}: Module assignments and membership values for each variable
-\item \code{eigenvalues}: Module eigenvalues (first principal component of module expression)
+\item \code{modules}: Module assignments and membership values containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{module}: Module assignment (color name)
+\item \code{membership}: Module membership value (correlation with module eigengene)
+}
+\item \code{eigenvalues}: Module eigenvalues containing the following columns:
+\itemize{
+\item \code{module}: Module name (color name)
+\item \code{sample}: Sample name
+\item \code{eigenvalue}: Module eigenvalue (first principal component of module expression)
+}
 }
 \item \code{raw_result}: The raw WGCNA blockwiseModules object
 The list has classes \code{glystats_wgcna_res} and \code{glystats_res}.

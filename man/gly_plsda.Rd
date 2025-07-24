@@ -42,10 +42,27 @@ A list containing:
 \itemize{
 \item \code{tidy_result}: A list of tibbles with PLS-DA results:
 \itemize{
-\item \code{samples}: PLS-DA scores for each sample with group information
-\item \code{variables}: PLS-DA loadings for each variable
-\item \code{variance}: PLS-DA explained variance information
-\item \code{vip}: Variable Importance in Projection (VIP) scores for each variable
+\item \code{samples}: PLS-DA scores for each sample containing the following columns:
+\itemize{
+\item \code{sample}: Sample name
+\item \code{group}: Group assignment
+\item \code{comp1}, \code{comp2}, etc.: PLS-DA component scores
+}
+\item \code{variables}: PLS-DA loadings for each variable containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{comp1}, \code{comp2}, etc.: PLS-DA component loadings
+}
+\item \code{variance}: PLS-DA explained variance containing the following columns:
+\itemize{
+\item \code{comp}: Component name (comp1, comp2, etc.)
+\item \code{explained_variance}: Percentage of variance explained by each component
+}
+\item \code{vip}: Variable Importance in Projection scores containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{vip}: VIP score
+}
 }
 \item \code{raw_result}: The raw mixOmics plsda object from \code{mixOmics::plsda()}
 }

@@ -41,7 +41,16 @@
 #' Converts UniProt IDs to Entrez IDs and uses `ReactomePA::enrichPathway()`.
 #'
 #' @return A list with two elements:
-#'  - `tidy_result`: A tibble with enrichment results
+#'  - `tidy_result`: A tibble with enrichment results containing the following columns:
+#'    - `id`: Term ID (GO:XXXXXXX, hsa:XXXXX, or R-HSA-XXXXX)
+#'    - `description`: Term description
+#'    - `gene_ratio`: Ratio of genes in the term to total genes in the input
+#'    - `bg_ratio`: Ratio of genes in the term to total genes in the background
+#'    - `p_value`: Raw p-value from hypergeometric test
+#'    - `p_adjust`: Adjusted p-value
+#'    - `q_value`: Q-value (FDR)
+#'    - `gene_id`: Gene IDs in the term (separated by "/")
+#'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
 #' The list has classes `glystats_go_ora_res`/`glystats_kegg_ora_res`/`glystats_reactome_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichGO()], [clusterProfiler::enrichKEGG()], [ReactomePA::enrichPathway()]

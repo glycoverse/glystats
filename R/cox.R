@@ -29,7 +29,14 @@
 #' P-values are adjusted by Benjamini-Hochberg method by default.
 #'
 #' @returns A list with two elements:
-#'  - `tidy_result`: A tibble with Cox model results including hazard ratio (hr) and p-value (p_value).
+#'  - `tidy_result`: A tibble with Cox model results containing the following columns:
+#'    - `variable`: Variable name
+#'    - `coefficient`: Regression coefficient (log hazard ratio)
+#'    - `std.error`: Standard error of the coefficient
+#'    - `statistic`: Wald test statistic
+#'    - `p`: Raw p-value from Wald test
+#'    - `hr`: Hazard ratio (exp(coefficient))
+#'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: A list of raw `coxph` model objects.
 #'
 #' @seealso [survival::coxph()], [survival::Surv()]

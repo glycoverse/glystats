@@ -35,12 +35,12 @@ If NULL, no adjustment is performed.}
 \value{
 A list with two elements:
 \itemize{
-\item \code{tidy_result}: A tibble with correlation results:
+\item \code{tidy_result}: A tibble with correlation results containing the following columns:
 \itemize{
-\item First column: First element of the pair (variable1/sample1)
-\item Second column: Second element of the pair (variable2/sample2)
+\item \code{variable1} or \code{sample1}: First element of the pair (depending on \code{on} parameter)
+\item \code{variable2} or \code{sample2}: Second element of the pair (depending on \code{on} parameter)
 \item \code{cor}: Correlation coefficient
-\item \code{p_value}: Raw p-value
+\item \code{p_value}: Raw p-value from correlation test
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 }
 \item \code{raw_result}: The raw rcorr object from Hmisc::rcorr()

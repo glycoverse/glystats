@@ -37,11 +37,11 @@
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @return A list with two elements:
-#'  - `tidy_result`: A tibble with correlation results:
-#'    - First column: First element of the pair (variable1/sample1)
-#'    - Second column: Second element of the pair (variable2/sample2)
+#'  - `tidy_result`: A tibble with correlation results containing the following columns:
+#'    - `variable1` or `sample1`: First element of the pair (depending on `on` parameter)
+#'    - `variable2` or `sample2`: Second element of the pair (depending on `on` parameter)
 #'    - `cor`: Correlation coefficient
-#'    - `p_value`: Raw p-value
+#'    - `p_value`: Raw p-value from correlation test
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: The raw rcorr object from Hmisc::rcorr()
 #' The list has classes `glystats_cor_res` and `glystats_res`.

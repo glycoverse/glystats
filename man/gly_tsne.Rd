@@ -27,7 +27,12 @@ Only applicable to \code{gly_tsne()}.}
 \value{
 A list with two elements:
 \itemize{
-\item \code{tidy_result}: A tibble with t-SNE coordinates (tsne1, tsne2) and sample names
+\item \code{tidy_result}: A tibble with t-SNE coordinates containing the following columns:
+\itemize{
+\item \code{sample}: Sample name
+\item \code{tsne1}: First t-SNE dimension
+\item \code{tsne2}: Second t-SNE dimension
+}
 \item \code{raw_result}: The raw Rtsne object
 The list has classes \code{glystats_tsne_res} and \code{glystats_res}.
 }

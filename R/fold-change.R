@@ -21,7 +21,9 @@
 #' `gly_fold_change_()` is the underlying API that works with matrices and factor vectors directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
-#' @return A tibble with two columns: `variable` and `log2fc`.
+#' @return A tibble with fold change results containing the following columns:
+#'   - `variable`: Variable name
+#'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #' @export
 gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   checkmate::assert_class(exp, "glyexp_experiment")

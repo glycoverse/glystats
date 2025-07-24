@@ -67,11 +67,11 @@ Only applicable to \code{gly_consensus_clustering()}.}
 \value{
 A list with two elements:
 \itemize{
-\item \code{tidy_result}: A tibble with three columns:
+\item \code{tidy_result}: A tibble with consensus clustering results containing the following columns:
 \itemize{
-\item First column: sample or variable names (depending on \code{on} parameter)
+\item \code{variable} or \code{sample}: Variable or sample name (depending on \code{on} parameter)
 \item \code{k}: Number of clusters
-\item \code{cluster}: Cluster assignments for the corresponding k
+\item \code{cluster}: Cluster assignment for the corresponding k
 }
 \item \code{raw_result}: The raw ConsensusClusterPlus object
 The list has classes \code{glystats_cc_res} and \code{glystats_res}.

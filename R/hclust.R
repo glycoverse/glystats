@@ -48,10 +48,18 @@
 #'
 #' @return A list containing:
 #'  - `tidy_result`: A list of tibbles with clustering results:
-#'    - `clusters`: Cluster assignments for different k values (variables or samples depending on `on` parameter)
-#'    - `dendrogram`: Dendrogram segment data for plotting (if ggdendro is available)
-#'    - `heights`: Merge heights and steps for the clustering process
-#'    - `labels`: Labels and their positions (if ggdendro is available)
+#'    - `clusters`: Cluster assignments containing the following columns:
+#'      - `variable` or `sample`: Variable or sample name (depending on `on` parameter)
+#'      - `cluster_k2`, `cluster_k3`, etc.: Cluster assignments for different k values
+#'    - `dendrogram`: Dendrogram segment data for plotting (if ggdendro is available) containing:
+#'      - `x`, `y`, `xend`, `yend`: Segment coordinates for plotting
+#'    - `heights`: Merge heights and steps containing the following columns:
+#'      - `merge_step`: Step number in the clustering process
+#'      - `height`: Height at which clusters are merged
+#'      - `n_clusters`: Number of clusters remaining after this merge
+#'    - `labels`: Labels and their positions (if ggdendro is available) containing:
+#'      - `x`, `y`: Position coordinates
+#'      - `label`: Label text
 #'  - `raw_result`: The raw hclust object from `stats::hclust()`
 #'
 #' @seealso [stats::hclust()], [stats::dist()], [stats::cutree()]

@@ -44,7 +44,16 @@ Only applicable to \code{gly_cox()}.}
 \value{
 A list with two elements:
 \itemize{
-\item \code{tidy_result}: A tibble with Cox model results including hazard ratio (hr) and p-value (p_value).
+\item \code{tidy_result}: A tibble with Cox model results containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{coefficient}: Regression coefficient (log hazard ratio)
+\item \code{std.error}: Standard error of the coefficient
+\item \code{statistic}: Wald test statistic
+\item \code{p}: Raw p-value from Wald test
+\item \code{hr}: Hazard ratio (exp(coefficient))
+\item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
+}
 \item \code{raw_result}: A list of raw \code{coxph} model objects.
 }
 }

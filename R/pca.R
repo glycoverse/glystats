@@ -27,9 +27,19 @@
 #'
 #' @return A list containing:
 #'  - `tidy_result`: A list of tibbles with PCA results:
-#'    - `samples`: PCA scores for each sample
-#'    - `variables`: PCA loadings for each variable
-#'    - `eigenvalues`: PCA eigenvalues
+#'    - `samples`: PCA scores for each sample containing the following columns:
+#'      - `sample`: Sample name
+#'      - `PC`: Principal component name (PC1, PC2, etc.)
+#'      - `value`: Score value for the principal component
+#'    - `variables`: PCA loadings for each variable containing the following columns:
+#'      - `variable`: Variable name
+#'      - `PC`: Principal component name (PC1, PC2, etc.)
+#'      - `value`: Loading value for the principal component
+#'    - `eigenvalues`: PCA eigenvalues containing the following columns:
+#'      - `PC`: Principal component name (PC1, PC2, etc.)
+#'      - `std.dev`: Standard deviation
+#'      - `percent`: Percentage of variance explained
+#'      - `cumulative`: Cumulative percentage of variance explained
 #'  - `raw_result`: The raw prcomp object from `stats::prcomp()`
 #' @seealso [stats::prcomp()]
 #' @export

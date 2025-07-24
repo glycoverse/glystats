@@ -34,17 +34,17 @@ A list with two elements:
 \itemize{
 \item \code{tidy_result}: A list containing two tibbles:
 \itemize{
-\item \code{auc}: A tibble containing AUC values for each variable, with columns:
+\item \code{auc}: A tibble containing AUC values for each variable with the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{auc}: AUC value
+\item \code{auc}: Area Under the Curve value
 }
-\item \code{coords}: A tibble containing ROC curve coordinates with columns:
+\item \code{coords}: A tibble containing ROC curve coordinates with the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{threshold}: Threshold value
-\item \code{sensitivity}: Sensitivity (True Positive Rate)
+\item \code{threshold}: Threshold value for classification
 \item \code{specificity}: Specificity (True Negative Rate)
+\item \code{sensitivity}: Sensitivity (True Positive Rate)
 }
 }
 \item \code{raw_result}: A list of \code{pROC} objects

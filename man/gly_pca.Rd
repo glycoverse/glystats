@@ -29,9 +29,25 @@ A list containing:
 \itemize{
 \item \code{tidy_result}: A list of tibbles with PCA results:
 \itemize{
-\item \code{samples}: PCA scores for each sample
-\item \code{variables}: PCA loadings for each variable
-\item \code{eigenvalues}: PCA eigenvalues
+\item \code{samples}: PCA scores for each sample containing the following columns:
+\itemize{
+\item \code{sample}: Sample name
+\item \code{PC}: Principal component name (PC1, PC2, etc.)
+\item \code{value}: Score value for the principal component
+}
+\item \code{variables}: PCA loadings for each variable containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{PC}: Principal component name (PC1, PC2, etc.)
+\item \code{value}: Loading value for the principal component
+}
+\item \code{eigenvalues}: PCA eigenvalues containing the following columns:
+\itemize{
+\item \code{PC}: Principal component name (PC1, PC2, etc.)
+\item \code{std.dev}: Standard deviation
+\item \code{percent}: Percentage of variance explained
+\item \code{cumulative}: Cumulative percentage of variance explained
+}
 }
 \item \code{raw_result}: The raw prcomp object from \code{stats::prcomp()}
 }

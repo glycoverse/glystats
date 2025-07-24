@@ -57,8 +57,17 @@ Must have at least 2 levels. Character vectors will be automatically converted t
 \value{
 A list with two elements:
 \itemize{
-\item \code{tidy_result}: A tibble with limma results including log2 fold change (log2fc).
-For multi-group comparisons, includes a "contrast" column indicating the comparison.
+\item \code{tidy_result}: A tibble with limma results containing the following columns:
+\itemize{
+\item \code{variable}: Variable name
+\item \code{log2fc}: Log2 fold change
+\item \code{AveExpr}: Average expression level
+\item \code{t}: t-statistic
+\item \code{p}: Raw p-value
+\item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
+\item \code{b}: B-statistic (log-odds of differential expression)
+\item \code{contrast}: Contrast name (for multi-group comparisons only)
+}
 \item \code{raw_result}: The raw limma fit object(s).
 }
 }

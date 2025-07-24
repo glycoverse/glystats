@@ -23,7 +23,11 @@
 #' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @return A list with two elements:
-#' - `tidy_result`: A tibble with UMAP coordinates (umap1, umap2, etc.) and sample names
+#' - `tidy_result`: A tibble with UMAP coordinates containing the following columns:
+#'   - `sample`: Sample name
+#'   - `umap1`: First UMAP dimension
+#'   - `umap2`: Second UMAP dimension
+#'   - `umap3`, `umap4`, etc.: Additional UMAP dimensions (if n_components > 2)
 #' - `raw_result`: The raw UMAP result matrix
 #' The list has classes `glystats_umap_res` and `glystats_res`.
 #' @seealso [uwot::umap()]

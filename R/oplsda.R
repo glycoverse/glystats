@@ -38,10 +38,21 @@
 #'
 #' @return A list containing:
 #'  - `tidy_result`: A list of tibbles with OPLS-DA results:
-#'    - `samples`: OPLS-DA scores for each sample with group information
-#'    - `variables`: OPLS-DA loadings for each variable
-#'    - `variance`: OPLS-DA explained variance information
-#'    - `vip`: Variable Importance in Projection (VIP) scores for each variable
+#'    - `samples`: OPLS-DA scores for each sample containing the following columns:
+#'      - `sample`: Sample name
+#'      - `group`: Group assignment
+#'      - `p1`, `p2`, etc.: Predictive component scores
+#'      - `o1`, `o2`, etc.: Orthogonal component scores
+#'    - `variables`: OPLS-DA loadings for each variable containing the following columns:
+#'      - `variable`: Variable name
+#'      - `p1`, `p2`, etc.: Predictive component loadings
+#'      - `o1`, `o2`, etc.: Orthogonal component loadings
+#'    - `variance`: OPLS-DA explained variance containing the following columns:
+#'      - `component`: Component name (p1, o1, etc.)
+#'      - `explained_variance`: Percentage of variance explained by each component
+#'    - `vip`: Variable Importance in Projection scores containing the following columns:
+#'      - `variable`: Variable name
+#'      - `vip`: VIP score
 #'  - `raw_result`: The raw ropls opls object from `ropls::opls()`
 #' @seealso [ropls::opls()]
 #' @export

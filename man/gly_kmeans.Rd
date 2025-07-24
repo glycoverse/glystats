@@ -38,7 +38,11 @@ Only applicable to \code{gly_kmeans()}.}
 \value{
 A list with two elements:
 \itemize{
-\item \code{tidy_result}: A tibble with cluster assignments.
+\item \code{tidy_result}: A tibble with cluster assignments containing the following columns:
+\itemize{
+\item \code{variable} or \code{sample}: Variable or sample name (depending on \code{on} parameter)
+\item \code{cluster}: Cluster assignment
+}
 \item \code{raw_result}: The raw kmeans object from \code{stats::kmeans()}.
 }
 }

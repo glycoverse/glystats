@@ -35,7 +35,18 @@ Only applicable to top-level APIs.}
 \value{
 A list with two elements:
 \itemize{
-\item \code{tidy_result}: A tibble with enrichment results
+\item \code{tidy_result}: A tibble with enrichment results containing the following columns:
+\itemize{
+\item \code{id}: Term ID (GO:XXXXXXX, hsa:XXXXX, or R-HSA-XXXXX)
+\item \code{description}: Term description
+\item \code{gene_ratio}: Ratio of genes in the term to total genes in the input
+\item \code{bg_ratio}: Ratio of genes in the term to total genes in the background
+\item \code{p_value}: Raw p-value from hypergeometric test
+\item \code{p_adjust}: Adjusted p-value
+\item \code{q_value}: Q-value (FDR)
+\item \code{gene_id}: Gene IDs in the term (separated by "/")
+\item \code{count}: Number of genes in the term
+}
 \item \code{raw_result}: The raw clusterProfiler enrichResult object
 The list has classes \code{glystats_go_ora_res}/\code{glystats_kegg_ora_res}/\code{glystats_reactome_ora_res} and \code{glystats_res}.
 }

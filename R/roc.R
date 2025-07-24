@@ -42,14 +42,14 @@
 #' @returns
 #' A list with two elements:
 #' - `tidy_result`: A list containing two tibbles:
-#'   - `auc`: A tibble containing AUC values for each variable, with columns:
+#'   - `auc`: A tibble containing AUC values for each variable with the following columns:
 #'     - `variable`: Variable name
-#'     - `auc`: AUC value
-#'   - `coords`: A tibble containing ROC curve coordinates with columns:
+#'     - `auc`: Area Under the Curve value
+#'   - `coords`: A tibble containing ROC curve coordinates with the following columns:
 #'     - `variable`: Variable name
-#'     - `threshold`: Threshold value
-#'     - `sensitivity`: Sensitivity (True Positive Rate)
+#'     - `threshold`: Threshold value for classification
 #'     - `specificity`: Specificity (True Negative Rate)
+#'     - `sensitivity`: Sensitivity (True Positive Rate)
 #' - `raw_result`: A list of `pROC` objects
 #' The list has classes `glystats_roc_res` and `glystats_res`.
 #' @seealso [pROC::roc()], [pROC::coords()]

@@ -49,8 +49,15 @@
 #' - `limma` for linear model fitting and empirical Bayes moderation
 #'
 #' @returns A list with two elements:
-#'  - `tidy_result`: A tibble with limma results including log2 fold change (log2fc).
-#'    For multi-group comparisons, includes a "contrast" column indicating the comparison.
+#'  - `tidy_result`: A tibble with limma results containing the following columns:
+#'    - `variable`: Variable name
+#'    - `log2fc`: Log2 fold change
+#'    - `AveExpr`: Average expression level
+#'    - `t`: t-statistic
+#'    - `p`: Raw p-value
+#'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
+#'    - `b`: B-statistic (log-odds of differential expression)
+#'    - `contrast`: Contrast name (for multi-group comparisons only)
 #'  - `raw_result`: The raw limma fit object(s).
 #' @seealso [limma::lmFit()], [limma::eBayes()], [limma::makeContrasts()]
 #' @export

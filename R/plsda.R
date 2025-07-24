@@ -37,10 +37,19 @@
 #'
 #' @return A list containing:
 #'  - `tidy_result`: A list of tibbles with PLS-DA results:
-#'    - `samples`: PLS-DA scores for each sample with group information
-#'    - `variables`: PLS-DA loadings for each variable
-#'    - `variance`: PLS-DA explained variance information
-#'    - `vip`: Variable Importance in Projection (VIP) scores for each variable
+#'    - `samples`: PLS-DA scores for each sample containing the following columns:
+#'      - `sample`: Sample name
+#'      - `group`: Group assignment
+#'      - `comp1`, `comp2`, etc.: PLS-DA component scores
+#'    - `variables`: PLS-DA loadings for each variable containing the following columns:
+#'      - `variable`: Variable name
+#'      - `comp1`, `comp2`, etc.: PLS-DA component loadings
+#'    - `variance`: PLS-DA explained variance containing the following columns:
+#'      - `comp`: Component name (comp1, comp2, etc.)
+#'      - `explained_variance`: Percentage of variance explained by each component
+#'    - `vip`: Variable Importance in Projection scores containing the following columns:
+#'      - `variable`: Variable name
+#'      - `vip`: VIP score
 #'  - `raw_result`: The raw mixOmics plsda object from `mixOmics::plsda()`
 #' @seealso [mixOmics::plsda()]
 #' @export

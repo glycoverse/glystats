@@ -23,7 +23,10 @@
 #' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @return A list with two elements:
-#' - `tidy_result`: A tibble with t-SNE coordinates (tsne1, tsne2) and sample names
+#' - `tidy_result`: A tibble with t-SNE coordinates containing the following columns:
+#'   - `sample`: Sample name
+#'   - `tsne1`: First t-SNE dimension
+#'   - `tsne2`: Second t-SNE dimension
 #' - `raw_result`: The raw Rtsne object
 #' The list has classes `glystats_tsne_res` and `glystats_res`.
 #' @seealso [Rtsne::Rtsne()]

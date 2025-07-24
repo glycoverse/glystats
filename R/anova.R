@@ -36,9 +36,22 @@
 #' @returns
 #' A list containing two elements:
 #'   - `tidy_result`: A list containing:
-#'     - `main_test`: A tibble with ANOVA results and a `post_hoc` column indicating significant group pairs.
-#'     - `post_hoc_test`: A tibble with detailed pairwise comparison results in long format
-#'       (variable, group1, group2, p_value, p_adj columns).
+#'     - `main_test`: A tibble with ANOVA results containing the following columns:
+#'       - `variable`: Variable name
+#'       - `term`: ANOVA term (usually "groups")
+#'       - `df`: Degrees of freedom
+#'       - `sumsq`: Sum of squares
+#'       - `meansq`: Mean squares
+#'       - `statistic`: F-statistic
+#'       - `p_value`: Raw p-value from ANOVA
+#'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
+#'       - `post_hoc`: Significant group pairs from post-hoc test
+#'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
+#'       - `variable`: Variable name
+#'       - `group1`: First group in comparison
+#'       - `group2`: Second group in comparison
+#'       - `p_value`: Raw p-value from Tukey's HSD test
+#'       - `p_adj`: Adjusted p-value from Tukey's HSD test
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `aov` model objects.
 #'     - `post_hoc_test`: A list of raw `TukeyHSD` objects.
@@ -167,9 +180,20 @@ gly_anova_ <- function(
 #' @returns
 #' A list containing two elements:
 #'   - `tidy_result`: A list containing:
-#'     - `main_test`: A tibble with Kruskal-Wallis test results and a `post_hoc` column indicating significant group pairs.
-#'     - `post_hoc_test`: A tibble with detailed pairwise comparison results in long format
-#'       (variable, group1, group2, p_value, p_adj columns).
+#'     - `main_test`: A tibble with Kruskal-Wallis test results containing the following columns:
+#'       - `variable`: Variable name
+#'       - `statistic`: Kruskal-Wallis test statistic
+#'       - `p_value`: Raw p-value from Kruskal-Wallis test
+#'       - `parameter`: Degrees of freedom
+#'       - `method`: Statistical method used
+#'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
+#'       - `post_hoc`: Significant group pairs from post-hoc test
+#'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
+#'       - `variable`: Variable name
+#'       - `group1`: First group in comparison
+#'       - `group2`: Second group in comparison
+#'       - `p_value`: Raw p-value from Dunn's test
+#'       - `p_adj`: Adjusted p-value from Dunn's test
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `kruskal.test` objects.
 #'     - `post_hoc_test`: A list of raw `dunnTest` objects.
