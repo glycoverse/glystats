@@ -5,9 +5,18 @@ test_that("gly_wgcna works correctly", {
 
   expect_s3_class(result, c("glystats_wgcna_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("modules", "eigenvalues"))
-  expect_true(tibble::is_tibble(result$modules))
-  expect_true(tibble::is_tibble(result$eigenvalues))
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+
+  # Test tidy_result structure
+  expect_type(result$tidy_result, "list")
+  expect_setequal(names(result$tidy_result), c("modules", "eigenvalues"))
+  expect_true(tibble::is_tibble(result$tidy_result$modules))
+  expect_true(tibble::is_tibble(result$tidy_result$eigenvalues))
+
+  # Test raw_result
+  expect_type(result$raw_result, "list")
+  expect_true("colors" %in% names(result$raw_result))
+  expect_true("MEs" %in% names(result$raw_result))
 })
 
 test_that("gly_wgcna_ works correctly", {
@@ -18,7 +27,16 @@ test_that("gly_wgcna_ works correctly", {
 
   expect_s3_class(result, c("glystats_wgcna_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("modules", "eigenvalues"))
-  expect_true(tibble::is_tibble(result$modules))
-  expect_true(tibble::is_tibble(result$eigenvalues))
+  expect_setequal(names(result), c("tidy_result", "raw_result"))
+
+  # Test tidy_result structure
+  expect_type(result$tidy_result, "list")
+  expect_setequal(names(result$tidy_result), c("modules", "eigenvalues"))
+  expect_true(tibble::is_tibble(result$tidy_result$modules))
+  expect_true(tibble::is_tibble(result$tidy_result$eigenvalues))
+
+  # Test raw_result
+  expect_type(result$raw_result, "list")
+  expect_true("colors" %in% names(result$raw_result))
+  expect_true("MEs" %in% names(result$raw_result))
 })

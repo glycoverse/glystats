@@ -14,7 +14,6 @@ gly_wgcna(
   deep_split = 2,
   merge_cut_height = 0.25,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 )
 
@@ -26,7 +25,6 @@ gly_wgcna_(
   min_module_size = 30,
   deep_split = 2,
   merge_cut_height = 0.25,
-  return_raw = FALSE,
   ...
 )
 }
@@ -57,19 +55,20 @@ Default is 0.25. Passed to the \verb{mergeCutHeight`` argument of }WGCNA::blockw
 \item{add_info}{A logical value indicating whether to add variable information
 to the modules tibble. Only applicable to \code{gly_wgcna()}.}
 
-\item{return_raw}{A logical value. If FALSE (default), returns processed tibble results.
-If TRUE, returns raw WGCNA blockwiseModules object.}
-
 \item{...}{Additional arguments passed to \code{WGCNA::blockwiseModules()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A list containing two tibbles (when return_raw = FALSE):
+A list with two elements:
+\itemize{
+\item \code{tidy_result}: A list containing two tibbles:
 \itemize{
 \item \code{modules}: Module assignments and membership values for each variable
 \item \code{eigenvalues}: Module eigenvalues (first principal component of module expression)
-When return_raw = TRUE, returns the raw WGCNA blockwiseModules object.
+}
+\item \code{raw_result}: The raw WGCNA blockwiseModules object
+The list has classes \code{glystats_wgcna_res} and \code{glystats_res}.
 }
 }
 \description{

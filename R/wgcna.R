@@ -23,8 +23,6 @@
 #'   Default is 0.25. Passed to the `mergeCutHeight`` argument of `WGCNA::blockwiseModules()`.
 #' @param add_info A logical value indicating whether to add variable information
 #'   to the modules tibble. Only applicable to `gly_wgcna()`.
-#' @param return_raw A logical value. If FALSE (default), returns processed tibble results.
-#'   If TRUE, returns raw WGCNA blockwiseModules object.
 #' @param ... Additional arguments passed to `WGCNA::blockwiseModules()`.
 #'
 #' @section Required packages:
@@ -47,10 +45,12 @@
 #' 3. Module membership calculation based on correlation with module eigengenes
 #' 4. Results formatting into standardized tibbles
 #'
-#' @return A list containing two tibbles (when return_raw = FALSE):
-#'  - `modules`: Module assignments and membership values for each variable
-#'  - `eigenvalues`: Module eigenvalues (first principal component of module expression)
-#' When return_raw = TRUE, returns the raw WGCNA blockwiseModules object.
+#' @return A list with two elements:
+#' - `tidy_result`: A list containing two tibbles:
+#'   - `modules`: Module assignments and membership values for each variable
+#'   - `eigenvalues`: Module eigenvalues (first principal component of module expression)
+#' - `raw_result`: The raw WGCNA blockwiseModules object
+#' The list has classes `glystats_wgcna_res` and `glystats_res`.
 #'
 #' @seealso [WGCNA::pickSoftThreshold()], [WGCNA::blockwiseModules()]
 #'
@@ -67,7 +67,6 @@ gly_wgcna <- function(
   deep_split = 2,
   merge_cut_height = 0.25,
   add_info = TRUE,
-  return_raw = FALSE,
   ...
 ) {
   # Validate inputs
@@ -80,16 +79,12 @@ gly_wgcna <- function(
   # Call the underlying API
   result <- gly_wgcna_(
     expr_mat, powers, network_type, tom_type, min_module_size,
-    deep_split, merge_cut_height, return_raw, ...
+    deep_split, merge_cut_height, ...
   )
 
-  # If raw results requested, return directly (no add_info processing needed)
-  if (return_raw) {
-    return(result)
-  }
-
   # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
 }
 
 #' @rdname gly_wgcna
@@ -102,7 +97,6 @@ gly_wgcna_ <- function(
   min_module_size = 30,
   deep_split = 2,
   merge_cut_height = 0.25,
-  return_raw = FALSE,
   ...
 ) {
   # Check if WGCNA package is available
@@ -116,7 +110,6 @@ gly_wgcna_ <- function(
   checkmate::assert_int(min_module_size, lower = 1)
   checkmate::assert_int(deep_split, lower = 0, upper = 4)
   checkmate::assert_number(merge_cut_height, lower = 0, upper = 1)
-  checkmate::assert_logical(return_raw, len = 1)
 
   # Prepare data for WGCNA (samples as rows, variables as columns)
   # Apply log2 transformation
@@ -190,14 +183,17 @@ gly_wgcna_ <- function(
   })
 
 
-  # Return raw results if requested
-  if (return_raw) {
-    return(net)
-  }
-
   # Step 3: Process results
-  result <- .process_wgcna_results(net, expr_mat, rownames(expr_mat))
-  structure(result, class = c("glystats_wgcna_res", "glystats_res"))
+  tidy_result <- .process_wgcna_results(net, expr_mat, rownames(expr_mat))
+
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = net
+    ),
+    class = c("glystats_wgcna_res", "glystats_res")
+  )
 }
 
 # Internal helper function to process WGCNA results
