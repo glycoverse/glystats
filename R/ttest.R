@@ -6,8 +6,8 @@
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor vector specifying group membership for each sample.
-#'   Must have exactly 2 levels.
+#' @param groups A factor or character vector specifying group membership for each sample.
+#'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -84,6 +84,7 @@ gly_ttest_ <- function(
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
+  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
 
@@ -109,8 +110,8 @@ gly_ttest_ <- function(
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor vector specifying group membership for each sample.
-#'   Must have exactly 2 levels.
+#' @param groups A factor or character vector specifying group membership for each sample.
+#'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -194,6 +195,7 @@ gly_wilcox_ <- function(
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
+  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
 

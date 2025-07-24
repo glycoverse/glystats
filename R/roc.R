@@ -7,8 +7,8 @@
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor vector specifying group membership for each sample.
-#'   Must have exactly 2 levels.
+#' @param groups A factor or character vector specifying group membership for each sample.
+#'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'   in the sample information. Default is `"group"`. The grouping variable must have
 #'   exactly 2 levels for binary classification.
@@ -91,6 +91,7 @@ gly_roc_ <- function(expr_mat, groups, pos_class = NULL) {
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
+  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_string(pos_class, null.ok = TRUE)
 

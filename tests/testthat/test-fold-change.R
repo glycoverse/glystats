@@ -148,3 +148,28 @@ test_that("gly_fold_change_ works correctly", {
   expect_type(result$log2fc, "double")
   expect_equal(nrow(result), 10)
 })
+
+test_that("gly_fold_change_ accepts character groups", {
+  # Create test data
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+  groups_char <- rep(c("A", "B"), each = 5)  # character vector
+  groups_factor <- factor(groups_char)       # factor vector
+
+  # Test with character groups
+  suppressMessages({
+    result_char <- gly_fold_change_(expr_mat, groups_char)
+  })
+
+  # Test with factor groups
+  suppressMessages({
+    result_factor <- gly_fold_change_(expr_mat, groups_factor)
+  })
+
+  # Results should be identical
+  expect_equal(result_char, result_factor)
+  expect_s3_class(result_char, "glystats_fc_res")
+  expect_true(tibble::is_tibble(result_char))
+})

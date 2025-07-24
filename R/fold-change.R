@@ -7,8 +7,8 @@
 #'
 #' @param exp A `glyexp::experiment()` object.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor vector specifying group membership for each sample.
-#'   Must have exactly 2 levels.
+#' @param groups A factor or character vector specifying group membership for each sample.
+#'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
 #' @param group_col The column name of the group information in the sample information.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the fold change results are returned.
@@ -53,6 +53,7 @@ gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
 gly_fold_change_ <- function(expr_mat, groups) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
+  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
   # Validate group count

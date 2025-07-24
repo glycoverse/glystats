@@ -5,7 +5,8 @@
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor vector specifying group membership for each sample.
+#' @param groups A factor or character vector specifying group membership for each sample.
+#'   Character vectors will be automatically converted to factors.
 #' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param ncomp An integer indicating the number of components to include. Default is 2.
@@ -97,6 +98,7 @@ gly_plsda_ <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
+  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
   # Prepare data (samples as rows, variables as columns)

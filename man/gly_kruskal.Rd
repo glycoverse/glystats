@@ -33,8 +33,8 @@ Only applicable to \code{gly_kruskal()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 
-\item{groups}{A factor vector specifying group membership for each sample.
-Must have at least 2 levels.}
+\item{groups}{A factor or character vector specifying group membership for each sample.
+Must have at least 2 levels. Character vectors will be automatically converted to factors.}
 }
 \value{
 A list containing two elements:

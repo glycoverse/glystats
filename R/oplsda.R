@@ -5,7 +5,8 @@
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor vector specifying group membership for each sample.
+#' @param groups A factor or character vector specifying group membership for each sample.
+#'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
 #' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param pred_i An integer indicating the number of predictive components to include. Default is 1.
@@ -101,6 +102,7 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
+  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
   # Prepare data matrix (samples as rows, variables as columns)
