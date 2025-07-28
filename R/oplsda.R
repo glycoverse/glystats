@@ -199,11 +199,24 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   # Note: We don't add group here because it will be handled by .process_results_add_info
   # This ensures consistent behavior across all functions
 
-  # Extract variable loadings (predictive components)
+  # Extract variable loadings (predictive + orthogonal components)
   pred_loadings <- oplsda_res@loadingMN
-  variables_tbl <- tibble::as_tibble(pred_loadings, .name_repair = "minimal")
-  colnames(variables_tbl) <- paste0("p", seq_len(ncol(pred_loadings)))
-  variables_tbl$variable <- rownames(pred_loadings)
+  ortho_loadings <- oplsda_res@orthoLoadingMN
+
+  # Combine predictive and orthogonal loadings
+  if (!is.null(ortho_loadings) && ncol(ortho_loadings) > 0 && nrow(ortho_loadings) == nrow(pred_loadings)) {
+    all_loadings <- cbind(pred_loadings, ortho_loadings)
+    # Create column names: p1, p2, ... for predictive, o1, o2, ... for orthogonal
+    pred_names <- paste0("p", seq_len(ncol(pred_loadings)))
+    ortho_names <- paste0("o", seq_len(ncol(ortho_loadings)))
+    colnames(all_loadings) <- c(pred_names, ortho_names)
+  } else {
+    all_loadings <- pred_loadings
+    colnames(all_loadings) <- paste0("p", seq_len(ncol(pred_loadings)))
+  }
+
+  variables_tbl <- tibble::as_tibble(all_loadings, .name_repair = "minimal")
+  variables_tbl$variable <- rownames(all_loadings)
 
   # Extract explained variance information from modelDF
   # modelDF contains individual R2X values for each component

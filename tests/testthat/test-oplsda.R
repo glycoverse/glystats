@@ -88,6 +88,100 @@ test_that("gly_oplsda works with orthogonal components", {
   }
 })
 
+test_that("gly_oplsda correctly handles orthogonal loadings and scores", {
+  # Skip test if ropls is not available
+  skip_if_not_installed("ropls")
+
+  # Create a small dataset that allows orthogonal components
+  # Use 2 variables with 12 samples to ensure we can force orthogonal components
+  suppressMessages({
+    small_exp <- test_gp_exp |>
+      glyexp::slice_head_var(n = 2) |>
+      glyexp::mutate_obs(group = dplyr::if_else(group %in% c("H", "M"), "control", "case"))
+  })
+
+  # Test without forced orthogonal components (automatic decision)
+  suppressMessages(suppressWarnings({
+    capture.output({
+      oplsda_auto <- gly_oplsda(small_exp)
+    }, type = "output")
+  }))
+
+  # Test with forced orthogonal components
+  suppressMessages(suppressWarnings({
+    capture.output({
+      oplsda_forced <- gly_oplsda(small_exp, ortho_i = 1)
+    }, type = "output")
+  }))
+
+  # Verify automatic case (should not have orthogonal components)
+  expect_true("p1" %in% colnames(oplsda_auto$tidy_result$samples))
+  expect_false("o1" %in% colnames(oplsda_auto$tidy_result$samples))
+  expect_true("p1" %in% colnames(oplsda_auto$tidy_result$variables))
+  expect_false("o1" %in% colnames(oplsda_auto$tidy_result$variables))
+
+  # Verify forced case (should have orthogonal components)
+  expect_true("p1" %in% colnames(oplsda_forced$tidy_result$samples))
+  expect_true("o1" %in% colnames(oplsda_forced$tidy_result$samples))
+  expect_true("p1" %in% colnames(oplsda_forced$tidy_result$variables))
+  expect_true("o1" %in% colnames(oplsda_forced$tidy_result$variables))
+
+  # Verify that orthogonal scores and loadings have correct dimensions
+  expect_equal(nrow(oplsda_forced$tidy_result$samples), 12)  # 12 samples
+  expect_equal(nrow(oplsda_forced$tidy_result$variables), 2)  # 2 variables
+
+  # Verify that orthogonal values are numeric and not all NA
+  expect_type(oplsda_forced$tidy_result$samples$o1, "double")
+  expect_type(oplsda_forced$tidy_result$variables$o1, "double")
+  expect_false(all(is.na(oplsda_forced$tidy_result$samples$o1)))
+  expect_false(all(is.na(oplsda_forced$tidy_result$variables$o1)))
+
+  # Verify that raw ropls object contains orthogonal components
+  expect_equal(ncol(oplsda_forced$raw_result@orthoScoreMN), 1)
+  expect_equal(ncol(oplsda_forced$raw_result@orthoLoadingMN), 1)
+  expect_equal(nrow(oplsda_forced$raw_result@orthoScoreMN), 12)
+  expect_equal(nrow(oplsda_forced$raw_result@orthoLoadingMN), 2)
+})
+
+test_that("gly_oplsda orthogonal components regression test", {
+  # Skip test if ropls is not available
+  skip_if_not_installed("ropls")
+
+  # This test specifically prevents regression of the bug where orthogonal loadings
+  # were not included in the variables tibble
+  suppressMessages({
+    small_exp <- test_gp_exp |>
+      glyexp::slice_head_var(n = 2) |>
+      glyexp::mutate_obs(group = dplyr::if_else(group %in% c("H", "M"), "control", "case"))
+  })
+
+  suppressMessages(suppressWarnings({
+    capture.output({
+      oplsda_res <- gly_oplsda(small_exp, ortho_i = 1)
+    }, type = "output")
+  }))
+
+  # Critical regression test: ensure both orthogonal scores AND loadings are present
+  samples_cols <- colnames(oplsda_res$tidy_result$samples)
+  variables_cols <- colnames(oplsda_res$tidy_result$variables)
+
+  # Both samples and variables should have predictive component
+  expect_true("p1" %in% samples_cols)
+  expect_true("p1" %in% variables_cols)
+
+  # Both samples and variables should have orthogonal component
+  expect_true("o1" %in% samples_cols,
+              info = "Orthogonal scores (o1) missing from samples tibble")
+  expect_true("o1" %in% variables_cols,
+              info = "Orthogonal loadings (o1) missing from variables tibble - this was the bug!")
+
+  # Verify the values are meaningful (not all zeros or NAs)
+  expect_false(all(oplsda_res$tidy_result$samples$o1 == 0))
+  expect_false(all(oplsda_res$tidy_result$variables$o1 == 0))
+  expect_false(all(is.na(oplsda_res$tidy_result$samples$o1)))
+  expect_false(all(is.na(oplsda_res$tidy_result$variables$o1)))
+})
+
 test_that("gly_oplsda raw_result is accessible", {
   # Skip test if ropls is not available
   skip_if_not_installed("ropls")
