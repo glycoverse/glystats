@@ -108,12 +108,18 @@ Must have exactly 2 levels. Character vectors will be automatically converted to
 <li><p><code>variables</code>: OPLS-DA loadings for each variable containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>p1</code>, <code>p2</code>, etc.: Predictive component loadings</p></li>
 <li><p><code>o1</code>, <code>o2</code>, etc.: Orthogonal component loadings</p></li>
+<li><p><code>pcorr1</code>, <code>pcorr2</code>, etc.: Correlation between each variable and the corresponding predictive component</p></li>
 </ul></li>
 <li><p><code>variance</code>: OPLS-DA explained variance containing the following columns:</p><ul><li><p><code>component</code>: Component name (p1, o1, etc.)</p></li>
-<li><p><code>explained_variance</code>: Percentage of variance explained by each component</p></li>
+<li><p><code>prop_var_explained</code>: Proportion of variance explained by each component</p></li>
+<li><p><code>cumulative_prop_var</code>: Cumulative proportion of variance explained</p></li>
 </ul></li>
 <li><p><code>vip</code>: Variable Importance in Projection scores containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>vip</code>: VIP score</p></li>
+</ul></li>
+<li><p><code>perm_test</code>: Permutation test results containing the following columns:</p><ul><li><p><code>model</code>: Model type ("Original" for the original model, "Permutation" for permuted models)</p></li>
+<li><p><code>perm_id</code>: Permutation ID (0 for original model, 1+ for permutations)</p></li>
+<li><p>Additional columns from the permutation test matrix (e.g., R2X, R2Y, Q2, etc.)</p></li>
 </ul></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw ropls opls object from <code><a href="https://rdrr.io/pkg/ropls/man/opls.html" class="external-link">ropls::opls()</a></code></p></li>
@@ -130,16 +136,6 @@ providing more flexibility for users who don't use the glyexp package.</p>
 
 
 <p>This function requires the following packages to be installed:</p><ul><li><p><code>ropls</code> for OPLS-DA analysis</p></li>
-</ul></div>
-    <div class="section level2">
-    <h2 id="sample-size-requirements">Sample size requirements<a class="anchor" aria-label="anchor" href="#sample-size-requirements"></a></h2>
-
-
-<p>According to the Topliss ratio principle, the ratio of samples to variables (n/p)
-should be at least 5 to avoid overfitting and ensure reliable results. This function
-will throw an error if n/p &lt; 5. For datasets with high dimensionality relative to
-sample size, consider:</p><ul><li><p>Feature selection before analysis</p></li>
-<li><p>Collecting more samples</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
