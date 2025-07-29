@@ -39,6 +39,7 @@
 #'      - `variable`: Variable name
 #'      - `p1`, `p2`, etc.: Predictive component loadings
 #'      - `o1`, `o2`, etc.: Orthogonal component loadings
+#'      - `pcorr1`, `pcorr2`, etc.: Correlation between each variable and the corresponding predictive component
 #'    - `variance`: OPLS-DA explained variance containing the following columns:
 #'      - `component`: Component name (p1, o1, etc.)
 #'      - `explained_variance`: Percentage of variance explained by each component
@@ -190,6 +191,31 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
 
   variables_tbl <- tibble::as_tibble(all_loadings, .name_repair = "minimal")
   variables_tbl$variable <- rownames(all_loadings)
+
+  # Calculate p(corr) for each predictive component
+  # Get the modeling matrix X (centered/scaled), rows are samples, columns are variables
+  X <- oplsda_res@suppLs$xModelMN
+
+  # Ensure sample alignment between X and scores
+  if (!is.null(rownames(X)) && !is.null(rownames(oplsda_res@scoreMN))) {
+    X <- X[rownames(oplsda_res@scoreMN), , drop = FALSE]
+  }
+
+  # Calculate p(corr) for each predictive component
+  pred_scores <- oplsda_res@scoreMN
+  n_pred_comp <- ncol(pred_scores)
+
+  for (i in seq_len(n_pred_comp)) {
+    # Get scores for component i
+    t_i <- pred_scores[, i, drop = TRUE]
+
+    # Calculate correlation between each variable and component i
+    pcorr_i <- apply(X, 2, function(x) stats::cor(x, t_i, use = "pairwise.complete.obs"))
+
+    # Add pcorr column to variables table
+    pcorr_col_name <- paste0("pcorr", i)
+    variables_tbl[[pcorr_col_name]] <- as.numeric(pcorr_i[variables_tbl$variable])
+  }
 
   # Extract explained variance information from modelDF
   # modelDF contains individual R2X values for each component

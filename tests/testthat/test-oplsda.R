@@ -26,6 +26,7 @@ test_that("gly_oplsda works with valid Topliss ratio", {
   expect_s3_class(oplsda_res$tidy_result$variables, "tbl_df")
   expect_true("variable" %in% colnames(oplsda_res$tidy_result$variables))
   expect_true("p1" %in% colnames(oplsda_res$tidy_result$variables))
+  expect_true("pcorr1" %in% colnames(oplsda_res$tidy_result$variables))
 
   # Check variance tibble
   expect_s3_class(oplsda_res$tidy_result$variance, "tbl_df")
@@ -244,4 +245,90 @@ test_that("gly_oplsda_ works correctly", {
   expect_setequal(names(result), c("tidy_result", "raw_result"))
   expect_type(result$tidy_result, "list")
   expect_s4_class(result$raw_result, "opls")
+})
+
+test_that("gly_oplsda includes pcorr columns for predictive components", {
+  skip_if_not_installed("ropls")
+
+  # Test with single predictive component
+  suppressMessages(suppressWarnings({
+    capture.output({
+      oplsda_res1 <- gly_oplsda(exp_topliss_valid(), pred_i = 1)
+    }, type = "output")
+  }))
+
+  # Check that pcorr1 is present
+  expect_true("pcorr1" %in% colnames(oplsda_res1$tidy_result$variables))
+
+  # Check that pcorr1 values are numeric and within valid correlation range
+  pcorr1_values <- oplsda_res1$tidy_result$variables$pcorr1
+  expect_type(pcorr1_values, "double")
+  expect_true(all(pcorr1_values >= -1 & pcorr1_values <= 1, na.rm = TRUE))
+  expect_false(all(is.na(pcorr1_values)))
+
+  # Test with multiple predictive components
+  suppressMessages(suppressWarnings({
+    capture.output({
+      oplsda_res2 <- gly_oplsda(exp_topliss_valid(), pred_i = 2)
+    }, type = "output")
+  }))
+
+  # Check that both pcorr1 and pcorr2 are present
+  variables_cols <- colnames(oplsda_res2$tidy_result$variables)
+  expect_true("pcorr1" %in% variables_cols)
+  expect_true("pcorr2" %in% variables_cols)
+
+  # Check that both pcorr columns have valid values
+  pcorr1_values2 <- oplsda_res2$tidy_result$variables$pcorr1
+  pcorr2_values2 <- oplsda_res2$tidy_result$variables$pcorr2
+
+  expect_type(pcorr1_values2, "double")
+  expect_type(pcorr2_values2, "double")
+  expect_true(all(pcorr1_values2 >= -1 & pcorr1_values2 <= 1, na.rm = TRUE))
+  expect_true(all(pcorr2_values2 >= -1 & pcorr2_values2 <= 1, na.rm = TRUE))
+  expect_false(all(is.na(pcorr1_values2)))
+  expect_false(all(is.na(pcorr2_values2)))
+
+  # Verify that pcorr values are different between components
+  expect_false(identical(pcorr1_values2, pcorr2_values2))
+})
+
+test_that("gly_oplsda pcorr values match manual calculation", {
+  skip_if_not_installed("ropls")
+
+  # Use a simple test case
+  suppressMessages(suppressWarnings({
+    capture.output({
+      oplsda_res <- gly_oplsda(exp_topliss_valid(), pred_i = 1)
+    }, type = "output")
+  }))
+
+  # Extract raw OPLS-DA object for manual calculation
+  opls_obj <- oplsda_res$raw_result
+
+  # Get the first predictive component scores
+  t1 <- opls_obj@scoreMN[, "p1", drop = TRUE]
+
+  # Get the modeling matrix X
+  X <- opls_obj@suppLs$xModelMN
+
+  # Ensure sample alignment
+  if (!is.null(rownames(X)) && !is.null(rownames(opls_obj@scoreMN))) {
+    X <- X[rownames(opls_obj@scoreMN), , drop = FALSE]
+  }
+
+  # Calculate manual pcorr1
+  manual_pcorr1 <- apply(X, 2, function(x) cor(x, t1, use = "pairwise.complete.obs"))
+
+  # Get pcorr1 from our function
+  function_pcorr1 <- oplsda_res$tidy_result$variables$pcorr1
+  names(function_pcorr1) <- oplsda_res$tidy_result$variables$variable
+
+  # Align by variable names
+  common_vars <- intersect(names(manual_pcorr1), names(function_pcorr1))
+  manual_aligned <- manual_pcorr1[common_vars]
+  function_aligned <- function_pcorr1[common_vars]
+
+  # Compare values (allowing for small numerical differences)
+  expect_equal(manual_aligned, function_aligned, tolerance = 1e-10)
 })

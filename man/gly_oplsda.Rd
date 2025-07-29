@@ -57,6 +57,7 @@ A list containing:
 \item \code{variable}: Variable name
 \item \code{p1}, \code{p2}, etc.: Predictive component loadings
 \item \code{o1}, \code{o2}, etc.: Orthogonal component loadings
+\item \code{pcorr1}, \code{pcorr2}, etc.: Correlation between each variable and the corresponding predictive component
 }
 \item \code{variance}: OPLS-DA explained variance containing the following columns:
 \itemize{
