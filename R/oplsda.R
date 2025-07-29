@@ -140,20 +140,8 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
 }
 
 # Helper function to format OPLS-DA results
-.format_oplsda_results <- function(oplsda_res, groups, sample_info, add_info = TRUE) {
-  # Check if model was successfully built
-  if (length(oplsda_res@scoreMN) == 0) {
-    # Model building failed - provide informative error
-    cli::cli_abort(c(
-      "OPLS-DA model building failed.",
-      "i" = "This usually happens when:",
-      "*" = "The data doesn't have sufficient discriminatory power between groups",
-      "*" = "The first predictive component is not statistically significant",
-      "*" = "Sample size is too small relative to the number of variables",
-      "!" = "Consider using PLS-DA instead, or check your data quality."
-    ))
-  }
-
+# Extract sample scores from OPLS-DA results
+.format_oplsda_samples <- function(oplsda_res) {
   # Extract sample scores (predictive + orthogonal components)
   # ropls stores scores in @scoreMN for predictive and @orthoScoreMN for orthogonal
   pred_scores <- oplsda_res@scoreMN
@@ -177,6 +165,11 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   # Note: We don't add group here because it will be handled by .process_results_add_info
   # This ensures consistent behavior across all functions
 
+  samples_tbl
+}
+
+# Extract variable loadings and p(corr) from OPLS-DA results
+.format_oplsda_variables <- function(oplsda_res) {
   # Extract variable loadings (predictive + orthogonal components)
   pred_loadings <- oplsda_res@loadingMN
   ortho_loadings <- oplsda_res@orthoLoadingMN
@@ -197,12 +190,12 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   variables_tbl$variable <- rownames(all_loadings)
 
   # Calculate p(corr) for each predictive component
-  # Get the modeling matrix X (centered/scaled), rows are samples, columns are variables
-  X <- oplsda_res@suppLs$xModelMN
+  # Get the modeling matrix x_model (centered/scaled), rows are samples, columns are variables
+  x_model <- oplsda_res@suppLs$xModelMN
 
-  # Ensure sample alignment between X and scores
-  if (!is.null(rownames(X)) && !is.null(rownames(oplsda_res@scoreMN))) {
-    X <- X[rownames(oplsda_res@scoreMN), , drop = FALSE]
+  # Ensure sample alignment between x_model and scores
+  if (!is.null(rownames(x_model)) && !is.null(rownames(oplsda_res@scoreMN))) {
+    x_model <- x_model[rownames(oplsda_res@scoreMN), , drop = FALSE]
   }
 
   # Calculate p(corr) for each predictive component
@@ -214,13 +207,18 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
     t_i <- pred_scores[, i, drop = TRUE]
 
     # Calculate correlation between each variable and component i
-    pcorr_i <- apply(X, 2, function(x) stats::cor(x, t_i, use = "pairwise.complete.obs"))
+    pcorr_i <- apply(x_model, 2, function(x) stats::cor(x, t_i, use = "pairwise.complete.obs"))
 
     # Add pcorr column to variables table
     pcorr_col_name <- paste0("pcorr", i)
     variables_tbl[[pcorr_col_name]] <- as.numeric(pcorr_i[variables_tbl$variable])
   }
 
+  variables_tbl
+}
+
+# Extract variance explained information from OPLS-DA results
+.format_oplsda_variance <- function(oplsda_res) {
   # Extract explained variance information from modelDF
   # modelDF contains individual R2X values for each component
   model_df <- oplsda_res@modelDF
@@ -239,26 +237,32 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   component_names <- component_names[valid_idx]
   r2x_values <- r2x_values[valid_idx]
 
-  variance_tbl <- tibble::tibble(
+  tibble::tibble(
     component = component_names,
     prop_var_explained = r2x_values,
     cumulative_prop_var = cumsum(r2x_values)
   )
+}
 
+# Extract VIP scores from OPLS-DA results
+.format_oplsda_vip <- function(oplsda_res) {
   # Calculate VIP (Variable Importance in Projection) scores
   # ropls provides VIP scores in @vipVn
   vip_scores <- oplsda_res@vipVn
 
-  vip_tbl <- tibble::tibble(
+  tibble::tibble(
     variable = names(vip_scores),
     VIP = as.numeric(vip_scores)
   )
+}
 
+# Extract permutation test results from OPLS-DA results
+.format_oplsda_perm_test <- function(oplsda_res) {
   # Extract permutation test results
   # ropls stores permutation results in @suppLs$permMN
   perm_m <- oplsda_res@suppLs$permMN
 
-  perm_test_tbl <- if (!is.null(perm_m) && nrow(perm_m) > 0) {
+  if (!is.null(perm_m) && nrow(perm_m) > 0) {
     tibble::as_tibble(perm_m, .name_repair = "minimal") |>
       dplyr::mutate(
         perm_id = dplyr::row_number() - 1,
@@ -272,12 +276,27 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
       perm_id = integer(0)
     )
   }
+}
+
+.format_oplsda_results <- function(oplsda_res, groups, sample_info, add_info = TRUE) {
+  # Check if model was successfully built
+  if (length(oplsda_res@scoreMN) == 0) {
+    # Model building failed - provide informative error
+    cli::cli_abort(c(
+      "OPLS-DA model building failed.",
+      "i" = "This usually happens when:",
+      "*" = "The data doesn't have sufficient discriminatory power between groups",
+      "*" = "The first predictive component is not statistically significant",
+      "*" = "Sample size is too small relative to the number of variables",
+      "!" = "Consider using PLS-DA instead, or check your data quality."
+    ))
+  }
 
   list(
-    samples = samples_tbl,
-    variables = variables_tbl,
-    variance = variance_tbl,
-    vip = vip_tbl,
-    perm_test = perm_test_tbl
+    samples = .format_oplsda_samples(oplsda_res),
+    variables = .format_oplsda_variables(oplsda_res),
+    variance = .format_oplsda_variance(oplsda_res),
+    vip = .format_oplsda_vip(oplsda_res),
+    perm_test = .format_oplsda_perm_test(oplsda_res)
   )
 }
