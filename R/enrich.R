@@ -73,12 +73,14 @@ gly_enrich_go_ <- function(proteins, ...) {
 
   checkmate::assert_character(proteins, min.len = 1)
 
-  raw_result <- clusterProfiler::enrichGO(
-    gene = proteins,
-    OrgDb = "org.Hs.eg.db",
-    keyType = "UNIPROT",
-    readable = TRUE,
-    ...
+  suppressMessages(
+    raw_result <- clusterProfiler::enrichGO(
+      gene = proteins,
+      OrgDb = "org.Hs.eg.db",
+      keyType = "UNIPROT",
+      readable = TRUE,
+      ...
+    )
   )
 
   tidy_result <- tibble::as_tibble(raw_result)
