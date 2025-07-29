@@ -221,7 +221,7 @@ test_that("gly_enrich_reactome works with protein column and returns properly fo
 
   with_mocked_bindings({
     exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
-    result <- gly_enrich_reactome(exp_with_protein)
+    result <- suppressMessages(gly_enrich_reactome(exp_with_protein))
     expect_s3_class(result, "glystats_reactome_ora_res")
     expect_s3_class(result, "glystats_res")
     expect_true(is.list(result))
@@ -308,7 +308,7 @@ test_that("gly_enrich_go_ works correctly", {
   )
 
   with_mocked_bindings({
-    result <- gly_enrich_go_(proteins)
+    result <- suppressMessages(gly_enrich_go_(proteins))
     expect_s3_class(result, "glystats_go_ora_res")
     expect_s3_class(result, "glystats_res")
     expect_true(is.list(result))
@@ -332,7 +332,7 @@ test_that("gly_enrich_kegg_ works correctly", {
   )
 
   with_mocked_bindings({
-    result <- gly_enrich_kegg_(proteins)
+    result <- suppressMessages(gly_enrich_kegg_(proteins))
     expect_s3_class(result, "glystats_kegg_ora_res")
     expect_s3_class(result, "glystats_res")
     expect_true(is.list(result))
@@ -357,7 +357,7 @@ test_that("gly_enrich_reactome_ works correctly", {
 
   with_mocked_bindings({
     with_mocked_bindings({
-      result <- gly_enrich_reactome_(proteins)
+      result <- suppressMessages(gly_enrich_reactome_(proteins))
       expect_s3_class(result, "glystats_reactome_ora_res")
       expect_s3_class(result, "glystats_res")
       expect_true(is.list(result))
