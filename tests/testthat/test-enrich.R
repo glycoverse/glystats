@@ -12,8 +12,7 @@ test_that("gly_enrich_go works with protein column (integration)", {
   expect_s3_class(result, "glystats_res")
   expect_true(is.list(result))
   expect_named(result, c("tidy_result", "raw_result"))
-  expect_s3_class(result$tidy_result, "glystats_go_ora_res")
-  expect_s3_class(result$tidy_result, "glystats_res")
+  expect_true(tibble::is_tibble(result$tidy_result))
 })
 
 test_that("gly_enrich_go works with protein column and returns properly formatted results", {

@@ -23,8 +23,6 @@ test_that("gly_hclust works with basic parameters (default: cluster variables)",
 
   # Check tidy_result structure
   expect_type(result$tidy_result, "list")
-  expect_s3_class(result$tidy_result, "glystats_hclust_res")
-  expect_s3_class(result$tidy_result, "glystats_res")
 
   # Check clusters component (should cluster variables by default)
   expect_true("clusters" %in% names(result$tidy_result))

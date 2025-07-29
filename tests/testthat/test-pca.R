@@ -7,7 +7,6 @@ test_that("gly_pca works", {
   expect_setequal(names(pca_res), c("tidy_result", "raw_result"))
 
   # Check tidy_result structure
-  expect_s3_class(pca_res$tidy_result, c("glystats_pca_res", "glystats_res"))
   expect_type(pca_res$tidy_result, "list")
   expect_setequal(names(pca_res$tidy_result), c("samples", "variables", "eigenvalues"))
 
@@ -33,7 +32,6 @@ test_that("gly_pca_ works correctly", {
   expect_setequal(names(result), c("tidy_result", "raw_result"))
 
   # Check tidy_result
-  expect_s3_class(result$tidy_result, c("glystats_pca_res", "glystats_res"))
   expect_type(result$tidy_result, "list")
   expect_setequal(names(result$tidy_result), c("samples", "variables", "eigenvalues"))
   expect_true(tibble::is_tibble(result$tidy_result$samples))

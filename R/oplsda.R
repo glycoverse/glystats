@@ -148,9 +148,6 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   # Extract and format results
   tidy_result <- .format_oplsda_results(oplsda_res, groups, NULL, FALSE)
 
-  # Add S3 class to tidy_result
-  tidy_result <- structure(tidy_result, class = c("glystats_oplsda_res", "glystats_res"))
-
   # Return list with both tidy and raw results
   structure(
     list(

@@ -12,7 +12,6 @@ test_that("gly_plsda works with valid Topliss ratio", {
   expect_setequal(names(plsda_res), c("tidy_result", "raw_result"))
 
   # Check tidy_result structure
-  expect_s3_class(plsda_res$tidy_result, c("glystats_plsda_res", "glystats_res"))
   expect_type(plsda_res$tidy_result, "list")
   expect_setequal(names(plsda_res$tidy_result), c("samples", "variables", "variance", "vip"))
 
@@ -118,7 +117,6 @@ test_that("gly_plsda_ works correctly", {
   expect_setequal(names(result), c("tidy_result", "raw_result"))
 
   # Check tidy_result
-  expect_s3_class(result$tidy_result, c("glystats_plsda_res", "glystats_res"))
   expect_type(result$tidy_result, "list")
   expect_setequal(names(result$tidy_result), c("samples", "variables", "variance", "vip"))
   expect_true(tibble::is_tibble(result$tidy_result$samples))

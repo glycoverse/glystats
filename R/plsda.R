@@ -119,9 +119,6 @@ gly_plsda_ <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
   # Extract and format results
   tidy_result <- .format_plsda_results(plsda_res, groups, NULL, FALSE)
 
-  # Add S3 class to tidy_result
-  tidy_result <- structure(tidy_result, class = c("glystats_plsda_res", "glystats_res"))
-
   # Return list with both tidy and raw results
   structure(
     list(

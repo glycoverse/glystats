@@ -83,7 +83,6 @@ gly_enrich_go_ <- function(proteins, ...) {
 
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
-  tidy_result <- structure(tidy_result, class = c("glystats_go_ora_res", "glystats_res", class(tidy_result)))
 
   # Return list with both tidy and raw results
   structure(
@@ -121,7 +120,6 @@ gly_enrich_kegg_ <- function(proteins, ...) {
 
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
-  tidy_result <- structure(tidy_result, class = c("glystats_kegg_ora_res", "glystats_res", class(tidy_result)))
 
   # Return list with both tidy and raw results
   structure(
@@ -181,7 +179,6 @@ gly_enrich_reactome_ <- function(proteins, ...) {
 
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
-  tidy_result <- structure(tidy_result, class = c("glystats_reactome_ora_res", "glystats_res", class(tidy_result)))
 
   # Return list with both tidy and raw results
   structure(

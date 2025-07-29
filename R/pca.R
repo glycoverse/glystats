@@ -88,8 +88,6 @@ gly_pca_ <- function(expr_mat, center = TRUE, scale = TRUE, ...) {
     "eigenvalues" = eigenvalues_tbl
   )
 
-  # Add S3 class to tidy_result
-  tidy_result <- structure(tidy_result, class = c("glystats_pca_res", "glystats_res"))
 
   # Return list with both tidy and raw results
   structure(

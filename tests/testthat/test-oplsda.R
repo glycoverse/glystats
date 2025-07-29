@@ -14,7 +14,6 @@ test_that("gly_oplsda works with valid Topliss ratio", {
   expect_setequal(names(oplsda_res), c("tidy_result", "raw_result"))
 
   # Check tidy_result structure
-  expect_s3_class(oplsda_res$tidy_result, c("glystats_oplsda_res", "glystats_res"))
   expect_type(oplsda_res$tidy_result, "list")
   expect_setequal(names(oplsda_res$tidy_result), c("samples", "variables", "variance", "vip"))
 
@@ -278,6 +277,6 @@ test_that("gly_oplsda_ works correctly", {
   expect_s3_class(result, c("glystats_oplsda_res", "glystats_res"))
   expect_type(result, "list")
   expect_setequal(names(result), c("tidy_result", "raw_result"))
-  expect_s3_class(result$tidy_result, c("glystats_oplsda_res", "glystats_res"))
+  expect_type(result$tidy_result, "list")
   expect_s4_class(result$raw_result, "opls")
 })

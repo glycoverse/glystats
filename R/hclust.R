@@ -208,9 +208,6 @@ gly_hclust_ <- function(
     )
   }
 
-  # Add S3 class to tidy_result
-  tidy_result <- structure(tidy_result, class = c("glystats_hclust_res", "glystats_res"))
-
   # Return list with both tidy and raw results
   structure(
     list(
