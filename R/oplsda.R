@@ -46,6 +46,10 @@
 #'    - `vip`: Variable Importance in Projection scores containing the following columns:
 #'      - `variable`: Variable name
 #'      - `vip`: VIP score
+#'    - `perm_test`: Permutation test results containing the following columns:
+#'      - `model`: Model type ("Original" for the original model, "Permutation" for permuted models)
+#'      - `perm_id`: Permutation ID (0 for original model, 1+ for permutations)
+#'      - Additional columns from the permutation test matrix (e.g., R2X, R2Y, Q2, etc.)
 #'  - `raw_result`: The raw ropls opls object from `ropls::opls()`
 #' @seealso [ropls::opls()]
 #' @export
@@ -250,10 +254,30 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
     VIP = as.numeric(vip_scores)
   )
 
+  # Extract permutation test results
+  # ropls stores permutation results in @suppLs$permMN
+  perm_m <- oplsda_res@suppLs$permMN
+
+  perm_test_tbl <- if (!is.null(perm_m) && nrow(perm_m) > 0) {
+    tibble::as_tibble(perm_m, .name_repair = "minimal") |>
+      dplyr::mutate(
+        perm_id = dplyr::row_number() - 1,
+        model   = dplyr::if_else(.data$perm_id == 0, "Original", "Permutation")
+      ) |>
+      dplyr::relocate(.data$model, .data$perm_id)
+  } else {
+    # If no permutation test was performed, return empty tibble
+    tibble::tibble(
+      model = character(0),
+      perm_id = integer(0)
+    )
+  }
+
   list(
     samples = samples_tbl,
     variables = variables_tbl,
     variance = variance_tbl,
-    vip = vip_tbl
+    vip = vip_tbl,
+    perm_test = perm_test_tbl
   )
 }

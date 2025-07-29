@@ -69,6 +69,12 @@ A list containing:
 \item \code{variable}: Variable name
 \item \code{vip}: VIP score
 }
+\item \code{perm_test}: Permutation test results containing the following columns:
+\itemize{
+\item \code{model}: Model type ("Original" for the original model, "Permutation" for permuted models)
+\item \code{perm_id}: Permutation ID (0 for original model, 1+ for permutations)
+\item Additional columns from the permutation test matrix (e.g., R2X, R2Y, Q2, etc.)
+}
 }
 \item \code{raw_result}: The raw ropls opls object from \code{ropls::opls()}
 }

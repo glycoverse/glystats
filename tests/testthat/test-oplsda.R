@@ -15,7 +15,7 @@ test_that("gly_oplsda works with valid Topliss ratio", {
 
   # Check tidy_result structure
   expect_type(oplsda_res$tidy_result, "list")
-  expect_setequal(names(oplsda_res$tidy_result), c("samples", "variables", "variance", "vip"))
+  expect_setequal(names(oplsda_res$tidy_result), c("samples", "variables", "variance", "vip", "perm_test"))
 
   # Check samples tibble
   expect_s3_class(oplsda_res$tidy_result$samples, "tbl_df")
@@ -39,6 +39,18 @@ test_that("gly_oplsda works with valid Topliss ratio", {
   expect_true("variable" %in% colnames(oplsda_res$tidy_result$vip))
   expect_true("VIP" %in% colnames(oplsda_res$tidy_result$vip))
   expect_true(all(oplsda_res$tidy_result$vip$VIP >= 0))  # VIP scores should be non-negative
+
+  # Check perm_test tibble
+  expect_s3_class(oplsda_res$tidy_result$perm_test, "tbl_df")
+  expect_true("model" %in% colnames(oplsda_res$tidy_result$perm_test))
+  expect_true("perm_id" %in% colnames(oplsda_res$tidy_result$perm_test))
+
+  # If permutation test was performed, check structure
+  if (nrow(oplsda_res$tidy_result$perm_test) > 0) {
+    expect_true("Original" %in% oplsda_res$tidy_result$perm_test$model)
+    expect_true(0 %in% oplsda_res$tidy_result$perm_test$perm_id)
+    expect_true(all(oplsda_res$tidy_result$perm_test$perm_id >= 0))
+  }
 
   # Check raw_result
   expect_s4_class(oplsda_res$raw_result, "opls")
