@@ -114,10 +114,12 @@ gly_enrich_kegg_ <- function(proteins, ...) {
 
   checkmate::assert_character(proteins, min.len = 1)
 
-  raw_result <- clusterProfiler::enrichKEGG(
-    gene = proteins,
-    keyType = "uniprot",
-    ...
+  suppressMessages(
+    raw_result <- clusterProfiler::enrichKEGG(
+      gene = proteins,
+      keyType = "uniprot",
+      ...
+    )
   )
 
   tidy_result <- tibble::as_tibble(raw_result)
@@ -172,11 +174,13 @@ gly_enrich_reactome_ <- function(proteins, ...) {
   }
 
   # Perform Reactome pathway analysis
-  raw_result <- ReactomePA::enrichPathway(
-    gene = entrez_ids,
-    organism = "human",
-    readable = TRUE,
-    ...
+  suppressMessages(
+    raw_result <- ReactomePA::enrichPathway(
+      gene = entrez_ids,
+      organism = "human",
+      readable = TRUE,
+      ...
+    )
   )
 
   tidy_result <- tibble::as_tibble(raw_result)
