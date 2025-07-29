@@ -43,30 +43,6 @@ test_that("gly_oplsda works with valid Topliss ratio", {
   expect_s4_class(oplsda_res$raw_result, "opls")
 })
 
-test_that("gly_oplsda validates Topliss ratio", {
-  # Skip test if ropls is not available
-  skip_if_not_installed("ropls")
-
-  # Test that function correctly rejects datasets with insufficient n/p ratio
-  # The test dataset has 6 samples and 500 variables (ratio = 0.012 << 5)
-  expect_error(
-    suppressMessages(gly_oplsda(exp_2groups())),
-    "Insufficient sample-to-variable ratio"
-  )
-
-  # Test that the error message contains helpful information
-  expect_error(
-    suppressMessages(gly_oplsda(exp_2groups())),
-    "Topliss ratio principle"
-  )
-
-  # Test that the error message suggests solutions
-  expect_error(
-    suppressMessages(gly_oplsda(exp_2groups())),
-    "Collecting more samples"
-  )
-})
-
 test_that("gly_oplsda works with orthogonal components", {
   # Skip test if ropls is not available
   skip_if_not_installed("ropls")
@@ -246,17 +222,6 @@ test_that("gly_oplsda handles different scaling options", {
 
   # Results should be different when scaling is different
   expect_false(identical(oplsda_scaled$tidy_result$samples, oplsda_unscaled$tidy_result$samples))
-})
-
-test_that("gly_oplsda validates Topliss ratio with invalid data", {
-  # Skip test if ropls is not available
-  skip_if_not_installed("ropls")
-
-  # Test that function rejects datasets with insufficient n/p ratio
-  expect_error(
-    suppressMessages(gly_oplsda(exp_2groups())),
-    "Insufficient sample-to-variable ratio"
-  )
 })
 
 test_that("gly_oplsda_ works correctly", {

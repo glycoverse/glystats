@@ -27,14 +27,6 @@
 #' `gly_plsda_()` is the underlying API that works with matrices and factor vectors directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
-#' @section Sample size requirements:
-#' According to the Topliss ratio principle, the ratio of samples to variables (n/p)
-#' should be at least 5 to avoid overfitting and ensure reliable results. This function
-#' will throw an error if n/p < 5. For datasets with high dimensionality relative to
-#' sample size, consider:
-#' - Feature selection before analysis
-#' - Collecting more samples
-#'
 #' @return A list containing:
 #'  - `tidy_result`: A list of tibbles with PLS-DA results:
 #'    - `samples`: PLS-DA scores for each sample containing the following columns:
@@ -77,22 +69,6 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, add_inf
     method = "PLS-DA"
   )
   groups <- group_info$groups
-
-  # Validate sample-to-variable ratio (Topliss ratio)
-  n_samples <- length(groups)
-  n_variables <- nrow(expr_mat)
-  topliss_ratio <- n_samples / n_variables
-
-  if (topliss_ratio < 5) {
-    cli::cli_abort(c(
-      "Insufficient sample-to-variable ratio for reliable PLS-DA analysis.",
-      "x" = "Current ratio: {n_samples}/{n_variables} = {round(topliss_ratio, 2)}",
-      "!" = "According to the Topliss ratio principle, n/p should be >= 5 to avoid overfitting.",
-      "i" = "Consider:",
-      "*" = "Collecting more samples (need >= {ceiling(n_variables * 5)} samples)",
-      "*" = "Reducing variables through feature selection"
-    ))
-  }
 
   # Call the underlying API
   result <- gly_plsda_(expr_mat, groups, ncomp, scale, ...)

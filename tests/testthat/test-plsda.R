@@ -43,30 +43,6 @@ test_that("gly_plsda works with valid Topliss ratio", {
   expect_s3_class(plsda_res$raw_result, "mixo_plsda")
 })
 
-test_that("gly_plsda validates Topliss ratio", {
-  # Skip test if mixOmics is not available
-  skip_if_not_installed("mixOmics")
-
-  # Test that function correctly rejects datasets with insufficient n/p ratio
-  # The test dataset has 12 samples and 500 variables (ratio = 0.024 << 5)
-  expect_error(
-    suppressMessages(gly_plsda(test_gp_exp)),
-    "Insufficient sample-to-variable ratio"
-  )
-
-  # Test that the error message contains helpful information
-  expect_error(
-    suppressMessages(gly_plsda(test_gp_exp)),
-    "Topliss ratio principle"
-  )
-
-  # Test that the error message suggests solutions
-  expect_error(
-    suppressMessages(gly_plsda(test_gp_exp)),
-    "Collecting more samples"
-  )
-})
-
 test_that("gly_plsda raw_result is accessible", {
   # Skip test if mixOmics is not available
   skip_if_not_installed("mixOmics")
