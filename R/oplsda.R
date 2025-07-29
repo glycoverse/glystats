@@ -42,7 +42,8 @@
 #'      - `pcorr1`, `pcorr2`, etc.: Correlation between each variable and the corresponding predictive component
 #'    - `variance`: OPLS-DA explained variance containing the following columns:
 #'      - `component`: Component name (p1, o1, etc.)
-#'      - `explained_variance`: Percentage of variance explained by each component
+#'      - `prop_var_explained`: Proportion of variance explained by each component
+#'      - `cumulative_prop_var`: Cumulative proportion of variance explained
 #'    - `vip`: Variable Importance in Projection scores containing the following columns:
 #'      - `variable`: Variable name
 #'      - `vip`: VIP score
@@ -252,7 +253,7 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
 
   tibble::tibble(
     variable = names(vip_scores),
-    VIP = as.numeric(vip_scores)
+    vip = as.numeric(vip_scores)
   )
 }
 
@@ -268,7 +269,7 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
         perm_id = dplyr::row_number() - 1,
         model   = dplyr::if_else(.data$perm_id == 0, "Original", "Permutation")
       ) |>
-      dplyr::relocate(.data$model, .data$perm_id)
+      dplyr::relocate(all_of(c("model", "perm_id")))
   } else {
     # If no permutation test was performed, return empty tibble
     tibble::tibble(

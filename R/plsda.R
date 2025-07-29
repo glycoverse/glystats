@@ -43,7 +43,7 @@
 #'      - `cumulative_prop_var`: Cumulative proportion of variance explained
 #'    - `vip`: Variable Importance in Projection scores containing the following columns:
 #'      - `variable`: Variable name
-#'      - `VIP`: VIP score
+#'      - `vip`: VIP score
 #'    - `perm_test`: Permutation test results containing the following columns:
 #'      - `model`: Model type ("Original" for the original model, "Permutation" for permuted models)
 #'      - `perm_id`: Permutation ID (0 for original model, 1+ for permutations)

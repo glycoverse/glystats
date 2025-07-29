@@ -62,7 +62,8 @@ A list containing:
 \item \code{variance}: OPLS-DA explained variance containing the following columns:
 \itemize{
 \item \code{component}: Component name (p1, o1, etc.)
-\item \code{explained_variance}: Percentage of variance explained by each component
+\item \code{prop_var_explained}: Proportion of variance explained by each component
+\item \code{cumulative_prop_var}: Cumulative proportion of variance explained
 }
 \item \code{vip}: Variable Importance in Projection scores containing the following columns:
 \itemize{

@@ -63,7 +63,7 @@ A list containing:
 \item \code{vip}: Variable Importance in Projection scores containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{VIP}: VIP score
+\item \code{vip}: VIP score
 }
 \item \code{perm_test}: Permutation test results containing the following columns:
 \itemize{

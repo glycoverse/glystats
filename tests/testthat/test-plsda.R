@@ -38,8 +38,8 @@ test_that("gly_plsda works with valid dataset", {
   # Check VIP tibble
   expect_s3_class(plsda_res$tidy_result$vip, "tbl_df")
   expect_true("variable" %in% colnames(plsda_res$tidy_result$vip))
-  expect_true("VIP" %in% colnames(plsda_res$tidy_result$vip))
-  expect_true(all(plsda_res$tidy_result$vip$VIP >= 0))  # VIP scores should be non-negative
+  expect_true("vip" %in% colnames(plsda_res$tidy_result$vip))
+  expect_true(all(plsda_res$tidy_result$vip$vip >= 0))  # VIP scores should be non-negative
 
   # Check perm_test tibble
   expect_s3_class(plsda_res$tidy_result$perm_test, "tbl_df")
