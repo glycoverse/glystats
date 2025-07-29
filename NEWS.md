@@ -1,3 +1,23 @@
+# glystats 0.4.0
+
+## Breaking changes
+
+* `gly_plsda()` now uses the `ropls` package as its backend instead of `mixOmics`. This changes the class of the object returned in the `raw_result` list element, which may affect downstream code that uses the raw result directly.
+
+## New features
+
+* Added permutation testing to `gly_oplsda()` via the new `perm_test` parameter to assess model significance.
+* The result from `gly_oplsda()` now includes a `pcorr` column containing p-values for the correlation coefficients of features with the predictive component.
+
+## Minor improvements and bug fixes
+
+* Removed the check for n/p in `gly_oplsda()` and `gly_plsda()`, increasing flexibility for smaller datasets.
+* Improved the error message when a specified grouping column is not found in the sample information.
+* Fixed a bug in `gly_limma()` that could cause duplicated messages to be printed.
+* Fixed a bug in `gly_oplsda()` where the column for the first orthogonal component score (`o1`) could be missing from the result.
+* Suppressed messages from dependency packages and extra blank lines when running `gly_enrich_go()` for a cleaner console output.
+* Removed redundant `glystats` S3 classes from the tibbles in the `tidy_result`, simplifying the output object structure.
+
 # glystats 0.3.0
 
 ## Breaking changes
