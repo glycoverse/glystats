@@ -16,7 +16,11 @@
 # Check if group column exists in sample information
 .check_group_column_exists <- function(sample_info, group_col) {
   if (!group_col %in% colnames(sample_info)) {
-    cli::cli_abort("Column {.field {group_col}} not found in sample information")
+    cli::cli_abort(c(
+      "Column {.field {group_col}} not found in sample information.",
+      "i" = "Available columns: {.field {colnames(sample_info)}}",
+      "i" = "Did you mistype the column name or use column other than {.field {group_col}}?"
+    ))
   }
 }
 
