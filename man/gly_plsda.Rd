@@ -30,7 +30,7 @@ that contains group labels. Default is "group".}
 will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.
 Only applicable to \code{gly_plsda()}.}
 
-\item{...}{Additional arguments passed to \code{mixOmics::plsda()}.}
+\item{...}{Additional arguments passed to \code{ropls::opls()}.}
 
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 
@@ -46,30 +46,38 @@ A list containing:
 \itemize{
 \item \code{sample}: Sample name
 \item \code{group}: Group assignment
-\item \code{comp1}, \code{comp2}, etc.: PLS-DA component scores
+\item \code{p1}, \code{p2}, etc.: PLS-DA component scores
 }
 \item \code{variables}: PLS-DA loadings for each variable containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{comp1}, \code{comp2}, etc.: PLS-DA component loadings
+\item \code{p1}, \code{p2}, etc.: PLS-DA component loadings
+\item \code{pcorr1}, \code{pcorr2}, etc.: Correlation between each variable and component
 }
 \item \code{variance}: PLS-DA explained variance containing the following columns:
 \itemize{
-\item \code{comp}: Component name (comp1, comp2, etc.)
-\item \code{explained_variance}: Percentage of variance explained by each component
+\item \code{component}: Component name (p1, p2, etc.)
+\item \code{prop_var_explained}: Proportion of variance explained by each component
+\item \code{cumulative_prop_var}: Cumulative proportion of variance explained
 }
 \item \code{vip}: Variable Importance in Projection scores containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{vip}: VIP score
+\item \code{VIP}: VIP score
+}
+\item \code{perm_test}: Permutation test results containing the following columns:
+\itemize{
+\item \code{model}: Model type ("Original" for the original model, "Permutation" for permuted models)
+\item \code{perm_id}: Permutation ID (0 for original model, 1+ for permutations)
+\item Additional columns from the permutation test matrix (e.g., R2X, R2Y, Q2, etc.)
 }
 }
-\item \code{raw_result}: The raw mixOmics plsda object from \code{mixOmics::plsda()}
+\item \code{raw_result}: The raw ropls opls object from \code{ropls::opls()}
 }
 }
 \description{
 Perform partial least squares discriminant analysis on the expression data.
-The function uses \code{mixOmics::plsda()} to perform PLS-DA and returns tidy results.
+The function uses \code{ropls::opls()} to perform PLS-DA and returns tidy results.
 }
 \details{
 \code{gly_plsda()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
@@ -82,10 +90,10 @@ providing more flexibility for users who don't use the glyexp package.
 
 This function requires the following packages to be installed:
 \itemize{
-\item \code{mixOmics} for PLS-DA analysis
+\item \code{ropls} for PLS-DA analysis
 }
 }
 
 \seealso{
-\code{\link[mixOmics:plsda]{mixOmics::plsda()}}
+\code{\link[ropls:opls]{ropls::opls()}}
 }

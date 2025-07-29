@@ -1,7 +1,7 @@
 #' Partial Least Squares Discriminant Analysis (PLS-DA)
 #'
 #' Perform partial least squares discriminant analysis on the expression data.
-#' The function uses `mixOmics::plsda()` to perform PLS-DA and returns tidy results.
+#' The function uses `ropls::opls()` to perform PLS-DA and returns tidy results.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
@@ -14,11 +14,11 @@
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.
 #'  Only applicable to `gly_plsda()`.
-#' @param ... Additional arguments passed to `mixOmics::plsda()`.
+#' @param ... Additional arguments passed to `ropls::opls()`.
 #'
 #' @section Required packages:
 #' This function requires the following packages to be installed:
-#' - `mixOmics` for PLS-DA analysis
+#' - `ropls` for PLS-DA analysis
 #'
 #' @details
 #' `gly_plsda()` is the top-level API that works with `glyexp::experiment()` objects and supports
@@ -32,22 +32,28 @@
 #'    - `samples`: PLS-DA scores for each sample containing the following columns:
 #'      - `sample`: Sample name
 #'      - `group`: Group assignment
-#'      - `comp1`, `comp2`, etc.: PLS-DA component scores
+#'      - `p1`, `p2`, etc.: PLS-DA component scores
 #'    - `variables`: PLS-DA loadings for each variable containing the following columns:
 #'      - `variable`: Variable name
-#'      - `comp1`, `comp2`, etc.: PLS-DA component loadings
+#'      - `p1`, `p2`, etc.: PLS-DA component loadings
+#'      - `pcorr1`, `pcorr2`, etc.: Correlation between each variable and component
 #'    - `variance`: PLS-DA explained variance containing the following columns:
-#'      - `comp`: Component name (comp1, comp2, etc.)
-#'      - `explained_variance`: Percentage of variance explained by each component
+#'      - `component`: Component name (p1, p2, etc.)
+#'      - `prop_var_explained`: Proportion of variance explained by each component
+#'      - `cumulative_prop_var`: Cumulative proportion of variance explained
 #'    - `vip`: Variable Importance in Projection scores containing the following columns:
 #'      - `variable`: Variable name
-#'      - `vip`: VIP score
-#'  - `raw_result`: The raw mixOmics plsda object from `mixOmics::plsda()`
-#' @seealso [mixOmics::plsda()]
+#'      - `VIP`: VIP score
+#'    - `perm_test`: Permutation test results containing the following columns:
+#'      - `model`: Model type ("Original" for the original model, "Permutation" for permuted models)
+#'      - `perm_id`: Permutation ID (0 for original model, 1+ for permutations)
+#'      - Additional columns from the permutation test matrix (e.g., R2X, R2Y, Q2, etc.)
+#'  - `raw_result`: The raw ropls opls object from `ropls::opls()`
+#' @seealso [ropls::opls()]
 #' @export
 gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, add_info = TRUE, ...) {
   # Check package availability
-  .check_pkg_available("mixOmics")
+  .check_pkg_available("ropls")
 
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
@@ -79,21 +85,37 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, add_inf
 #' @rdname gly_plsda
 #' @export
 gly_plsda_ <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
-  .check_pkg_available("mixOmics")
+  .check_pkg_available("ropls")
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
-  # Prepare data (samples as rows, variables as columns)
+  # Prepare data matrix (samples as rows, variables as columns)
   mat <- log(t(expr_mat) + 1)
 
-  # Perform PLS-DA
-  plsda_res <- mixOmics::plsda(X = mat, Y = groups, ncomp = ncomp, scale = scale, ...)
+  # Perform PLS-DA using ropls::opls with orthoI = 0
+  # Set appropriate cross-validation folds based on sample size
+  n_samples <- nrow(mat)
+  crossval_i <- min(7, n_samples - 1)  # Default is 7, but must be less than sample size
+
+  # Suppress plotting to prevent Rplots.pdf generation
+  # Open a null device to capture any plotting output
+  grDevices::pdf(file = NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+
+  # For small datasets, reduce permutation tests to allow model building
+  perm_i <- if (n_samples < 10) 0 else 20
+
+  # Perform PLS-DA by setting orthoI = 0 (no orthogonal components)
+  plsda_res <- ropls::opls(x = mat, y = groups, predI = ncomp, orthoI = 0,
+                           scaleC = if (scale) "standard" else "none",
+                           crossvalI = crossval_i, permI = perm_i,
+                           fig.pdfC = "none", info.txtC = "none", ...)
 
   # Extract and format results
-  tidy_result <- .format_plsda_results(plsda_res, groups, NULL, FALSE)
+  tidy_result <- .format_oplsda_results(plsda_res, groups, NULL, FALSE)
 
   # Return list with both tidy and raw results
   structure(
@@ -102,48 +124,5 @@ gly_plsda_ <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
       raw_result = plsda_res
     ),
     class = c("glystats_plsda_res", "glystats_res")
-  )
-}
-
-# Helper function to format PLS-DA results
-.format_plsda_results <- function(plsda_res, groups, sample_info, add_info = TRUE) {
-  # Extract sample scores
-  samples_tbl <- tibble::as_tibble(plsda_res$variates$X, .name_repair = "minimal")
-  colnames(samples_tbl) <- paste0("comp", seq_len(ncol(samples_tbl)))
-  samples_tbl$sample <- rownames(plsda_res$variates$X)
-
-  # Note: We don't add group or sample_info here because it will be handled by .process_results_add_info
-  # This ensures consistent behavior across all functions
-
-  # Extract variable loadings
-  variables_tbl <- tibble::as_tibble(plsda_res$loadings$X, .name_repair = "minimal")
-  colnames(variables_tbl) <- paste0("comp", seq_len(ncol(variables_tbl)))
-  variables_tbl$variable <- rownames(plsda_res$loadings$X)
-
-  # Extract explained variance information
-  # For PLS-DA, we use prop_expl_var$X which contains the proportion of variance explained
-  n_comp <- length(plsda_res$prop_expl_var$X)
-
-  variance_tbl <- tibble::tibble(
-    component = paste0("comp", seq_len(n_comp)),
-    prop_var_explained = plsda_res$prop_expl_var$X,
-    cumulative_prop_var = cumsum(plsda_res$prop_expl_var$X)
-  )
-
-  # Calculate VIP (Variable Importance in Projection) scores
-  vip_matrix <- mixOmics::vip(plsda_res)
-  # Calculate overall VIP score as the square root of the sum of squared VIP scores across components
-  overall_vip <- sqrt(rowSums(vip_matrix^2))
-
-  vip_tbl <- tibble::tibble(
-    variable = rownames(vip_matrix),
-    VIP = overall_vip
-  )
-
-  list(
-    samples = samples_tbl,
-    variables = variables_tbl,
-    variance = variance_tbl,
-    vip = vip_tbl
   )
 }

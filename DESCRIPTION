@@ -9,7 +9,6 @@ Description: This package provides statistical analysis of glycoproteomics and g
 License: MIT + file LICENSE
 Suggests:
     testthat (>= 3.0.0),
-    mixOmics,
     FSA,
     ropls,
     mockery,

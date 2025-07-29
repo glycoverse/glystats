@@ -82,8 +82,8 @@ test_that("multi-group functions accept character groups", {
   expect_equal(colnames(result_limma_char$tidy_result), 
                colnames(result_limma_factor$tidy_result))
   
-  # Test gly_plsda_ (requires mixOmics package)
-  skip_if_not_installed("mixOmics")
+  # Test gly_plsda_ (requires ropls package)
+  skip_if_not_installed("ropls")
   suppressMessages({
     result_plsda_char <- gly_plsda_(expr_mat, groups_char_3)
     result_plsda_factor <- gly_plsda_(expr_mat, groups_factor_3)
