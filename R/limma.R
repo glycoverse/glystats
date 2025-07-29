@@ -232,7 +232,6 @@ gly_limma_ <- function(
   n_groups <- length(group_levels)
 
   cli::cli_alert_info("Performing multi-group limma analysis with {n_groups} groups")
-  cli::cli_alert_info("Groups: {.val {group_levels}}")
 
   # Prepare data for limma
   log_expr_mat <- log2(expr_mat + 1)
