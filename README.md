@@ -20,11 +20,17 @@ glycoproteomics and glycomics data. It works seamlessly with the
 
 ## Installation
 
-You can install the development version of glystats from
+You can install the latest release of glystats from
 [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
+pak::pak("glycoverse/glystats@*release")
+```
+
+Or install the development version:
+
+``` r
 pak::pak("glycoverse/glystats")
 ```
 
