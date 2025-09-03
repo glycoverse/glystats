@@ -24,14 +24,14 @@ You can install the latest release of glystats from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("pak")
-pak::pak("glycoverse/glystats@*release")
+# install.packages("devtools")
+devtools::install_github("glycoverse/glystats@*release")
 ```
 
 Or install the development version:
 
 ``` r
-pak::pak("glycoverse/glystats")
+devtools::install_github("glycoverse/glystats")
 ```
 
 ## Documentation
