@@ -83,6 +83,9 @@ the \code{add_info} parameter for joining experiment metadata.
 \code{gly_kruskal_()} is the underlying API that works with matrices and factor vectors directly,
 providing more flexibility for users who don't use the glyexp package.
 
+For any variable failed to fit a \code{stats::kruskal.test()} model,
+NAs will be assigned to the results in both main test and post-hoc test.
+
 \strong{Post-hoc Test:}
 Dunn's test with Holm correction for multiple comparisons (\code{FSA::dunnTest()}) is performed
 for variables with significant main effects (p_adj < 0.05).

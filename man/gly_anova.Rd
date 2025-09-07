@@ -79,6 +79,9 @@ the \code{add_info} parameter for joining experiment metadata.
 \code{gly_anova_()} is the underlying API that works with matrices and factor vectors directly,
 providing more flexibility for users who don't use the glyexp package.
 
+For any variable failed to fit a \code{stats::aov()} model,
+NAs will be assigned to the results in both main test and post-hoc test.
+
 \strong{Post-hoc Test:}
 Tukey's HSD test for pairwise comparisons (\code{stats::TukeyHSD()}) is performed
 for variables with significant main effects (p_adj < 0.05).

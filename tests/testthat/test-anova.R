@@ -33,6 +33,28 @@ test_that("gly_anova works with anova method", {
   expect_named(result$raw_result, c("main_test", "post_hoc_test"))
 })
 
+test_that("gly_anova assigns NA for failed variables", {
+  # Use test_gp_exp with 3 groups for ANOVA
+  # The first three variables are set to NA
+  exp_3group <- test_gp_exp |>
+    glyexp::filter_obs(group %in% c("C", "H", "M")) |>
+    glyexp::slice_sample_var(n = 10)
+  exp_3group$expr_mat[1:3, ] <- NA  # This will lead to stats::aov() failing
+  na_vars <- exp_3group$var_info$variable[1:3]
+
+  # Run DEA with ANOVA
+  result <- suppressMessages(gly_anova(exp_3group))
+
+  # Test main test
+  main_test_raw <- result$raw_result$main_test
+  expect_true(all(is.na(main_test_raw[na_vars])))
+  main_test_tidy <- result$tidy_result$main_test
+  p_values <- main_test_tidy |>
+    dplyr::filter(variable %in% na_vars) |>
+    dplyr::pull(p_value)
+  expect_true(all(is.na(p_values)))
+})
+
 test_that("gly_kruskal works with kruskal method", {
   # Use test_gp_exp with 3 groups for Kruskal-Wallis test
   exp_3group <- test_gp_exp |>

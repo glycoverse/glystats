@@ -29,6 +29,9 @@
 #' `gly_anova_()` is the underlying API that works with matrices and factor vectors directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
+#' For any variable failed to fit a `stats::aov()` model,
+#' NAs will be assigned to the results in both main test and post-hoc test.
+#'
 #' **Post-hoc Test:**
 #' Tukey's HSD test for pairwise comparisons (`stats::TukeyHSD()`) is performed
 #' for variables with significant main effects (p_adj < 0.05).
@@ -173,6 +176,9 @@ gly_anova_ <- function(
 #' `gly_kruskal_()` is the underlying API that works with matrices and factor vectors directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
+#' For any variable failed to fit a `stats::kruskal.test()` model,
+#' NAs will be assigned to the results in both main test and post-hoc test.
+#'
 #' **Post-hoc Test:**
 #' Dunn's test with Holm correction for multiple comparisons (`FSA::dunnTest()`) is performed
 #' for variables with significant main effects (p_adj < 0.05).
@@ -303,73 +309,38 @@ gly_kruskal_ <- function(
 
 # Helper function to generate raw main test results
 .generate_raw_main_results <- function(data, .f, ...) {
+  safe_f <- purrr::possibly(.f, otherwise = NA)
   main_test_raw <- data %>%
     dplyr::nest_by(.data$variable) %>%
-    dplyr::mutate(
-      test_result = list(.f(log_value ~ group, data = .data$data))
-    )
+    dplyr::mutate(test_result = list(safe_f(log_value ~ group, data = .data$data)))
 
   main_test_list <- main_test_raw$test_result
   names(main_test_list) <- main_test_raw$variable
   main_test_list
 }
 
-# Helper function to generate raw post-hoc results
 .generate_raw_posthoc_results <- function(main_test_raw, data, .f, p_adj_method) {
-  # First, we need to determine which variables are significant
-  # We'll need to extract p-values from the raw results
-  significant_vars <- c()
-
-  for (var_name in names(main_test_raw)) {
-    raw_result <- main_test_raw[[var_name]]
-
-    # Extract p-value from raw result
-    if (identical(.f, stats::aov)) {
-      # For ANOVA, extract p-value from summary
-      p_val <- summary(raw_result)[[1]][["Pr(>F)"]][1]
-    } else {
-      # For Kruskal-Wallis, p-value is in $p.value
-      p_val <- raw_result$p.value
-    }
-
-    # Apply p-adjustment if needed
-    if (!is.null(p_val) && !is.na(p_val)) {
-      if (p_val < 0.05) {  # Use unadjusted p-value for initial filtering
-        significant_vars <- c(significant_vars, var_name)
-      }
-    }
+  p_fn <- ifelse(
+    identical(.f, stats::aov),
+    function(x) summary(x)[[1]][["Pr(>F)"]][1],
+    function(x) x$p.value
+  )
+  valid_main_test_mods <- main_test_raw[!is.na(main_test_raw)]
+  main_test_p_vals <- purrr::map_dbl(valid_main_test_mods, p_fn)
+  if (!is.null(p_adj_method)) {
+    main_test_p_vals <- stats::p.adjust(main_test_p_vals, method = p_adj_method)
   }
-
-  # Apply p-adjustment to all p-values if requested
-  if (!is.null(p_adj_method) && length(significant_vars) > 0) {
-    all_p_vals <- sapply(names(main_test_raw), function(var_name) {
-      raw_result <- main_test_raw[[var_name]]
-      if (identical(.f, stats::aov)) {
-        summary(raw_result)[[1]][["Pr(>F)"]][1]
-      } else {
-        raw_result$p.value
-      }
-    })
-
-    adj_p_vals <- stats::p.adjust(all_p_vals, method = p_adj_method)
-    significant_vars <- names(adj_p_vals)[adj_p_vals < 0.05 & !is.na(adj_p_vals)]
-  }
-
-  if (length(significant_vars) > 0) {
-    # Perform post-hoc tests for significant variables and return raw objects
+  sig_vars <- names(main_test_p_vals)[main_test_p_vals < 0.05]
+  if (length(sig_vars) > 0) {
     posthoc_raw_results <- data %>%
-      dplyr::filter(.data$variable %in% significant_vars) %>%
+      dplyr::filter(.data$variable %in% sig_vars) %>%
       dplyr::nest_by(.data$variable) %>%
       dplyr::mutate(posthoc_raw = list(.perform_raw_posthoc_test(.data$data, .f))) %>%
       dplyr::select(all_of(c("variable", "posthoc_raw")))
-
-    # Convert to named list
     raw_posthoc_list <- posthoc_raw_results$posthoc_raw
     names(raw_posthoc_list) <- posthoc_raw_results$variable
-
     return(raw_posthoc_list)
   } else {
-    # No significant results, return empty named list
     return(list())
   }
 }
@@ -390,19 +361,18 @@ gly_kruskal_ <- function(
     dplyr::mutate(log_value = log2(.data$value + 1))
 }
 
-
-
 # Helper function to convert main test raw results to tibble
 .tibblify_main_test_results <- function(main_test_raw, .f, p_adj_method) {
   var_names <- names(main_test_raw)
-
   result_tbl <- tibble::tibble(
     variable = var_names,
     test_result = main_test_raw
   ) %>%
-    dplyr::mutate(params = purrr::map(.data$test_result, ~ broom::tidy(.x))) %>%
+    dplyr::mutate(params = purrr::map(.data$test_result, ~ {
+      if (rlang::is_na(.x)) NULL else broom::tidy(.x)
+    })) %>%
     dplyr::select(all_of(c("variable", "params"))) %>%
-    tidyr::unnest(all_of("params")) %>%
+    tidyr::unnest(all_of("params"), keep_empty = TRUE) %>%
     dplyr::ungroup() %>%
     janitor::clean_names()
 
