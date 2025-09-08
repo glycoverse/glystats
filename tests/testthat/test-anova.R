@@ -43,7 +43,7 @@ test_that("gly_anova assigns NA for failed variables", {
   na_vars <- exp_3group$var_info$variable[1:3]
 
   # Run DEA with ANOVA
-  result <- suppressMessages(gly_anova(exp_3group))
+  expect_warning(result <- suppressMessages(gly_anova(exp_3group)))
 
   # Test main test
   main_test_raw <- result$raw_result$main_test

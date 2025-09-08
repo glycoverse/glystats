@@ -313,8 +313,11 @@ gly_kruskal_ <- function(
   main_test_raw <- data %>%
     dplyr::nest_by(.data$variable) %>%
     dplyr::mutate(test_result = list(safe_f(log_value ~ group, data = .data$data)))
-
   main_test_list <- main_test_raw$test_result
+  n_na <- sum(is.na(main_test_list))
+  if (n_na > 0) {
+    cli::cli_warn("{.val {n_na}} variables failed to fit the model")
+  }
   names(main_test_list) <- main_test_raw$variable
   main_test_list
 }
