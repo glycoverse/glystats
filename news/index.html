@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,15 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.1" id="glystats-041">glystats 0.4.1<a class="anchor" aria-label="anchor" href="#glystats-041"></a></h2>
+<div class="section level3">
+<h3 id="minor-improvements-and-bug-fixes-0-4-1">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-4-1"></a></h3>
+<ul><li>Fix the <code>could not find function "%||%"</code> bug in <code><a href="../reference/gly_anova.html">gly_anova()</a></code>.</li>
+<li>
+<code><a href="../reference/gly_anova.html">gly_anova()</a></code>, <code><a href="../reference/gly_kruskal.html">gly_kruskal()</a></code>, <code><a href="../reference/gly_ttest.html">gly_ttest()</a></code>, <code><a href="../reference/gly_wilcox.html">gly_wilcox()</a></code>, <code><a href="../reference/gly_cox.html">gly_cox()</a></code>, <code><a href="../reference/gly_roc.html">gly_roc()</a></code>, and their <code>gly_xxx_()</code> counterparts are now more robust. Previously, if the model failed to be fitted for any variable, the functions stopped with an error. Now, they only issue a warning and continue, assigning NAs in the results for those failed variables.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="glystats-040">glystats 0.4.0<a class="anchor" aria-label="anchor" href="#glystats-040"></a></h2>
 <div class="section level3">
