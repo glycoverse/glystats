@@ -115,19 +115,25 @@ gly_roc_ <- function(expr_mat, groups, pos_class = NULL) {
 
   # Prepare data for ROC analysis
   response <- as.numeric(groups == pos_class)
+  safe_f <- purrr::possibly(pROC::roc, otherwise = NA)
   roc_objs <- purrr::map(
     rownames(expr_mat),
-    ~ suppressMessages(pROC::roc(response, expr_mat[.x, ]))
+    ~ suppressMessages(safe_f(response, expr_mat[.x, ]))
   )
+  names(roc_objs) <- rownames(expr_mat)
+  n_na <- sum(is.na(roc_objs))
+  if (n_na > 0) {
+    cli::cli_warn("{.val {n_na}} variables failed to fit the model")
+  }
 
   # Create tidy results
   roc_auc_tb <- tibble::tibble(
     variable = rownames(expr_mat),
-    auc = purrr::map_dbl(roc_objs, ~ .x$auc)
+    auc = purrr::map_dbl(roc_objs, ~ if (rlang::is_na(.x)) NA else .x$auc)
   )
 
   coords_tb <- roc_objs %>%
-    purrr::map(~ tibble::as_tibble(pROC::coords(.x, "all"))) %>%
+    purrr::map(~ tibble::as_tibble(if (rlang::is_na(.x)) NULL else pROC::coords(.x, "all"))) %>%
     rlang::set_names(rownames(expr_mat)) %>%
     dplyr::bind_rows(.id = "variable")
 

@@ -86,6 +86,28 @@ test_that("gly_roc works with different group column names", {
   expect_setequal(names(result), c("tidy_result", "raw_result"))
 })
 
+test_that("gly_roc assigns NA for failed variables", {
+  # Use test_gp_exp and filter to 2 groups for ROC analysis
+  exp_2group <- exp_2groups() |>
+    glyexp::slice_sample_var(n = 10)
+  exp_2group$expr_mat[1:3, ] <- NA  # This will lead to pROC::roc() failing
+  na_vars <- exp_2group$var_info$variable[1:3]
+
+  # Run DEA with ROC analysis
+  expect_warning(result <- suppressMessages(gly_roc(exp_2group)))
+
+  # Test results
+  expect_true(all(is.na(result$raw_result[na_vars])))
+  auc_values <- result$tidy_result$auc |>
+    dplyr::filter(variable %in% na_vars) |>
+    dplyr::pull(auc)
+  expect_true(all(is.na(auc_values)))
+  coords_values <- result$tidy_result$coords |>
+    dplyr::filter(variable %in% na_vars) |>
+    dplyr::pull(sensitivity)
+  expect_true(all(is.na(coords_values)))
+})
+
 test_that("gly_roc_ works correctly", {
   skip_if_not_installed("pROC")
 
