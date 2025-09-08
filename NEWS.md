@@ -1,3 +1,10 @@
+# glystats 0.4.1
+
+## Minor improvements and bug fixes
+
+* Fix the `could not find function "%||%"` bug in `gly_anova()`.
+* `gly_anova()`, `gly_kruskal()`, `gly_ttest()`, `gly_wilcox()`, `gly_cox()`, `gly_roc()`, and their `gly_xxx_()` counterparts are now more robust. Previously, if the model failed to be fitted for any variable, the functions stopped with an error. Now, they only issue a warning and continue, assigning NAs in the results for those failed variables.
+
 # glystats 0.4.0
 
 ## Breaking changes
