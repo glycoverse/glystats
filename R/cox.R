@@ -95,9 +95,15 @@ gly_cox_ <- function(
   .check_pkg_available("survival")
 
   # Fit Cox model for each variable
+  safe_f <- purrr::possibly(survival::coxph, otherwise = NA)
   cox_models <- apply(expr_mat, 1, function(x) {
-    survival::coxph(survival::Surv(time, event) ~ x, ...)
+    safe_f(survival::Surv(time, event) ~ x, ...)
   })
+
+  n_na <- sum(is.na(cox_models))
+  if (n_na > 0) {
+    cli::cli_warn("{.val {n_na}} variables failed to fit the model")
+  }
 
   # Extract results and convert to tibble
   tidy_result <- .gly_cox_tibblify(cox_models, p_adj_method)
@@ -119,7 +125,7 @@ gly_cox_ <- function(
     model = cox_models
   ) %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(params = list(broom::tidy(.data$model))) %>%
+    dplyr::mutate(params = list(if (rlang::is_na(.data$model)) NULL else broom::tidy(.data$model))) %>%
     dplyr::select(-all_of("model")) %>%
     tidyr::unnest(all_of("params")) %>%
     dplyr::ungroup() %>%

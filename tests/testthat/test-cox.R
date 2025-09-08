@@ -59,6 +59,51 @@ test_that("gly_cox works with basic survival data", {
   expect_true(all(purrr::map_lgl(result$raw_result, ~ inherits(.x, "coxph"))))
 })
 
+test_that("gly_cox assigns NA for failed variables", {
+  # Create test survival data
+  set.seed(123)
+
+  # Create expression matrix (10 variables, 20 samples)
+  expr_mat <- matrix(rnorm(200), nrow = 10, ncol = 20)
+  expr_mat[1:3, ] <- NA  # This will lead to stats::coxph() failing
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:20)
+  na_vars <- paste0("var", 1:3)
+
+  # Create sample info with survival data
+  sample_info <- tibble::tibble(
+    sample = paste0("sample", 1:20),
+    time = rexp(20, rate = 0.1),  # Exponential survival times
+    event = rbinom(20, 1, 0.7),  # 70% event rate
+    group = rep(c("A", "B"), each = 10)
+  )
+
+  # Create variable info
+  var_info <- tibble::tibble(
+    variable = paste0("var", 1:10),
+    type = rep("biomarker", 10)
+  )
+
+  # Create experiment object
+  exp <- glyexp::experiment(
+    expr_mat = expr_mat,
+    sample_info = sample_info,
+    var_info = var_info,
+    exp_type = "glycomics",
+    glycan_type = "N"
+  )
+
+  # Run DEA with cox test
+  expect_warning(result <- suppressMessages(gly_cox(exp)))
+
+  # Test results
+  expect_true(all(is.na(result$raw_result[na_vars])))
+  p_values <- result$tidy_result |>
+    dplyr::filter(variable %in% na_vars) |>
+    dplyr::pull(p)
+  expect_true(all(is.na(p_values)))
+})
+
 test_that("gly_cox_ works with matrix input", {
   # Create test data
   set.seed(456)
