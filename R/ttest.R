@@ -265,13 +265,18 @@ gly_wilcox_ <- function(
     dplyr::mutate(log_value = log2(.data$value + 1))
 
   # Perform statistical tests and store raw results
+  safe_f <- purrr::possibly(.f, otherwise = NA)
   nested_data <- data %>%
     dplyr::nest_by(.data$variable) %>%
-    dplyr::mutate(test_result = list(.f(log_value ~ group, data = .data$data)))
+    dplyr::mutate(test_result = list(safe_f(log_value ~ group, data = .data$data)))
 
   # Return named list of raw results
   raw_results <- nested_data$test_result
   names(raw_results) <- nested_data$variable
+  n_na <- sum(is.na(raw_results))
+  if (n_na > 0) {
+    cli::cli_warn("{.val {n_na}} variables failed to fit the model")
+  }
   raw_results
 }
 
@@ -285,7 +290,9 @@ gly_wilcox_ <- function(
     test_result = mod_list
   ) %>%
     dplyr::mutate(
-      params = purrr::map(.data$test_result, ~ broom::tidy(.x)),
+      params = purrr::map(.data$test_result, ~ {
+        if (rlang::is_na(.x)) NULL else broom::tidy(.x)
+      }),
     ) %>%
     dplyr::select(all_of(c("variable", "params"))) %>%
     tidyr::unnest(all_of("params")) %>%

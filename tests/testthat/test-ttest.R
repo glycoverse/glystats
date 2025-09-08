@@ -22,6 +22,27 @@ test_that("gly_ttest works with t-test method", {
   expect_true(all(purrr::map_lgl(result$raw_result, ~ inherits(.x, "htest"))))
 })
 
+test_that("gly_ttest assigns NA for failed variables", {
+  # Use test_gp_exp and filter to 2 groups for t-test
+  exp_2group <- test_gp_exp |>
+    glyexp::filter_obs(group %in% c("C", "H")) |>
+    glyexp::slice_sample_var(n = 10)
+  exp_2group$expr_mat[1:3, ] <- NA  # This will lead to stats::t.test() failing
+  na_vars <- exp_2group$var_info$variable[1:3]
+
+  # Run DEA with t-test
+  expect_warning(result <- suppressMessages(gly_ttest(exp_2group)))
+
+  # Test results
+  main_test_raw <- result$raw_result
+  expect_true(all(is.na(main_test_raw[na_vars])))
+  main_test_tidy <- result$tidy_result
+  p_values <- main_test_tidy |>
+    dplyr::filter(variable %in% na_vars) |>
+    dplyr::pull(p_value)
+  expect_true(all(is.na(p_values)))
+})
+
 test_that("gly_wilcox works with wilcoxon method", {
   # Use test_gp_exp and filter to 2 groups for wilcoxon test
   exp_2group <- test_gp_exp |>
