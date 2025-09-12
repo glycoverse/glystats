@@ -1,3 +1,9 @@
+# glystats 0.4.2
+
+## Minor improvements and bug fixes
+
+* Update dependencies to depend on release versions of glycoverse packages.
+
 # glystats 0.4.1
 
 ## Minor improvements and bug fixes
