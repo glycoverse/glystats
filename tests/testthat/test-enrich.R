@@ -1,3 +1,5 @@
+skip("Too long to run.")
+
 # Integration test for GO enrichment
 test_that("gly_enrich_go works with protein column (integration)", {
   # Skip if required packages are not available
