@@ -56,8 +56,8 @@
 #' @seealso [clusterProfiler::enrichGO()], [clusterProfiler::enrichKEGG()], [ReactomePA::enrichPathway()]
 #' @export
 gly_enrich_go <- function(exp, add_info = TRUE, ...) {
-  .check_pkg_available("clusterProfiler")
-  .check_pkg_available("org.Hs.eg.db")
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("org.Hs.eg.db")
 
   checkmate::assert_logical(add_info, len = 1)
 
@@ -68,8 +68,8 @@ gly_enrich_go <- function(exp, add_info = TRUE, ...) {
 #' @rdname gly_enrich_go
 #' @export
 gly_enrich_go_ <- function(proteins, ...) {
-  .check_pkg_available("clusterProfiler")
-  .check_pkg_available("org.Hs.eg.db")
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("org.Hs.eg.db")
 
   checkmate::assert_character(proteins, min.len = 1)
 
@@ -99,7 +99,7 @@ gly_enrich_go_ <- function(proteins, ...) {
 #' @rdname gly_enrich_go
 #' @export
 gly_enrich_kegg <- function(exp, add_info = TRUE, ...) {
-  .check_pkg_available("clusterProfiler")
+  rlang::check_installed("clusterProfiler")
 
   checkmate::assert_logical(add_info, len = 1)
 
@@ -110,7 +110,7 @@ gly_enrich_kegg <- function(exp, add_info = TRUE, ...) {
 #' @rdname gly_enrich_go
 #' @export
 gly_enrich_kegg_ <- function(proteins, ...) {
-  .check_pkg_available("clusterProfiler")
+  rlang::check_installed("clusterProfiler")
 
   checkmate::assert_character(proteins, min.len = 1)
 
@@ -138,9 +138,9 @@ gly_enrich_kegg_ <- function(proteins, ...) {
 #' @rdname gly_enrich_go
 #' @export
 gly_enrich_reactome <- function(exp, add_info = TRUE, ...) {
-  .check_pkg_available("clusterProfiler")
-  .check_pkg_available("ReactomePA")
-  .check_pkg_available("org.Hs.eg.db")
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("ReactomePA")
+  rlang::check_installed("org.Hs.eg.db")
 
   checkmate::assert_logical(add_info, len = 1)
 
@@ -151,9 +151,9 @@ gly_enrich_reactome <- function(exp, add_info = TRUE, ...) {
 #' @rdname gly_enrich_go
 #' @export
 gly_enrich_reactome_ <- function(proteins, ...) {
-  .check_pkg_available("clusterProfiler")
-  .check_pkg_available("ReactomePA")
-  .check_pkg_available("org.Hs.eg.db")
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("ReactomePA")
+  rlang::check_installed("org.Hs.eg.db")
 
   checkmate::assert_character(proteins, min.len = 1)
 

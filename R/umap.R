@@ -39,7 +39,7 @@ gly_umap <- function(
   add_info = TRUE,
   ...
 ) {
-  .check_pkg_available("uwot")
+  rlang::check_installed("uwot")
   checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_flag(add_info)
 
@@ -58,7 +58,7 @@ gly_umap_ <- function(
   n_components = 2,
   ...
 ) {
-  .check_pkg_available("uwot")
+  rlang::check_installed("uwot")
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
 

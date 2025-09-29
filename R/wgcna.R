@@ -106,7 +106,7 @@ gly_wgcna_ <- function(
   ...
 ) {
   # Check if WGCNA package is available
-  .check_pkg_available("WGCNA")
+  rlang::check_installed("WGCNA")
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")

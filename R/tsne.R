@@ -45,7 +45,7 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
 #' @rdname gly_tsne
 #' @export
 gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, ...) {
-  .check_pkg_available("Rtsne")
+  rlang::check_installed("Rtsne")
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
 

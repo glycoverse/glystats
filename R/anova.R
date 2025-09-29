@@ -214,7 +214,7 @@ gly_kruskal <- function(exp, group_col = "group", p_adj_method = "BH", add_info 
   checkmate::assert_logical(add_info, len = 1)
 
   # Check package availability
-  .check_pkg_available("FSA")
+  rlang::check_installed("FSA")
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -245,7 +245,7 @@ gly_kruskal_ <- function(
   ...
 ) {
   # Check package availability
-  .check_pkg_available("FSA")
+  rlang::check_installed("FSA")
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")

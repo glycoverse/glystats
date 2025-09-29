@@ -55,7 +55,7 @@
 #' @seealso [pROC::roc()], [pROC::coords()]
 #' @export
 gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE) {
-  .check_pkg_available("pROC")
+  rlang::check_installed("pROC")
 
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
@@ -87,7 +87,7 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE)
 #' @rdname gly_roc
 #' @export
 gly_roc_ <- function(expr_mat, groups, pos_class = NULL) {
-  .check_pkg_available("pROC")
+  rlang::check_installed("pROC")
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")

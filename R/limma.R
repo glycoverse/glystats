@@ -78,7 +78,7 @@ gly_limma <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   # Check package availability
-  .check_pkg_available("limma")
+  rlang::check_installed("limma")
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -123,7 +123,7 @@ gly_limma_ <- function(
   checkmate::assert_character(contrasts, null.ok = TRUE)
 
   # Check package availability
-  .check_pkg_available("limma")
+  rlang::check_installed("limma")
 
   # Validate groups
   n_groups <- length(levels(groups))

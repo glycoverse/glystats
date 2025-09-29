@@ -53,7 +53,7 @@
 #' @export
 gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, add_info = TRUE, ...) {
   # Check package availability
-  .check_pkg_available("ropls")
+  rlang::check_installed("ropls")
 
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
@@ -85,7 +85,7 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, add_inf
 #' @rdname gly_plsda
 #' @export
 gly_plsda_ <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
-  .check_pkg_available("ropls")
+  rlang::check_installed("ropls")
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")

@@ -104,7 +104,7 @@ gly_consensus_clustering_ <- function(
   checkmate::assert_character(output_file, len = 1, null.ok = TRUE)
 
   # Check if required packages are available
-  .check_pkg_available("ConsensusClusterPlus", "BiocManager::install('ConsensusClusterPlus')")
+  rlang::check_installed("ConsensusClusterPlus")
 
   # Prepare data for clustering based on 'on' parameter
   if (on == "sample") {

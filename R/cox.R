@@ -92,7 +92,7 @@ gly_cox_ <- function(
   }
 
   # Check if survival package is available
-  .check_pkg_available("survival")
+  rlang::check_installed("survival")
 
   # Fit Cox model for each variable
   safe_f <- purrr::possibly(survival::coxph, otherwise = NA)
