@@ -26,8 +26,7 @@ Suggests:
     knitr,
     rmarkdown,
     glyclean (>= 0.6.2),
-    glyread (>= 0.4.2),
-    ggtree (>= 3.16.0)
+    glyread (>= 0.4.2)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
