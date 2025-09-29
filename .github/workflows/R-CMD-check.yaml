@@ -21,9 +21,9 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+          - {os: ubuntu-latest,  r: 'devel',   http-user-agent: 'release'}
+          - {os: ubuntu-latest,  r: 'release'}
+          - {os: ubuntu-latest,  r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -40,10 +40,27 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      # ----- Dependency installation -----
+
+      # oldrel-1: pin ggplot2 to 3.5.x (compatible with ggtree 3.14.0)
+      - name: Install deps (oldrel-1, pin ggplot2 to 3.5.x)
+        if: matrix.config.r == 'oldrel-1'
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
           needs: check
+          extra-packages: |
+            any::rcmdcheck
+            cran::ggplot2@3.5.2
+
+      # Other R versions: normal installation (will get ggplot2 4.x)
+      - name: Install deps (others)
+        if: matrix.config.r != 'oldrel-1'
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          needs: check
+          extra-packages: any::rcmdcheck
+
+      # ----- End of dependency installation -----
 
       - uses: r-lib/actions/check-r-package@v2
         with:
