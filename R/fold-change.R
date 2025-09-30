@@ -103,7 +103,8 @@ gly_fold_change_ <- function(expr_mat, groups) {
   comparisons <- .make_comparisons(levels(groups))
   result_list <- purrr::map(comparisons, function(c) {
     sample_mask <- groups %in% c
-    .fc_2groups(expr_mat[, sample_mask], groups[sample_mask])
+    sub_groups <- factor(groups[sample_mask], levels = c)
+    .fc_2groups(expr_mat[, sample_mask, drop = FALSE], sub_groups)
   })
   comparison_str <- purrr::map_chr(comparisons, ~ stringr::str_c(.x[1], "_vs_", .x[2]))
   names(result_list) <- comparison_str

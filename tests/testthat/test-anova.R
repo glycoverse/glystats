@@ -26,7 +26,7 @@ test_that("gly_anova works with anova method", {
   # Test post_hoc_test tibble
   post_hoc_test <- result$tidy_result$post_hoc_test
   expect_true(tibble::is_tibble(post_hoc_test))
-  expect_true(all(c("variable", "ref_group", "test_group", "p_value", "p_adj") %in% colnames(post_hoc_test)))
+  expect_true(all(c("variable", "ref_group", "test_group", "p_value", "p_adj", "log2fc") %in% colnames(post_hoc_test)))
 
   # Test raw_result structure
   expect_type(result$raw_result, "list")
@@ -54,6 +54,7 @@ test_that("gly_anova comparison direction is correct for 2 groups", {
 
   # Test post_hoc
   expect_identical(result$tidy_result$main_test$post_hoc, "A_vs_B")
+  expect_true(all(result$tidy_result$post_hoc_test$log2fc > 0))
   expect_identical(result$tidy_result$post_hoc_test$ref_group, "A")
   expect_identical(result$tidy_result$post_hoc_test$test_group, "B")
 })
@@ -88,6 +89,7 @@ test_that("gly_anova comparison direction is correct for 3 groups", {
     result$tidy_result$post_hoc_test$test_group
   )
   expect_setequal(comparisons, c("A_vs_B", "A_vs_C", "B_vs_C"))
+  expect_true(all(result$tidy_result$post_hoc_test$log2fc > 0))
 })
 
 test_that("gly_kruskal comparison direction is correct for 2 groups", {
@@ -108,6 +110,7 @@ test_that("gly_kruskal comparison direction is correct for 2 groups", {
 
   # Test post_hoc
   expect_identical(result$tidy_result$main_test$post_hoc, "A_vs_B")
+  expect_true(result$tidy_result$post_hoc_test$log2fc > 0)
   expect_identical(result$tidy_result$post_hoc_test$ref_group, "A")
   expect_identical(result$tidy_result$post_hoc_test$test_group, "B")
 })
@@ -139,6 +142,7 @@ test_that("gly_kruskal comparison direction is correct for 3 groups", {
     result$tidy_result$post_hoc_test$test_group
   )
   expect_setequal(comparisons, c("A_vs_B", "A_vs_C", "B_vs_C"))
+  expect_true(all(result$tidy_result$post_hoc_test$log2fc > 0))
 })
 
 test_that("gly_anova assigns NA for failed variables", {
@@ -193,7 +197,7 @@ test_that("gly_kruskal works with kruskal method", {
   # Test post_hoc_test tibble
   post_hoc_test <- result$tidy_result$post_hoc_test
   expect_true(tibble::is_tibble(post_hoc_test))
-  expect_true(all(c("variable", "ref_group", "test_group", "p_value", "p_adj") %in% colnames(post_hoc_test)))
+  expect_true(all(c("variable", "ref_group", "test_group", "p_value", "p_adj", "log2fc") %in% colnames(post_hoc_test)))
 
   # Test raw_result structure
   expect_type(result$raw_result, "list")

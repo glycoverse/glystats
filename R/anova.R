@@ -119,6 +119,7 @@ gly_anova_ <- function(
   post_hoc_vec <- .format_posthoc_results(raw_post_hoc_test, stats::aov, main_test$variable)
   main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
+  post_hoc_test <- .add_fold_change(post_hoc_test, expr_mat, groups)
 
   # Assemble tidy results
   tidy_result <- list(
@@ -270,6 +271,7 @@ gly_kruskal_ <- function(
   post_hoc_vec <- .format_posthoc_results(raw_post_hoc_test, stats::kruskal.test, main_test$variable)
   main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::kruskal.test)
+  post_hoc_test <- .add_fold_change(post_hoc_test, expr_mat, groups)
 
   # Assemble tidy results
   tidy_result <- list(
@@ -514,4 +516,14 @@ gly_kruskal_ <- function(
 
   # Combine all results
   dplyr::bind_rows(result_list)
+}
+
+.add_fold_change <- function(post_hoc_test, expr_mat, groups) {
+  if (length(levels(groups)) == 2) {
+    fc_res <- .fc_2groups(expr_mat, groups)
+    return(dplyr::left_join(post_hoc_test, fc_res, by = "variable"))
+  } else {
+    fc_res <- .fc_multi_groups(expr_mat, groups)
+    return(dplyr::left_join(post_hoc_test, fc_res, by = c("ref_group", "test_group", "variable")))
+  }
 }
