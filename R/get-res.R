@@ -12,6 +12,7 @@
 #' @examples
 #' library(glyexp)
 #' library(glyclean)
+#' library(dplyr)
 #'
 #' exp <- auto_clean(real_experiment)
 #'

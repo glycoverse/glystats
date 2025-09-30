@@ -25,6 +25,7 @@ It's useful to be used in pipes.
 \examples{
 library(glyexp)
 library(glyclean)
+library(dplyr)
 
 exp <- auto_clean(real_experiment)
 
