@@ -61,7 +61,8 @@
 #'    - `p_val`: Raw p-value
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'    - `b`: B-statistic (log-odds of differential expression)
-#'  For multi-group comparisons, `ref_group` and `test_group` columns are added to the tibble.
+#'    - `ref_group`: Reference group
+#'    - `test_group`: Test group
 #'
 #'  - `raw_result`: The raw limma fit object(s).
 #' @seealso [limma::lmFit()], [limma::eBayes()], [limma::makeContrasts()]
@@ -216,6 +217,9 @@ gly_limma_ <- function(
   if (is.null(p_adj_method)) {
     result_tbl <- dplyr::select(result_tbl, -"p_adj")
   }
+
+  result_tbl$ref_group <- levels(groups)[1]
+  result_tbl$test_group <- levels(groups)[2]
 
   result_tbl
 }
