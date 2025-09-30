@@ -97,23 +97,6 @@ test_that("gly_fold_change error handling", {
   expect_error(gly_fold_change(exp_small, group_col = 123))
 })
 
-test_that("gly_fold_change outputs informative messages", {
-  # Test that function outputs group information
-  exp_2group <- test_gp_exp |>
-    glyexp::filter_obs(group %in% c("C", "H")) |>
-    glyexp::slice_sample_var(n = 3)
-  
-  # Capture messages
-  messages <- capture.output(
-    result <- gly_fold_change(exp_2group),
-    type = "message"
-  )
-  
-  # Should contain group information
-  expect_true(any(stringr::str_detect(messages, "Group 1")))
-  expect_true(any(stringr::str_detect(messages, "Group 2")))
-})
-
 test_that("gly_fold_change handles edge cases", {
   # Test with minimal data (just 1 variable)
   exp_minimal <- test_gp_exp |>

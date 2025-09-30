@@ -85,8 +85,8 @@
 
 # Display group information for two-group analysis
 .display_two_group_info <- function(groups) {
-  cli::cli_alert_info("Group 1: {.val {levels(groups)[1]}}")
-  cli::cli_alert_info("Group 2: {.val {levels(groups)[2]}}")
+  cli::cli_alert_info("Ref Group: {.val {levels(groups)[1]}}")
+  cli::cli_alert_info("Test Group: {.val {levels(groups)[2]}}")
 }
 
 # Display group information for multi-group analysis
@@ -94,6 +94,7 @@
   n_groups <- length(levels(groups))
   cli::cli_alert_info("Number of groups: {.val {n_groups}}")
   cli::cli_alert_info("Groups: {.val {levels(groups)}}")
+  cli::cli_alert_info("Pairwise comparisons will be performed, with levels coming first as reference groups.")
 }
 
 # Extract and validate groups (comprehensive function)
