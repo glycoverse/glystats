@@ -2,9 +2,63 @@
 % Please edit documentation in R/filter-sig-vars.R
 \name{filter_sig_vars}
 \alias{filter_sig_vars}
+\alias{filter_sig_vars.glystats_anova_res}
+\alias{filter_sig_vars.glystats_kruskal_res}
+\alias{filter_sig_vars.glystats_ttest_res}
+\alias{filter_sig_vars.glystats_wilcox_res}
+\alias{filter_sig_vars.glystats_limma_res}
 \title{Filter Significant Variables}
 \usage{
 filter_sig_vars(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  ...
+)
+
+\method{filter_sig_vars}{glystats_anova_res}(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  on = "main_test",
+  comparison = NULL,
+  ...
+)
+
+\method{filter_sig_vars}{glystats_kruskal_res}(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  on = "main_test",
+  comparison = NULL,
+  ...
+)
+
+\method{filter_sig_vars}{glystats_ttest_res}(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  ...
+)
+
+\method{filter_sig_vars}{glystats_wilcox_res}(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  ...
+)
+
+\method{filter_sig_vars}{glystats_limma_res}(
   exp,
   res,
   p_adj_cutoff = 0.05,
@@ -25,16 +79,17 @@ filter_sig_vars(
 If you insist to use it, please set \code{p_adj_cutoff} to NULL.}
 
 \item{fc_cutoff}{The threshold for fold changes. Default is NULL. Only positive value is needed.
-For example, \code{2} means fold change > 2 or < 1/2.
-For \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results, \code{fc_cutoff} is only used when \code{on} is "post_hoc_test".}
+For example, \code{2} means fold change > 2 or < 1/2.}
 
-\item{comparison}{Only matters for multi-group DEA results.
+\item{...}{Additional arguments passed to methods. See the method-specific documentation for details.}
+
+\item{on}{(For \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results only)
+"main_test" or "post_hoc_test". Should the filter be applied on the main test results or the post-hoc test results?
+Default is "main_test". If "post_hoc_test", please set a \code{comparison} value.}
+
+\item{comparison}{(For \code{\link[=gly_anova]{gly_anova()}}, \code{\link[=gly_kruskal]{gly_kruskal()}}, and \code{\link[=gly_limma]{gly_limma()}} results only)
 Specifies which comparison to filter on. A string with the format "group1_vs_group2".
 For \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results, \code{comparison} is only used when \code{on} is "post_hoc_test".}
-
-\item{on}{"main_test" or "post_hoc_test". Should the filter be applied on the main test results or the post-hoc test results?
-Only applicable to \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results. Default is "main_test".
-If "post_hoc_result", please set a \code{comparison} value.}
 }
 \value{
 An new \code{\link[glyexp:experiment]{glyexp::experiment()}} object.

@@ -12,13 +12,7 @@
 #'   If you insist to use it, please set `p_adj_cutoff` to NULL.
 #' @param fc_cutoff The threshold for fold changes. Default is NULL. Only positive value is needed.
 #'   For example, `2` means fold change > 2 or < 1/2.
-#'   For [gly_anova()] and [gly_kruskal()] results, `fc_cutoff` is only used when `on` is "post_hoc_test".
-#' @param on "main_test" or "post_hoc_test". Should the filter be applied on the main test results or the post-hoc test results?
-#'   Only applicable to [gly_anova()] and [gly_kruskal()] results. Default is "main_test".
-#'   If "post_hoc_result", please set a `comparison` value.
-#' @param comparison Only matters for multi-group DEA results.
-#'   Specifies which comparison to filter on. A string with the format "group1_vs_group2".
-#'   For [gly_anova()] and [gly_kruskal()] results, `comparison` is only used when `on` is "post_hoc_test".
+#' @param ... Additional arguments passed to methods. See the method-specific documentation for details.
 #'
 #' @returns An new [glyexp::experiment()] object.
 #'
@@ -31,34 +25,45 @@
 #' sig_exp <- filter_sig_vars(exp, res)
 #'
 #' @export
-filter_sig_vars <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, comparison = NULL, ...) {
+filter_sig_vars <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, ...) {
   UseMethod("filter_sig_vars", res)
 }
 
+#' @rdname filter_sig_vars
+#' @param on (For [gly_anova()] and [gly_kruskal()] results only)
+#'   "main_test" or "post_hoc_test". Should the filter be applied on the main test results or the post-hoc test results?
+#'   Default is "main_test". If "post_hoc_test", please set a `comparison` value.
+#' @param comparison (For [gly_anova()], [gly_kruskal()], and [gly_limma()] results only)
+#'   Specifies which comparison to filter on. A string with the format "group1_vs_group2".
+#'   For [gly_anova()] and [gly_kruskal()] results, `comparison` is only used when `on` is "post_hoc_test".
 #' @export
 filter_sig_vars.glystats_anova_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
   .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
   .filter_sig_vars_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
 }
 
+#' @rdname filter_sig_vars
 #' @export
 filter_sig_vars.glystats_kruskal_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
   .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
   .filter_sig_vars_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
 }
 
+#' @rdname filter_sig_vars
 #' @export
 filter_sig_vars.glystats_ttest_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, ...) {
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
 }
 
+#' @rdname filter_sig_vars
 #' @export
 filter_sig_vars.glystats_wilcox_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, ...) {
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
 }
 
+#' @rdname filter_sig_vars
 #' @export
 filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, comparison = NULL, ...) {
   .check_filter_sig_vars_args_limma(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison)
