@@ -1,5 +1,34 @@
 # glystats (development version)
 
+This is a big update! We make some breaking changes to the API, mainly DEA functions.
+Now you can ensure these properties for all DEA results:
+
+* The levels in the front are the reference group. For example, for groups with levels c("A", "B"), "A" is the reference group. For groups with levels c("A", "B", "C"), "A" is the reference group in A-B and A-C comparisons, and "B" is the reference group in B-C comparisons.
+* For the concept of "comparison", either in result columns or as arguments, it is expected to be in the format of "ref_vs_test".
+
+## Breaking changes
+
+* The `post_hoc` column in `tidy_result$main_test` of results from `gly_anova()` and `gly_kruskal()` is now in the format of "ref_vs_test" instead of "ref-test".
+* The `group1` and `group2` columns in `tidy_result$post_hoc_test` of results from `gly_anova()` and `gly_kruskal()` are renamed into `ref_group` and `test_group` for more clarity.
+* In the `tidy_result` of `gly_limma()`, the `comparison` column is replaced by the `ref_group` and `test_group` columns.
+* The results of all functions now have a `p_val` column for raw p-values, a `p_adj` column for adjusted p-values, and a `log2fc` column for log2 fold change, if applicable. This consistence in column naming reduces the cognitive load.
+
+## New features
+
+* Add `get_tidy_result()` and `get_raw_result()` to get the tidy result tibble and the raw result list from a glystats result object. These functions are useful to be used in pipes.
+* Add `filter_sig_vars()` to filter the experiment using the results from glystats DEA functions to keep only significant variables.
+* `gly_fold_change()` now supports multiple groups.
+* The post-hoc results from `gly_anova()` and `gly_kruskal()` now have a `log2fc` column for log2 fold change.
+
+## Minor improvements and bug fixes
+
+* Update group information message in many functions. Instead of "Group 1" and "Group 2", now we use "Ref Group" and "Test Group" for more clarity.
+* There are `ref_group` and `test_group` columns in the `tidy_result` tibble of `gly_limma()` even for 2 groups now.
+* Fix the bug that `gly_kruskal()` failed to work with experiments with 2 groups.
+* Fix the bug that the direction of fold change is not consistent when with 2 groups and with multiple groups.
+* Fix the bug that `gly_anova()` and `gly_kruskal()` have NAs in the `post_hoc_test` tibble.
+* Add `glyrepr` to dependencies to fix the result printing bug.
+
 # glystats 0.4.2
 
 ## Minor improvements and bug fixes
