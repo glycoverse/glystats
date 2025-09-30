@@ -104,7 +104,8 @@ It supports results from all glystats DEA functions including
 library(glyexp)
 library(glyclean)
 
-exp <- auto_clean(real_experiment)
+exp <- auto_clean(real_experiment) |>
+  glyexp::slice_head_var(n = 10)
 res <- gly_anova(exp)
 sig_exp <- filter_sig_vars(exp, res)
 

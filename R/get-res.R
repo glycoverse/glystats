@@ -14,7 +14,8 @@
 #' library(glyclean)
 #' library(dplyr)
 #'
-#' exp <- auto_clean(real_experiment)
+#' exp <- auto_clean(real_experiment) |>
+#'   glyexp::slice_head_var(n = 10)
 #'
 #' # Using a pipe
 #' sig_res <- exp |>
