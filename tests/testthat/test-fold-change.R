@@ -27,6 +27,27 @@ test_that("gly_fold_change works with basic 2-group comparison", {
   expect_true("log2fc" %in% colnames(result_with_info))
 })
 
+test_that("gly_fold_change works with multi-group comparison", {
+  # Use test_gp_exp and filter to 3 groups
+  exp_3group <- test_gp_exp |>
+    glyexp::filter_obs(group %in% c("C", "H", "M")) |>
+    glyexp::mutate_obs(group = factor(group, levels = c("H", "M", "C"))) |>
+    glyexp::slice_sample_var(n = 10)
+
+  result <- suppressMessages(gly_fold_change(exp_3group, add_info = FALSE))
+  expect_equal(nrow(result), 30)
+  expect_setequal(colnames(result), c("variable", "log2fc", "ref_group", "test_group"))
+  comparisons <- stringr::str_c(result$ref_group, "_vs_", result$test_group)
+  expect_setequal(comparisons, c("H_vs_M", "H_vs_C", "M_vs_C"))
+})
+
+test_that("gly_fold_change raises error with only 1 group", {
+  exp_1group <- test_gp_exp |>
+    glyexp::filter_obs(group == "C") |>
+    glyexp::slice_sample_var(n = 5)
+  expect_error(gly_fold_change(exp_1group))
+})
+
 test_that("gly_fold_change works with custom group column", {
   # Create test data with custom group column
   exp_2group <- test_gp_exp |>
@@ -74,22 +95,6 @@ test_that("gly_fold_change error handling", {
   
   # Test with non-string group_col
   expect_error(gly_fold_change(exp_small, group_col = 123))
-})
-
-test_that("gly_fold_change group validation", {
-  # Test with more than 2 groups
-  exp_3group <- test_gp_exp |>
-    glyexp::filter_obs(group %in% c("C", "H", "M")) |>
-    glyexp::slice_sample_var(n = 5)
-  
-  expect_error(suppressMessages(gly_fold_change(exp_3group)), "exactly 2 levels")
-  
-  # Test with only 1 group
-  exp_1group <- test_gp_exp |>
-    glyexp::filter_obs(group == "C") |>
-    glyexp::slice_sample_var(n = 5)
-  
-  expect_error(suppressMessages(gly_fold_change(exp_1group)), "exactly 2 levels")
 })
 
 test_that("gly_fold_change outputs informative messages", {

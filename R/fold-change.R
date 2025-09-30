@@ -2,13 +2,16 @@
 #'
 #' Calculate fold change for a given expression matrix and group information.
 #' It could only be used for 2-group analysis.
-#' When you run this function, you will see message about "Group 1" and "Group 2".
-#' "Group 1" is the reference group, and "Group 2" is the test group.
+#' When you run this function, you will see message about "Ref Group" and "Test Group".
+#' "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
 #'
 #' @param exp A `glyexp::experiment()` object.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
 #' @param groups A factor or character vector specifying group membership for each sample.
-#'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
+#'   Character vectors will be automatically converted to factors.
+#'   If two groups, the first level is the reference group.
+#'   If more than two groups, pairwise comparisons will be performed,
+#'   with levels coming first as reference groups.
 #' @param group_col The column name of the group information in the sample information.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the fold change results are returned.
@@ -21,9 +24,10 @@
 #' `gly_fold_change_()` is the underlying API that works with matrices and factor vectors directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
-#' @return A tibble with fold change results containing the following columns:
+#' @returns A tibble with fold change results containing the following columns:
 #'   - `variable`: Variable name
 #'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
+#'   If more than two groups, two additional columns `ref_group` and `test_group` will be added.
 #' @export
 gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   checkmate::assert_class(exp, "glyexp_experiment")
@@ -35,7 +39,6 @@ gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
     sample_info = exp$sample_info,
     group_col = group_col,
     min_count = 2,
-    max_count = 2,
     method = "fold_change",
     show_info = TRUE
   )
@@ -58,21 +61,70 @@ gly_fold_change_ <- function(expr_mat, groups) {
   groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
-  # Validate group count
-  if (length(levels(groups)) != 2) {
-    cli::cli_abort("groups must have exactly 2 levels for fold change calculation")
+  # Calculate fold change
+  if (length(levels(groups)) == 2) {
+    result <- .fc_2groups(expr_mat, groups)
+  } else {
+    result <- .fc_multi_groups(expr_mat, groups)
   }
+  structure(result, class = c("glystats_fc_res", "glystats_res", class(result)))
+}
 
-  # Calculate mean expression for each group
+#' Calculate fold change for 2-group analysis
+#'
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor vector specifying group membership for each sample.
+#'   Must have exactly 2 levels. The first level is the reference group.
+#'
+#' @return A tibble with fold change results containing the following columns:
+#'   - `variable`: Variable name
+#'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
+#' @noRd
+.fc_2groups <- function(expr_mat, groups) {
   group1_mean <- rowMeans(expr_mat[, groups == levels(groups)[1], drop = FALSE])
   group2_mean <- rowMeans(expr_mat[, groups == levels(groups)[2], drop = FALSE])
-
-  # Calculate log2 fold change
   log2fc <- log2(group2_mean / group1_mean)
+  tibble::tibble(variable = rownames(expr_mat), log2fc = log2fc)
+}
 
-  # Create result tibble
-  result <- tibble::tibble(variable = rownames(expr_mat), log2fc = log2fc)
+#' Calculate fold change for multi-group analysis
+#'
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor vector specifying group membership for each sample.
+#'   Must have more than 2 levels.
+#'
+#' @return A tibble with fold change results containing the following columns:
+#'   - `variable`: Variable name
+#'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
+#'   - `ref_group`: Reference group
+#'   - `test_group`: Test/treatment/case group
+#' @noRd
+.fc_multi_groups <- function(expr_mat, groups) {
+  comparisons <- .make_comparisons(levels(groups))
+  result_list <- purrr::map(comparisons, function(c) {
+    sample_mask <- groups %in% c
+    .fc_2groups(expr_mat[, sample_mask], groups[sample_mask])
+  })
+  comparison_str <- purrr::map_chr(comparisons, ~ stringr::str_c(.x[1], "_vs_", .x[2]))
+  names(result_list) <- comparison_str
+  dplyr::bind_rows(result_list, .id = "comparison") |>
+    tidyr::separate(col = "comparison", into = c("ref_group", "test_group"), sep = "_vs_")
+}
 
-  # Add S3 class
-  structure(result, class = c("glystats_fc_res", "glystats_res", class(result)))
+#' Make comparisons pairs for multi-group analysis
+#'
+#' @param levels A character vector of group levels.
+#' @return A list of character vectors, each containing two group levels.
+#' @noRd
+.make_comparisons <- function(levels) {
+  n_pairs <- length(levels) * (length(levels) - 1) / 2
+  pairs <- vector("list", n_pairs)
+  count <- 1
+  for (i in 1:(length(levels) - 1)) {
+    for (j in (i + 1):length(levels)) {
+      pairs[[count]] <- c(levels[i], levels[j])
+      count <- count + 1
+    }
+  }
+  pairs
 }
