@@ -36,6 +36,7 @@ library(glystats)
 library(glyexp)
 library(glyread)
 library(glyclean)
+library(dplyr)
 ```
 
 ## 🔍 Meet Your Data
@@ -97,8 +98,10 @@ All `glystats` functions return a consistent, well-structured list with two key 
 For `gly_anova()`, the `tidy_result` contains two informative tibbles:
 `main_test` and `post_hoc_test`.
 
+You can use `get_tidy_result()` to get the tidy result tibble:
+
 ```{r}
-anova_res$tidy_result
+get_tidy_result(anova_res, "main_test")
 ```
 
 Notice something cool? 😎 `gly_anova()` thoughtfully adds back all the descriptive columns
@@ -109,7 +112,16 @@ The `raw_result` houses two lists of models - one for the main test,
 one for post hoc comparisons:
 
 ```{r}
-names(anova_res$raw_result)
+names(get_raw_result(anova_res))
+```
+
+`get_tidy_result()` and `get_raw_result()` are useful to be used in pipes:
+
+```{r}
+exp |>
+  gly_anova() |>
+  get_tidy_result("main_test") |>
+  filter(p_adj < 0.05)
 ```
 
 ## 🔧 Maximum Flexibility Mode
