@@ -88,9 +88,11 @@ Only used for two-group comparisons.</p></dd>
 
 <dt id="arg-contrasts">contrasts<a class="anchor" aria-label="anchor" href="#arg-contrasts"></a></dt>
 <dd><p>A character vector specifying custom contrasts for multi-group comparisons.
-If NULL (default), all pairwise comparisons are automatically generated.
+If NULL (default), all pairwise comparisons are automatically generated,
+and the levels coming first in the factor will be used as the reference group.
 Supports two formats: "group1-group2" or "group1_vs_group2".
-Use the second format if group names contain hyphens.</p></dd>
+Use the second format if group names contain hyphens.
+"group1" will be used as the reference group.</p></dd>
 
 
 <dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
@@ -109,7 +111,9 @@ Only applicable to <code>gly_limma()</code>.</p></dd>
 
 <dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
 <dd><p>A factor or character vector specifying group membership for each sample.
-Must have at least 2 levels. Character vectors will be automatically converted to factors.</p></dd>
+Must have at least 2 levels. Character vectors will be automatically converted to factors.
+If <code>contrasts</code> is not provided,
+the levels coming first in the factor will be used as the reference group.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -118,10 +122,11 @@ Must have at least 2 levels. Character vectors will be automatically converted t
 <li><p><code>log2fc</code>: Log2 fold change</p></li>
 <li><p><code>AveExpr</code>: Average expression level</p></li>
 <li><p><code>t</code>: t-statistic</p></li>
-<li><p><code>p</code>: Raw p-value</p></li>
+<li><p><code>p_val</code>: Raw p-value</p></li>
 <li><p><code>p_adj</code>: Adjusted p-value (if p_adj_method is not NULL)</p></li>
 <li><p><code>b</code>: B-statistic (log-odds of differential expression)</p></li>
-<li><p><code>contrast</code>: Contrast name (for multi-group comparisons only)</p></li>
+<li><p><code>ref_group</code>: Reference group</p></li>
+<li><p><code>test_group</code>: Test group</p></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw limma fit object(s).</p></li>
 </ul></div>

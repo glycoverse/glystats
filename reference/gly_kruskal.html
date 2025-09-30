@@ -100,16 +100,16 @@ Must have at least 2 levels. Character vectors will be automatically converted t
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list containing two elements:</p><ul><li><p><code>tidy_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A tibble with Kruskal-Wallis test results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>statistic</code>: Kruskal-Wallis test statistic</p></li>
-<li><p><code>p_value</code>: Raw p-value from Kruskal-Wallis test</p></li>
+<li><p><code>p_val</code>: Raw p-value from Kruskal-Wallis test</p></li>
 <li><p><code>parameter</code>: Degrees of freedom</p></li>
 <li><p><code>method</code>: Statistical method used</p></li>
 <li><p><code>p_adj</code>: Adjusted p-value (if p_adj_method is not NULL)</p></li>
-<li><p><code>post_hoc</code>: Significant group pairs from post-hoc test</p></li>
+<li><p><code>post_hoc</code>: Significant group pairs from post-hoc test, in the format of "ref_vs_test".</p></li>
 </ul></li>
 <li><p><code>post_hoc_test</code>: A tibble with pairwise comparison results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
-<li><p><code>group1</code>: First group in comparison</p></li>
-<li><p><code>group2</code>: Second group in comparison</p></li>
-<li><p><code>p_value</code>: Raw p-value from Dunn's test</p></li>
+<li><p><code>ref_group</code>: Reference group</p></li>
+<li><p><code>test_group</code>: Test/treatment/case group</p></li>
+<li><p><code>p_val</code>: Raw p-value from Dunn's test</p></li>
 <li><p><code>p_adj</code>: Adjusted p-value from Dunn's test</p></li>
 </ul></li>
 </ul></li>

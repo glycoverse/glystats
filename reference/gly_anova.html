@@ -98,14 +98,14 @@ Must have at least 2 levels. Character vectors will be automatically converted t
 <li><p><code>sumsq</code>: Sum of squares</p></li>
 <li><p><code>meansq</code>: Mean squares</p></li>
 <li><p><code>statistic</code>: F-statistic</p></li>
-<li><p><code>p_value</code>: Raw p-value from ANOVA</p></li>
+<li><p><code>p_val</code>: Raw p-value from ANOVA</p></li>
 <li><p><code>p_adj</code>: Adjusted p-value (if p_adj_method is not NULL)</p></li>
-<li><p><code>post_hoc</code>: Significant group pairs from post-hoc test</p></li>
+<li><p><code>post_hoc</code>: Significant group pairs from post-hoc test, in the format of "ref_vs_test".</p></li>
 </ul></li>
 <li><p><code>post_hoc_test</code>: A tibble with pairwise comparison results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
-<li><p><code>group1</code>: First group in comparison</p></li>
-<li><p><code>group2</code>: Second group in comparison</p></li>
-<li><p><code>p_value</code>: Raw p-value from Tukey's HSD test</p></li>
+<li><p><code>ref_group</code>: Reference group</p></li>
+<li><p><code>test_group</code>: Test/treatment/case group</p></li>
+<li><p><code>p_val</code>: Raw p-value from Tukey's HSD test</p></li>
 <li><p><code>p_adj</code>: Adjusted p-value from Tukey's HSD test</p></li>
 </ul></li>
 </ul></li>

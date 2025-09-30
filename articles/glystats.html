@@ -86,7 +86,19 @@ first to get up to speed.</p>
 <span><span class="co">#&gt; Attaching package: 'glyclean'</span></span>
 <span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     aggregate</span></span></code></pre></div>
+<span><span class="co">#&gt;     aggregate</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:glyexp':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     select_var</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     filter, lag</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="meet-your-data">🔍 Meet Your Data<a class="anchor" aria-label="anchor" href="#meet-your-data"></a>
 </h2>
@@ -96,28 +108,28 @@ first to get up to speed.</p>
 <span><span class="va">exp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glycoverse.github.io/glyread/reference/read_pglyco3_pglycoquant.html" class="external-link">read_pglyco3_pglycoquant</a></span><span class="op">(</span><span class="st">"glycopeptides.list"</span>, sample_info <span class="op">=</span> <span class="st">"sample_info.csv"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://glycoverse.github.io/glyclean/reference/auto_clean.html" class="external-link">auto_clean</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading data</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Finding leader proteins</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Finding leader proteins <span style="color: #B2B2B2;">[471ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Finding leader proteins <span style="color: #B2B2B2;">[241ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading data<span style="color: #00BBBB;">ℹ</span> Parsing glycan compositions and structures</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Parsing glycan compositions and structures <span style="color: #B2B2B2;">[282ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Parsing glycan compositions and structures <span style="color: #B2B2B2;">[221ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading data<span style="color: #00BB00;">✔</span> Reading data <span style="color: #B2B2B2;">[1.5s]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading data<span style="color: #00BB00;">✔</span> Reading data <span style="color: #B2B2B2;">[979ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Normalizing data (Median)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Normalizing data (Median) <span style="color: #B2B2B2;">[166ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Normalizing data (Median) <span style="color: #B2B2B2;">[124ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Removing variables with &gt;50% missing values</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Removing variables with &gt;50% missing values <span style="color: #B2B2B2;">[22ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Removing variables with &gt;50% missing values <span style="color: #B2B2B2;">[18ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Imputing missing values</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Sample size &lt;= 30, using sample minimum imputation</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Imputing missing values<span style="color: #00BB00;">✔</span> Imputing missing values <span style="color: #B2B2B2;">[26ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Imputing missing values<span style="color: #00BB00;">✔</span> Imputing missing values <span style="color: #B2B2B2;">[15ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Aggregating data</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Aggregating data <span style="color: #B2B2B2;">[113ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Aggregating data <span style="color: #B2B2B2;">[96ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Normalizing data again</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Normalizing data again <span style="color: #B2B2B2;">[18ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Normalizing data again <span style="color: #B2B2B2;">[14ms]</span></span></span>
 <span><span class="va">exp</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Glycoproteomics Experiment</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────</span></span></span>
@@ -181,7 +193,8 @@ differentially expressed glycoforms:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anova_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gly_anova.html">gly_anova</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Number of groups: <span style="color: #0000BB;">4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Groups: <span style="color: #0000BB;">"C"</span>, <span style="color: #0000BB;">"H"</span>, <span style="color: #0000BB;">"M"</span>, and <span style="color: #0000BB;">"Y"</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Groups: <span style="color: #0000BB;">"C"</span>, <span style="color: #0000BB;">"H"</span>, <span style="color: #0000BB;">"M"</span>, and <span style="color: #0000BB;">"Y"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Pairwise comparisons will be performed, with levels coming first as reference groups.</span></span></code></pre></div>
 <p>Boom! 💥 Analysis complete in just one line! <code><a href="../reference/gly_anova.html">gly_anova()</a></code>
 intelligently follows the <code>glycoverse</code> naming conventions,
 automatically detecting the “group” column in your sample info and
@@ -203,50 +216,58 @@ statistical functions 🔧</li>
 <p>For <code><a href="../reference/gly_anova.html">gly_anova()</a></code>, the <code>tidy_result</code> contains
 two informative tibbles: <code>main_test</code> and
 <code>post_hoc_test</code>.</p>
+<p>You can use <code><a href="../reference/get_tidy_result.html">get_tidy_result()</a></code> to get the tidy result
+tibble:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">anova_res</span><span class="op">$</span><span class="va">tidy_result</span></span>
-<span><span class="co">#&gt; $main_test</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/get_tidy_result.html">get_tidy_result</a></span><span class="op">(</span><span class="va">anova_res</span>, <span class="st">"main_test"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 221 × 13</span></span></span>
-<span><span class="co">#&gt;    variable protein gene     glycan_composition  protein_site term     df  sumsq</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;comp&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> V1       P08185  SERPINA6 Hex(5)HexNAc(4)Neu…          176 group     3  68.3 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> V2       P04196  HRG      Hex(5)HexNAc(4)Neu…          344 group     3 161.  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> V3       P04196  HRG      Hex(5)HexNAc(4)              344 group     3 126.  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> V4       P10909  CLU      Hex(6)HexNAc(5)              291 group     3  22.9 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> V5       P04196  HRG      Hex(5)HexNAc(4)Neu…          344 group     3 472.  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> V6       P04196  HRG      Hex(5)HexNAc(4)              345 group     3  59.8 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> V7       P04196  HRG      Hex(5)HexNAc(4)dHe…          344 group     3 208.  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> V8       P04196  HRG      Hex(4)HexNAc(3)              344 group     3 108.  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> V9       P04196  HRG      Hex(4)HexNAc(4)Neu…          344 group     3   9.20</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> V10      P10909  CLU      Hex(5)HexNAc(4)              291 group     3  86.6 </span></span>
+<span><span class="co">#&gt;    variable term     df sumsq meansq statistic   p_val  p_adj post_hoc   protein</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> V1       group     3 68.3   22.8      6.72  0.014<span style="text-decoration: underline;">1</span>  0.052<span style="text-decoration: underline;">7</span> <span style="color: #BB0000;">NA</span>         P08185 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> V10      group     3 86.6   28.9      7.86  0.009<span style="text-decoration: underline;">06</span> 0.040<span style="text-decoration: underline;">8</span> C_vs_H;H_… P10909 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> V100     group     3 44.2   14.7      0.527 0.676   0.755  <span style="color: #BB0000;">NA</span>         P01871 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> V101     group     3  8.57   2.86     4.00  0.052<span style="text-decoration: underline;">0</span>  0.122  <span style="color: #BB0000;">NA</span>         P01871 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> V102     group     3  5.66   1.89     0.367 0.779   0.819  <span style="color: #BB0000;">NA</span>         P01871 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> V103     group     3  3.32   1.11     6.41  0.016<span style="text-decoration: underline;">0</span>  0.054<span style="text-decoration: underline;">7</span> <span style="color: #BB0000;">NA</span>         P01871 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> V104     group     3 14.0    4.68     6.76  0.013<span style="text-decoration: underline;">9</span>  0.052<span style="text-decoration: underline;">7</span> <span style="color: #BB0000;">NA</span>         P01871 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> V105     group     3  7.37   2.46     1.51  0.284   0.409  <span style="color: #BB0000;">NA</span>         P01871 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> V106     group     3  5.72   1.91     1.86  0.215   0.335  <span style="color: #BB0000;">NA</span>         P10909 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> V107     group     3 10.8    3.60     0.829 0.514   0.625  <span style="color: #BB0000;">NA</span>         P01871 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 211 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: meansq &lt;dbl&gt;, statistic &lt;dbl&gt;, p_value &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   p_adj &lt;dbl&gt;, post_hoc &lt;chr&gt;</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $post_hoc_test</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 506 × 9</span></span></span>
-<span><span class="co">#&gt;    variable protein gene  glycan_composition protein_site group1 group2  p_value</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;comp&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> V1       P08185  SERP… Hex(5)HexNAc(4)Ne…          176 <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> V2       P04196  HRG   Hex(5)HexNAc(4)Ne…          344 C      H       2.47<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> V2       P04196  HRG   Hex(5)HexNAc(4)Ne…          344 C      M       9.99<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> V2       P04196  HRG   Hex(5)HexNAc(4)Ne…          344 C      Y       6.28<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> V2       P04196  HRG   Hex(5)HexNAc(4)Ne…          344 H      M       2.34<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> V2       P04196  HRG   Hex(5)HexNAc(4)Ne…          344 H      Y       1.09<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> V2       P04196  HRG   Hex(5)HexNAc(4)Ne…          344 M      Y       5.36<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> V3       P04196  HRG   Hex(5)HexNAc(4)             344 C      H       2.41<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> V3       P04196  HRG   Hex(5)HexNAc(4)             344 C      M       5.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> V3       P04196  HRG   Hex(5)HexNAc(4)             344 C      Y       6.12<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 496 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: p_adj &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: gene &lt;chr&gt;, glycan_composition &lt;comp&gt;, protein_site &lt;int&gt;</span></span></span></code></pre></div>
 <p>Notice something cool? 😎 <code><a href="../reference/gly_anova.html">gly_anova()</a></code> thoughtfully adds
 back all the descriptive columns from your variable tibble. Want to
 control this behavior? Just use the <code>add_info</code> parameter!</p>
 <p>The <code>raw_result</code> houses two lists of models - one for the
 main test, one for post hoc comparisons:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">anova_res</span><span class="op">$</span><span class="va">raw_result</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_tidy_result.html">get_raw_result</a></span><span class="op">(</span><span class="va">anova_res</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "main_test"     "post_hoc_test"</span></span></code></pre></div>
+<p><code><a href="../reference/get_tidy_result.html">get_tidy_result()</a></code> and <code><a href="../reference/get_tidy_result.html">get_raw_result()</a></code> are
+useful to be used in pipes:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exp</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/gly_anova.html">gly_anova</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/get_tidy_result.html">get_tidy_result</a></span><span class="op">(</span><span class="st">"main_test"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">p_adj</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Number of groups: <span style="color: #0000BB;">4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Groups: <span style="color: #0000BB;">"C"</span>, <span style="color: #0000BB;">"H"</span>, <span style="color: #0000BB;">"M"</span>, and <span style="color: #0000BB;">"Y"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Pairwise comparisons will be performed, with levels coming first as reference groups.</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 57 × 13</span></span></span>
+<span><span class="co">#&gt;    variable term     df  sumsq meansq statistic   p_val   p_adj post_hoc protein</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> V10      group     3  86.6   28.9       7.86 9.06<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> 4.08<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> C_vs_H;… P10909 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> V11      group     3 176.    58.7      20.6  4.02<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> 5.93<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> C_vs_H;… P04196 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> V111     group     3 225.    75.0      46.9  2.01<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 4.94<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> C_vs_H;… P10909 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> V114     group     3   9.68   3.23      8.09 8.31<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> 3.83<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> C_vs_H;… P01871 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> V12      group     3  81.2   27.1       9.82 4.66<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> 2.72<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> C_vs_H;… P13671 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> V123     group     3  10.9    3.62      9.72 4.80<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> 2.72<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> C_vs_H;… P10909 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> V124     group     3   9.14   3.05     11.0  3.25<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> 2.40<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> C_vs_H;… P02790 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> V128     group     3 309.   103.      146.   2.56<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 1.62<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> C_vs_H;… P01860 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> V129     group     3 273.    90.9      11.2  3.14<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> 2.40<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> H_vs_M;… P01860 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> V13      group     3 158.    52.7     141.   2.92<span style="color: #949494;">e</span><span style="color: #BB0000;">-7</span> 1.62<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> C_vs_H;… P04196 </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 47 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: gene &lt;chr&gt;, glycan_composition &lt;comp&gt;, protein_site &lt;int&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="maximum-flexibility-mode">🔧 Maximum Flexibility Mode<a class="anchor" aria-label="anchor" href="#maximum-flexibility-mode"></a>
@@ -255,7 +276,7 @@ main test, one for post hoc comparisons:</p>
 <code>gly_xxx()</code> function comes with a flexible
 <code>gly_xxx_()</code> sibling that works with standard R objects. For
 instance, <code><a href="../reference/gly_anova.html">gly_anova_()</a></code> happily accepts plain matrices:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">expr_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glycoverse.github.io/glyexp/reference/get_expr_mat.html" class="external-link">get_expr_mat</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span>
 <span><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://glycoverse.github.io/glyexp/reference/get_sample_info.html" class="external-link">get_sample_info</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span><span class="op">$</span><span class="va">group</span><span class="op">)</span></span>
 <span><span class="va">anova_res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gly_anova.html">gly_anova_</a></span><span class="op">(</span><span class="va">expr_mat</span>, <span class="va">groups</span><span class="op">)</span></span></code></pre></div>
