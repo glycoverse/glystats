@@ -50,7 +50,7 @@ A list with two elements:
 \item \code{estimate1}: Mean of group 1
 \item \code{estimate2}: Mean of group 2
 \item \code{statistic}: t-statistic
-\item \code{p_value}: Raw p-value from t-test
+\item \code{p_val}: Raw p-value from t-test
 \item \code{parameter}: Degrees of freedom
 \item \code{conf_low}: Lower bound of 95\% confidence interval
 \item \code{conf_high}: Upper bound of 95\% confidence interval

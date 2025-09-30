@@ -41,8 +41,8 @@ A list with two elements:
 \item \code{description}: Term description
 \item \code{gene_ratio}: Ratio of genes in the term to total genes in the input
 \item \code{bg_ratio}: Ratio of genes in the term to total genes in the background
-\item \code{p_value}: Raw p-value from hypergeometric test
-\item \code{p_adjust}: Adjusted p-value
+\item \code{p_val}: Raw p-value from hypergeometric test
+\item \code{p_adj}: Adjusted p-value
 \item \code{q_value}: Q-value (FDR)
 \item \code{gene_id}: Gene IDs in the term (separated by "/")
 \item \code{count}: Number of genes in the term

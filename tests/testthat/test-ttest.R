@@ -39,7 +39,7 @@ test_that("gly_ttest assigns NA for failed variables", {
   main_test_tidy <- result$tidy_result
   p_values <- main_test_tidy |>
     dplyr::filter(variable %in% na_vars) |>
-    dplyr::pull(p_value)
+    dplyr::pull(p_val)
   expect_true(all(is.na(p_values)))
 })
 

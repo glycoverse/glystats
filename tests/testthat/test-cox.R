@@ -47,7 +47,7 @@ test_that("gly_cox works with basic survival data", {
   expect_true("variable" %in% colnames(result$tidy_result))
   expect_true("coefficient" %in% colnames(result$tidy_result))
   expect_true("hr" %in% colnames(result$tidy_result))
-  expect_true("p" %in% colnames(result$tidy_result))
+  expect_true("p_val" %in% colnames(result$tidy_result))
   expect_true("p_adj" %in% colnames(result$tidy_result))
 
   # Check that add_info worked (variable info should be joined)
@@ -100,7 +100,7 @@ test_that("gly_cox assigns NA for failed variables", {
   expect_true(all(is.na(result$raw_result[na_vars])))
   p_values <- result$tidy_result |>
     dplyr::filter(variable %in% na_vars) |>
-    dplyr::pull(p)
+    dplyr::pull(p_val)
   expect_true(all(is.na(p_values)))
 })
 
@@ -127,7 +127,7 @@ test_that("gly_cox_ works with matrix input", {
   expect_equal(nrow(result$tidy_result), 10)
   expect_true("coefficient" %in% colnames(result$tidy_result))
   expect_true("hr" %in% colnames(result$tidy_result))
-  expect_true("p" %in% colnames(result$tidy_result))
+  expect_true("p_val" %in% colnames(result$tidy_result))
   expect_true("p_adj" %in% colnames(result$tidy_result))
 
   # Check raw_result
@@ -271,7 +271,7 @@ test_that("gly_cox custom time and event columns work", {
   expect_equal(nrow(result$tidy_result), 5)
   expect_true("coefficient" %in% colnames(result$tidy_result))
   expect_true("hr" %in% colnames(result$tidy_result))
-  expect_true("p" %in% colnames(result$tidy_result))
+  expect_true("p_val" %in% colnames(result$tidy_result))
 })
 
 test_that("gly_cox p-value adjustment methods work", {
@@ -430,7 +430,7 @@ test_that("gly_cox works with test_gp_exp data", {
 
   # Check that results are reasonable
   expect_true(all(is.finite(result$tidy_result$coefficient)))
-  expect_true(all(result$tidy_result$p >= 0 & result$tidy_result$p <= 1))
+  expect_true(all(result$tidy_result$p_val >= 0 & result$tidy_result$p_val <= 1))
   expect_true(all(result$tidy_result$p_adj >= 0 & result$tidy_result$p_adj <= 1))
 })
 

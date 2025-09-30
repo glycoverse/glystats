@@ -18,7 +18,7 @@ test_that("gly_cor basic functionality works", {
   expect_true("variable1" %in% colnames(tidy_result))
   expect_true("variable2" %in% colnames(tidy_result))
   expect_true("cor" %in% colnames(tidy_result))
-  expect_true("p_value" %in% colnames(tidy_result))
+  expect_true("p_val" %in% colnames(tidy_result))
   expect_true("p_adj" %in% colnames(tidy_result))
 
   # Check that we have the right number of pairs (n choose 2)
@@ -28,7 +28,7 @@ test_that("gly_cor basic functionality works", {
 
   # Check that correlation values are in valid range
   expect_true(all(tidy_result$cor >= -1 & tidy_result$cor <= 1))
-  expect_true(all(tidy_result$p_value >= 0 & tidy_result$p_value <= 1))
+  expect_true(all(tidy_result$p_val >= 0 & tidy_result$p_val <= 1))
   expect_true(all(tidy_result$p_adj >= 0 & tidy_result$p_adj <= 1))
 
   # Check raw_result structure
@@ -91,7 +91,7 @@ test_that("gly_cor p_adj_method parameter works", {
   # Test without p-value adjustment
   result_no_adj <- suppressMessages(gly_cor(exp_subset, p_adj_method = NULL))
   expect_false("p_adj" %in% colnames(result_no_adj$tidy_result))
-  expect_true("p_value" %in% colnames(result_no_adj$tidy_result))
+  expect_true("p_val" %in% colnames(result_no_adj$tidy_result))
 })
 
 test_that("gly_cor raw_result contains expected structure", {
@@ -149,7 +149,7 @@ test_that("gly_cor produces consistent results", {
 
   # Results should be identical
   expect_equal(result1$tidy_result$cor, result2$tidy_result$cor)
-  expect_equal(result1$tidy_result$p_value, result2$tidy_result$p_value)
+  expect_equal(result1$tidy_result$p_val, result2$tidy_result$p_val)
   expect_equal(result1$tidy_result$p_adj, result2$tidy_result$p_adj)
 })
 

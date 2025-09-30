@@ -37,7 +37,7 @@
 #'   - `estimate1`: Mean of group 1
 #'   - `estimate2`: Mean of group 2
 #'   - `statistic`: t-statistic
-#'   - `p_value`: Raw p-value from t-test
+#'   - `p_val`: Raw p-value from t-test
 #'   - `parameter`: Degrees of freedom
 #'   - `conf_low`: Lower bound of 95% confidence interval
 #'   - `conf_high`: Upper bound of 95% confidence interval
@@ -152,7 +152,7 @@ gly_ttest_ <- function(
 #' - `tidy_result`: A tibble with Wilcoxon test results containing the following columns:
 #'   - `variable`: Variable name
 #'   - `statistic`: Wilcoxon test statistic
-#'   - `p_value`: Raw p-value from Wilcoxon test
+#'   - `p_val`: Raw p-value from Wilcoxon test
 #'   - `method`: Statistical method used
 #'   - `alternative`: Alternative hypothesis
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
@@ -299,8 +299,13 @@ gly_wilcox_ <- function(
     dplyr::ungroup() %>%
     janitor::clean_names()
 
+  # Rename p_value to p_val for consistency
+  if ("p_value" %in% colnames(result_tbl)) {
+    result_tbl <- dplyr::rename(result_tbl, p_val = "p_value")
+  }
+
   if (!is.null(p_adj_method)) {
-    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p_value, method = p_adj_method))
+    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p_val, method = p_adj_method))
   }
 
   # Calculate log2 fold change

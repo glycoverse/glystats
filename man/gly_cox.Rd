@@ -50,7 +50,7 @@ A list with two elements:
 \item \code{coefficient}: Regression coefficient (log hazard ratio)
 \item \code{std.error}: Standard error of the coefficient
 \item \code{statistic}: Wald test statistic
-\item \code{p}: Raw p-value from Wald test
+\item \code{p_val}: Raw p-value from Wald test
 \item \code{hr}: Hazard ratio (exp(coefficient))
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 }

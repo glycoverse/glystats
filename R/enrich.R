@@ -46,8 +46,8 @@
 #'    - `description`: Term description
 #'    - `gene_ratio`: Ratio of genes in the term to total genes in the input
 #'    - `bg_ratio`: Ratio of genes in the term to total genes in the background
-#'    - `p_value`: Raw p-value from hypergeometric test
-#'    - `p_adjust`: Adjusted p-value
+#'    - `p_val`: Raw p-value from hypergeometric test
+#'    - `p_adj`: Adjusted p-value
 #'    - `q_value`: Q-value (FDR)
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
@@ -85,6 +85,14 @@ gly_enrich_go_ <- function(proteins, ...) {
 
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
+  
+  # Rename p_value to p_val and p_adjust to p_adj for consistency
+  if ("p_value" %in% colnames(tidy_result)) {
+    tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
+  }
+  if ("p_adjust" %in% colnames(tidy_result)) {
+    tidy_result <- dplyr::rename(tidy_result, p_adj = "p_adjust")
+  }
 
   # Return list with both tidy and raw results
   structure(
@@ -124,6 +132,14 @@ gly_enrich_kegg_ <- function(proteins, ...) {
 
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
+  
+  # Rename p_value to p_val and p_adjust to p_adj for consistency
+  if ("p_value" %in% colnames(tidy_result)) {
+    tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
+  }
+  if ("p_adjust" %in% colnames(tidy_result)) {
+    tidy_result <- dplyr::rename(tidy_result, p_adj = "p_adjust")
+  }
 
   # Return list with both tidy and raw results
   structure(
@@ -185,6 +201,14 @@ gly_enrich_reactome_ <- function(proteins, ...) {
 
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
+  
+  # Rename p_value to p_val and p_adjust to p_adj for consistency
+  if ("p_value" %in% colnames(tidy_result)) {
+    tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
+  }
+  if ("p_adjust" %in% colnames(tidy_result)) {
+    tidy_result <- dplyr::rename(tidy_result, p_adj = "p_adjust")
+  }
 
   # Return list with both tidy and raw results
   structure(

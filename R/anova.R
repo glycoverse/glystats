@@ -46,14 +46,14 @@
 #'       - `sumsq`: Sum of squares
 #'       - `meansq`: Mean squares
 #'       - `statistic`: F-statistic
-#'       - `p_value`: Raw p-value from ANOVA
+#'       - `p_val`: Raw p-value from ANOVA
 #'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'       - `post_hoc`: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 #'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
 #'       - `variable`: Variable name
 #'       - `ref_group`: Reference group
 #'       - `test_group`: Test/treatment/case group
-#'       - `p_value`: Raw p-value from Tukey's HSD test
+#'       - `p_val`: Raw p-value from Tukey's HSD test
 #'       - `p_adj`: Adjusted p-value from Tukey's HSD test
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `aov` model objects.
@@ -190,7 +190,7 @@ gly_anova_ <- function(
 #'     - `main_test`: A tibble with Kruskal-Wallis test results containing the following columns:
 #'       - `variable`: Variable name
 #'       - `statistic`: Kruskal-Wallis test statistic
-#'       - `p_value`: Raw p-value from Kruskal-Wallis test
+#'       - `p_val`: Raw p-value from Kruskal-Wallis test
 #'       - `parameter`: Degrees of freedom
 #'       - `method`: Statistical method used
 #'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
@@ -199,7 +199,7 @@ gly_anova_ <- function(
 #'       - `variable`: Variable name
 #'       - `ref_group`: Reference group
 #'       - `test_group`: Test/treatment/case group
-#'       - `p_value`: Raw p-value from Dunn's test
+#'       - `p_val`: Raw p-value from Dunn's test
 #'       - `p_adj`: Adjusted p-value from Dunn's test
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `kruskal.test` objects.
@@ -430,8 +430,13 @@ gly_kruskal_ <- function(
       dplyr::filter(.data$term == "group")
   }
 
+  # Rename p_value to p_val for consistency
+  if ("p_value" %in% colnames(result_tbl)) {
+    result_tbl <- dplyr::rename(result_tbl, p_val = "p_value")
+  }
+
   if (!is.null(p_adj_method)) {
-    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p_value, method = p_adj_method))
+    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p_val, method = p_adj_method))
   }
 
   result_tbl
@@ -475,7 +480,7 @@ gly_kruskal_ <- function(
       variable = character(0),
       ref_group = character(0),
       test_group = character(0),
-      p_value = numeric(0),
+      p_val = numeric(0),
       p_adj = numeric(0)
     ))
   }
@@ -494,7 +499,7 @@ gly_kruskal_ <- function(
         variable = var_name,
         ref_group = comparison_parts[, 2],  # Second part is ref_group
         test_group = comparison_parts[, 1],  # First part is test_group
-        p_value = tukey_df$`p adj`,      # TukeyHSD already provides adjusted p-values
+        p_val = tukey_df$`p adj`,      # TukeyHSD already provides adjusted p-values
         p_adj = tukey_df$`p adj`
       )
     } else {
@@ -508,7 +513,7 @@ gly_kruskal_ <- function(
         variable = var_name,
         ref_group = comparison_parts[, 1],
         test_group = comparison_parts[, 2],
-        p_value = dunn_df$P.unadj,       # Unadjusted p-value
+        p_val = dunn_df$P.unadj,       # Unadjusted p-value
         p_adj = dunn_df$P.adj            # Adjusted p-value
       )
     }

@@ -67,7 +67,7 @@ A list with two elements:
 \item \code{log2fc}: Log2 fold change
 \item \code{AveExpr}: Average expression level
 \item \code{t}: t-statistic
-\item \code{p}: Raw p-value
+\item \code{p_val}: Raw p-value
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 \item \code{b}: B-statistic (log-odds of differential expression)
 For multi-group comparisons, \code{ref_group} and \code{test_group} columns are added to the tibble.

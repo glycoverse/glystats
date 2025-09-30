@@ -45,7 +45,7 @@ A list containing two elements:
 \itemize{
 \item \code{variable}: Variable name
 \item \code{statistic}: Kruskal-Wallis test statistic
-\item \code{p_value}: Raw p-value from Kruskal-Wallis test
+\item \code{p_val}: Raw p-value from Kruskal-Wallis test
 \item \code{parameter}: Degrees of freedom
 \item \code{method}: Statistical method used
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
@@ -56,7 +56,7 @@ A list containing two elements:
 \item \code{variable}: Variable name
 \item \code{ref_group}: Reference group
 \item \code{test_group}: Test/treatment/case group
-\item \code{p_value}: Raw p-value from Dunn's test
+\item \code{p_val}: Raw p-value from Dunn's test
 \item \code{p_adj}: Adjusted p-value from Dunn's test
 }
 }

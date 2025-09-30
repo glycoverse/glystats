@@ -34,7 +34,7 @@
 #'    - `coefficient`: Regression coefficient (log hazard ratio)
 #'    - `std.error`: Standard error of the coefficient
 #'    - `statistic`: Wald test statistic
-#'    - `p`: Raw p-value from Wald test
+#'    - `p_val`: Raw p-value from Wald test
 #'    - `hr`: Hazard ratio (exp(coefficient))
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: A list of raw `coxph` model objects.
@@ -130,14 +130,14 @@ gly_cox_ <- function(
     tidyr::unnest(all_of("params")) %>%
     dplyr::ungroup() %>%
     # Rename columns to match expected names
-    dplyr::rename(all_of(c("coefficient" = "estimate", "p" = "p.value"))) %>%
+    dplyr::rename(all_of(c("coefficient" = "estimate", "p_val" = "p.value"))) %>%
     # Calculate hazard ratio
     dplyr::mutate(hr = exp(.data$coefficient)) %>%
     # Remove the term column as it's redundant with variable
     dplyr::select(-all_of("term"))
 
   if (!is.null(p_adj_method)) {
-    result_df <- dplyr::mutate(result_df, p_adj = stats::p.adjust(.data$p, method = p_adj_method))
+    result_df <- dplyr::mutate(result_df, p_adj = stats::p.adjust(.data$p_val, method = p_adj_method))
   }
 
   result_df

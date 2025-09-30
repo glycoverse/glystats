@@ -43,7 +43,7 @@ A list containing two elements:
 \item \code{sumsq}: Sum of squares
 \item \code{meansq}: Mean squares
 \item \code{statistic}: F-statistic
-\item \code{p_value}: Raw p-value from ANOVA
+\item \code{p_val}: Raw p-value from ANOVA
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 \item \code{post_hoc}: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 }
@@ -52,7 +52,7 @@ A list containing two elements:
 \item \code{variable}: Variable name
 \item \code{ref_group}: Reference group
 \item \code{test_group}: Test/treatment/case group
-\item \code{p_value}: Raw p-value from Tukey's HSD test
+\item \code{p_val}: Raw p-value from Tukey's HSD test
 \item \code{p_adj}: Adjusted p-value from Tukey's HSD test
 }
 }

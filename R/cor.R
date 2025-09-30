@@ -41,7 +41,7 @@
 #'    - `variable1` or `sample1`: First element of the pair (depending on `on` parameter)
 #'    - `variable2` or `sample2`: Second element of the pair (depending on `on` parameter)
 #'    - `cor`: Correlation coefficient
-#'    - `p_value`: Raw p-value from correlation test
+#'    - `p_val`: Raw p-value from correlation test
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: The raw rcorr object from Hmisc::rcorr()
 #' The list has classes `glystats_cor_res` and `glystats_res`.
@@ -116,7 +116,7 @@ gly_cor_ <- function(
     item1 = rep(rownames(cor_matrix), each = ncol(cor_matrix)),
     item2 = rep(colnames(cor_matrix), times = nrow(cor_matrix)),
     cor = as.vector(cor_matrix),
-    p_value = as.vector(p_matrix)
+    p_val = as.vector(p_matrix)
   ) %>%
     # Add row indices to filter upper triangle
     dplyr::mutate(
@@ -137,7 +137,7 @@ gly_cor_ <- function(
 
   # Adjust p-values if requested
   if (!is.null(p_adj_method)) {
-    tidy_result$p_adj <- stats::p.adjust(tidy_result$p_value, method = p_adj_method)
+    tidy_result$p_adj <- stats::p.adjust(tidy_result$p_val, method = p_adj_method)
   }
 
   # Return list with both tidy and raw results

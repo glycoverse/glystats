@@ -58,7 +58,7 @@
 #'    - `log2fc`: Log2 fold change
 #'    - `AveExpr`: Average expression level
 #'    - `t`: t-statistic
-#'    - `p`: Raw p-value
+#'    - `p_val`: Raw p-value
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'    - `b`: B-statistic (log-odds of differential expression)
 #'  For multi-group comparisons, `ref_group` and `test_group` columns are added to the tibble.
@@ -206,7 +206,7 @@ gly_limma_ <- function(
   result_tbl <- tibble::as_tibble(top_table, rownames = "variable") %>%
     dplyr::rename(
       log2fc = "logFC",
-      p = "P.Value",
+      p_val = "P.Value",
       p_adj = "adj.P.Val",
       t = "t",
       b = "B"
@@ -311,7 +311,7 @@ gly_limma_ <- function(
     result_tbl <- tibble::as_tibble(top_table, rownames = "variable") %>%
       dplyr::rename(
         log2fc = "logFC",
-        p = "P.Value",
+        p_val = "P.Value",
         p_adj = "adj.P.Val",
         t = "t",
         b = "B"

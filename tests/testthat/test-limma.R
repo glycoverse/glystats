@@ -267,6 +267,6 @@ test_that("gly_limma_ works correctly", {
   expect_true("raw_result" %in% names(result))
   expect_true(tibble::is_tibble(result$tidy_result))
   expect_true("log2fc" %in% colnames(result$tidy_result))
-  expect_true("p" %in% colnames(result$tidy_result))  # limma uses "p" not "p_value"
+  expect_true("p_val" %in% colnames(result$tidy_result))  # Now uses p_val
   expect_equal(nrow(result$tidy_result), 10)
 })

@@ -40,7 +40,7 @@ A list with two elements:
 \item \code{variable1} or \code{sample1}: First element of the pair (depending on \code{on} parameter)
 \item \code{variable2} or \code{sample2}: Second element of the pair (depending on \code{on} parameter)
 \item \code{cor}: Correlation coefficient
-\item \code{p_value}: Raw p-value from correlation test
+\item \code{p_val}: Raw p-value from correlation test
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 }
 \item \code{raw_result}: The raw rcorr object from Hmisc::rcorr()
