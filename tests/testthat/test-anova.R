@@ -285,3 +285,31 @@ test_that("gly_kruskal_ works correctly", {
   expect_true(tibble::is_tibble(result$tidy_result$main_test))
   expect_equal(nrow(result$tidy_result$main_test), 10)
 })
+
+test_that("post_hoc_test should not contain NA rows when add_info is TRUE", {
+  # Run ANOVA with add_info = TRUE (default)
+  result <- suppressMessages(gly_anova(test_gp_exp))
+  
+  post_hoc_test <- result$tidy_result$post_hoc_test
+  
+  # Count total NA values in ref_group
+  n_na_ref_group <- sum(is.na(post_hoc_test$ref_group))
+  
+  # There should be no NA values in ref_group
+  # because post_hoc_test should only contain variables with significant main effects
+  expect_equal(n_na_ref_group, 0, 
+               info = "post_hoc_test should not have NA values in ref_group column")
+  
+  # Verify that all rows have complete data
+  expect_equal(sum(is.na(post_hoc_test$test_group)), 0)
+  expect_equal(sum(is.na(post_hoc_test$p_val)), 0)
+  expect_equal(sum(is.na(post_hoc_test$p_adj)), 0)
+  
+  # Verify that post_hoc_test only contains variables from main_test that are significant
+  main_test <- result$tidy_result$main_test
+  sig_vars <- main_test$variable[main_test$p_adj < 0.05]
+  
+  # All variables in post_hoc_test should be significant in main_test
+  expect_true(all(post_hoc_test$variable %in% sig_vars),
+              info = "All variables in post_hoc_test should have significant main effects")
+})

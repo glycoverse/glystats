@@ -132,8 +132,8 @@
 
   # Only join if there are columns other than variable
   if (ncol(var_info_subset) > 0) {
-    # Put var_info columns first, then the original tibble columns
-    result <- dplyr::left_join(var_info, tbl, by = "variable")
+    # Join var_info to tbl, keeping all rows from tbl
+    result <- dplyr::left_join(tbl, var_info, by = "variable")
     return(result)
   }
 
@@ -152,8 +152,8 @@
 
   # Only join if there are columns other than sample
   if (ncol(sample_info_subset) > 0) {
-    # Put sample_info columns first, then the original tibble columns
-    result <- dplyr::left_join(sample_info, tbl, by = "sample")
+    # Join sample_info to tbl, keeping all rows from tbl
+    result <- dplyr::left_join(tbl, sample_info, by = "sample")
     return(result)
   }
 
