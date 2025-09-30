@@ -48,11 +48,11 @@
 #'       - `statistic`: F-statistic
 #'       - `p_value`: Raw p-value from ANOVA
 #'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
-#'       - `post_hoc`: Significant group pairs from post-hoc test
+#'       - `post_hoc`: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 #'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
 #'       - `variable`: Variable name
-#'       - `group1`: First group in comparison
-#'       - `group2`: Second group in comparison
+#'       - `ref_group`: Reference group
+#'       - `test_group`: Test/treatment/case group
 #'       - `p_value`: Raw p-value from Tukey's HSD test
 #'       - `p_adj`: Adjusted p-value from Tukey's HSD test
 #'   - `raw_result`: A list containing:
@@ -193,11 +193,11 @@ gly_anova_ <- function(
 #'       - `parameter`: Degrees of freedom
 #'       - `method`: Statistical method used
 #'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
-#'       - `post_hoc`: Significant group pairs from post-hoc test
+#'       - `post_hoc`: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 #'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
 #'       - `variable`: Variable name
-#'       - `group1`: First group in comparison
-#'       - `group2`: Second group in comparison
+#'       - `ref_group`: Reference group
+#'       - `test_group`: Test/treatment/case group
 #'       - `p_value`: Raw p-value from Dunn's test
 #'       - `p_adj`: Adjusted p-value from Dunn's test
 #'   - `raw_result`: A list containing:
@@ -302,8 +302,50 @@ gly_kruskal_ <- function(
     aov_model <- stats::aov(log_value ~ group, data = data_nested)
     stats::TukeyHSD(aov_model)
   } else {
-    # Dunn test for Kruskal-Wallis - return raw dunnTest object
-    FSA::dunnTest(log_value ~ group, data = data_nested, method = "holm")
+    # Dunn test for Kruskal-Wallis
+    # Check number of groups - FSA::dunnTest fails with only 2 groups
+    n_groups <- length(unique(data_nested$group))
+
+    if (n_groups == 2) {
+      # Use pairwise Wilcoxon test for 2 groups
+      wilcox_result <- stats::pairwise.wilcox.test(
+        data_nested$log_value,
+        data_nested$group,
+        p.adjust.method = "holm"
+      )
+
+      # Convert to dunnTest-like format for consistency
+      # In pairwise.wilcox.test, column name is the first group (ref_group),
+      # row name is the second group (test_group)
+      p_matrix <- wilcox_result$p.value
+      comparisons <- c()
+      p_values <- c()
+
+      for (i in seq_len(nrow(p_matrix))) {
+        for (j in seq_len(ncol(p_matrix))) {
+          if (!is.na(p_matrix[i, j])) {
+            group1 <- colnames(p_matrix)[j]  # ref_group (column name)
+            group2 <- rownames(p_matrix)[i]  # test_group (row name)
+            comparisons <- c(comparisons, paste(group1, "-", group2))
+            p_values <- c(p_values, p_matrix[i, j])
+          }
+        }
+      }
+
+      # Create dunnTest-like structure
+      list(
+        res = data.frame(
+          Comparison = comparisons,
+          P.unadj = p_values,
+          P.adj = p_values,
+          stringsAsFactors = FALSE
+        ),
+        method = wilcox_result$p.adjust.method
+      )
+    } else {
+      # Use FSA::dunnTest for 3+ groups
+      FSA::dunnTest(log_value ~ group, data = data_nested, method = "holm")
+    }
   }
 }
 
@@ -402,10 +444,20 @@ gly_kruskal_ <- function(
     if (identical(.f, stats::aov)) {
       tukey_df <- as.data.frame(raw_result$group)
       sig_pairs <- rownames(tukey_df)[tukey_df$"p adj" < 0.05]
+      sig_pairs <- purrr::map(sig_pairs, function(x) {
+        # switch two groups and change the "-" to "_vs_"
+        parts <- stringr::str_split(x, "-", simplify = TRUE)
+        stringr::str_c(parts[, 2], "_vs_", parts[, 1])
+      })
       sig_str <- if (length(sig_pairs) == 0) NA_character_ else paste(sig_pairs, collapse = ";")
     } else {
       dunn_df <- raw_result$res
       sig_pairs <- dunn_df$Comparison[dunn_df$P.adj < 0.05]
+      # Convert "A - B" format to "A_vs_B" format for consistency
+      sig_pairs <- purrr::map_chr(sig_pairs, function(x) {
+        parts <- stringr::str_split(x, " - ", simplify = TRUE)
+        stringr::str_c(parts[, 1], "_vs_", parts[, 2])
+      })
       sig_str <- if (length(sig_pairs) == 0) NA_character_ else paste(sig_pairs, collapse = ";")
     }
     sig_str
@@ -419,8 +471,8 @@ gly_kruskal_ <- function(
     # Return empty tibble with correct structure
     return(tibble::tibble(
       variable = character(0),
-      group1 = character(0),
-      group2 = character(0),
+      ref_group = character(0),
+      test_group = character(0),
       p_value = numeric(0),
       p_adj = numeric(0)
     ))
@@ -438,8 +490,8 @@ gly_kruskal_ <- function(
 
       tibble::tibble(
         variable = var_name,
-        group1 = comparison_parts[, 2],  # Second part is group1
-        group2 = comparison_parts[, 1],  # First part is group2
+        ref_group = comparison_parts[, 2],  # Second part is ref_group
+        test_group = comparison_parts[, 1],  # First part is test_group
         p_value = tukey_df$`p adj`,      # TukeyHSD already provides adjusted p-values
         p_adj = tukey_df$`p adj`
       )
@@ -452,8 +504,8 @@ gly_kruskal_ <- function(
 
       tibble::tibble(
         variable = var_name,
-        group1 = comparison_parts[, 1],
-        group2 = comparison_parts[, 2],
+        ref_group = comparison_parts[, 1],
+        test_group = comparison_parts[, 2],
         p_value = dunn_df$P.unadj,       # Unadjusted p-value
         p_adj = dunn_df$P.adj            # Adjusted p-value
       )

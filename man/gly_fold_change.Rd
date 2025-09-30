@@ -21,20 +21,24 @@ Only applicable to \code{gly_fold_change()}.}
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 
 \item{groups}{A factor or character vector specifying group membership for each sample.
-Must have exactly 2 levels. Character vectors will be automatically converted to factors.}
+Character vectors will be automatically converted to factors.
+If two groups, the first level is the reference group.
+If more than two groups, pairwise comparisons will be performed,
+with levels coming first as reference groups.}
 }
 \value{
 A tibble with fold change results containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
 \item \code{log2fc}: Log2 fold change (log2(group2_mean / group1_mean))
+If more than two groups, two additional columns \code{ref_group} and \code{test_group} will be added.
 }
 }
 \description{
 Calculate fold change for a given expression matrix and group information.
 It could only be used for 2-group analysis.
-When you run this function, you will see message about "Group 1" and "Group 2".
-"Group 1" is the reference group, and "Group 2" is the test group.
+When you run this function, you will see message about "Ref Group" and "Test Group".
+"Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
 }
 \details{
 \code{gly_fold_change()} is the top-level API that works with \code{glyexp::experiment()} objects and supports

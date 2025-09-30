@@ -26,11 +26,119 @@ test_that("gly_anova works with anova method", {
   # Test post_hoc_test tibble
   post_hoc_test <- result$tidy_result$post_hoc_test
   expect_true(tibble::is_tibble(post_hoc_test))
-  expect_true(all(c("variable", "group1", "group2", "p_value", "p_adj") %in% colnames(post_hoc_test)))
+  expect_true(all(c("variable", "ref_group", "test_group", "p_value", "p_adj") %in% colnames(post_hoc_test)))
 
   # Test raw_result structure
   expect_type(result$raw_result, "list")
   expect_named(result$raw_result, c("main_test", "post_hoc_test"))
+})
+
+test_that("gly_anova comparison direction is correct for 2 groups", {
+  # Create a test experiment with 2 groups
+  # group B has higher mean than group A
+  var_info <- tibble::tibble(variable = "V1")
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:20),
+    group = factor(rep(c("A", "B"), each = 10), levels = c("A", "B"))
+  )
+  expr_mat <- matrix(
+    c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1)),
+    nrow = 1, byrow = TRUE
+  )
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+
+  # Call gly_anova
+  result <- suppressMessages(gly_anova(exp))
+
+  # Test post_hoc
+  expect_identical(result$tidy_result$main_test$post_hoc, "A_vs_B")
+  expect_identical(result$tidy_result$post_hoc_test$ref_group, "A")
+  expect_identical(result$tidy_result$post_hoc_test$test_group, "B")
+})
+
+test_that("gly_anova comparison direction is correct for 3 groups", {
+  # Create a test experiment with 3 groups
+  # Group means: A < B < C
+  var_info <- tibble::tibble(variable = "V1")
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:30),
+    group = factor(rep(c("A", "B", "C"), each = 10), levels = c("A", "B", "C"))
+  )
+  expr_mat <- matrix(
+    c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1), rnorm(10, mean = 3, sd = 0.1)),
+    nrow = 1, byrow = TRUE
+  )
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+
+  # Call gly_anova
+  result <- suppressMessages(gly_anova(exp))
+
+  # Test post_hoc
+  expect_setequal(
+    stringr::str_split_1(result$tidy_result$main_test$post_hoc, ";"),
+    c("A_vs_B", "A_vs_C", "B_vs_C")
+  )
+  comparisons <- stringr::str_c(
+    result$tidy_result$post_hoc_test$ref_group,
+    "_vs_",
+    result$tidy_result$post_hoc_test$test_group
+  )
+  expect_setequal(comparisons, c("A_vs_B", "A_vs_C", "B_vs_C"))
+})
+
+test_that("gly_kruskal comparison direction is correct for 2 groups", {
+  # Create a test experiment with 2 groups
+  # group B has higher mean than group A
+  var_info <- tibble::tibble(variable = "V1")
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:20),
+    group = factor(rep(c("A", "B"), each = 10), levels = c("A", "B"))
+  )
+  expr_mat <- matrix(1:20, nrow = 1, byrow = TRUE)
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+
+  # Call gly_kruskal
+  result <- suppressMessages(gly_kruskal(exp))
+
+  # Test post_hoc
+  expect_identical(result$tidy_result$main_test$post_hoc, "A_vs_B")
+  expect_identical(result$tidy_result$post_hoc_test$ref_group, "A")
+  expect_identical(result$tidy_result$post_hoc_test$test_group, "B")
+})
+
+test_that("gly_kruskal comparison direction is correct for 3 groups", {
+  # Create a test experiment with 3 groups
+  # Group means: A < B < C
+  var_info <- tibble::tibble(variable = "V1")
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:30),
+    group = factor(rep(c("A", "B", "C"), each = 10), levels = c("A", "B", "C"))
+  )
+  expr_mat <- matrix(1:30, nrow = 1, byrow = TRUE)
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+
+  # Call gly_kruskal
+  result <- suppressMessages(gly_kruskal(exp))
+
+  # Test post_hoc
+  expect_setequal(
+    stringr::str_split_1(result$tidy_result$main_test$post_hoc, ";"),
+    c("A_vs_B", "A_vs_C", "B_vs_C")
+  )
+  comparisons <- stringr::str_c(
+    result$tidy_result$post_hoc_test$ref_group,
+    "_vs_",
+    result$tidy_result$post_hoc_test$test_group
+  )
+  expect_setequal(comparisons, c("A_vs_B", "A_vs_C", "B_vs_C"))
 })
 
 test_that("gly_anova assigns NA for failed variables", {
@@ -85,7 +193,7 @@ test_that("gly_kruskal works with kruskal method", {
   # Test post_hoc_test tibble
   post_hoc_test <- result$tidy_result$post_hoc_test
   expect_true(tibble::is_tibble(post_hoc_test))
-  expect_true(all(c("variable", "group1", "group2", "p_value", "p_adj") %in% colnames(post_hoc_test)))
+  expect_true(all(c("variable", "ref_group", "test_group", "p_value", "p_adj") %in% colnames(post_hoc_test)))
 
   # Test raw_result structure
   expect_type(result$raw_result, "list")
@@ -130,28 +238,6 @@ test_that("gly_anova and gly_kruskal group validation", {
   # Test 1 group with multi-group methods
   expect_error(suppressMessages(gly_anova(exp_1group)), "at least 2 levels")
   expect_error(suppressMessages(gly_kruskal(exp_1group)), "at least 2 levels")
-})
-
-test_that("gly_anova works with real data", {
-  # This test uses the full test_gp_exp to ensure integration works
-  result <- suppressMessages(gly_anova(test_gp_exp))
-  expect_type(result, "list")
-  expect_s3_class(result, c("glystats_anova_res", "glystats_res"))
-  expect_named(result, c("tidy_result", "raw_result"))
-  expect_true(tibble::is_tibble(result$tidy_result$main_test))
-  expect_true("post_hoc" %in% colnames(result$tidy_result$main_test))
-  expect_true(tibble::is_tibble(result$tidy_result$post_hoc_test))
-})
-
-test_that("gly_kruskal works with real data", {
-  # This test uses the full test_gp_exp to ensure integration works
-  result <- suppressMessages(gly_kruskal(test_gp_exp))
-  expect_type(result, "list")
-  expect_s3_class(result, c("glystats_kruskal_res", "glystats_res"))
-  expect_named(result, c("tidy_result", "raw_result"))
-  expect_true(tibble::is_tibble(result$tidy_result$main_test))
-  expect_true("post_hoc" %in% colnames(result$tidy_result$main_test))
-  expect_true(tibble::is_tibble(result$tidy_result$post_hoc_test))
 })
 
 test_that("gly_anova_ works correctly", {

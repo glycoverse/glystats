@@ -205,3 +205,26 @@
   class(new_results) <- old_class
   return(new_results)
 }
+
+#' Make comparisons pairs for multi-group analysis
+#'
+#' @param levels A character vector of group levels.
+#' @param reverse A logical value. Default is FALSE. If TRUE, reference group will be the second level.
+#' @return A list of character vectors, each containing two group levels.
+#' @noRd
+.make_comparisons <- function(levels, reverse = FALSE) {
+  n_pairs <- length(levels) * (length(levels) - 1) / 2
+  pairs <- vector("list", n_pairs)
+  count <- 1
+  for (i in 1:(length(levels) - 1)) {
+    for (j in (i + 1):length(levels)) {
+      if (reverse) {
+        pairs[[count]] <- c(levels[j], levels[i])
+      } else {
+        pairs[[count]] <- c(levels[i], levels[j])
+      }
+      count <- count + 1
+    }
+  }
+  pairs
+}

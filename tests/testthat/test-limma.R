@@ -1,7 +1,6 @@
-test_that("gly_limma works with limma method", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
+skip_if_not_installed("limma")
 
+test_that("gly_limma works with 2 groups", {
   # Use test_gp_exp and filter to 2 groups for limma
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
@@ -18,39 +17,44 @@ test_that("gly_limma works with limma method", {
   expect_true("p_adj" %in% colnames(result$tidy_result))  # p_adj should exist
   expect_true("log2fc" %in% colnames(result$tidy_result))  # log2fc should exist
   expect_type(result$tidy_result$log2fc, "double")  # log2fc should be numeric
-  # coefficient列已被重命名为log2fc，所以不需要单独的coefficient列
   expect_true("t" %in% colnames(result$tidy_result))  # t-statistic
   expect_true("b" %in% colnames(result$tidy_result))  # log-odds (B-statistic)
 })
 
-test_that("gly_limma basic functionality works", {
-  # Only test limma if available
-  skip_if_not_installed("limma")
-  
-  # Test limma works with test_gp_exp
-  exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5)  # Use very small subset
-  
-  # 2-group method
-  exp_2group <- exp_small |> glyexp::filter_obs(group %in% c("C", "H"))
-  expect_no_error(suppressMessages(gly_limma(exp_2group)))
+test_that("gly_limma direction is correct for 2 groups", {
+  # Create a test experiment with 2 groups
+  # group B has higher mean than group A
+  var_info <- tibble::tibble(variable = "V1")
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:20),
+    group = factor(rep(c("A", "B"), each = 10), levels = c("A", "B"))
+  )
+  expr_mat <- matrix(
+    c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1)),
+    nrow = 1, byrow = TRUE
+  )
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+
+  # Call gly_limma
+  result <- suppressMessages(gly_limma(exp))
+
+  # Test post_hoc
+  expect_true(result$tidy_result$log2fc > 0)
+  expect_true(result$tidy_result$t > 0)
 })
 
 test_that("gly_limma error handling", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
-  
   # Use test_gp_exp for error testing
   exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5)
-  
+
   # Test various error conditions - group column not found
   expect_error(suppressMessages(gly_limma(exp_small, group_col = "nonexistent")),
                "not found in sample information")
 })
 
 test_that("gly_limma group validation", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
-
   # Test with 1 group
   exp_1group <- test_gp_exp |>
     glyexp::filter_obs(group == "C") |>
@@ -61,9 +65,6 @@ test_that("gly_limma group validation", {
 })
 
 test_that("gly_limma ref_group parameter works", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
-
   # Use test_gp_exp and filter to 2 groups for limma
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
@@ -87,29 +88,11 @@ test_that("gly_limma ref_group parameter works", {
                "Must be element of set")
 })
 
-test_that("gly_limma works with real data", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
-
-  # This test uses a subset of test_gp_exp to ensure integration works
-  exp_2group <- test_gp_exp |>
-    glyexp::filter_obs(group %in% c("C", "H")) |>
-    glyexp::slice_sample_var(n = 20)  # Use reasonable subset for testing
-
-  result <- suppressMessages(gly_limma(exp_2group))
-  expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
-  expect_true(tibble::is_tibble(result$tidy_result))
-  expect_true("log2fc" %in% colnames(result$tidy_result))
-  expect_true("p_adj" %in% colnames(result$tidy_result))
-})
-
 test_that("gly_limma works with multi-group data", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
-
   # Test with 3 groups (using C, H, M from test_gp_exp)
   exp_3group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
+    glyexp::mutate_obs(group = factor(group, levels = c("H", "M", "C"))) |>
     glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
 
   result <- suppressMessages(gly_limma(exp_3group))
@@ -117,41 +100,69 @@ test_that("gly_limma works with multi-group data", {
   # Test core functionality
   expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
   expect_true(tibble::is_tibble(result$tidy_result))
-  expect_true("contrast" %in% colnames(result$tidy_result))  # Should have contrast column
+  expect_true("ref_group" %in% colnames(result$tidy_result))  # Should have contrast column
+  expect_true("test_group" %in% colnames(result$tidy_result))  # Should have contrast column
   expect_true("log2fc" %in% colnames(result$tidy_result))
   expect_true("p_adj" %in% colnames(result$tidy_result))
 
-  # Should have 3 pairwise comparisons: C_vs_H, C_vs_M, H_vs_M
-  expect_equal(length(unique(result$tidy_result$contrast)), 3)
-  expect_true(all(c("C_vs_H", "C_vs_M", "H_vs_M") %in% result$tidy_result$contrast))
+  # Should have 3 pairwise comparisons: H_vs_C, H_vs_M, M_vs_C
+  contrasts <- stringr::str_c(result$tidy_result$ref_group, "_vs_", result$tidy_result$test_group)
+  expect_setequal(unique(contrasts), c("H_vs_C", "H_vs_M", "M_vs_C"))
 
   # Each contrast should have the same number of variables
   expect_equal(nrow(result$tidy_result), 10 * 3)  # 10 variables * 3 contrasts
 })
 
-test_that("gly_limma multi-group generates correct contrasts", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
+test_that("gly_limma direction is correct for 3 groups", {
+  # Create a test experiment with 3 groups
+  # Group means: A < B < C
+  var_info <- tibble::tibble(variable = "V1")
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:30),
+    group = factor(rep(c("A", "B", "C"), each = 10), levels = c("A", "B", "C"))
+  )
+  expr_mat <- matrix(
+    c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1), rnorm(10, mean = 3, sd = 0.1)),
+    nrow = 1, byrow = TRUE
+  )
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
 
-  # Test with 4 groups to verify all pairwise comparisons (using C, H, M, Y)
-  exp_4group <- test_gp_exp |>
-    glyexp::filter_obs(group %in% c("C", "H", "M", "Y")) |>
-    glyexp::slice_sample_var(n = 5)  # Use very small subset for speed
+  # Call gly_limma
+  result <- suppressMessages(gly_limma(exp))
 
-  result <- suppressMessages(gly_limma(exp_4group))
+  # Test post_hoc
+  expect_true(all(result$tidy_result$log2fc > 0))
+  expect_true(all(result$tidy_result$t > 0))
+})
 
-  # Should have 6 pairwise comparisons for 4 groups: C(4,2) = 6
-  expect_equal(length(unique(result$tidy_result$contrast)), 6)
+test_that("gly_limma direction is correct for 3 groups with custom contrasts", {
+  # Create a test experiment with 3 groups
+  # Group means: A < B < C
+  var_info <- tibble::tibble(variable = "V1")
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:30),
+    group = factor(rep(c("A", "B", "C"), each = 10), levels = c("A", "B", "C"))
+  )
+  expr_mat <- matrix(
+    c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1), rnorm(10, mean = 3, sd = 0.1)),
+    nrow = 1, byrow = TRUE
+  )
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
 
-  # Check all expected contrasts are present
-  expected_contrasts <- c("C_vs_H", "C_vs_M", "C_vs_Y", "H_vs_M", "H_vs_Y", "M_vs_Y")
-  expect_setequal(unique(result$tidy_result$contrast), expected_contrasts)
+  # Call gly_limma
+  custom_contrasts <- c("A_vs_B", "A_vs_C")
+  result <- suppressMessages(gly_limma(exp, contrasts = custom_contrasts))
+
+  # Test post_hoc
+  expect_true(all(result$tidy_result$log2fc > 0))
+  expect_true(all(result$tidy_result$t > 0))
 })
 
 test_that("gly_limma custom contrasts work with hyphen format", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
-
   # Test with 4 groups using custom contrasts (hyphen format)
   exp_4group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M", "Y")) |>
@@ -162,15 +173,12 @@ test_that("gly_limma custom contrasts work with hyphen format", {
   result <- suppressMessages(gly_limma(exp_4group, contrasts = custom_contrasts))
 
   # Should have exactly 3 contrasts as specified
-  expect_equal(length(unique(result$tidy_result$contrast)), 3)
-  expect_setequal(unique(result$tidy_result$contrast), c("H_vs_C", "H_vs_M", "H_vs_Y"))
+  contrasts <- stringr::str_c(result$tidy_result$ref_group, "_vs_", result$tidy_result$test_group)
+  expect_setequal(unique(contrasts), c("H_vs_C", "H_vs_M", "H_vs_Y"))
   expect_equal(nrow(result$tidy_result), 5 * 3)  # 5 variables * 3 contrasts
 })
 
 test_that("gly_limma custom contrasts work with _vs_ format", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
-
   # Test with 4 groups using custom contrasts (_vs_ format)
   exp_4group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M", "Y")) |>
@@ -181,15 +189,12 @@ test_that("gly_limma custom contrasts work with _vs_ format", {
   result <- suppressMessages(gly_limma(exp_4group, contrasts = custom_contrasts))
 
   # Should have exactly 3 contrasts as specified
-  expect_equal(length(unique(result$tidy_result$contrast)), 3)
-  expect_setequal(unique(result$tidy_result$contrast), c("H_vs_C", "M_vs_C", "Y_vs_C"))
+  contrasts <- stringr::str_c(result$tidy_result$ref_group, "_vs_", result$tidy_result$test_group)
+  expect_setequal(contrasts, c("H_vs_C", "M_vs_C", "Y_vs_C"))
   expect_equal(nrow(result$tidy_result), 5 * 3)  # 5 variables * 3 contrasts
 })
 
 test_that("gly_limma contrasts error handling works", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
-
   # Test with 3 groups
   exp_3group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
@@ -209,9 +214,6 @@ test_that("gly_limma contrasts error handling works", {
 })
 
 test_that("gly_limma handles group names with hyphens correctly", {
-  # Skip test if limma is not available
-  skip_if_not_installed("limma")
-
   # Create test data with group names containing hyphens
   exp_hyphen <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
@@ -242,13 +244,11 @@ test_that("gly_limma handles group names with hyphens correctly", {
 
   # Test that _vs_ format works
   result <- suppressMessages(gly_limma(exp_hyphen_modified, contrasts = c("High-dose_vs_Control-1")))
-  expect_equal(length(unique(result$tidy_result$contrast)), 1)
-  expect_equal(unique(result$tidy_result$contrast), "High-dose_vs_Control-1")
+  contrasts <- stringr::str_c(result$tidy_result$ref_group, "_vs_", result$tidy_result$test_group)
+  expect_setequal(contrasts, c("High-dose_vs_Control-1"))
 })
 
 test_that("gly_limma_ works correctly", {
-  skip_if_not_installed("limma")
-
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)

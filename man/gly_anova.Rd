@@ -45,13 +45,13 @@ A list containing two elements:
 \item \code{statistic}: F-statistic
 \item \code{p_value}: Raw p-value from ANOVA
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
-\item \code{post_hoc}: Significant group pairs from post-hoc test
+\item \code{post_hoc}: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 }
 \item \code{post_hoc_test}: A tibble with pairwise comparison results containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{group1}: First group in comparison
-\item \code{group2}: Second group in comparison
+\item \code{ref_group}: Reference group
+\item \code{test_group}: Test/treatment/case group
 \item \code{p_value}: Raw p-value from Tukey's HSD test
 \item \code{p_adj}: Adjusted p-value from Tukey's HSD test
 }

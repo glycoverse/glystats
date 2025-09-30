@@ -110,21 +110,3 @@ gly_fold_change_ <- function(expr_mat, groups) {
   dplyr::bind_rows(result_list, .id = "comparison") |>
     tidyr::separate(col = "comparison", into = c("ref_group", "test_group"), sep = "_vs_")
 }
-
-#' Make comparisons pairs for multi-group analysis
-#'
-#' @param levels A character vector of group levels.
-#' @return A list of character vectors, each containing two group levels.
-#' @noRd
-.make_comparisons <- function(levels) {
-  n_pairs <- length(levels) * (length(levels) - 1) / 2
-  pairs <- vector("list", n_pairs)
-  count <- 1
-  for (i in 1:(length(levels) - 1)) {
-    for (j in (i + 1):length(levels)) {
-      pairs[[count]] <- c(levels[i], levels[j])
-      count <- count + 1
-    }
-  }
-  pairs
-}

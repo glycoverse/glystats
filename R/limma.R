@@ -7,6 +7,8 @@
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
 #' @param groups A factor or character vector specifying group membership for each sample.
 #'   Must have at least 2 levels. Character vectors will be automatically converted to factors.
+#'   If `contrasts` is not provided,
+#'   the levels coming first in the factor will be used as the reference group.
 #' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param p_adj_method A character string specifying the method for multiple testing correction.
@@ -16,9 +18,11 @@
 #'  If NULL (default), the first level of the group factor is used as the reference.
 #'  Only used for two-group comparisons.
 #' @param contrasts A character vector specifying custom contrasts for multi-group comparisons.
-#'   If NULL (default), all pairwise comparisons are automatically generated.
+#'   If NULL (default), all pairwise comparisons are automatically generated,
+#'   and the levels coming first in the factor will be used as the reference group.
 #'   Supports two formats: "group1-group2" or "group1_vs_group2".
 #'   Use the second format if group names contain hyphens.
+#'   "group1" will be used as the reference group.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #'  Only applicable to `gly_limma()`.
@@ -57,7 +61,8 @@
 #'    - `p`: Raw p-value
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'    - `b`: B-statistic (log-odds of differential expression)
-#'    - `contrast`: Contrast name (for multi-group comparisons only)
+#'  For multi-group comparisons, `ref_group` and `test_group` columns are added to the tibble.
+#'
 #'  - `raw_result`: The raw limma fit object(s).
 #' @seealso [limma::lmFit()], [limma::eBayes()], [limma::makeContrasts()]
 #' @export
@@ -248,7 +253,7 @@ gly_limma_ <- function(
   # Generate contrasts based on user input or default pairwise
   if (is.null(contrasts)) {
     # Generate all pairwise contrasts
-    contrast_pairs <- .generate_pairwise_contrasts(group_levels)
+    contrast_pairs <- .make_comparisons(group_levels, reverse = TRUE)
   } else {
     # Parse user-specified contrasts
     contrast_pairs <- .parse_custom_contrasts(contrasts, group_levels)
@@ -289,20 +294,6 @@ gly_limma_ <- function(
   )
 }
 
-# Helper function to generate all pairwise contrasts
-.generate_pairwise_contrasts <- function(group_levels) {
-  n_groups <- length(group_levels)
-  contrast_pairs <- list()
-
-  for (i in 1:(n_groups - 1)) {
-    for (j in (i + 1):n_groups) {
-      contrast_pairs <- append(contrast_pairs, list(c(group_levels[i], group_levels[j])))
-    }
-  }
-
-  return(contrast_pairs)
-}
-
 # Convert multi-group limma fit object to tibble
 .gly_limma_multi_tibblify <- function(fit, p_adj_method, contrast_pairs) {
   # Extract single contrast result as tibble
@@ -326,7 +317,8 @@ gly_limma_ <- function(
         b = "B"
       ) %>%
       dplyr::mutate(
-        contrast = stringr::str_c(contrast_pairs[[i]][1], "_vs_", contrast_pairs[[i]][2])
+        ref_group = contrast_pairs[[i]][2],
+        test_group = contrast_pairs[[i]][1],
       )
 
     # Remove p_adj column if p_adj_method was NULL
@@ -387,7 +379,7 @@ gly_limma_ <- function(
     }
 
     # Return as character vector
-    c(group1, group2)
+    c(group2, group1)
   }
 
   # Use purrr::map to parse all contrasts

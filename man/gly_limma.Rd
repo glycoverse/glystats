@@ -39,9 +39,11 @@ If NULL (default), the first level of the group factor is used as the reference.
 Only used for two-group comparisons.}
 
 \item{contrasts}{A character vector specifying custom contrasts for multi-group comparisons.
-If NULL (default), all pairwise comparisons are automatically generated.
+If NULL (default), all pairwise comparisons are automatically generated,
+and the levels coming first in the factor will be used as the reference group.
 Supports two formats: "group1-group2" or "group1_vs_group2".
-Use the second format if group names contain hyphens.}
+Use the second format if group names contain hyphens.
+"group1" will be used as the reference group.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the statistical results are returned.
@@ -52,7 +54,9 @@ Only applicable to \code{gly_limma()}.}
 \item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
 
 \item{groups}{A factor or character vector specifying group membership for each sample.
-Must have at least 2 levels. Character vectors will be automatically converted to factors.}
+Must have at least 2 levels. Character vectors will be automatically converted to factors.
+If \code{contrasts} is not provided,
+the levels coming first in the factor will be used as the reference group.}
 }
 \value{
 A list with two elements:
@@ -66,7 +70,7 @@ A list with two elements:
 \item \code{p}: Raw p-value
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 \item \code{b}: B-statistic (log-odds of differential expression)
-\item \code{contrast}: Contrast name (for multi-group comparisons only)
+For multi-group comparisons, \code{ref_group} and \code{test_group} columns are added to the tibble.
 }
 \item \code{raw_result}: The raw limma fit object(s).
 }
