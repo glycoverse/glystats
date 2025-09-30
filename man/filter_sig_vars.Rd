@@ -10,7 +10,8 @@ filter_sig_vars(
   p_adj_cutoff = 0.05,
   p_val_cutoff = NULL,
   fc_cutoff = NULL,
-  comparison = NULL
+  comparison = NULL,
+  ...
 )
 }
 \arguments{
@@ -20,16 +21,20 @@ filter_sig_vars(
 
 \item{p_adj_cutoff}{The threshold for p-adjusted values. Default is 0.05.}
 
-\item{p_val_cutoff}{The threshold for p-values. We don't recommend using this. Default is NULL.}
+\item{p_val_cutoff}{The threshold for p-values. We don't recommend using this. Default is NULL.
+If you insist to use it, please set \code{p_adj_cutoff} to NULL.}
 
 \item{fc_cutoff}{The threshold for fold changes. Default is NULL. Only positive value is needed.
-For example, \code{2} means fold change > 2 or < 1/2.}
+For example, \code{2} means fold change > 2 or < 1/2.
+For \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results, \code{fc_cutoff} is only used when \code{on} is "post_hoc_test".}
 
 \item{comparison}{Only matters for multi-group DEA results.
 Specifies which comparison to filter on. A string with the format "group1_vs_group2".
-For \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results, if \code{comparison} is NULL,
-the main test results will be used, otherwise the post-hoc test results.
-For \code{\link[=gly_limma]{gly_limma()}} results, if \code{comparison} is NULL, all comparisons will be filtered.}
+For \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results, \code{comparison} is only used when \code{on} is "post_hoc_test".}
+
+\item{on}{"main_test" or "post_hoc_test". Should the filter be applied on the main test results or the post-hoc test results?
+Only applicable to \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results. Default is "main_test".
+If "post_hoc_result", please set a \code{comparison} value.}
 }
 \value{
 An new \code{\link[glyexp:experiment]{glyexp::experiment()}} object.

@@ -70,7 +70,8 @@ A list with two elements:
 \item \code{p_val}: Raw p-value
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 \item \code{b}: B-statistic (log-odds of differential expression)
-For multi-group comparisons, \code{ref_group} and \code{test_group} columns are added to the tibble.
+\item \code{ref_group}: Reference group
+\item \code{test_group}: Test group
 }
 \item \code{raw_result}: The raw limma fit object(s).
 }
