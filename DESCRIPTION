@@ -48,11 +48,13 @@ Imports:
     purrr,
     stringr,
     withr,
-    survival
+    survival,
+    glyrepr (>= 0.7.4)
 Depends: 
     R (>= 2.10)
-Remotes: 
+Remotes:  
     glycoverse/glyexp@*release,
     glycoverse/glyclean@*release,
-    glycoverse/glyread@*release
+    glycoverse/glyread@*release,
+    glycoverse/glyrepr@*release
 VignetteBuilder: knitr

@@ -9,3 +9,7 @@
 #' @importFrom tidyselect all_of
 ## usethis namespace: end
 NULL
+
+ignore_unused_imports <- function() {
+  glyrepr::glycan_structure
+}
