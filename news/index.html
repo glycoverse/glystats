@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,18 +33,21 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glystats-development-version">glystats (development version)<a class="anchor" aria-label="anchor" href="#glystats-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.0" id="glystats-050">glystats 0.5.0<a class="anchor" aria-label="anchor" href="#glystats-050"></a></h2>
 <p>This is a big update! We make some breaking changes to the API, mainly DEA functions. Now you can ensure these properties for all DEA results:</p>
 <ul><li>The levels in the front are the reference group. For example, for groups with levels c(“A”, “B”), “A” is the reference group. For groups with levels c(“A”, “B”, “C”), “A” is the reference group in A-B and A-C comparisons, and “B” is the reference group in B-C comparisons.</li>
 <li>For the concept of “comparison”, either in result columns or as arguments, it is expected to be in the format of “ref_vs_test”.</li>
 </ul><div class="section level3">
-<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<h3 id="breaking-changes-0-5-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-5-0"></a></h3>
 <ul><li>The <code>post_hoc</code> column in <code>tidy_result$main_test</code> of results from <code><a href="../reference/gly_anova.html">gly_anova()</a></code> and <code><a href="../reference/gly_kruskal.html">gly_kruskal()</a></code> is now in the format of “ref_vs_test” instead of “ref-test”.</li>
 <li>The <code>group1</code> and <code>group2</code> columns in <code>tidy_result$post_hoc_test</code> of results from <code><a href="../reference/gly_anova.html">gly_anova()</a></code> and <code><a href="../reference/gly_kruskal.html">gly_kruskal()</a></code> are renamed into <code>ref_group</code> and <code>test_group</code> for more clarity.</li>
 <li>In the <code>tidy_result</code> of <code><a href="../reference/gly_limma.html">gly_limma()</a></code>, the <code>comparison</code> column is replaced by the <code>ref_group</code> and <code>test_group</code> columns.</li>
 <li>The results of all functions now have a <code>p_val</code> column for raw p-values, a <code>p_adj</code> column for adjusted p-values, and a <code>log2fc</code> column for log2 fold change, if applicable. This consistence in column naming reduces the cognitive load.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<h3 id="new-features-0-5-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-5-0"></a></h3>
 <ul><li>Add <code><a href="../reference/get_tidy_result.html">get_tidy_result()</a></code> and <code><a href="../reference/get_tidy_result.html">get_raw_result()</a></code> to get the tidy result tibble and the raw result list from a glystats result object. These functions are useful to be used in pipes.</li>
 <li>Add <code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> to filter the experiment using the results from glystats DEA functions to keep only significant variables.</li>
 <li>
@@ -52,7 +55,7 @@
 <li>The post-hoc results from <code><a href="../reference/gly_anova.html">gly_anova()</a></code> and <code><a href="../reference/gly_kruskal.html">gly_kruskal()</a></code> now have a <code>log2fc</code> column for log2 fold change.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="minor-improvements-and-bug-fixes-development-version">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-development-version"></a></h3>
+<h3 id="minor-improvements-and-bug-fixes-0-5-0">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-5-0"></a></h3>
 <ul><li>Update group information message in many functions. Instead of “Group 1” and “Group 2”, now we use “Ref Group” and “Test Group” for more clarity.</li>
 <li>There are <code>ref_group</code> and <code>test_group</code> columns in the <code>tidy_result</code> tibble of <code><a href="../reference/gly_limma.html">gly_limma()</a></code> even for 2 groups now.</li>
 <li>Fix the bug that <code><a href="../reference/gly_kruskal.html">gly_kruskal()</a></code> failed to work with experiments with 2 groups.</li>
