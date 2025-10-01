@@ -1,4 +1,4 @@
-# glystats (development version)
+# glystats 0.5.0
 
 This is a big update! We make some breaking changes to the API, mainly DEA functions.
 Now you can ensure these properties for all DEA results:
