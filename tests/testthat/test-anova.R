@@ -47,7 +47,7 @@ test_that("gly_anova comparison direction is correct for 2 groups", {
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
-  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
 
   # Call gly_anova
   result <- suppressMessages(gly_anova(exp))
@@ -73,7 +73,7 @@ test_that("gly_anova comparison direction is correct for 3 groups", {
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
-  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
 
   # Call gly_anova
   result <- suppressMessages(gly_anova(exp))
@@ -103,7 +103,7 @@ test_that("gly_kruskal comparison direction is correct for 2 groups", {
   expr_mat <- matrix(1:20, nrow = 1, byrow = TRUE)
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
-  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
 
   # Call gly_kruskal
   result <- suppressMessages(gly_kruskal(exp))
@@ -126,7 +126,7 @@ test_that("gly_kruskal comparison direction is correct for 3 groups", {
   expr_mat <- matrix(1:30, nrow = 1, byrow = TRUE)
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
-  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
 
   # Call gly_kruskal
   result <- suppressMessages(gly_kruskal(exp))

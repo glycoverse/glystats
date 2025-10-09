@@ -26,8 +26,7 @@ test_that("gly_cox works with basic survival data", {
     expr_mat = expr_mat,
     sample_info = sample_info,
     var_info = var_info,
-    exp_type = "glycomics",
-    glycan_type = "N"
+    exp_type = "others"
   )
   
   # Test gly_cox function
@@ -89,8 +88,7 @@ test_that("gly_cox assigns NA for failed variables", {
     expr_mat = expr_mat,
     sample_info = sample_info,
     var_info = var_info,
-    exp_type = "glycomics",
-    glycan_type = "N"
+    exp_type = "others"
   )
 
   # Run DEA with cox test
@@ -162,8 +160,7 @@ test_that("gly_cox returns list with tidy and raw results", {
     expr_mat = expr_mat,
     sample_info = sample_info,
     var_info = var_info,
-    exp_type = "glycomics",
-    glycan_type = "N"
+    exp_type = "others"
   )
 
   # Test gly_cox function
@@ -214,8 +211,7 @@ test_that("gly_cox add_info parameter works", {
     expr_mat = expr_mat,
     sample_info = sample_info,
     var_info = var_info,
-    exp_type = "glycomics",
-    glycan_type = "N"
+    exp_type = "others"
   )
   
   # Test add_info = TRUE (default)
@@ -256,8 +252,7 @@ test_that("gly_cox custom time and event columns work", {
     expr_mat = expr_mat,
     sample_info = sample_info,
     var_info = var_info,
-    exp_type = "glycomics",
-    glycan_type = "N"
+    exp_type = "others"
   )
 
   # Test with custom column names
@@ -301,8 +296,7 @@ test_that("gly_cox p-value adjustment methods work", {
     expr_mat = expr_mat,
     sample_info = sample_info,
     var_info = var_info,
-    exp_type = "glycomics",
-    glycan_type = "N"
+    exp_type = "others"
   )
 
   # Test different p-value adjustment methods
@@ -354,8 +348,7 @@ test_that("gly_cox error handling works", {
     expr_mat = expr_mat,
     sample_info = sample_info_no_surv,
     var_info = var_info,
-    exp_type = "glycomics",
-    glycan_type = "N"
+    exp_type = "others"
   )
 
   expect_error(suppressMessages(gly_cox(exp_no_time)), "Must be of type 'numeric'")
@@ -368,8 +361,7 @@ test_that("gly_cox error handling works", {
     expr_mat = expr_mat,
     sample_info = sample_info_with_surv,
     var_info = var_info,
-    exp_type = "glycomics",
-    glycan_type = "N"
+    exp_type = "others"
   )
 
   expect_error(suppressMessages(gly_cox_(expr_mat, sample_info_with_surv$time, sample_info_with_surv$event, p_adj_method = "invalid")),

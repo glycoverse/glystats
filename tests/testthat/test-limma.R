@@ -35,7 +35,7 @@ test_that("gly_limma direction is correct for 2 groups", {
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
-  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
 
   # Call gly_limma
   result <- suppressMessages(gly_limma(exp))
@@ -127,7 +127,7 @@ test_that("gly_limma direction is correct for 3 groups", {
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
-  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
 
   # Call gly_limma
   result <- suppressMessages(gly_limma(exp))
@@ -151,7 +151,7 @@ test_that("gly_limma direction is correct for 3 groups with custom contrasts", {
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
-  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "glycomics", "N")
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
 
   # Call gly_limma
   custom_contrasts <- c("A_vs_B", "A_vs_C")

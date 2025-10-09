@@ -51,8 +51,7 @@ exp_topliss_valid <- function() {
   rownames(var_info) <- rownames(expr_mat)
 
   # Create glyexp object
-  glyexp::experiment(expr_mat = expr_mat, sample_info = sample_info, var_info = var_info,
-                     exp_type = "glycomics", glycan_type = "N")
+  glyexp::experiment(expr_mat, sample_info, var_info, "others")
 }
 
 # Create a multi-group dataset that satisfies Topliss ratio
@@ -94,6 +93,5 @@ exp_multigroup_valid <- function() {
   rownames(var_info) <- rownames(expr_mat)
 
   # Create glyexp object
-  glyexp::experiment(expr_mat = expr_mat, sample_info = sample_info, var_info = var_info,
-                     exp_type = "glycomics", glycan_type = "N")
+  glyexp::experiment(expr_mat = expr_mat, sample_info = sample_info, var_info = var_info, exp_type = "others")
 }
