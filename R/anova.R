@@ -353,10 +353,15 @@ gly_kruskal_ <- function(
 
 # Helper function to generate raw main test results
 .generate_raw_main_results <- function(data, .f, ...) {
-  safe_f <- purrr::possibly(.f, otherwise = NA)
+  dots <- rlang::list2(...)
+  disallowed_args <- intersect(names(dots), c("formula", "data"))
+  if (length(disallowed_args) > 0) {
+    cli::cli_abort("Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; they are controlled internally.")
+  }
+  safe_f <- purrr::possibly(function(...) rlang::exec(.f, ...), otherwise = NA)
   main_test_raw <- data %>%
     dplyr::nest_by(.data$variable) %>%
-    dplyr::mutate(test_result = list(safe_f(log_value ~ group, data = .data$data)))
+    dplyr::mutate(test_result = list(safe_f(log_value ~ group, data = .data$data, !!!dots)))
   main_test_list <- main_test_raw$test_result
   n_na <- sum(is.na(main_test_list))
   if (n_na > 0) {

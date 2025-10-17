@@ -69,13 +69,22 @@ gly_umap_ <- function(
   mat <- log(mat + 1)
 
   # Perform UMAP
-  umap_res <- uwot::umap(
-    X = mat,
-    n_components = n_components,
-    n_neighbors = n_neighbors,
-    verbose = FALSE,
-    ...
+  dots <- rlang::list2(...)
+  if ("X" %in% names(dots)) {
+    cli::cli_abort("{.field X} should not be supplied through `...`; data comes from the function inputs.")
+  }
+  call_args <- c(
+    list(
+      X = mat,
+      n_components = n_components,
+      n_neighbors = n_neighbors
+    ),
+    dots
   )
+  if (!"verbose" %in% names(call_args)) {
+    call_args$verbose <- FALSE
+  }
+  umap_res <- do.call(uwot::umap, call_args)
 
   # Create tidy result tibble
   tidy_result <- tibble::tibble(

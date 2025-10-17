@@ -265,10 +265,15 @@ gly_wilcox_ <- function(
     dplyr::mutate(log_value = log2(.data$value + 1))
 
   # Perform statistical tests and store raw results
-  safe_f <- purrr::possibly(.f, otherwise = NA)
+  dots <- rlang::list2(...)
+  disallowed_args <- intersect(names(dots), c("formula", "data"))
+  if (length(disallowed_args) > 0) {
+    cli::cli_abort("Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; they are controlled internally.")
+  }
+  safe_f <- purrr::possibly(function(...) rlang::exec(.f, ...), otherwise = NA)
   nested_data <- data %>%
     dplyr::nest_by(.data$variable) %>%
-    dplyr::mutate(test_result = list(safe_f(log_value ~ group, data = .data$data)))
+    dplyr::mutate(test_result = list(safe_f(log_value ~ group, data = .data$data, !!!dots)))
 
   # Return named list of raw results
   raw_results <- nested_data$test_result

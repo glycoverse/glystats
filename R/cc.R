@@ -167,19 +167,31 @@ gly_consensus_clustering_ <- function(
 .cc_no_output <- function(mat, ...) {
   temp_dir <- withr::local_tempdir("consensus_temp")
 
+  dots <- rlang::list2(...)
+  if ("d" %in% names(dots)) {
+    cli::cli_abort("{.field d} should not be supplied through `...`; data comes from the function inputs.")
+  }
+
   # Capture and suppress all graphics output
   suppressMessages({
     withr::with_dir(temp_dir, {
       # Temporarily redirect graphics to a null device
       temp_pdf <- tempfile(fileext = ".pdf")
       withr::with_pdf(temp_pdf, {
-        ConsensusClusterPlus::ConsensusClusterPlus(
-          d = t(mat),  # ConsensusClusterPlus expects samples as columns
-          title = "temp_consensus",
-          plot = "pdf",  # Use pdf but redirect to temp file
-          verbose = FALSE,
-          ...
+        call_args <- c(
+          list(d = t(mat)),
+          dots
         )
+        if (!"title" %in% names(call_args)) {
+          call_args$title <- "temp_consensus"
+        }
+        if (!"plot" %in% names(call_args)) {
+          call_args$plot <- "pdf"
+        }
+        if (!"verbose" %in% names(call_args)) {
+          call_args$verbose <- FALSE
+        }
+        do.call(ConsensusClusterPlus::ConsensusClusterPlus, call_args)
       })
     })
   })
@@ -187,14 +199,25 @@ gly_consensus_clustering_ <- function(
 
 .cc_with_output <- function(mat, output_file, ...) {
   temp_dir <- withr::local_tempdir("consensus_temp")
+  dots <- rlang::list2(...)
+  if ("d" %in% names(dots)) {
+    cli::cli_abort("{.field d} should not be supplied through `...`; data comes from the function inputs.")
+  }
   cc_res <- suppressMessages({
-    ConsensusClusterPlus::ConsensusClusterPlus(
-      d = t(mat),  # ConsensusClusterPlus expects samples as columns
-      title = file.path(temp_dir, "consensus_output"),
-      plot = "pdf",
-      verbose = FALSE,
-      ...
+    call_args <- c(
+      list(d = t(mat)),
+      dots
     )
+    if (!"title" %in% names(call_args)) {
+      call_args$title <- file.path(temp_dir, "consensus_output")
+    }
+    if (!"plot" %in% names(call_args)) {
+      call_args$plot <- "pdf"
+    }
+    if (!"verbose" %in% names(call_args)) {
+      call_args$verbose <- FALSE
+    }
+    do.call(ConsensusClusterPlus::ConsensusClusterPlus, call_args)
   })
 
   # Move the generated consensus.pdf to the specified output file

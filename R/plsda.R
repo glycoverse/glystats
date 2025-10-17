@@ -108,11 +108,41 @@ gly_plsda_ <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
   # For small datasets, reduce permutation tests to allow model building
   perm_i <- if (n_samples < 10) 0 else 20
 
+  dots <- rlang::list2(...)
+  disallowed_args <- intersect(names(dots), c("x", "y"))
+  if (length(disallowed_args) > 0) {
+    cli::cli_abort("Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; data comes from the function inputs.")
+  }
+
+  call_args <- c(
+    list(
+      x = mat,
+      y = groups,
+      predI = ncomp
+    ),
+    dots
+  )
+  if (!"orthoI" %in% names(call_args)) {
+    call_args$orthoI <- 0
+  }
+  if (!"scaleC" %in% names(call_args)) {
+    call_args$scaleC <- if (scale) "standard" else "none"
+  }
+  if (!"crossvalI" %in% names(call_args)) {
+    call_args$crossvalI <- crossval_i
+  }
+  if (!"permI" %in% names(call_args)) {
+    call_args$permI <- perm_i
+  }
+  if (!"fig.pdfC" %in% names(call_args)) {
+    call_args$fig.pdfC <- "none"
+  }
+  if (!"info.txtC" %in% names(call_args)) {
+    call_args$info.txtC <- "none"
+  }
+
   # Perform PLS-DA by setting orthoI = 0 (no orthogonal components)
-  plsda_res <- ropls::opls(x = mat, y = groups, predI = ncomp, orthoI = 0,
-                           scaleC = if (scale) "standard" else "none",
-                           crossvalI = crossval_i, permI = perm_i,
-                           fig.pdfC = "none", info.txtC = "none", ...)
+  plsda_res <- do.call(ropls::opls, call_args)
 
   # Extract and format results
   tidy_result <- .format_oplsda_results(plsda_res, groups, NULL, FALSE)

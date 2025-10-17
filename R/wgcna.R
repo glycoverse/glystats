@@ -117,44 +117,54 @@ gly_wgcna_ <- function(
   checkmate::assert_int(deep_split, lower = 0, upper = 4)
   checkmate::assert_number(merge_cut_height, lower = 0, upper = 1)
 
+  dots <- rlang::list2(...)
+  if ("datExpr" %in% names(dots)) {
+    cli::cli_abort("{.field datExpr} should not be supplied through `...`; data comes from the function inputs.")
+  }
+
   # Prepare data for WGCNA (samples as rows, variables as columns)
   # Apply log2 transformation
   expr_mat <- log2(t(expr_mat) + 1)
 
-  # Step 1: Choose soft threshold power
-  # Suppress all output from pickSoftThreshold (including direct console output)
-  threshold_res <- suppressMessages(suppressWarnings({
-    utils::capture.output({
-      threshold_res_temp <- WGCNA::pickSoftThreshold(
-        expr_mat,
-        powerVector = powers,
-        verbose = 0
-      )
-    }, type = "output")
-    threshold_res_temp
-  }))
+  if (!"power" %in% names(dots)) {
+    # Step 1: Choose soft threshold power
+    # Suppress all output from pickSoftThreshold (including direct console output)
+    threshold_res <- suppressMessages(suppressWarnings({
+      utils::capture.output({
+        threshold_res_temp <- WGCNA::pickSoftThreshold(
+          expr_mat,
+          powerVector = powers,
+          verbose = 0
+        )
+      }, type = "output")
+      threshold_res_temp
+    }))
 
-  # Extract the recommended power
-  power <- threshold_res$powerEstimate
-  if (is.na(power)) {
-    cli::cli_warn(c(
-      "Can't determine optimal soft thresholding power.",
-      "x" = "This implies the data is not suitable for WGCNA.",
-      "i" = "Falling back to the first power that gives R^2 > 0.8 or the power with highest R^2."
-    ))
-    # If no power is recommended, use the first power that gives R^2 > 0.8
-    sft_data <- threshold_res$fitIndices
-    power_candidates <- sft_data$Power[sft_data$SFT.R.sq > 0.8]
-    if (length(power_candidates) > 0) {
-      power <- min(power_candidates)
-    } else {
-      # If still no suitable power, use the power with highest R^2
-      power <- sft_data$Power[which.max(sft_data$SFT.R.sq)]
+    # Extract the recommended power
+    power <- threshold_res$powerEstimate
+    if (is.na(power)) {
+      cli::cli_warn(c(
+        "Can't determine optimal soft thresholding power.",
+        "x" = "This implies the data is not suitable for WGCNA.",
+        "i" = "Falling back to the first power that gives R^2 > 0.8 or the power with highest R^2."
+      ))
+      # If no power is recommended, use the first power that gives R^2 > 0.8
+      sft_data <- threshold_res$fitIndices
+      power_candidates <- sft_data$Power[sft_data$SFT.R.sq > 0.8]
+      if (length(power_candidates) > 0) {
+        power <- min(power_candidates)
+      } else {
+        # If still no suitable power, use the power with highest R^2
+        power <- sft_data$Power[which.max(sft_data$SFT.R.sq)]
+      }
     }
-  }
 
-  # Inform user about the selected power
-  cli::cli_alert_info("Selected soft threshold power: {.val {power}}")
+    # Inform user about the selected power
+    cli::cli_alert_info("Selected soft threshold power: {.val {power}}")
+  } else {
+    power <- dots$power
+    cli::cli_alert_info("Using user-supplied soft threshold power: {.val {power}}")
+  }
 
   # Step 2: Network construction and module detection
   # **Note about `cor`**
@@ -174,17 +184,34 @@ gly_wgcna_ <- function(
   net <- local({
     cor <- wgcna_cor
     suppressMessages(suppressWarnings(
-      WGCNA::blockwiseModules(
-        expr_mat,
-        power = power,
-        networkType = network_type,
-        TOMType = tom_type,
-        minModuleSize = min_module_size,
-        deepSplit = deep_split,
-        mergeCutHeight = merge_cut_height,
-        verbose = 0,
-        ...
-      )
+      {
+        call_args <- c(
+          list(datExpr = expr_mat),
+          dots
+        )
+        if (!"power" %in% names(call_args)) {
+          call_args$power <- power
+        }
+        if (!"networkType" %in% names(call_args)) {
+          call_args$networkType <- network_type
+        }
+        if (!"TOMType" %in% names(call_args)) {
+          call_args$TOMType <- tom_type
+        }
+        if (!"minModuleSize" %in% names(call_args)) {
+          call_args$minModuleSize <- min_module_size
+        }
+        if (!"deepSplit" %in% names(call_args)) {
+          call_args$deepSplit <- deep_split
+        }
+        if (!"mergeCutHeight" %in% names(call_args)) {
+          call_args$mergeCutHeight <- merge_cut_height
+        }
+        if (!"verbose" %in% names(call_args)) {
+          call_args$verbose <- 0
+        }
+        do.call(WGCNA::blockwiseModules, call_args)
+      }
     ))
   })
 

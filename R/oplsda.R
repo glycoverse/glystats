@@ -114,18 +114,40 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   # For small datasets, reduce permutation tests to allow model building
   perm_i <- if (n_samples < 10) 0 else 20
 
-  # Handle ortho_i parameter - if NA, let ropls decide automatically
-  if (is.na(ortho_i)) {
-    oplsda_res <- ropls::opls(x = mat, y = groups, predI = pred_i,
-                              scaleC = if (scale) "standard" else "none",
-                              crossvalI = crossval_i, permI = perm_i,
-                              fig.pdfC = "none", info.txtC = "none", ...)
-  } else {
-    oplsda_res <- ropls::opls(x = mat, y = groups, predI = pred_i, orthoI = ortho_i,
-                              scaleC = if (scale) "standard" else "none",
-                              crossvalI = crossval_i, permI = perm_i,
-                              fig.pdfC = "none", info.txtC = "none", ...)
+  dots <- rlang::list2(...)
+  disallowed_args <- intersect(names(dots), c("x", "y"))
+  if (length(disallowed_args) > 0) {
+    cli::cli_abort("Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; data comes from the function inputs.")
   }
+
+  call_args <- c(
+    list(
+      x = mat,
+      y = groups,
+      predI = pred_i
+    ),
+    dots
+  )
+  if (!is.na(ortho_i) && !"orthoI" %in% names(call_args)) {
+    call_args$orthoI <- ortho_i
+  }
+  if (!"scaleC" %in% names(call_args)) {
+    call_args$scaleC <- if (scale) "standard" else "none"
+  }
+  if (!"crossvalI" %in% names(call_args)) {
+    call_args$crossvalI <- crossval_i
+  }
+  if (!"permI" %in% names(call_args)) {
+    call_args$permI <- perm_i
+  }
+  if (!"fig.pdfC" %in% names(call_args)) {
+    call_args$fig.pdfC <- "none"
+  }
+  if (!"info.txtC" %in% names(call_args)) {
+    call_args$info.txtC <- "none"
+  }
+
+  oplsda_res <- do.call(ropls::opls, call_args)
 
   # Extract and format results
   tidy_result <- .format_oplsda_results(oplsda_res, groups, NULL, FALSE)

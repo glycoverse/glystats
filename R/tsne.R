@@ -64,13 +64,22 @@ gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, ...) {
   mat <- log(mat + 1)
 
   # Perform t-SNE
-  tsne_res <- Rtsne::Rtsne(
-    X = mat,
-    dims = dims,
-    perplexity = perplexity,
-    check_duplicates = FALSE,  # Set to FALSE for better performance
-    ...
+  dots <- rlang::list2(...)
+  if ("X" %in% names(dots)) {
+    cli::cli_abort("{.field X} should not be supplied through `...`; data comes from the function inputs.")
+  }
+  call_args <- c(
+    list(
+      X = mat,
+      dims = dims,
+      perplexity = perplexity
+    ),
+    dots
   )
+  if (!"check_duplicates" %in% names(call_args)) {
+    call_args$check_duplicates <- FALSE
+  }
+  tsne_res <- do.call(Rtsne::Rtsne, call_args)
 
   # Create tidy result tibble
   tidy_result <- tibble::tibble(
