@@ -57,30 +57,39 @@
 #' @export
 gly_enrich_go <- function(exp, add_info = TRUE, ...) {
   rlang::check_installed("clusterProfiler")
-  rlang::check_installed("org.Hs.eg.db")
 
   checkmate::assert_logical(add_info, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
-  gly_enrich_go_(genes, ...)
+  dots <- rlang::list2(...)
+  rlang::exec(gly_enrich_go_, genes, !!!dots)
 }
 
 #' @rdname gly_enrich_go
 #' @export
 gly_enrich_go_ <- function(proteins, ...) {
   rlang::check_installed("clusterProfiler")
-  rlang::check_installed("org.Hs.eg.db")
 
   checkmate::assert_character(proteins, min.len = 1)
 
+  dots <- rlang::list2(...)
+  call_args <- c(list(gene = proteins), dots)
+  if (!"OrgDb" %in% names(call_args)) {
+    rlang::check_installed("org.Hs.eg.db")
+    call_args$OrgDb <- "org.Hs.eg.db"
+  }
+  if (!"keyType" %in% names(call_args)) {
+    call_args$keyType <- "UNIPROT"
+  }
+  if (!"readable" %in% names(call_args)) {
+    call_args$readable <- TRUE
+  }
+  if ("gene" %in% names(dots)) {
+    cli::cli_abort("{.field gene} should not be supplied through `...`; use the function's first argument instead.")
+  }
+
   suppressMessages(
-    raw_result <- clusterProfiler::enrichGO(
-      gene = proteins,
-      OrgDb = "org.Hs.eg.db",
-      keyType = "UNIPROT",
-      readable = TRUE,
-      ...
-    )
+    raw_result <- do.call(clusterProfiler::enrichGO, call_args)
   )
 
   tidy_result <- tibble::as_tibble(raw_result)
@@ -112,7 +121,8 @@ gly_enrich_kegg <- function(exp, add_info = TRUE, ...) {
   checkmate::assert_logical(add_info, len = 1)
 
   genes <- .extract_genes_from_exp(exp)
-  gly_enrich_kegg_(genes, ...)
+  dots <- rlang::list2(...)
+  rlang::exec(gly_enrich_kegg_, genes, !!!dots)
 }
 
 #' @rdname gly_enrich_go
@@ -122,12 +132,17 @@ gly_enrich_kegg_ <- function(proteins, ...) {
 
   checkmate::assert_character(proteins, min.len = 1)
 
+  dots <- rlang::list2(...)
+  if ("gene" %in% names(dots)) {
+    cli::cli_abort("{.field gene} should not be supplied through `...`; use the function's first argument instead.")
+  }
+  call_args <- c(list(gene = proteins), dots)
+  if (!"keyType" %in% names(call_args)) {
+    call_args$keyType <- "uniprot"
+  }
+
   suppressMessages(
-    raw_result <- clusterProfiler::enrichKEGG(
-      gene = proteins,
-      keyType = "uniprot",
-      ...
-    )
+    raw_result <- do.call(clusterProfiler::enrichKEGG, call_args)
   )
 
   tidy_result <- tibble::as_tibble(raw_result)
@@ -156,12 +171,16 @@ gly_enrich_kegg_ <- function(proteins, ...) {
 gly_enrich_reactome <- function(exp, add_info = TRUE, ...) {
   rlang::check_installed("clusterProfiler")
   rlang::check_installed("ReactomePA")
-  rlang::check_installed("org.Hs.eg.db")
 
   checkmate::assert_logical(add_info, len = 1)
 
+  dots <- rlang::list2(...)
+  if (!"OrgDb" %in% names(dots)) {
+    rlang::check_installed("org.Hs.eg.db")
+  }
+
   uniprot_ids <- .extract_genes_from_exp(exp)
-  gly_enrich_reactome_(uniprot_ids, ...)
+  rlang::exec(gly_enrich_reactome_, uniprot_ids, !!!dots)
 }
 
 #' @rdname gly_enrich_go
@@ -169,18 +188,42 @@ gly_enrich_reactome <- function(exp, add_info = TRUE, ...) {
 gly_enrich_reactome_ <- function(proteins, ...) {
   rlang::check_installed("clusterProfiler")
   rlang::check_installed("ReactomePA")
-  rlang::check_installed("org.Hs.eg.db")
 
   checkmate::assert_character(proteins, min.len = 1)
 
+  dots <- rlang::list2(...)
+  if ("gene" %in% names(dots)) {
+    cli::cli_abort("{.field gene} should not be supplied through `...`; use the function's first argument instead.")
+  }
+
+  bitr_arg_names <- c("OrgDb", "fromType", "toType", "drop")
+  bitr_args <- dots[intersect(names(dots), bitr_arg_names)]
+  dots <- dots[setdiff(names(dots), bitr_arg_names)]
+
+  orgdb <- bitr_args$OrgDb
+  if (is.null(orgdb)) {
+    rlang::check_installed("org.Hs.eg.db")
+    orgdb <- "org.Hs.eg.db"
+  }
+  orgdb_obj <- .resolve_orgdb(orgdb)
+
+  from_type <- if (!is.null(bitr_args$fromType)) bitr_args$fromType else "UNIPROT"
+  to_type <- if (!is.null(bitr_args$toType)) bitr_args$toType else "ENTREZID"
+  drop_arg <- bitr_args$drop
+
   # Convert UniProt to Entrez IDs
+  bitr_call <- list(
+    proteins,
+    fromType = from_type,
+    toType = to_type,
+    OrgDb = orgdb_obj
+  )
+  if (!is.null(drop_arg)) {
+    bitr_call$drop <- drop_arg
+  }
+
   suppressWarnings(suppressMessages(
-    entrez_ids <- clusterProfiler::bitr(
-      proteins,
-      fromType = "UNIPROT",
-      toType = "ENTREZID",
-      OrgDb = org.Hs.eg.db::org.Hs.eg.db
-    )$ENTREZID
+    entrez_ids <- do.call(clusterProfiler::bitr, bitr_call)$ENTREZID
   ))
   entrez_ids <- entrez_ids[!is.na(entrez_ids)]
   n_failed <- length(proteins) - length(entrez_ids)
@@ -190,13 +233,15 @@ gly_enrich_reactome_ <- function(proteins, ...) {
   }
 
   # Perform Reactome pathway analysis
+  call_args <- c(list(gene = entrez_ids), dots)
+  if (!"organism" %in% names(call_args)) {
+    call_args$organism <- "human"
+  }
+  if (!"readable" %in% names(call_args)) {
+    call_args$readable <- TRUE
+  }
   suppressMessages(
-    raw_result <- ReactomePA::enrichPathway(
-      gene = entrez_ids,
-      organism = "human",
-      readable = TRUE,
-      ...
-    )
+    raw_result <- do.call(ReactomePA::enrichPathway, call_args)
   )
 
   tidy_result <- tibble::as_tibble(raw_result)
@@ -228,4 +273,13 @@ gly_enrich_reactome_ <- function(proteins, ...) {
     cli::cli_abort("{.field protein} column not found in the variable information tibble.")
   }
   unique(genes[!is.na(genes)])
+}
+
+.resolve_orgdb <- function(orgdb) {
+  if (is.character(orgdb) && length(orgdb) == 1) {
+    rlang::check_installed(orgdb)
+    get(orgdb, envir = asNamespace(orgdb))
+  } else {
+    orgdb
+  }
 }

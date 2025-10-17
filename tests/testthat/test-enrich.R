@@ -1,11 +1,9 @@
-skip("Too long to run.")
+#skip("Too long to run.")
+skip_if_not_installed("clusterProfiler")
+skip_if_not_installed("org.Hs.eg.db")
 
 # Integration test for GO enrichment
 test_that("gly_enrich_go works with protein column (integration)", {
-  # Skip if required packages are not available
-  skip_if_not_installed("clusterProfiler")
-  skip_if_not_installed("org.Hs.eg.db")
-
   # Create test data with protein column
   exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
 
@@ -191,9 +189,7 @@ test_that("gly_enrich_kegg filters out NA proteins", {
 # Integration test for Reactome enrichment
 test_that("gly_enrich_reactome works with protein column (integration)", {
   # Skip if required packages are not available
-  skip_if_not_installed("clusterProfiler")
   skip_if_not_installed("ReactomePA")
-  skip_if_not_installed("org.Hs.eg.db")
 
   # Skip if network connection is not available
   skip_if_offline()
@@ -373,4 +369,15 @@ test_that("gly_enrich_reactome_ works correctly", {
   bitr = function(...) data.frame(UNIPROT = character(0), ENTREZID = character(0), stringsAsFactors = FALSE),
   .package = "clusterProfiler"
   )
+})
+
+test_that("gly_enrich_go_ supports custom OrgDb", {
+  skip_if_not_installed("org.Mm.eg.db")
+  proteins <- c("Q9WV54", "Q02788", "Q3V3R4", "Q61207", "P97821", "P02468", "P09470", "Q9CYA0")
+  result <- suppressMessages(gly_enrich_go_(proteins, OrgDb = "org.Mm.eg.db"))
+  expect_s3_class(result, "glystats_go_ora_res")
+  expect_s3_class(result, "glystats_res")
+  expect_true(is.list(result))
+  expect_named(result, c("tidy_result", "raw_result"))
+  expect_true("id" %in% colnames(result$tidy_result))
 })
