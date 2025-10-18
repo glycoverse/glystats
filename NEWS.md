@@ -1,4 +1,8 @@
-# glystats (development version)
+# glystats 0.5.2
+
+## Minor improvements and bug fixes
+
+* Fix the bug in many functions that some parameters cannot be passed by `...` to the underlying statistical functions.
 
 # glystats 0.5.1
 
