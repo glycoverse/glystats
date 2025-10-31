@@ -38,7 +38,7 @@ Suggests:
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 URL: https://glycoverse.github.io/glystats/
 Imports:
     tibble,
@@ -59,10 +59,9 @@ Imports:
     survival,
     glyrepr (>= 0.7.4)
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1)
 Remotes: 
     glycoverse/glyexp@*release,
     glycoverse/glyclean@*release,
-    glycoverse/glyread@*release,
-    glycoverse/glyrepr@*release
+    glycoverse/glyread@*release
 VignetteBuilder: knitr
