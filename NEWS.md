@@ -1,4 +1,8 @@
-# glystats (development version)
+# glystats 0.5.3
+
+## Minor improvements and fixes
+
+* glystats now depends on the CRAN version of glyrepr.
 
 # glystats 0.5.2
 
