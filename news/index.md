@@ -2,6 +2,16 @@
 
 ## glystats (development version)
 
+## glystats 0.5.4
+
+### Minor improvements and bug fixes
+
+- [`filter_sig_vars()`](https://glycoverse.github.io/glystats/reference/filter_sig_vars.md)
+  now doesn’t require `comparison` to be provided for
+  [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
+  results. If `comparison` is not provided, a variable will be kept if
+  it is significant in any comparison.
+
 ## glystats 0.5.3
 
 ### Minor improvements and fixes
