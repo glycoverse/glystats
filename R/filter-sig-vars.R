@@ -37,6 +37,8 @@ filter_sig_vars <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, 
 #' @param comparison (For [gly_anova()], [gly_kruskal()], and [gly_limma()] results only)
 #'   Specifies which comparison to filter on. A string with the format "group1_vs_group2".
 #'   For [gly_anova()] and [gly_kruskal()] results, `comparison` is only used when `on` is "post_hoc_test".
+#'   If not provided, filtering will be performed on the main test results for [gly_anova()] and [gly_kruskal()],
+#'   and variables will be kept if they are significant in any comparison for [gly_limma()].
 #' @export
 filter_sig_vars.glystats_anova_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
   .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
@@ -97,12 +99,6 @@ filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_
 
 .filter_sig_vars_limma <- function(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison) {
   df <- res$tidy_result
-  if (dplyr::n_distinct(df$ref_group, df$test_group) > 1 && is.null(comparison)) {
-    cli::cli_abort(c(
-      "{.arg comparison} must be provided when there are multiple comparisons for limma.",
-      "i" = "Please set {.arg comparison} to a string with the format of {.val group1_vs_group2}."
-    ))
-  }
   if (!is.null(comparison)) {
     df <- .filter_comparison(df, comparison)
   }

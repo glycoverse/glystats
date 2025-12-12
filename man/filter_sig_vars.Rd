@@ -89,7 +89,9 @@ Default is "main_test". If "post_hoc_test", please set a \code{comparison} value
 
 \item{comparison}{(For \code{\link[=gly_anova]{gly_anova()}}, \code{\link[=gly_kruskal]{gly_kruskal()}}, and \code{\link[=gly_limma]{gly_limma()}} results only)
 Specifies which comparison to filter on. A string with the format "group1_vs_group2".
-For \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results, \code{comparison} is only used when \code{on} is "post_hoc_test".}
+For \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results, \code{comparison} is only used when \code{on} is "post_hoc_test".
+If not provided, filtering will be performed on the main test results for \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}},
+and variables will be kept if they are significant in any comparison for \code{\link[=gly_limma]{gly_limma()}}.}
 }
 \value{
 An new \code{\link[glyexp:experiment]{glyexp::experiment()}} object.

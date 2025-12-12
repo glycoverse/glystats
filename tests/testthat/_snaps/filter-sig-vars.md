@@ -71,12 +71,3 @@
       i Available comparisons: "H_vs_M", "H_vs_Y", "H_vs_C", "M_vs_Y", "M_vs_C", and "Y_vs_C".
       i Did you mean "H_vs_C"?
 
-# filter_sig_vars fails for limma for multiple groups without comparison
-
-    Code
-      filter_sig_vars(exp, result)
-    Condition
-      Error in `.filter_sig_vars_limma()`:
-      ! `comparison` must be provided when there are multiple comparisons for limma.
-      i Please set `comparison` to a string with the format of "group1_vs_group2".
-

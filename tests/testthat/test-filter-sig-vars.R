@@ -154,9 +154,3 @@ test_that("filter_sig_vars works for limma for multiple groups", {
   sig_exp <- filter_sig_vars(exp, result, comparison = "H_vs_C")
   expect_equal(nrow(sig_exp), 7)
 })
-
-test_that("filter_sig_vars fails for limma for multiple groups without comparison", {
-  exp <- small_exp()
-  result <- suppressMessages(gly_limma(exp))
-  expect_snapshot(filter_sig_vars(exp, result), error = TRUE)
-})
