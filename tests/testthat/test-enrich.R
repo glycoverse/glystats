@@ -1,4 +1,4 @@
-#skip("Too long to run.")
+skip("Too long to run.")
 skip_if_not_installed("clusterProfiler")
 skip_if_not_installed("org.Hs.eg.db")
 
