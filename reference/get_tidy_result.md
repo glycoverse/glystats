@@ -1,0 +1,101 @@
+# Get the result of a glystats analysis
+
+Syntax sugar for `$tidy_result` and `$raw_result` elements of a glystats
+result object. It's useful to be used in pipes.
+
+## Usage
+
+``` r
+get_tidy_result(res, which = NULL)
+
+get_raw_result(res, which = NULL)
+```
+
+## Arguments
+
+- res:
+
+  A glystats result object.
+
+- which:
+
+  Used to specify which element to get, when the result is a list. If
+  NULL, the whole result (tibble or list) will be returned.
+
+## Value
+
+A tibble.
+
+## Examples
+
+``` r
+library(glyexp)
+library(glyclean)
+library(dplyr)
+#> 
+#> Attaching package: ‘dplyr’
+#> The following object is masked from ‘package:glyexp’:
+#> 
+#>     select_var
+#> The following objects are masked from ‘package:stats’:
+#> 
+#>     filter, lag
+#> The following objects are masked from ‘package:base’:
+#> 
+#>     intersect, setdiff, setequal, union
+
+exp <- auto_clean(real_experiment) |>
+  glyexp::slice_head_var(n = 10)
+#> 
+#> ── Normalizing data ──
+#> 
+#> ℹ No QC samples found. Using default normalization method based on experiment type.
+#> ℹ Experiment type is "glycoproteomics". Using `normalize_median()`.
+#> ✔ Normalization completed.
+#> 
+#> ── Removing variables with too many missing values ──
+#> 
+#> ℹ No QC samples found. Using all samples.
+#> ℹ Applying preset "discovery"...
+#> ℹ Total removed: 24 (0.56%) variables.
+#> ✔ Variable removal completed.
+#> 
+#> ── Imputing missing values ──
+#> 
+#> ℹ No QC samples found. Using default imputation method based on sample size.
+#> ℹ Sample size <= 30, using `impute_sample_min()`.
+#> ✔ Imputation completed.
+#> 
+#> ── Aggregating data ──
+#> 
+#> ℹ Aggregating to "gfs" level
+#> ✔ Aggregation completed.
+#> 
+#> ── Normalizing data again ──
+#> 
+#> ℹ No QC samples found. Using default normalization method based on experiment type.
+#> ℹ Experiment type is "glycoproteomics". Using `normalize_median()`.
+#> ✔ Normalization completed.
+#> 
+#> ── Correcting batch effects ──
+#> 
+#> ℹ Batch column  not found in sample_info. Skipping batch correction.
+#> ✔ Batch correction completed.
+
+# Using a pipe
+sig_res <- exp |>
+  gly_anova() |>
+  get_tidy_result("main_test") |>
+  filter(p_adj < 0.05)
+#> ℹ Number of groups: 4
+#> ℹ Groups: "H", "M", "Y", and "C"
+#> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
+
+# Equivalent to
+anova_res <- gly_anova(exp)
+#> ℹ Number of groups: 4
+#> ℹ Groups: "H", "M", "Y", and "C"
+#> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
+sig_res <- anova_res$tidy_result$main_test |>
+  filter(p_adj < 0.05)
+```
