@@ -1,4 +1,8 @@
-# glystats (development version)
+# glystats 0.5.4
+
+## Minor improvements and bug fixes
+
+* `filter_sig_vars()` now doesn't require `comparison` to be provided for `gly_limma()` results. If `comparison` is not provided, a variable will be kept if it is significant in any comparison.
 
 # glystats 0.5.3
 
