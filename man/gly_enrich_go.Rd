@@ -28,7 +28,8 @@ gly_enrich_reactome_(proteins, ...)
 since enrichment results do not contain variable or sample columns.
 Only applicable to top-level APIs.}
 
-\item{...}{Additional arguments passed to \code{clusterProfiler::enrichGO()}, \code{clusterProfiler::enrichKEGG()}, or \code{ReactomePA::enrichPathway()}.}
+\item{...}{Additional arguments passed to \code{clusterProfiler::enrichGO()}, \code{clusterProfiler::enrichKEGG()}, or \code{ReactomePA::enrichPathway()}.
+See the "Additional arguments" section for more information.}
 
 \item{proteins}{A character vector of UniProt accession IDs.}
 }
@@ -52,9 +53,20 @@ The list has classes \code{glystats_go_ora_res}/\code{glystats_kegg_ora_res}/\co
 }
 }
 \description{
-Perform GO, KEGG, and Reactome ORA for proteins/genes.
+Perform GO, KEGG, and Reactome ORA for protein UniProt accessions.
+For glycoproteomics experiments, the function extracts unique proteins from the variable information.
 }
-\details{
+\section{Required packages}{
+
+These functions require the following packages to be installed:
+\itemize{
+\item \code{clusterProfiler} for enrichment analysis
+\item \code{ReactomePA} for Reactome pathway analysis
+\item \code{org.Hs.eg.db} for human gene annotation (GO analysis only)
+}
+}
+
+\section{Details}{
 These functions perform over-representation analysis using the specified database.
 
 \code{gly_enrich_go()}, \code{gly_enrich_kegg()}, and \code{gly_enrich_reactome()} are the top-level APIs
@@ -78,14 +90,26 @@ Uses \code{clusterProfiler::enrichKEGG()} with UniProt IDs as input.
 \strong{Reactome Analysis:}
 Converts UniProt IDs to Entrez IDs and uses \code{ReactomePA::enrichPathway()}.
 }
-\section{Required packages}{
 
-These functions require the following packages to be installed:
-\itemize{
-\item \code{clusterProfiler} for enrichment analysis
-\item \code{ReactomePA} for Reactome pathway analysis
-\item \code{org.Hs.eg.db} for human gene annotation (GO analysis only)
-}
+\section{Additional arguments}{
+\code{universe} can be passed as a character vector of uniprot accession,
+or a \code{\link[glyexp:experiment]{glyexp::experiment()}} object.
+If latter, the background proteins will be extracted from the experiment.
+This can be convenient when you first perform differential analysis and then perform enrichment
+on the differentially expressed proteins:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{dea_res <- gly_limma(exp)
+sig_exp <- filter_sig_vars(exp, dea_res)
+enrich_res <- gly_enrich_go(sig_exp, universe = exp)
+}\if{html}{\out{</div>}}
+
+For \code{gly_enrich_reactome()}, an \code{OrgDb} can be passed through \code{...} to \code{clusterProfiler::bitr()}
+to convert UniProt to Entrez IDs.
+By default, \code{org.Hs.eg.db} is used.
+This is useful when you want to use a different organism than human:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{enrich_res <- gly_enrich_reactome(exp, OrgDb = "org.Mm.eg.db")
+}\if{html}{\out{</div>}}
 }
 
 \seealso{

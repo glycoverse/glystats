@@ -1,7 +1,7 @@
 #' GO, KEGG, and Reactome over-representation analysis (ORA)
 #'
-#' @description
-#' Perform GO, KEGG, and Reactome ORA for proteins/genes.
+#' Perform GO, KEGG, and Reactome ORA for protein UniProt accessions.
+#' For glycoproteomics experiments, the function extracts unique proteins from the variable information.
 #'
 #' @param exp A `glyexp::experiment()` object.
 #' @param proteins A character vector of UniProt accession IDs.
@@ -9,6 +9,7 @@
 #'  since enrichment results do not contain variable or sample columns.
 #'  Only applicable to top-level APIs.
 #' @param ... Additional arguments passed to `clusterProfiler::enrichGO()`, `clusterProfiler::enrichKEGG()`, or `ReactomePA::enrichPathway()`.
+#'  See the "Additional arguments" section for more information.
 #'
 #' @section Required packages:
 #' These functions require the following packages to be installed:
@@ -17,6 +18,7 @@
 #' - `org.Hs.eg.db` for human gene annotation (GO analysis only)
 #'
 #' @details
+#' # Details
 #' These functions perform over-representation analysis using the specified database.
 #'
 #' `gly_enrich_go()`, `gly_enrich_kegg()`, and `gly_enrich_reactome()` are the top-level APIs
@@ -40,6 +42,29 @@
 #' **Reactome Analysis:**
 #' Converts UniProt IDs to Entrez IDs and uses `ReactomePA::enrichPathway()`.
 #'
+#' # Additional arguments
+#'
+#' `universe` can be passed as a character vector of uniprot accession,
+#' or a [glyexp::experiment()] object.
+#' If latter, the background proteins will be extracted from the experiment.
+#' This can be convenient when you first perform differential analysis and then perform enrichment
+#' on the differentially expressed proteins:
+#'
+#' ```r
+#' dea_res <- gly_limma(exp)
+#' sig_exp <- filter_sig_vars(exp, dea_res)
+#' enrich_res <- gly_enrich_go(sig_exp, universe = exp)
+#' ```
+#'
+#' For `gly_enrich_reactome()`, an `OrgDb` can be passed through `...` to `clusterProfiler::bitr()`
+#' to convert UniProt to Entrez IDs.
+#' By default, `org.Hs.eg.db` is used.
+#' This is useful when you want to use a different organism than human:
+#'
+#' ```r
+#' enrich_res <- gly_enrich_reactome(exp, OrgDb = "org.Mm.eg.db")
+#' ```
+#'
 #' @return A list with two elements:
 #'  - `tidy_result`: A tibble with enrichment results containing the following columns:
 #'    - `id`: Term ID (GO:XXXXXXX, hsa:XXXXX, or R-HSA-XXXXX)
@@ -60,7 +85,7 @@ gly_enrich_go <- function(exp, add_info = TRUE, ...) {
 
   checkmate::assert_logical(add_info, len = 1)
 
-  genes <- .extract_genes_from_exp(exp)
+  genes <- .extract_uniprot_from_exp(exp)
   dots <- rlang::list2(...)
   rlang::exec(gly_enrich_go_, genes, !!!dots)
 }
@@ -84,6 +109,11 @@ gly_enrich_go_ <- function(proteins, ...) {
   if (!"readable" %in% names(call_args)) {
     call_args$readable <- TRUE
   }
+  if ("universe" %in% names(dots)) {
+    if (glyexp::is_experiment(dots$universe)) {
+      call_args$universe <- .extract_uniprot_from_exp(dots$universe)
+    }
+  }
   if ("gene" %in% names(dots)) {
     cli::cli_abort("{.field gene} should not be supplied through `...`; use the function's first argument instead.")
   }
@@ -94,7 +124,7 @@ gly_enrich_go_ <- function(proteins, ...) {
 
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
-  
+
   # Rename p_value to p_val and p_adjust to p_adj for consistency
   if ("p_value" %in% colnames(tidy_result)) {
     tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
@@ -120,7 +150,7 @@ gly_enrich_kegg <- function(exp, add_info = TRUE, ...) {
 
   checkmate::assert_logical(add_info, len = 1)
 
-  genes <- .extract_genes_from_exp(exp)
+  genes <- .extract_uniprot_from_exp(exp)
   dots <- rlang::list2(...)
   rlang::exec(gly_enrich_kegg_, genes, !!!dots)
 }
@@ -140,6 +170,11 @@ gly_enrich_kegg_ <- function(proteins, ...) {
   if (!"keyType" %in% names(call_args)) {
     call_args$keyType <- "uniprot"
   }
+  if ("universe" %in% names(dots)) {
+    if (glyexp::is_experiment(dots$universe)) {
+      call_args$universe <- .extract_uniprot_from_exp(dots$universe)
+    }
+  }
 
   suppressMessages(
     raw_result <- do.call(clusterProfiler::enrichKEGG, call_args)
@@ -147,7 +182,7 @@ gly_enrich_kegg_ <- function(proteins, ...) {
 
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
-  
+
   # Rename p_value to p_val and p_adjust to p_adj for consistency
   if ("p_value" %in% colnames(tidy_result)) {
     tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
@@ -179,7 +214,7 @@ gly_enrich_reactome <- function(exp, add_info = TRUE, ...) {
     rlang::check_installed("org.Hs.eg.db")
   }
 
-  uniprot_ids <- .extract_genes_from_exp(exp)
+  uniprot_ids <- .extract_uniprot_from_exp(exp)
   rlang::exec(gly_enrich_reactome_, uniprot_ids, !!!dots)
 }
 
@@ -192,61 +227,47 @@ gly_enrich_reactome_ <- function(proteins, ...) {
   checkmate::assert_character(proteins, min.len = 1)
 
   dots <- rlang::list2(...)
+
   if ("gene" %in% names(dots)) {
     cli::cli_abort("{.field gene} should not be supplied through `...`; use the function's first argument instead.")
   }
-
-  bitr_arg_names <- c("OrgDb", "fromType", "toType", "drop")
-  bitr_args <- dots[intersect(names(dots), bitr_arg_names)]
-  dots <- dots[setdiff(names(dots), bitr_arg_names)]
-
-  orgdb <- bitr_args$OrgDb
-  if (is.null(orgdb)) {
-    rlang::check_installed("org.Hs.eg.db")
+  if ("OrgDb" %in% names(dots)) {
+    orgdb <- dots$OrgDb
+    dots$OrgDb <- NULL
+  } else {
     orgdb <- "org.Hs.eg.db"
   }
   orgdb_obj <- .resolve_orgdb(orgdb)
 
-  from_type <- if (!is.null(bitr_args$fromType)) bitr_args$fromType else "UNIPROT"
-  to_type <- if (!is.null(bitr_args$toType)) bitr_args$toType else "ENTREZID"
-  drop_arg <- bitr_args$drop
-
-  # Convert UniProt to Entrez IDs
-  bitr_call <- list(
-    proteins,
-    fromType = from_type,
-    toType = to_type,
-    OrgDb = orgdb_obj
-  )
-  if (!is.null(drop_arg)) {
-    bitr_call$drop <- drop_arg
-  }
-
-  suppressWarnings(suppressMessages(
-    entrez_ids <- do.call(clusterProfiler::bitr, bitr_call)$ENTREZID
-  ))
-  entrez_ids <- entrez_ids[!is.na(entrez_ids)]
-  n_failed <- length(proteins) - length(entrez_ids)
-  if (n_failed > 0) {
-    pct_failed <- round(n_failed / length(proteins) * 100, 1)
-    cli::cli_alert_warning("{.val {n_failed}} of {.val {length(proteins)}} ({.val {pct_failed}}%) proteins failed to map to Entrez IDs.")
-  }
+  cli::cli_alert_info("Converting foreground proteins to Entrez IDs")
+  fg_genes <- .uniprot_to_entrez(proteins, orgdb_obj)
 
   # Perform Reactome pathway analysis
-  call_args <- c(list(gene = entrez_ids), dots)
+  call_args <- c(list(gene = fg_genes), dots)
   if (!"organism" %in% names(call_args)) {
     call_args$organism <- "human"
   }
   if (!"readable" %in% names(call_args)) {
     call_args$readable <- TRUE
   }
+  if ("universe" %in% names(dots)) {
+    cli::cli_alert_info("Converting background proteins to Entrez IDs")
+    if (glyexp::is_experiment(dots$universe)) {
+      proteins <- .extract_uniprot_from_exp(dots$universe)
+      bg_genes <- .uniprot_to_entrez(proteins, orgdb_obj)
+      call_args$universe <- bg_genes
+    } else {
+      call_args$universe <- .uniprot_to_entrez(dots$universe, orgdb_obj)
+    }
+  }
+
   suppressMessages(
     raw_result <- do.call(ReactomePA::enrichPathway, call_args)
   )
 
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
-  
+
   # Rename p_value to p_val and p_adjust to p_adj for consistency
   if ("p_value" %in% colnames(tidy_result)) {
     tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
@@ -265,14 +286,14 @@ gly_enrich_reactome_ <- function(proteins, ...) {
   )
 }
 
-# Extract genes from experiment object helper function
-.extract_genes_from_exp <- function(exp) {
+# Extract UniProt accessions from experiment object helper function
+.extract_uniprot_from_exp <- function(exp) {
   if ("protein" %in% colnames(exp$var_info)) {
-    genes <- exp$var_info$protein  # Uniprot
+    uniprot <- exp$var_info$protein
   } else {
     cli::cli_abort("{.field protein} column not found in the variable information tibble.")
   }
-  unique(genes[!is.na(genes)])
+  unique(uniprot[!is.na(uniprot)])
 }
 
 .resolve_orgdb <- function(orgdb) {
@@ -282,4 +303,17 @@ gly_enrich_reactome_ <- function(proteins, ...) {
   } else {
     orgdb
   }
+}
+
+.uniprot_to_entrez <- function(uniprot, orgdb) {
+  suppressWarnings(suppressMessages(
+    entrez_ids <- clusterProfiler::bitr(uniprot, fromType = "UNIPROT", toType = "ENTREZID", OrgDb = orgdb)$ENTREZID
+  ))
+  entrez_ids <- entrez_ids[!is.na(entrez_ids)]
+  n_failed <- length(uniprot) - length(entrez_ids)
+  if (n_failed > 0) {
+    pct_failed <- round(n_failed / length(uniprot) * 100, 1)
+    cli::cli_alert_warning("{.val {n_failed}} of {.val {length(uniprot)}} ({.val {pct_failed}}%) proteins failed to map to Entrez IDs.")
+  }
+  entrez_ids
 }
