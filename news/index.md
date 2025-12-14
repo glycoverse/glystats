@@ -2,6 +2,27 @@
 
 ## glystats (development version)
 
+## glystats 0.5.5
+
+### Minor improvements and bug fixes
+
+- The `universe` argument of
+  [`gly_enrich_go()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md),
+  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md),
+  and
+  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md)
+  accepts a
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  object now.
+- Optimize message output of
+  [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md).
+- The columns from sample information or variable information are joined
+  right after the `sample` or `variable` column in the results now, not
+  appending to the end as previously.
+- Update documentation of
+  [`filter_sig_vars()`](https://glycoverse.github.io/glystats/reference/filter_sig_vars.md)
+  to inform about using the same experiment used for DEA.
+
 ## glystats 0.5.4
 
 ### Minor improvements and bug fixes
