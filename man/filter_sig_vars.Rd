@@ -69,7 +69,7 @@ filter_sig_vars(
 )
 }
 \arguments{
-\item{exp}{An \code{\link[glyexp:experiment]{glyexp::experiment()}}.}
+\item{exp}{An \code{\link[glyexp:experiment]{glyexp::experiment()}}. Please use the same experiment used to generate the DEA result.}
 
 \item{res}{A glystats result object from a glystats DEA function.}
 

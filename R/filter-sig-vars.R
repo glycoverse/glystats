@@ -5,7 +5,7 @@
 #' It supports results from all glystats DEA functions including
 #' [gly_anova()], [gly_kruskal()], [gly_ttest()], [gly_wilcox()], and [gly_limma()].
 #'
-#' @param exp An [glyexp::experiment()].
+#' @param exp An [glyexp::experiment()]. Please use the same experiment used to generate the DEA result.
 #' @param res A glystats result object from a glystats DEA function.
 #' @param p_adj_cutoff The threshold for p-adjusted values. Default is 0.05.
 #' @param p_val_cutoff The threshold for p-values. We don't recommend using this. Default is NULL.
