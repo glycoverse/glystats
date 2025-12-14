@@ -84,6 +84,7 @@ filter_sig_vars(
 
   An
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html).
+  Please use the same experiment used to generate the DEA result.
 
 - res:
 

@@ -1,5 +1,7 @@
 # Changelog
 
+## glystats (development version)
+
 ## glystats 0.5.4
 
 ### Minor improvements and bug fixes

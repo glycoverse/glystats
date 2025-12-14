@@ -51,12 +51,12 @@ Let’s start by exploring our demo dataset:
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [84ms]
+#> ✔ Finding leader proteins [82ms]
 #> 
 #> ℹ Reading dataColumn group converted to <factor>.ℹ Parsing glycan compositions and structures
-#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [270ms]
+#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [285ms]
 #> 
-#> ℹ Reading data✔ Reading data [764ms]
+#> ℹ Reading data✔ Reading data [762ms]
 #> 
 #> 
 #> ── Normalizing data ──
@@ -199,20 +199,21 @@ to get the tidy result tibble:
 ``` r
 get_tidy_result(anova_res, "main_test")
 #> # A tibble: 225 × 13
-#>    variable term     df sumsq meansq statistic   p_val  p_adj post_hoc   protein
-#>    <chr>    <chr> <dbl> <dbl>  <dbl>     <dbl>   <dbl>  <dbl> <chr>      <chr>  
-#>  1 V1       group     3 67.7   22.6      6.68  0.0143  0.0528 NA         P08185 
-#>  2 V10      group     3 87.0   29.0      7.87  0.00903 0.0391 C_vs_H;H_… P10909 
-#>  3 V100     group     3  6.57   2.19     2.59  0.125   0.228  NA         P01871 
-#>  4 V101     group     3 15.4    5.12     6.13  0.0180  0.0580 NA         P01871 
-#>  5 V102     group     3 43.5   14.5      0.520 0.680   0.758  NA         P01871 
-#>  6 V103     group     3  8.61   2.87     3.93  0.0539  0.124  NA         P01871 
-#>  7 V104     group     3  5.30   1.77     0.347 0.793   0.829  NA         P01871 
-#>  8 V105     group     3  3.28   1.09     6.08  0.0185  0.0581 NA         P01871 
-#>  9 V106     group     3 14.0    4.66     6.59  0.0148  0.0534 NA         P01871 
-#> 10 V107     group     3  7.43   2.48     1.51  0.286   0.409  NA         P01871 
+#>    variable protein glycan_composition     protein_site gene  term     df  sumsq
+#>    <chr>    <chr>   <comp>                        <int> <chr> <chr> <dbl>  <dbl>
+#>  1 V1       P08185  Hex(5)HexNAc(4)NeuAc(…          176 SERP… group     3  67.7 
+#>  2 V2       P04196  Hex(5)HexNAc(4)NeuAc(…          344 HRG   group     3 161.  
+#>  3 V3       P04196  Hex(5)HexNAc(4)                 344 HRG   group     3 126.  
+#>  4 V4       P10909  Hex(6)HexNAc(5)                 291 CLU   group     3  23.1 
+#>  5 V5       P04196  Hex(5)HexNAc(4)NeuAc(…          344 HRG   group     3 472.  
+#>  6 V6       P04196  Hex(5)HexNAc(4)                 345 HRG   group     3  60.0 
+#>  7 V7       P04196  Hex(5)HexNAc(4)dHex(2)          344 HRG   group     3 208.  
+#>  8 V8       P04196  Hex(4)HexNAc(3)                 344 HRG   group     3 109.  
+#>  9 V9       P04196  Hex(4)HexNAc(4)NeuAc(…          344 HRG   group     3   9.66
+#> 10 V10      P10909  Hex(5)HexNAc(4)                 291 CLU   group     3  87.0 
 #> # ℹ 215 more rows
-#> # ℹ 3 more variables: glycan_composition <comp>, protein_site <int>, gene <chr>
+#> # ℹ 5 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
+#> #   post_hoc <chr>
 ```
 
 Notice something cool? 😎
@@ -243,20 +244,21 @@ exp |>
 #> ℹ Groups: "C", "H", "M", and "Y"
 #> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
 #> # A tibble: 60 × 13
-#>    variable term     df  sumsq meansq statistic   p_val   p_adj post_hoc protein
-#>    <chr>    <chr> <dbl>  <dbl>  <dbl>     <dbl>   <dbl>   <dbl> <chr>    <chr>  
-#>  1 V10      group     3  87.0   29.0       7.87 9.03e-3 3.91e-2 C_vs_H;… P10909 
-#>  2 V11      group     3 176.    58.8      20.8  3.94e-4 5.90e-3 C_vs_H;… P04196 
-#>  3 V113     group     3 226.    75.2      46.6  2.07e-5 5.17e-4 C_vs_H;… P10909 
-#>  4 V116     group     3   9.72   3.24      8.08 8.36e-3 3.69e-2 C_vs_H;… P01871 
-#>  5 V12      group     3  81.1   27.0       9.70 4.85e-3 2.66e-2 C_vs_H;… P13671 
-#>  6 V125     group     3  11.0    3.68      9.72 4.81e-3 2.66e-2 C_vs_H;… P10909 
-#>  7 V126     group     3   9.36   3.12     11.1  3.22e-3 2.41e-2 C_vs_H;… P02790 
-#>  8 V13      group     3 159.    52.9     138.   3.12e-7 1.75e-5 C_vs_H;… P04196 
-#>  9 V130     group     3 308.   103.      144.   2.66e-7 1.75e-5 C_vs_H;… P01860 
-#> 10 V131     group     3 272.    90.7      11.2  3.12e-3 2.41e-2 H_vs_M;… P01860 
+#>    variable protein glycan_composition      protein_site gene  term     df sumsq
+#>    <chr>    <chr>   <comp>                         <int> <chr> <chr> <dbl> <dbl>
+#>  1 V2       P04196  Hex(5)HexNAc(4)NeuAc(1)          344 HRG   group     3 161. 
+#>  2 V3       P04196  Hex(5)HexNAc(4)                  344 HRG   group     3 126. 
+#>  3 V5       P04196  Hex(5)HexNAc(4)NeuAc(2)          344 HRG   group     3 472. 
+#>  4 V7       P04196  Hex(5)HexNAc(4)dHex(2)           344 HRG   group     3 208. 
+#>  5 V10      P10909  Hex(5)HexNAc(4)                  291 CLU   group     3  87.0
+#>  6 V11      P04196  Hex(5)HexNAc(4)dHex(1)…          344 HRG   group     3 176. 
+#>  7 V12      P13671  Hex(5)HexNAc(4)dHex(1)…          855 C6    group     3  81.1
+#>  8 V13      P04196  Hex(4)HexNAc(3)dHex(1)…          344 HRG   group     3 159. 
+#>  9 V14      P04196  Hex(5)HexNAc(4)dHex(1)…          344 HRG   group     3 150. 
+#> 10 V15      P01019  Hex(5)HexNAc(4)NeuAc(2)          161 AGT   group     3  46.4
 #> # ℹ 50 more rows
-#> # ℹ 3 more variables: glycan_composition <comp>, protein_site <int>, gene <chr>
+#> # ℹ 5 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
+#> #   post_hoc <chr>
 ```
 
 ## 🔧 Maximum Flexibility Mode

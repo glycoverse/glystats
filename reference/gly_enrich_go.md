@@ -1,6 +1,8 @@
 # GO, KEGG, and Reactome over-representation analysis (ORA)
 
-Perform GO, KEGG, and Reactome ORA for proteins/genes.
+Perform GO, KEGG, and Reactome ORA for protein UniProt accessions. For
+glycoproteomics experiments, the function extracts unique proteins from
+the variable information.
 
 ## Usage
 
@@ -39,6 +41,7 @@ gly_enrich_reactome_(proteins, ...)
   [`clusterProfiler::enrichKEGG()`](https://rdrr.io/pkg/clusterProfiler/man/enrichKEGG.html),
   or
   [`ReactomePA::enrichPathway()`](https://rdrr.io/pkg/ReactomePA/man/enrichPathway.html).
+  See the "Additional arguments" section for more information.
 
 - proteins:
 
@@ -75,6 +78,16 @@ A list with two elements:
   `glystats_go_ora_res`/`glystats_kegg_ora_res`/`glystats_reactome_ora_res`
   and `glystats_res`.
 
+## Required packages
+
+These functions require the following packages to be installed:
+
+- `clusterProfiler` for enrichment analysis
+
+- `ReactomePA` for Reactome pathway analysis
+
+- `org.Hs.eg.db` for human gene annotation (GO analysis only)
+
 ## Details
 
 These functions perform over-representation analysis using the specified
@@ -106,15 +119,26 @@ with UniProt IDs as input.
 **Reactome Analysis:** Converts UniProt IDs to Entrez IDs and uses
 [`ReactomePA::enrichPathway()`](https://rdrr.io/pkg/ReactomePA/man/enrichPathway.html).
 
-## Required packages
+## Additional arguments
 
-These functions require the following packages to be installed:
+`universe` can be passed as a character vector of uniprot accession, or
+a
+[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+object. If latter, the background proteins will be extracted from the
+experiment. This can be convenient when you first perform differential
+analysis and then perform enrichment on the differentially expressed
+proteins:
 
-- `clusterProfiler` for enrichment analysis
+    dea_res <- gly_limma(exp)
+    sig_exp <- filter_sig_vars(exp, dea_res)
+    enrich_res <- gly_enrich_go(sig_exp, universe = exp)
 
-- `ReactomePA` for Reactome pathway analysis
+For `gly_enrich_reactome()`, an `OrgDb` can be passed through `...` to
+[`clusterProfiler::bitr()`](https://rdrr.io/pkg/clusterProfiler/man/bitr.html)
+to convert UniProt to Entrez IDs. By default, `org.Hs.eg.db` is used.
+This is useful when you want to use a different organism than human:
 
-- `org.Hs.eg.db` for human gene annotation (GO analysis only)
+    enrich_res <- gly_enrich_reactome(exp, OrgDb = "org.Mm.eg.db")
 
 ## See also
 
