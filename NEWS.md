@@ -1,4 +1,11 @@
-# glystats (development version)
+# glystats 0.5.5
+
+## Minor improvements and bug fixes
+
+* The `universe` argument of `gly_enrich_go()`, `gly_enrich_kegg()`, and `gly_enrich_reactome()` accepts a `glyexp::experiment()` object now.
+* Optimize message output of `gly_limma()`.
+* The columns from sample information or variable information are joined right after the `sample` or `variable` column in the results now, not appending to the end as previously.
+* Update documentation of `filter_sig_vars()` to inform about using the same experiment used for DEA.
 
 # glystats 0.5.4
 
