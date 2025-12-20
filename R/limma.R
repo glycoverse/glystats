@@ -163,7 +163,7 @@ gly_limma_ <- function(
   cli::cli_alert_info("Reference group: {.val {levels(groups)[1]}}")
 
   # Prepare data for limma
-  log_expr_mat <- log2(expr_mat + 1)
+  log_expr_mat <- log2(expr_mat + 1e-6)
 
   # Create design matrix
   design <- stats::model.matrix(~ groups)
@@ -241,7 +241,7 @@ gly_limma_ <- function(
   n_groups <- length(group_levels)
 
   # Prepare data for limma
-  log_expr_mat <- log2(expr_mat + 1)
+  log_expr_mat <- log2(expr_mat + 1e-6)
 
   # Create design matrix without intercept (means model)
   design <- stats::model.matrix(~ 0 + groups)
