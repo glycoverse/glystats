@@ -1,4 +1,8 @@
-# glystats (development version)
+# glystats 0.5.6
+
+## Minor improvements and bug fixes
+
+* Fix the bug that fold change estimation in `gly_limma()` is not correct for glycomics data.
 
 # glystats 0.5.5
 
