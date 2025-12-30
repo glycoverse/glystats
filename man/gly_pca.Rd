@@ -55,6 +55,7 @@ A list containing:
 \description{
 Perform principal component analysis on the expression data.
 The function uses \code{prcomp()} to perform PCA and \code{broom::tidy()} to tidy the results.
+If \code{scale = TRUE}, constant variables (zero variance) will be removed before PCA.
 }
 \details{
 The function performs log transformation on the expression data (log(x + 1)) before

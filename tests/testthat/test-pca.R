@@ -54,3 +54,44 @@ test_that("gly_pca add_info works", {
     pca_without_info$tidy_result$samples
   ))
 })
+
+test_that("gly_pca_ handles constant columns with scale = TRUE", {
+  # Create test data with a constant column
+  set.seed(123)
+  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+
+  # Make the first variable constant (all same value)
+  expr_mat[1, ] <- 1
+
+  # With scale = TRUE (default), should warn and remove the constant column
+  expect_warning(
+    result <- gly_pca_(expr_mat, scale = TRUE),
+    "Removed 1 constant column before PCA"
+  )
+  expect_s3_class(result, "glystats_pca_res")
+  # The constant variable should not be in the loadings
+  expect_false("var1" %in% result$tidy_result$variables$variable)
+
+  # With scale = FALSE, no need to remove constant columns
+  expect_no_warning(
+    result_no_scale <- gly_pca_(expr_mat, scale = FALSE)
+  )
+  expect_s3_class(result_no_scale, "glystats_pca_res")
+  # The constant variable should be in the loadings (with zero loading)
+  expect_true("var1" %in% result_no_scale$tidy_result$variables$variable)
+})
+
+test_that("gly_pca_ handles all constant columns", {
+  # Create test data where all columns become constant after log transformation
+  expr_mat <- matrix(0, nrow = 10, ncol = 10)
+  rownames(expr_mat) <- paste0("var", 1:10)
+  colnames(expr_mat) <- paste0("sample", 1:10)
+
+  # Should error because no columns with variance remain
+  expect_error(
+    expect_warning(gly_pca_(expr_mat, scale = TRUE)),
+    "No columns with non-zero variance remain"
+  )
+})

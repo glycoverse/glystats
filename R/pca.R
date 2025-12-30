@@ -2,6 +2,7 @@
 #'
 #' Perform principal component analysis on the expression data.
 #' The function uses `prcomp()` to perform PCA and `broom::tidy()` to tidy the results.
+#' If `scale = TRUE`, constant variables (zero variance) will be removed before PCA.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
@@ -66,6 +67,28 @@ gly_pca_ <- function(expr_mat, center = TRUE, scale = TRUE, ...) {
 
   # Prepare data for PCA (samples as rows, variables as columns)
   mat <- log(t(expr_mat) + 1)
+
+  # If scaling, check for constant columns (zero variance)
+  # These will cause prcomp to fail with "cannot rescale a constant/zero column to unit variance"
+  if (scale) {
+    col_vars <- apply(mat, 2, stats::var, na.rm = TRUE)
+    constant_cols <- which(col_vars == 0 | is.na(col_vars))
+
+    if (length(constant_cols) > 0) {
+      constant_names <- colnames(mat)[constant_cols]
+      cli::cli_warn(c(
+        "Removed {length(constant_cols)} constant column{?s} before PCA (zero variance after log transformation).",
+        "i" = "Affected variable{?s}: {.val {constant_names}}"
+      ))
+      mat <- mat[, -constant_cols, drop = FALSE]
+
+      # Check if we have any columns left
+      if (ncol(mat) == 0) {
+        cli::cli_abort("No columns with non-zero variance remain after removing constant columns.")
+      }
+    }
+  }
+
   prcomp_res <- stats::prcomp(mat, center = center, scale = scale, ...)
 
   # Get tidy results and rename columns to be consistent
