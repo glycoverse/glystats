@@ -4,7 +4,8 @@ Perform principal component analysis on the expression data. The
 function uses [`prcomp()`](https://rdrr.io/r/stats/prcomp.html) to
 perform PCA and
 [`broom::tidy()`](https://generics.r-lib.org/reference/tidy.html) to
-tidy the results.
+tidy the results. If `scale = TRUE`, constant variables (zero variance)
+will be removed before PCA.
 
 ## Usage
 

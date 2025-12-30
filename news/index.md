@@ -2,6 +2,15 @@
 
 ## glystats (development version)
 
+## glystats 0.5.7
+
+### Minor improvements and bug fixes
+
+- Fix the bug that
+  [`gly_pca()`](https://glycoverse.github.io/glystats/reference/gly_pca.md)
+  fails to work with experiments with constant variables. Now the
+  constant variables are removed before PCA, with a warning issued.
+
 ## glystats 0.5.6
 
 ### Minor improvements and bug fixes
