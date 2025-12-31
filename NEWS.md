@@ -1,4 +1,8 @@
-# glystats (development version)
+# glystats 0.5.8
+
+## Breaking changes
+
+* `filter_sig_vars()` now has a default `fc_cutoff` of `2` for glycoproteomics data, and `NULL` for other types of data.
 
 # glystats 0.5.7
 
