@@ -13,7 +13,7 @@ gly_anova(), gly_kruskal(), gly_ttest(), gly_wilcox(), and gly_limma()."><meta p
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.8.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -134,8 +134,9 @@ If you insist to use it, please set <code>p_adj_cutoff</code> to NULL.</p></dd>
 
 
 <dt id="arg-fc-cutoff">fc_cutoff<a class="anchor" aria-label="anchor" href="#arg-fc-cutoff"></a></dt>
-<dd><p>The threshold for fold changes. Default is NULL. Only positive value is needed.
-For example, <code>2</code> means fold change &gt; 2 or &lt; 1/2.</p></dd>
+<dd><p>The threshold for fold changes. Only positive value is needed.
+For example, <code>2</code> means fold change &gt; 2 or &lt; 1/2.
+Default is <code>2</code> for glycoproteomics data and <code>NULL</code> for others.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

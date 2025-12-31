@@ -101,8 +101,9 @@ filter_sig_vars(
 
 - fc_cutoff:
 
-  The threshold for fold changes. Default is NULL. Only positive value
-  is needed. For example, `2` means fold change \> 2 or \< 1/2.
+  The threshold for fold changes. Only positive value is needed. For
+  example, `2` means fold change \> 2 or \< 1/2. Default is `2` for
+  glycoproteomics data and `NULL` for others.
 
 - ...:
 
