@@ -136,7 +136,7 @@ test_that("filter_sig_vars works for t-test with default settings", {
   result <- suppressMessages(gly_ttest(exp))
   result$tidy_result$p_adj <- c(rep(0.01, 5), rep(1, 5))
   sig_exp <- filter_sig_vars(exp, result)
-  expect_equal(nrow(sig_exp), 5)
+  expect_equal(nrow(sig_exp), 4)
 })
 
 # ===== limma =====
@@ -144,8 +144,9 @@ test_that("filter_sig_vars works for limma with default settings for 2 groups", 
   exp <- small_exp2()
   result <- suppressMessages(gly_limma(exp))
   result$tidy_result$p_adj <- c(rep(0.01, 5), rep(1, 5))
+  result$tidy_result$log2fc <- c(rep(c(1, 2), 5))
   sig_exp <- filter_sig_vars(exp, result)
-  expect_equal(nrow(sig_exp), 5)
+  expect_equal(nrow(sig_exp), 2)
 })
 
 test_that("filter_sig_vars works for limma for multiple groups", {

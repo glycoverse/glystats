@@ -78,8 +78,9 @@ filter_sig_vars(
 \item{p_val_cutoff}{The threshold for p-values. We don't recommend using this. Default is NULL.
 If you insist to use it, please set \code{p_adj_cutoff} to NULL.}
 
-\item{fc_cutoff}{The threshold for fold changes. Default is NULL. Only positive value is needed.
-For example, \code{2} means fold change > 2 or < 1/2.}
+\item{fc_cutoff}{The threshold for fold changes. Only positive value is needed.
+For example, \code{2} means fold change > 2 or < 1/2.
+Default is \code{2} for glycoproteomics data and \code{NULL} for others.}
 
 \item{...}{Additional arguments passed to methods. See the method-specific documentation for details.}
 

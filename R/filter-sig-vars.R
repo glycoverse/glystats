@@ -10,8 +10,9 @@
 #' @param p_adj_cutoff The threshold for p-adjusted values. Default is 0.05.
 #' @param p_val_cutoff The threshold for p-values. We don't recommend using this. Default is NULL.
 #'   If you insist to use it, please set `p_adj_cutoff` to NULL.
-#' @param fc_cutoff The threshold for fold changes. Default is NULL. Only positive value is needed.
+#' @param fc_cutoff The threshold for fold changes. Only positive value is needed.
 #'   For example, `2` means fold change > 2 or < 1/2.
+#'   Default is `2` for glycoproteomics data and `NULL` for others.
 #' @param ... Additional arguments passed to methods. See the method-specific documentation for details.
 #'
 #' @returns An new [glyexp::experiment()] object.
@@ -42,6 +43,7 @@ filter_sig_vars <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, 
 #' @export
 filter_sig_vars.glystats_anova_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
   .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
 }
 
@@ -49,6 +51,7 @@ filter_sig_vars.glystats_anova_res <- function(exp, res, p_adj_cutoff = 0.05, p_
 #' @export
 filter_sig_vars.glystats_kruskal_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
   .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
 }
 
@@ -56,6 +59,7 @@ filter_sig_vars.glystats_kruskal_res <- function(exp, res, p_adj_cutoff = 0.05, 
 #' @export
 filter_sig_vars.glystats_ttest_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, ...) {
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
 }
 
@@ -63,6 +67,7 @@ filter_sig_vars.glystats_ttest_res <- function(exp, res, p_adj_cutoff = 0.05, p_
 #' @export
 filter_sig_vars.glystats_wilcox_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, ...) {
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
 }
 
@@ -70,6 +75,7 @@ filter_sig_vars.glystats_wilcox_res <- function(exp, res, p_adj_cutoff = 0.05, p
 #' @export
 filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, comparison = NULL, ...) {
   .check_filter_sig_vars_args_limma(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_limma(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison)
 }
 
@@ -221,4 +227,14 @@ filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_
 
 .check_filter_sig_vars_args_limma <- function(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison) {
   .check_filter_sig_vars_args(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison)
+}
+
+.decide_fc <- function(exp, user_provided) {
+  if (!is.null(user_provided)) {
+    return(user_provided)
+  }
+  if (glyexp::get_exp_type(exp) == "glycoproteomics") {
+    return(2)
+  }
+  NULL
 }
