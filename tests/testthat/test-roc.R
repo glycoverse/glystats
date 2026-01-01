@@ -17,7 +17,11 @@ test_that("gly_roc works with 2-group binary classification", {
 
   # Test AUC
   expect_s3_class(result$tidy_result$auc, "tbl_df")
+  expect_true(all(c("variable", "auc", "auc_ci_low", "auc_ci_high") %in% colnames(result$tidy_result$auc)))
   expect_true(all(result$tidy_result$auc$auc >= 0 & result$tidy_result$auc$auc <= 1))  # AUC should be between 0 and 1
+  expect_true(all(result$tidy_result$auc$auc_ci_low >= 0 & result$tidy_result$auc$auc_ci_low <= 1))
+  expect_true(all(result$tidy_result$auc$auc_ci_high >= 0 & result$tidy_result$auc$auc_ci_high <= 1))
+  expect_true(all(result$tidy_result$auc$auc_ci_low <= result$tidy_result$auc$auc_ci_high))
 
   # Test coords
   expect_s3_class(result$tidy_result$coords, "tbl_df")
@@ -102,6 +106,14 @@ test_that("gly_roc assigns NA for failed variables", {
     dplyr::filter(variable %in% na_vars) |>
     dplyr::pull(auc)
   expect_true(all(is.na(auc_values)))
+  auc_ci_low_values <- result$tidy_result$auc |>
+    dplyr::filter(variable %in% na_vars) |>
+    dplyr::pull(auc_ci_low)
+  expect_true(all(is.na(auc_ci_low_values)))
+  auc_ci_high_values <- result$tidy_result$auc |>
+    dplyr::filter(variable %in% na_vars) |>
+    dplyr::pull(auc_ci_high)
+  expect_true(all(is.na(auc_ci_high_values)))
   coords_values <- result$tidy_result$coords |>
     dplyr::filter(variable %in% na_vars) |>
     dplyr::pull(sensitivity)
@@ -128,6 +140,7 @@ test_that("gly_roc_ works correctly", {
   expect_type(result, "list")
   expect_setequal(names(result), c("tidy_result", "raw_result"))
   expect_true(tibble::is_tibble(result$tidy_result$auc))
+  expect_true(all(c("variable", "auc", "auc_ci_low", "auc_ci_high") %in% colnames(result$tidy_result$auc)))
   expect_equal(nrow(result$tidy_result$auc), 10)
   expect_equal(length(result$raw_result), 10)
 })

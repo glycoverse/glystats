@@ -45,6 +45,8 @@
 #'   - `auc`: A tibble containing AUC values for each variable with the following columns:
 #'     - `variable`: Variable name
 #'     - `auc`: Area Under the Curve value
+#'     - `auc_ci_low`: Lower bound of 95% confidence interval for AUC
+#'     - `auc_ci_high`: Upper bound of 95% confidence interval for AUC
 #'   - `coords`: A tibble containing ROC curve coordinates with the following columns:
 #'     - `variable`: Variable name
 #'     - `threshold`: Threshold value for classification
@@ -127,9 +129,23 @@ gly_roc_ <- function(expr_mat, groups, pos_class = NULL) {
   }
 
   # Create tidy results
+  safe_ci <- purrr::possibly(pROC::ci.auc, otherwise = NA)
+  auc_ci <- purrr::map(roc_objs, function(roc_obj) {
+    if (rlang::is_na(roc_obj)) {
+      return(c(auc_ci_low = NA_real_, auc_ci_high = NA_real_))
+    }
+    ci <- suppressWarnings(suppressMessages(safe_ci(roc_obj, conf.level = 0.95)))
+    if (rlang::is_na(ci)) {
+      return(c(auc_ci_low = NA_real_, auc_ci_high = NA_real_))
+    }
+    ci <- as.numeric(ci)
+    c(auc_ci_low = ci[1], auc_ci_high = ci[3])
+  })
   roc_auc_tb <- tibble::tibble(
     variable = rownames(expr_mat),
-    auc = purrr::map_dbl(roc_objs, ~ if (rlang::is_na(.x)) NA else .x$auc)
+    auc = purrr::map_dbl(roc_objs, ~ if (rlang::is_na(.x)) NA else .x$auc),
+    auc_ci_low = purrr::map_dbl(auc_ci, 1),
+    auc_ci_high = purrr::map_dbl(auc_ci, 2)
   )
 
   coords_tb <- roc_objs %>%

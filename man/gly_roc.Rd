@@ -38,6 +38,8 @@ A list with two elements:
 \itemize{
 \item \code{variable}: Variable name
 \item \code{auc}: Area Under the Curve value
+\item \code{auc_ci_low}: Lower bound of 95\% confidence interval for AUC
+\item \code{auc_ci_high}: Upper bound of 95\% confidence interval for AUC
 }
 \item \code{coords}: A tibble containing ROC curve coordinates with the following columns:
 \itemize{
