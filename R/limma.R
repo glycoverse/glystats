@@ -17,7 +17,7 @@
 #' @param ref_group A character string specifying the reference group.
 #'  If NULL (default), the first level of the group factor is used as the reference.
 #'  Only used for two-group comparisons.
-#' @param contrasts A character vector specifying custom contrasts for multi-group comparisons.
+#' @param contrasts A character vector specifying custom contrasts.
 #'   If NULL (default), all pairwise comparisons are automatically generated,
 #'   and the levels coming first in the factor will be used as the reference group.
 #'   Supports two formats: "group1-group2" or "group1_vs_group2".
@@ -39,9 +39,9 @@
 #' `gly_limma_()` is the underlying API that works with matrices and factor vectors directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
-#' For two-group comparisons, a simple contrast is performed between the groups.
-#' For multi-group comparisons (3+ groups), all pairwise comparisons are automatically
-#' generated and performed using contrast matrices unless custom contrasts are specified.
+#' For two or more groups, all pairwise comparisons are automatically generated
+#' (one contrast for two groups) and performed using contrast matrices unless
+#' custom contrasts are specified.
 #'
 #' When specifying custom contrasts, use either "group1-group2" or "group1_vs_group2" format.
 #' If group names contain hyphens and you use the first format, an error will be raised
@@ -139,89 +139,18 @@ gly_limma_ <- function(
   # Validate ref_group parameter
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
-  # Perform limma analysis based on number of groups
-  if (n_groups == 2) {
-    # Two-group comparison
-    result <- .gly_limma_2groups(expr_mat, groups, p_adj_method, ref_group, ...)
-  } else {
-    # Multi-group comparison
-    result <- .gly_limma_multigroups(expr_mat, groups, p_adj_method, contrasts, ...)
+  # Align reference group for 2-group comparisons
+  if (n_groups == 2 && !is.null(ref_group)) {
+    groups <- .reorder_groups_for_ref(groups, ref_group)
   }
+
+  # Use the multi-group workflow for all cases
+  result <- .gly_limma_multigroups(expr_mat, groups, p_adj_method, contrasts, ...)
 
   result
 }
 
 # Internal helper functions for limma analysis
-
-# Limma-specific 2-group analysis function
-.gly_limma_2groups <- function(expr_mat, groups, p_adj_method, ref_group, ...) {
-  # Reorder groups if ref_group is specified
-  if (!is.null(ref_group)) {
-    groups <- .reorder_groups_for_ref(groups, ref_group)
-  }
-  cli::cli_alert_info("Reference group: {.val {levels(groups)[1]}}")
-
-  # Prepare data for limma
-  log_expr_mat <- log2(expr_mat + 1e-6)
-
-  # Create design matrix
-  design <- stats::model.matrix(~ groups)
-  colnames(design) <- c("Intercept", stringr::str_c(levels(groups)[2], "_vs_", levels(groups)[1]))
-
-  # Fit linear model
-  fit <- limma::lmFit(log_expr_mat, design, ...)
-
-  # Apply empirical Bayes moderation
-  fit <- limma::eBayes(fit, trend = TRUE)
-
-  # Extract results and convert to tibble
-  tidy_result <- .gly_limma_tibblify(fit, p_adj_method, expr_mat, groups)
-
-  # Return list with both tidy and raw results
-  structure(
-    list(
-      tidy_result = tidy_result,
-      raw_result = fit
-    ),
-    class = c("glystats_limma_res", "glystats_res")
-  )
-}
-
-# Convert limma fit object to tibble
-.gly_limma_tibblify <- function(fit, p_adj_method, expr_mat, groups) {
-  # Use topTable to extract results - this is the standard limma approach
-  # The coefficient of interest is the second column (group comparison)
-  coef_idx <- 2
-
-  # Extract all results using topTable
-  top_table <- limma::topTable(
-    fit,
-    coef = coef_idx,
-    number = Inf,  # Get all genes
-    adjust.method = if (is.null(p_adj_method)) "none" else p_adj_method,
-    sort.by = "none"  # Keep original order
-  )
-
-  # Convert to tibble and rename columns to match glystats conventions
-  result_tbl <- tibble::as_tibble(top_table, rownames = "variable") %>%
-    dplyr::rename(
-      log2fc = "logFC",
-      p_val = "P.Value",
-      p_adj = "adj.P.Val",
-      t = "t",
-      b = "B"
-    )
-
-  # Remove p_adj column if p_adj_method was NULL
-  if (is.null(p_adj_method)) {
-    result_tbl <- dplyr::select(result_tbl, -"p_adj")
-  }
-
-  result_tbl$ref_group <- levels(groups)[1]
-  result_tbl$test_group <- levels(groups)[2]
-
-  result_tbl
-}
 
 # Helper function to reorder groups so that ref_group becomes the first level
 .reorder_groups_for_ref <- function(groups, ref_group) {

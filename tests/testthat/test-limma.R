@@ -45,6 +45,31 @@ test_that("gly_limma direction is correct for 2 groups", {
   expect_true(result$tidy_result$t > 0)
 })
 
+test_that("gly_limma respects custom contrasts for 2 groups", {
+  # Create a test experiment with 2 groups
+  # group B has higher mean than group A
+  set.seed(123)
+  var_info <- tibble::tibble(variable = "V1")
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:20),
+    group = factor(rep(c("A", "B"), each = 10), levels = c("A", "B"))
+  )
+  expr_mat <- matrix(
+    c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1)),
+    nrow = 1, byrow = TRUE
+  )
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
+
+  # Call gly_limma with reversed contrast
+  result <- suppressMessages(gly_limma(exp, contrasts = "B_vs_A"))
+
+  # Test post_hoc (A vs B should be negative)
+  expect_true(result$tidy_result$log2fc < 0)
+  expect_true(result$tidy_result$t < 0)
+})
+
 test_that("gly_limma error handling", {
   # Use test_gp_exp for error testing
   exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5)

@@ -38,7 +38,7 @@ Set to NULL to skip p-value adjustment.}
 If NULL (default), the first level of the group factor is used as the reference.
 Only used for two-group comparisons.}
 
-\item{contrasts}{A character vector specifying custom contrasts for multi-group comparisons.
+\item{contrasts}{A character vector specifying custom contrasts.
 If NULL (default), all pairwise comparisons are automatically generated,
 and the levels coming first in the factor will be used as the reference group.
 Supports two formats: "group1-group2" or "group1_vs_group2".
@@ -91,9 +91,9 @@ the \code{add_info} parameter for joining experiment metadata.
 \code{gly_limma_()} is the underlying API that works with matrices and factor vectors directly,
 providing more flexibility for users who don't use the glyexp package.
 
-For two-group comparisons, a simple contrast is performed between the groups.
-For multi-group comparisons (3+ groups), all pairwise comparisons are automatically
-generated and performed using contrast matrices unless custom contrasts are specified.
+For two or more groups, all pairwise comparisons are automatically generated
+(one contrast for two groups) and performed using contrast matrices unless
+custom contrasts are specified.
 
 When specifying custom contrasts, use either "group1-group2" or "group1_vs_group2" format.
 If group names contain hyphens and you use the first format, an error will be raised
