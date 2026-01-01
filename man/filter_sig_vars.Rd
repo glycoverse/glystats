@@ -3,6 +3,7 @@
 \name{filter_sig_vars}
 \alias{filter_sig_vars}
 \alias{filter_sig_vars.glystats_anova_res}
+\alias{filter_sig_vars.glystats_ancova_res}
 \alias{filter_sig_vars.glystats_kruskal_res}
 \alias{filter_sig_vars.glystats_ttest_res}
 \alias{filter_sig_vars.glystats_wilcox_res}
@@ -19,6 +20,17 @@ filter_sig_vars(
 )
 
 \method{filter_sig_vars}{glystats_anova_res}(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  on = "main_test",
+  comparison = NULL,
+  ...
+)
+
+\method{filter_sig_vars}{glystats_ancova_res}(
   exp,
   res,
   p_adj_cutoff = 0.05,
@@ -101,7 +113,7 @@ An new \code{\link[glyexp:experiment]{glyexp::experiment()}} object.
 Filtering the experiment to keep only significant variables is a common task.
 This function provides a convenient way to do this.
 It supports results from all glystats DEA functions including
-\code{\link[=gly_anova]{gly_anova()}}, \code{\link[=gly_kruskal]{gly_kruskal()}}, \code{\link[=gly_ttest]{gly_ttest()}}, \code{\link[=gly_wilcox]{gly_wilcox()}}, and \code{\link[=gly_limma]{gly_limma()}}.
+\code{\link[=gly_anova]{gly_anova()}}, \code{\link[=gly_ancova]{gly_ancova()}}, \code{\link[=gly_kruskal]{gly_kruskal()}}, \code{\link[=gly_ttest]{gly_ttest()}}, \code{\link[=gly_wilcox]{gly_wilcox()}}, and \code{\link[=gly_limma]{gly_limma()}}.
 }
 \examples{
 library(glyexp)

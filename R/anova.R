@@ -143,6 +143,200 @@ gly_anova_ <- function(
   )
 }
 
+#' Analysis of Covariance (ANCOVA) for Differential Expression Analysis
+#'
+#' Perform ANCOVA for glycomics or glycoproteomics data with sample-level covariates.
+#' The function supports parametric comparison of multiple groups while adjusting for covariates.
+#' For significant results, emmeans post-hoc comparisons (Tukey adjustment) are automatically performed.
+#' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
+#'
+#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param expr_mat (Only for [gly_ancova_()]) A numeric matrix with variables as rows and samples as columns.
+#' @param groups (Only for [gly_ancova_()]) A factor or character vector specifying group membership for each sample.
+#'   Must have at least 2 levels. Character vectors will be automatically converted to factors.
+#' @param group_col (Only for [gly_ancova()]) A character string specifying the column name of the grouping variable
+#'  in the sample information. Default is `"group"`.
+#' @param covariate_cols (Only for [gly_ancova()]) A character vector specifying column names in sample information
+#'  to include as covariates. At least one covariate must be provided.
+#' @param covariates (Only for [gly_ancova_()]) A data frame, matrix, or vector of sample-level covariates.
+#'   At least one covariate must be provided.
+#' @param p_adj_method A character string specifying the method to adjust p-values.
+#'  See `p.adjust.methods` for available methods. Default is "BH".
+#'  If NULL, no adjustment is performed.
+#' @param add_info A logical value. If TRUE (default), variable information from the experiment
+#'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#'  Only applicable to `gly_ancova()`.
+#' @param ... Additional arguments passed to `stats::aov()`.
+#'
+#' @details
+#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' statistical testing. At least 2 groups and at least 1 covariate are required.
+#'
+#' `gly_ancova()` is the top-level API that works with `glyexp::experiment()` objects and supports
+#' the `add_info` parameter for joining experiment metadata.
+#'
+#' `gly_ancova_()` is the underlying API that works with matrices, factor vectors, and covariate
+#' data directly, providing more flexibility for users who don't use the glyexp package.
+#'
+#' For any variable failed to fit a `stats::aov()` model,
+#' NAs will be assigned to the results in both main test and post-hoc test.
+#'
+#' **Post-hoc Test:**
+#' emmeans pairwise comparisons with Tukey adjustment (`emmeans::emmeans()`) are performed
+#' for variables with significant main effects (p_adj < 0.05).
+#'
+#' @returns
+#' A list containing two elements:
+#'   - `tidy_result`: A list containing:
+#'     - `main_test`: A tibble with ANCOVA results containing the following columns:
+#'       - `variable`: Variable name
+#'       - `term`: ANCOVA term (usually "group")
+#'       - `df`: Degrees of freedom
+#'       - `sumsq`: Sum of squares
+#'       - `meansq`: Mean squares
+#'       - `statistic`: F-statistic
+#'       - `p_val`: Raw p-value from ANCOVA
+#'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
+#'       - `post_hoc`: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
+#'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
+#'       - `variable`: Variable name
+#'       - `ref_group`: Reference group
+#'       - `test_group`: Test/treatment/case group
+#'       - `p_val`: Adjusted p-value from emmeans pairwise test
+#'       - `p_adj`: Adjusted p-value from emmeans pairwise test
+#'   - `raw_result`: A list containing:
+#'     - `main_test`: A list of raw `aov` model objects.
+#'     - `post_hoc_test`: A list of raw emmeans results.
+#'
+#' @section Required packages:
+#' This function requires the `emmeans` package for post-hoc comparisons.
+#'
+#' @seealso [stats::aov()], [emmeans::emmeans()], [emmeans::contrast()]
+#' @export
+gly_ancova <- function(
+  exp,
+  group_col = "group",
+  covariate_cols = NULL,
+  p_adj_method = "BH",
+  add_info = TRUE,
+  ...
+) {
+  # Validate inputs
+  checkmate::assert_class(exp, "glyexp_experiment")
+  checkmate::assert_string(group_col)
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_logical(add_info, len = 1)
+  rlang::check_installed("emmeans")
+  if (is.null(covariate_cols) || length(covariate_cols) == 0) {
+    cli::cli_abort("covariate_cols must be provided for ANCOVA.")
+  }
+  checkmate::assert_character(covariate_cols, min.len = 1)
+
+  # Extract data from experiment object
+  expr_mat <- glyexp::get_expr_mat(exp)
+  sample_info <- glyexp::get_sample_info(exp)
+
+  # Extract and validate groups
+  group_info <- .extract_and_validate_groups(
+    sample_info = sample_info,
+    group_col = group_col,
+    min_count = 2,
+    max_count = NULL,
+    method = "ancova"
+  )
+  groups <- group_info$groups
+
+  # Extract covariates
+  covariates <- .extract_covariates_from_sample_info(sample_info, covariate_cols, group_col)
+  if (is.null(covariates) || ncol(covariates) == 0) {
+    cli::cli_abort("covariate_cols must be provided for ANCOVA.")
+  }
+
+  # Call the underlying API
+  result <- gly_ancova_(expr_mat, groups, covariates, p_adj_method, ...)
+  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result
+}
+
+#' @rdname gly_ancova
+#' @export
+gly_ancova_ <- function(
+  expr_mat,
+  groups,
+  covariates,
+  p_adj_method = "BH",
+  ...
+) {
+  # Check package availability
+  rlang::check_installed("emmeans")
+
+  # Validate inputs
+  checkmate::assert_matrix(expr_mat, mode = "numeric")
+  groups <- .convert_groups_to_factor(groups)
+  checkmate::assert_factor(groups, len = ncol(expr_mat))
+  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+
+  # Validate group count
+  if (length(levels(groups)) < 2) {
+    cli::cli_abort("groups must have at least 2 levels for ANCOVA")
+  }
+
+  # Normalize and validate covariates
+  covariates <- .normalize_covariates(covariates, ncol(expr_mat), colnames(expr_mat))
+  if (is.null(covariates) || ncol(covariates) == 0) {
+    cli::cli_abort("covariates must be provided for ANCOVA.")
+  }
+  if ("group" %in% colnames(covariates)) {
+    cli::cli_abort("covariates cannot include a column named {.field group}; rename it.")
+  }
+
+  # Prepare data
+  data <- .prepare_multi_group_data(expr_mat, groups, covariates)
+  ancova_formula <- stats::reformulate(
+    termlabels = c("group", colnames(covariates)),
+    response = "log_value"
+  )
+
+  # Generate raw results
+  raw_main_test <- .generate_raw_main_results(data, stats::aov, formula = ancova_formula, ...)
+  raw_post_hoc_test <- .generate_raw_posthoc_results(
+    raw_main_test,
+    data,
+    stats::aov,
+    p_adj_method,
+    formula = ancova_formula,
+    posthoc_method = "emmeans"
+  )
+
+  # Tibblify results
+  main_test <- .tibblify_main_test_results(raw_main_test, stats::aov, p_adj_method)
+  post_hoc_vec <- .format_posthoc_results(raw_post_hoc_test, stats::aov, main_test$variable)
+  main_test$post_hoc <- post_hoc_vec
+  post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
+  post_hoc_test <- .add_fold_change(post_hoc_test, expr_mat, groups)
+
+  # Assemble tidy results
+  tidy_result <- list(
+    main_test = main_test,
+    post_hoc_test = post_hoc_test
+  )
+
+  # Assemble raw results
+  raw_result <- list(
+    main_test = raw_main_test,
+    post_hoc_test = raw_post_hoc_test
+  )
+
+  # Assemble final result
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = raw_result
+    ),
+    class = c("glystats_ancova_res", "glystats_res")
+  )
+}
+
 #' Kruskal-Wallis test for Differential Expression Analysis
 #'
 #' Perform Kruskal-Wallis test for glycomics or glycoproteomics data.
@@ -298,11 +492,20 @@ gly_kruskal_ <- function(
 # Internal helper functions for multi-group analysis (ANOVA and Kruskal-Wallis)
 
 # Helper function to perform raw post-hoc tests (returns raw objects)
-.perform_raw_posthoc_test <- function(data_nested, .f) {
+.perform_raw_posthoc_test <- function(data_nested, .f, formula = NULL, posthoc_method = "tukey") {
   if (identical(.f, stats::aov)) {
-    # TukeyHSD for ANOVA - return raw TukeyHSD object
-    aov_model <- stats::aov(log_value ~ group, data = data_nested)
-    stats::TukeyHSD(aov_model)
+    # Post-hoc for ANOVA/ANCOVA
+    if (is.null(formula)) {
+      formula <- log_value ~ group
+    }
+    aov_model <- stats::aov(formula, data = data_nested)
+    if (identical(posthoc_method, "emmeans")) {
+      emm <- emmeans::emmeans(aov_model, specs = "group")
+      contrast <- emmeans::contrast(emm, method = "pairwise", adjust = "tukey", reverse = FALSE)
+      as.data.frame(summary(contrast))
+    } else {
+      suppressWarnings(stats::TukeyHSD(aov_model, which = "group"))
+    }
   } else {
     # Dunn test for Kruskal-Wallis
     # Check number of groups - FSA::dunnTest fails with only 2 groups
@@ -352,16 +555,19 @@ gly_kruskal_ <- function(
 }
 
 # Helper function to generate raw main test results
-.generate_raw_main_results <- function(data, .f, ...) {
+.generate_raw_main_results <- function(data, .f, formula = NULL, ...) {
   dots <- rlang::list2(...)
   disallowed_args <- intersect(names(dots), c("formula", "data"))
   if (length(disallowed_args) > 0) {
     cli::cli_abort("Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; they are controlled internally.")
   }
+  if (is.null(formula)) {
+    formula <- log_value ~ group
+  }
   safe_f <- purrr::possibly(function(...) rlang::exec(.f, ...), otherwise = NA)
   main_test_raw <- data %>%
     dplyr::nest_by(.data$variable) %>%
-    dplyr::mutate(test_result = list(safe_f(log_value ~ group, data = .data$data, !!!dots)))
+    dplyr::mutate(test_result = list(safe_f(formula, data = .data$data, !!!dots)))
   main_test_list <- main_test_raw$test_result
   n_na <- sum(is.na(main_test_list))
   if (n_na > 0) {
@@ -371,7 +577,7 @@ gly_kruskal_ <- function(
   main_test_list
 }
 
-.generate_raw_posthoc_results <- function(main_test_raw, data, .f, p_adj_method) {
+.generate_raw_posthoc_results <- function(main_test_raw, data, .f, p_adj_method, formula = NULL, posthoc_method = "tukey") {
   p_fn <- ifelse(
     identical(.f, stats::aov),
     function(x) summary(x)[[1]][["Pr(>F)"]][1],
@@ -387,7 +593,12 @@ gly_kruskal_ <- function(
     posthoc_raw_results <- data %>%
       dplyr::filter(.data$variable %in% sig_vars) %>%
       dplyr::nest_by(.data$variable) %>%
-      dplyr::mutate(posthoc_raw = list(.perform_raw_posthoc_test(.data$data, .f))) %>%
+      dplyr::mutate(posthoc_raw = list(.perform_raw_posthoc_test(
+        .data$data,
+        .f,
+        formula = formula,
+        posthoc_method = posthoc_method
+      ))) %>%
       dplyr::select(all_of(c("variable", "posthoc_raw")))
     raw_posthoc_list <- posthoc_raw_results$posthoc_raw
     names(raw_posthoc_list) <- posthoc_raw_results$variable
@@ -398,15 +609,27 @@ gly_kruskal_ <- function(
 }
 
 # Helper function to prepare data for analysis
-.prepare_multi_group_data <- function(expr_mat, groups) {
-  expr_mat %>%
+.prepare_multi_group_data <- function(expr_mat, groups, covariates = NULL) {
+  data <- expr_mat %>%
     t() %>%
     as.data.frame() %>%
     tibble::rownames_to_column("sample") %>%
     tibble::as_tibble() %>%
-    dplyr::mutate(group = groups) %>%
+    dplyr::mutate(group = groups)
+
+  if (!is.null(covariates)) {
+    covariate_tbl <- tibble::as_tibble(covariates)
+    data <- dplyr::bind_cols(data, covariate_tbl)
+  }
+
+  keep_cols <- c("sample", "group")
+  if (!is.null(covariates)) {
+    keep_cols <- c(keep_cols, colnames(covariates))
+  }
+
+  data %>%
     tidyr::pivot_longer(
-      cols = -all_of(c("sample", "group")),
+      cols = -all_of(keep_cols),
       names_to = "variable",
       values_to = "value"
     ) %>%
@@ -454,13 +677,21 @@ gly_kruskal_ <- function(
   }
   posthoc_map <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
     if (identical(.f, stats::aov)) {
-      tukey_df <- as.data.frame(raw_result$group)
-      sig_pairs <- rownames(tukey_df)[tukey_df$"p adj" < 0.05]
-      sig_pairs <- purrr::map(sig_pairs, function(x) {
-        # switch two groups and change the "-" to "_vs_"
-        parts <- stringr::str_split(x, "-", simplify = TRUE)
-        stringr::str_c(parts[, 2], "_vs_", parts[, 1])
-      })
+      if (is.data.frame(raw_result) && "contrast" %in% colnames(raw_result)) {
+        sig_pairs <- raw_result$contrast[raw_result$p.value < 0.05]
+        sig_pairs <- purrr::map_chr(sig_pairs, function(x) {
+          parts <- stringr::str_split(x, "\\s*-\\s*", simplify = TRUE)
+          stringr::str_c(parts[, 1], "_vs_", parts[, 2])
+        })
+      } else {
+        tukey_df <- as.data.frame(raw_result$group)
+        sig_pairs <- rownames(tukey_df)[tukey_df$"p adj" < 0.05]
+        sig_pairs <- purrr::map(sig_pairs, function(x) {
+          # switch two groups and change the "-" to "_vs_"
+          parts <- stringr::str_split(x, "-", simplify = TRUE)
+          stringr::str_c(parts[, 2], "_vs_", parts[, 1])
+        })
+      }
       sig_str <- if (length(sig_pairs) == 0) NA_character_ else paste(sig_pairs, collapse = ";")
     } else {
       dunn_df <- raw_result$res
@@ -493,20 +724,31 @@ gly_kruskal_ <- function(
   # Convert each post-hoc result to tibble and combine
   result_list <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
     if (identical(.f, stats::aov)) {
-      # For TukeyHSD results
-      tukey_df <- as.data.frame(raw_result$group)
-      tukey_df$comparison <- rownames(tukey_df)
+      if (is.data.frame(raw_result) && "contrast" %in% colnames(raw_result)) {
+        comparison_parts <- stringr::str_split(raw_result$contrast, "\\s*-\\s*", simplify = TRUE)
+        tibble::tibble(
+          variable = var_name,
+          ref_group = comparison_parts[, 1],
+          test_group = comparison_parts[, 2],
+          p_val = raw_result$p.value,
+          p_adj = raw_result$p.value
+        )
+      } else {
+        # For TukeyHSD results
+        tukey_df <- as.data.frame(raw_result$group)
+        tukey_df$comparison <- rownames(tukey_df)
 
-      # Parse group comparisons (format: "group2-group1")
-      comparison_parts <- stringr::str_split(tukey_df$comparison, "-", simplify = TRUE)
+        # Parse group comparisons (format: "group2-group1")
+        comparison_parts <- stringr::str_split(tukey_df$comparison, "-", simplify = TRUE)
 
-      tibble::tibble(
-        variable = var_name,
-        ref_group = comparison_parts[, 2],  # Second part is ref_group
-        test_group = comparison_parts[, 1],  # First part is test_group
-        p_val = tukey_df$`p adj`,      # TukeyHSD already provides adjusted p-values
-        p_adj = tukey_df$`p adj`
-      )
+        tibble::tibble(
+          variable = var_name,
+          ref_group = comparison_parts[, 2],  # Second part is ref_group
+          test_group = comparison_parts[, 1],  # First part is test_group
+          p_val = tukey_df$`p adj`,      # TukeyHSD already provides adjusted p-values
+          p_adj = tukey_df$`p adj`
+        )
+      }
     } else {
       # For Dunn test results
       dunn_df <- raw_result$res

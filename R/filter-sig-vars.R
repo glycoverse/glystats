@@ -3,7 +3,7 @@
 #' Filtering the experiment to keep only significant variables is a common task.
 #' This function provides a convenient way to do this.
 #' It supports results from all glystats DEA functions including
-#' [gly_anova()], [gly_kruskal()], [gly_ttest()], [gly_wilcox()], and [gly_limma()].
+#' [gly_anova()], [gly_ancova()], [gly_kruskal()], [gly_ttest()], [gly_wilcox()], and [gly_limma()].
 #'
 #' @param exp An [glyexp::experiment()]. Please use the same experiment used to generate the DEA result.
 #' @param res A glystats result object from a glystats DEA function.
@@ -42,6 +42,14 @@ filter_sig_vars <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, 
 #'   and variables will be kept if they are significant in any comparison for [gly_limma()].
 #' @export
 filter_sig_vars.glystats_anova_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
+  .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff)
+  .filter_sig_vars_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+}
+
+#' @rdname filter_sig_vars
+#' @export
+filter_sig_vars.glystats_ancova_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
   .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
   fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
