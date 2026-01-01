@@ -173,7 +173,7 @@ gly_limma_ <- function(
   fit <- limma::lmFit(log_expr_mat, design, ...)
 
   # Apply empirical Bayes moderation
-  fit <- limma::eBayes(fit)
+  fit <- limma::eBayes(fit, trend = TRUE)
 
   # Extract results and convert to tibble
   tidy_result <- .gly_limma_tibblify(fit, p_adj_method, expr_mat, groups)
@@ -281,7 +281,7 @@ gly_limma_ <- function(
   fit2 <- limma::contrasts.fit(fit, contrast_matrix)
 
   # Apply empirical Bayes moderation
-  fit2 <- limma::eBayes(fit2)
+  fit2 <- limma::eBayes(fit2, trend = TRUE)
 
   # Extract results and convert to tibble
   tidy_result <- .gly_limma_multi_tibblify(fit2, p_adj_method, contrast_pairs)
