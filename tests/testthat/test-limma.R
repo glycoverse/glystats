@@ -219,6 +219,59 @@ test_that("gly_limma custom contrasts work with _vs_ format", {
   expect_equal(nrow(result$tidy_result), 5 * 3)  # 5 variables * 3 contrasts
 })
 
+test_that("gly_limma works with covariate_cols", {
+  set.seed(101)
+  var_info <- tibble::tibble(variable = paste0("V", 1:5))
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:20),
+    group = factor(rep(c("A", "B"), each = 10), levels = c("A", "B")),
+    batch = rep(c("X", "Y"), times = 10),
+    age = seq(30, 49)
+  )
+  expr_mat <- matrix(rnorm(5 * 20, mean = 1, sd = 0.2), nrow = 5)
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
+
+  result <- suppressMessages(gly_limma(exp, covariate_cols = c("batch", "age")))
+
+  expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
+  expect_equal(nrow(result$tidy_result), 5)
+  expect_true("log2fc" %in% colnames(result$tidy_result))
+})
+
+test_that("gly_limma_ works with covariates", {
+  set.seed(202)
+  var_info <- tibble::tibble(variable = paste0("V", 1:4))
+  sample_names <- paste0("S", 1:16)
+  groups <- factor(rep(c("A", "B"), each = 8), levels = c("A", "B"))
+  expr_mat <- matrix(rnorm(4 * 16, mean = 1.5, sd = 0.3), nrow = 4)
+  colnames(expr_mat) <- sample_names
+  rownames(expr_mat) <- var_info$variable
+  covariates <- data.frame(
+    batch = rep(c("B1", "B2"), times = 8),
+    age = seq(40, 55),
+    row.names = sample_names,
+    stringsAsFactors = FALSE
+  )
+
+  result <- suppressMessages(gly_limma_(expr_mat, groups, covariates = covariates))
+
+  expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
+  expect_equal(nrow(result$tidy_result), 4)
+})
+
+test_that("gly_limma_ validates covariate rows", {
+  expr_mat <- matrix(rnorm(3 * 10), nrow = 3)
+  groups <- factor(rep(c("A", "B"), each = 5), levels = c("A", "B"))
+  covariates <- data.frame(batch = rep(c("B1", "B2"), each = 4))
+
+  expect_error(
+    suppressMessages(gly_limma_(expr_mat, groups, covariates = covariates)),
+    "covariates must have"
+  )
+})
+
 test_that("gly_limma contrasts error handling works", {
   # Test with 3 groups
   exp_3group <- test_gp_exp |>
