@@ -19,7 +19,7 @@ gly_plsda_(expr_mat, groups, ncomp = 2, scale = TRUE, ...)
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{group_col}{A character string specifying the column name in sample information
+\item{group_col}{(Only for \code{\link[=gly_plsda]{gly_plsda()}}) A character string specifying the column name in sample information
 that contains group labels. Default is "group".}
 
 \item{ncomp}{An integer indicating the number of components to include. Default is 2.}
@@ -32,9 +32,9 @@ Only applicable to \code{gly_plsda()}.}
 
 \item{...}{Additional arguments passed to \code{ropls::opls()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_plsda_]{gly_plsda_()}}) A numeric matrix with variables as rows and samples as columns.}
 
-\item{groups}{A factor or character vector specifying group membership for each sample.
+\item{groups}{(Only for \code{\link[=gly_plsda_]{gly_plsda_()}}) A factor or character vector specifying group membership for each sample.
 Character vectors will be automatically converted to factors.}
 }
 \value{

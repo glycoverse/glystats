@@ -35,7 +35,7 @@ Only applicable to \code{gly_cox()}.}
 
 \item{...}{Additional arguments passed to \code{survival::coxph()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_cox_]{gly_cox_()}}) A numeric matrix with variables as rows and samples as columns.}
 
 \item{time}{A numeric vector specifying the survival time for each sample.}
 

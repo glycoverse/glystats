@@ -12,7 +12,7 @@ gly_roc_(expr_mat, groups, pos_class = NULL)
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{group_col}{A character string specifying the column name of the grouping variable
+\item{group_col}{(Only for \code{\link[=gly_roc]{gly_roc()}}) A character string specifying the column name of the grouping variable
 in the sample information. Default is \code{"group"}. The grouping variable must have
 exactly 2 levels for binary classification.}
 
@@ -24,9 +24,9 @@ used as the positive class.}
 will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
 Only applicable to \code{gly_roc()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_roc_]{gly_roc_()}}) A numeric matrix with variables as rows and samples as columns.}
 
-\item{groups}{A factor or character vector specifying group membership for each sample.
+\item{groups}{(Only for \code{\link[=gly_roc_]{gly_roc_()}}) A factor or character vector specifying group membership for each sample.
 Must have exactly 2 levels. Character vectors will be automatically converted to factors.}
 }
 \value{

@@ -4,7 +4,7 @@
 #' The function uses `Rtsne::Rtsne()` to perform t-SNE analysis.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param expr_mat (Only for [gly_tsne_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param dims Number of output dimensions. Default is 2.
 #' @param perplexity Perplexity parameter for t-SNE. Default is 30.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment

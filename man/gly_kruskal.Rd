@@ -18,7 +18,7 @@ gly_kruskal_(expr_mat, groups, p_adj_method = "BH", ...)
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{group_col}{A character string specifying the column name of the grouping variable
+\item{group_col}{(Only for \code{\link[=gly_kruskal]{gly_kruskal()}}) A character string specifying the column name of the grouping variable
 in the sample information. Default is \code{"group"}.}
 
 \item{p_adj_method}{A character string specifying the method to adjust p-values.
@@ -31,9 +31,9 @@ Only applicable to \code{gly_kruskal()}.}
 
 \item{...}{Additional arguments passed to \code{stats::kruskal.test()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_kruskal_]{gly_kruskal_()}}) A numeric matrix with variables as rows and samples as columns.}
 
-\item{groups}{A factor or character vector specifying group membership for each sample.
+\item{groups}{(Only for \code{\link[=gly_kruskal_]{gly_kruskal_()}}) A factor or character vector specifying group membership for each sample.
 Must have at least 2 levels. Character vectors will be automatically converted to factors.}
 }
 \value{

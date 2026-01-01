@@ -8,7 +8,7 @@
 #' for more information.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param expr_mat (Only for [gly_consensus_clustering_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param on A character string specifying what to cluster. Either "sample" (default) to cluster
 #'   samples/observations, or "variable" to cluster variables/features.
 #' @param max_k Maximum number of clusters to test. Default is 9.

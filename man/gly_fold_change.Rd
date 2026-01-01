@@ -12,15 +12,15 @@ gly_fold_change_(expr_mat, groups)
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object.}
 
-\item{group_col}{The column name of the group information in the sample information.}
+\item{group_col}{(Only for \code{\link[=gly_fold_change]{gly_fold_change()}}) The column name of the group information in the sample information.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the fold change results are returned.
 Only applicable to \code{gly_fold_change()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_fold_change_]{gly_fold_change_()}}) A numeric matrix with variables as rows and samples as columns.}
 
-\item{groups}{A factor or character vector specifying group membership for each sample.
+\item{groups}{(Only for \code{\link[=gly_fold_change_]{gly_fold_change_()}}) A factor or character vector specifying group membership for each sample.
 Character vectors will be automatically converted to factors.
 If two groups, the first level is the reference group.
 If more than two groups, pairwise comparisons will be performed,

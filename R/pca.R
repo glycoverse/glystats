@@ -5,7 +5,7 @@
 #' If `scale = TRUE`, constant variables (zero variance) will be removed before PCA.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param expr_mat (Only for [gly_pca_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param center A logical indicating whether to center the data. Default is TRUE.
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment

@@ -6,10 +6,10 @@
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor or character vector specifying group membership for each sample.
+#' @param expr_mat (Only for [gly_anova_()]) A numeric matrix with variables as rows and samples as columns.
+#' @param groups (Only for [gly_anova_()]) A factor or character vector specifying group membership for each sample.
 #'   Must have at least 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col A character string specifying the column name of the grouping variable
+#' @param group_col (Only for [gly_anova()]) A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
@@ -151,10 +151,10 @@ gly_anova_ <- function(
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor or character vector specifying group membership for each sample.
+#' @param expr_mat (Only for [gly_kruskal_()]) A numeric matrix with variables as rows and samples as columns.
+#' @param groups (Only for [gly_kruskal_()]) A factor or character vector specifying group membership for each sample.
 #'   Must have at least 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col A character string specifying the column name of the grouping variable
+#' @param group_col (Only for [gly_kruskal()]) A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".

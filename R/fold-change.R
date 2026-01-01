@@ -6,13 +6,13 @@
 #' "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
 #'
 #' @param exp A `glyexp::experiment()` object.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor or character vector specifying group membership for each sample.
+#' @param expr_mat (Only for [gly_fold_change_()]) A numeric matrix with variables as rows and samples as columns.
+#' @param groups (Only for [gly_fold_change_()]) A factor or character vector specifying group membership for each sample.
 #'   Character vectors will be automatically converted to factors.
 #'   If two groups, the first level is the reference group.
 #'   If more than two groups, pairwise comparisons will be performed,
 #'   with levels coming first as reference groups.
-#' @param group_col The column name of the group information in the sample information.
+#' @param group_col (Only for [gly_fold_change()]) The column name of the group information in the sample information.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the fold change results are returned.
 #'  Only applicable to `gly_fold_change()`.
@@ -72,8 +72,8 @@ gly_fold_change_ <- function(expr_mat, groups) {
 
 #' Calculate fold change for 2-group analysis
 #'
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor vector specifying group membership for each sample.
+#' @param expr_mat (Only for `.fc_2groups()`) A numeric matrix with variables as rows and samples as columns.
+#' @param groups (Only for `.fc_2groups()`) A factor vector specifying group membership for each sample.
 #'   Must have exactly 2 levels. The first level is the reference group.
 #'
 #' @return A tibble with fold change results containing the following columns:
@@ -89,8 +89,8 @@ gly_fold_change_ <- function(expr_mat, groups) {
 
 #' Calculate fold change for multi-group analysis
 #'
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor vector specifying group membership for each sample.
+#' @param expr_mat (Only for `.fc_multi_groups()`) A numeric matrix with variables as rows and samples as columns.
+#' @param groups (Only for `.fc_multi_groups()`) A factor vector specifying group membership for each sample.
 #'   Must have more than 2 levels.
 #'
 #' @return A tibble with fold change results containing the following columns:

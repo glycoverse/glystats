@@ -5,7 +5,7 @@
 #' tidy results with cluster assignments.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param expr_mat (Only for [gly_kmeans_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param on A character string specifying what to cluster. Either "variable" (default) to cluster
 #'   variables/features, or "sample" to cluster samples/observations.
 #' @param centers Either the number of clusters (integer) or a set of initial cluster centers.

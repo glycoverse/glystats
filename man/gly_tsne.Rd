@@ -22,7 +22,7 @@ Only applicable to \code{gly_tsne()}.}
 
 \item{...}{Additional arguments passed to \code{Rtsne::Rtsne()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_tsne_]{gly_tsne_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with two elements:

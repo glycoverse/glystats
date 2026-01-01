@@ -4,12 +4,12 @@
 #' moderation from the limma package. Supports both two-group and multi-group comparisons.
 #'
 #' @param exp A `glyexp_experiment` object containing expression data and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor or character vector specifying group membership for each sample.
+#' @param expr_mat (Only for [gly_limma_()]) A numeric matrix with variables as rows and samples as columns.
+#' @param groups (Only for [gly_limma_()]) A factor or character vector specifying group membership for each sample.
 #'   Must have at least 2 levels. Character vectors will be automatically converted to factors.
 #'   If `contrasts` is not provided,
 #'   the levels coming first in the factor will be used as the reference group.
-#' @param group_col A character string specifying the column name in sample information
+#' @param group_col (Only for [gly_limma()]) A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param p_adj_method A character string specifying the method for multiple testing correction.
 #'   Must be one of the methods supported by `stats::p.adjust()`. Default is "BH" (Benjamini-Hochberg).
@@ -26,7 +26,6 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #'  Only applicable to `gly_limma()`.
-
 #' @param ... Additional arguments passed to `limma::lmFit()`.
 #'
 #' @details

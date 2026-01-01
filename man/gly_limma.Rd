@@ -27,7 +27,7 @@ gly_limma_(
 \arguments{
 \item{exp}{A \code{glyexp_experiment} object containing expression data and sample information.}
 
-\item{group_col}{A character string specifying the column name in sample information
+\item{group_col}{(Only for \code{\link[=gly_limma]{gly_limma()}}) A character string specifying the column name in sample information
 that contains group labels. Default is "group".}
 
 \item{p_adj_method}{A character string specifying the method for multiple testing correction.
@@ -51,9 +51,9 @@ Only applicable to \code{gly_limma()}.}
 
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_limma_]{gly_limma_()}}) A numeric matrix with variables as rows and samples as columns.}
 
-\item{groups}{A factor or character vector specifying group membership for each sample.
+\item{groups}{(Only for \code{\link[=gly_limma_]{gly_limma_()}}) A factor or character vector specifying group membership for each sample.
 Must have at least 2 levels. Character vectors will be automatically converted to factors.
 If \code{contrasts} is not provided,
 the levels coming first in the factor will be used as the reference group.}

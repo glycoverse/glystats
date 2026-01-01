@@ -3,8 +3,8 @@
 #' Perform GO, KEGG, and Reactome ORA for protein UniProt accessions.
 #' For glycoproteomics experiments, the function extracts unique proteins from the variable information.
 #'
-#' @param exp A `glyexp::experiment()` object.
-#' @param proteins A character vector of UniProt accession IDs.
+#' @param exp (Only for [gly_enrich_go()], [gly_enrich_kegg()], [gly_enrich_reactome()]) A `glyexp::experiment()` object.
+#' @param proteins (Only for [gly_enrich_go_()], [gly_enrich_kegg_()], [gly_enrich_reactome_()]) A character vector of UniProt accession IDs.
 #' @param add_info A logical value. This parameter is included for API consistency but has no effect
 #'  since enrichment results do not contain variable or sample columns.
 #'  Only applicable to top-level APIs.

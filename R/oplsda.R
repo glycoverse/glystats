@@ -4,10 +4,10 @@
 #' The function uses `ropls::opls()` to perform OPLS-DA and returns tidy results.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor or character vector specifying group membership for each sample.
+#' @param expr_mat (Only for [gly_oplsda_()]) A numeric matrix with variables as rows and samples as columns.
+#' @param groups (Only for [gly_oplsda_()]) A factor or character vector specifying group membership for each sample.
 #'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col A character string specifying the column name in sample information
+#' @param group_col (Only for [gly_oplsda()]) A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param pred_i An integer indicating the number of predictive components to include. Default is 1.
 #' @param ortho_i An integer indicating the number of orthogonal components to include. Default is NA (automatic).

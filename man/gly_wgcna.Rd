@@ -57,7 +57,7 @@ to the modules tibble. Only applicable to \code{gly_wgcna()}.}
 
 \item{...}{Additional arguments passed to \code{WGCNA::blockwiseModules()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_wgcna_]{gly_wgcna_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with two elements:

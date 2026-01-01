@@ -5,7 +5,7 @@
 #' detect modules, and calculate module membership and eigenvalues.
 #'
 #' @param exp A `glyexp::experiment()` object.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param expr_mat (Only for [gly_wgcna_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param powers A numeric vector of soft thresholding powers to test.
 #'   Default is `c(1:10, seq(12, 20, by = 2))`.
 #' @param network_type Character string specifying network type.

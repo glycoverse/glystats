@@ -41,7 +41,7 @@ Only applicable to \code{gly_hclust()}.}
 Note: if both functions need a \code{method} parameter, use \code{dist.method} for distance
 and \code{hclust.method} for clustering method.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_hclust_]{gly_hclust_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list containing:

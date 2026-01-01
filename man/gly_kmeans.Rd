@@ -33,7 +33,7 @@ Only applicable to \code{gly_kmeans()}.}
 
 \item{...}{Additional arguments passed to \code{stats::kmeans()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_kmeans_]{gly_kmeans_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with two elements:

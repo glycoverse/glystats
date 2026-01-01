@@ -4,7 +4,7 @@
 #' The function uses `uwot::umap()` to perform UMAP analysis.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param expr_mat (Only for [gly_umap_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param n_neighbors Number of neighbors to consider for each point. Default is 15.
 #' @param n_components Number of output dimensions. Default is 2.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment

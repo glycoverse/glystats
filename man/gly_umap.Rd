@@ -22,7 +22,7 @@ Only applicable to \code{gly_umap()}.}
 
 \item{...}{Additional arguments passed to \code{uwot::umap()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_umap_]{gly_umap_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with two elements:

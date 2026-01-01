@@ -62,7 +62,7 @@ Only applicable to \code{gly_consensus_clustering()}.}
 
 \item{...}{Additional arguments passed to \code{ConsensusClusterPlus::ConsensusClusterPlus()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_consensus_clustering_]{gly_consensus_clustering_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with two elements:

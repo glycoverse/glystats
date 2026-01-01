@@ -22,7 +22,7 @@ gly_enrich_reactome(exp, add_info = TRUE, ...)
 gly_enrich_reactome_(proteins, ...)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} object.}
+\item{exp}{(Only for \code{\link[=gly_enrich_go]{gly_enrich_go()}}, \code{\link[=gly_enrich_kegg]{gly_enrich_kegg()}}, \code{\link[=gly_enrich_reactome]{gly_enrich_reactome()}}) A \code{glyexp::experiment()} object.}
 
 \item{add_info}{A logical value. This parameter is included for API consistency but has no effect
 since enrichment results do not contain variable or sample columns.
@@ -31,7 +31,7 @@ Only applicable to top-level APIs.}
 \item{...}{Additional arguments passed to \code{clusterProfiler::enrichGO()}, \code{clusterProfiler::enrichKEGG()}, or \code{ReactomePA::enrichPathway()}.
 See the "Additional arguments" section for more information.}
 
-\item{proteins}{A character vector of UniProt accession IDs.}
+\item{proteins}{(Only for \code{\link[=gly_enrich_go_]{gly_enrich_go_()}}, \code{\link[=gly_enrich_kegg_]{gly_enrich_kegg_()}}, \code{\link[=gly_enrich_reactome_]{gly_enrich_reactome_()}}) A character vector of UniProt accession IDs.}
 }
 \value{
 A list with two elements:

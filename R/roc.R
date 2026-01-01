@@ -6,10 +6,10 @@
 #' power between two groups.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor or character vector specifying group membership for each sample.
+#' @param expr_mat (Only for [gly_roc_()]) A numeric matrix with variables as rows and samples as columns.
+#' @param groups (Only for [gly_roc_()]) A factor or character vector specifying group membership for each sample.
 #'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col A character string specifying the column name of the grouping variable
+#' @param group_col (Only for [gly_roc()]) A character string specifying the column name of the grouping variable
 #'   in the sample information. Default is `"group"`. The grouping variable must have
 #'   exactly 2 levels for binary classification.
 #' @param pos_class A character string specifying which group level should be treated as

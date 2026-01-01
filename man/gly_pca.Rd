@@ -22,7 +22,7 @@ Only applicable to \code{gly_pca()}.}
 
 \item{...}{Additional arguments passed to \code{prcomp()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_pca_]{gly_pca_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list containing:

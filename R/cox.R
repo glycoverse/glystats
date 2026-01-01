@@ -4,7 +4,7 @@
 #' and extract p-values and hazard ratios from it.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param expr_mat (Only for [gly_cox_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param time_col A character string specifying the column name in sample information
 #'   that contains survival time. Default is "time".
 #' @param event_col A character string specifying the column name in sample information

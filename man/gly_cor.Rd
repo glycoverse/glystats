@@ -30,7 +30,7 @@ If NULL, no adjustment is performed.}
 
 \item{...}{Additional arguments passed to \code{Hmisc::rcorr()}.}
 
-\item{expr_mat}{A numeric matrix with variables as rows and samples as columns.}
+\item{expr_mat}{(Only for \code{\link[=gly_cor_]{gly_cor_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with two elements:

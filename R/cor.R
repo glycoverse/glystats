@@ -5,7 +5,7 @@
 #' with optional multiple testing correction.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param expr_mat (Only for [gly_cor_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param on A character string specifying what to correlate. Either "variable" (default) to correlate
 #'   variables/features, or "sample" to correlate samples/observations.
 #' @param method A character string indicating which correlation coefficient is to be computed.
