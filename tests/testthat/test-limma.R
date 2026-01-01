@@ -348,3 +348,66 @@ test_that("gly_limma_ works correctly", {
   expect_true("p_val" %in% colnames(result$tidy_result))  # Now uses p_val
   expect_equal(nrow(result$tidy_result), 10)
 })
+
+test_that("gly_limma supports subject_cols for paired design", {
+  set.seed(42)
+  n_subjects <- 6
+  subjects <- factor(rep(paste0("S", seq_len(n_subjects)), each = 2))
+  groups <- factor(rep(c("A", "B"), times = n_subjects), levels = c("A", "B"))
+  subject_effect <- rep(seq_len(n_subjects) * 2, each = 2)
+  group_effect <- ifelse(groups == "B", 1.5, 0)
+  n_genes <- 4
+  n_samples <- length(groups)
+  noise <- matrix(rnorm(n_genes * n_samples, sd = 0.05), nrow = n_genes)
+  expr_mat <- matrix(10, nrow = n_genes, ncol = n_samples) +
+    matrix(rep(subject_effect + group_effect, each = n_genes), nrow = n_genes) +
+    noise
+  rownames(expr_mat) <- paste0("V", seq_len(n_genes))
+  sample_info <- tibble::tibble(
+    sample = paste0("sample", seq_len(n_samples)),
+    group = groups,
+    subject = subjects
+  )
+  colnames(expr_mat) <- sample_info$sample
+  exp <- glyexp::experiment(expr_mat, sample_info, tibble::tibble(variable = rownames(expr_mat)), "others")
+
+  result_paired <- suppressMessages(gly_limma(exp, subject_cols = "subject", add_info = FALSE))
+  result_unpaired <- suppressMessages(gly_limma(exp, add_info = FALSE))
+
+  expect_s3_class(result_paired, c("glystats_limma_res", "glystats_res"))
+  expect_true(mean(abs(result_paired$tidy_result$t)) > mean(abs(result_unpaired$tidy_result$t)))
+})
+
+test_that("gly_limma_ supports subjects for paired design", {
+  set.seed(101)
+  n_subjects <- 5
+  subjects <- factor(rep(paste0("S", seq_len(n_subjects)), each = 2))
+  groups <- factor(rep(c("A", "B"), times = n_subjects), levels = c("A", "B"))
+  subject_effect <- rep(seq_len(n_subjects) * 1.5, each = 2)
+  group_effect <- ifelse(groups == "B", 1.2, 0)
+  n_genes <- 3
+  n_samples <- length(groups)
+  noise <- matrix(rnorm(n_genes * n_samples, sd = 0.05), nrow = n_genes)
+  expr_mat <- matrix(8, nrow = n_genes, ncol = n_samples) +
+    matrix(rep(subject_effect + group_effect, each = n_genes), nrow = n_genes) +
+    noise
+  rownames(expr_mat) <- paste0("V", seq_len(n_genes))
+  colnames(expr_mat) <- paste0("sample", seq_len(n_samples))
+
+  result_paired <- suppressMessages(gly_limma_(expr_mat, groups, subjects = subjects))
+  result_unpaired <- suppressMessages(gly_limma_(expr_mat, groups))
+
+  expect_s3_class(result_paired, c("glystats_limma_res", "glystats_res"))
+  expect_true(mean(abs(result_paired$tidy_result$t)) > mean(abs(result_unpaired$tidy_result$t)))
+})
+
+test_that("gly_limma_ validates subjects length", {
+  expr_mat <- matrix(rnorm(3 * 6), nrow = 3)
+  groups <- factor(rep(c("A", "B"), each = 3), levels = c("A", "B"))
+  subjects <- factor(rep(c("S1", "S2"), each = 2))
+
+  expect_error(
+    suppressMessages(gly_limma_(expr_mat, groups, subjects = subjects)),
+    "subjects must have"
+  )
+})

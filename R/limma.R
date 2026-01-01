@@ -13,9 +13,14 @@
 #'   that contains group labels. Default is "group".
 #' @param covariate_cols (Only for [gly_limma()]) A character vector specifying column names in sample information
 #'   to include as covariates in the limma model. Default is NULL.
+#' @param subject_cols (Only for [gly_limma()]) A character string specifying the column name in sample information
+#'   that contains subject identifiers for paired comparisons. Default is NULL.
 #' @param covariates (Only for [gly_limma_()]) A data frame, matrix, or vector of sample-level covariates.
 #'   Must have the same number of rows as `expr_mat` has columns. If row names are provided and
 #'   match `colnames(expr_mat)`, they will be aligned automatically. Default is NULL.
+#' @param subjects (Only for [gly_limma_()]) A vector or factor of subject identifiers for paired comparisons.
+#'   Must have length equal to `ncol(expr_mat)`. If names or row names are provided and match
+#'   `colnames(expr_mat)`, they will be aligned automatically. Default is NULL.
 #' @param p_adj_method A character string specifying the method for multiple testing correction.
 #'   Must be one of the methods supported by `stats::p.adjust()`. Default is "BH" (Benjamini-Hochberg).
 #'   Set to NULL to skip p-value adjustment.
@@ -51,6 +56,9 @@
 #' If covariates are provided, they are added as additional terms in the design
 #' matrix and are not part of the group contrasts.
 #'
+#' If subjects are provided, they are included as a blocking factor in the design
+#' matrix using the formula `~ 0 + group + subject` (plus any covariates).
+#'
 #' When specifying custom contrasts, use either "group1-group2" or "group1_vs_group2" format.
 #' If group names contain hyphens and you use the first format, an error will be raised
 #' suggesting to use the second format.
@@ -82,6 +90,7 @@ gly_limma <- function(
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
+  subject_cols = NULL,
   ...
 ) {
   # Validate inputs
@@ -90,7 +99,11 @@ gly_limma <- function(
   if (length(covariate_cols) == 0) {
     covariate_cols <- NULL
   }
+  if (length(subject_cols) == 0) {
+    subject_cols <- NULL
+  }
   checkmate::assert_character(covariate_cols, null.ok = TRUE)
+  checkmate::assert_character(subject_cols, null.ok = TRUE)
   checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
   checkmate::assert_character(contrasts, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
@@ -113,12 +126,14 @@ gly_limma <- function(
   groups <- group_info$groups
 
   covariates <- .extract_covariates_from_sample_info(sample_info, covariate_cols, group_col)
+  subjects <- .extract_subjects_from_sample_info(sample_info, subject_cols, group_col, covariate_cols)
 
   # Validate ref_group parameter
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Call the underlying API
-  result <- gly_limma_(expr_mat, groups, p_adj_method, ref_group, contrasts, covariates, ...)
+  result <- gly_limma_(expr_mat, groups, p_adj_method, ref_group, contrasts, covariates,
+                       subjects = subjects, ...)
 
   # Process results with add_info logic
   result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
@@ -134,6 +149,7 @@ gly_limma_ <- function(
   ref_group = NULL,
   contrasts = NULL,
   covariates = NULL,
+  subjects = NULL,
   ...
 ) {
   # Validate inputs
@@ -156,6 +172,7 @@ gly_limma_ <- function(
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   covariates <- .normalize_covariates(covariates, ncol(expr_mat), colnames(expr_mat))
+  subjects <- .normalize_subjects(subjects, ncol(expr_mat), colnames(expr_mat))
 
   # Align reference group for 2-group comparisons
   if (n_groups == 2 && !is.null(ref_group)) {
@@ -163,7 +180,7 @@ gly_limma_ <- function(
   }
 
   # Use the multi-group workflow for all cases
-  result <- .gly_limma_multigroups(expr_mat, groups, p_adj_method, contrasts, covariates, ...)
+  result <- .gly_limma_multigroups(expr_mat, groups, p_adj_method, contrasts, covariates, subjects, ...)
 
   result
 }
@@ -205,6 +222,41 @@ gly_limma_ <- function(
   sample_info[, covariate_cols, drop = FALSE]
 }
 
+# Extract subjects from sample_info for gly_limma
+.extract_subjects_from_sample_info <- function(sample_info, subject_cols, group_col, covariate_cols) {
+  if (is.null(subject_cols) || length(subject_cols) == 0) {
+    return(NULL)
+  }
+
+  if (anyDuplicated(subject_cols) > 0) {
+    cli::cli_abort("subject_cols must be unique.")
+  }
+  if (length(subject_cols) != 1) {
+    cli::cli_abort("subject_cols must contain exactly 1 column name.")
+  }
+  if (group_col %in% subject_cols) {
+    cli::cli_abort("subject_cols cannot include the group column {.field {group_col}}.")
+  }
+  if (!is.null(covariate_cols) && any(subject_cols %in% covariate_cols)) {
+    cli::cli_abort("subject_cols cannot overlap with covariate_cols.")
+  }
+
+  missing_cols <- setdiff(subject_cols, colnames(sample_info))
+  if (length(missing_cols) > 0) {
+    cli::cli_abort(c(
+      "subject_cols not found in sample information: {.field {missing_cols}}.",
+      "i" = "Available columns: {.field {colnames(sample_info)}}"
+    ))
+  }
+
+  subjects <- sample_info[[subject_cols]]
+  if (!is.factor(subjects)) {
+    subjects <- factor(subjects)
+  }
+
+  subjects
+}
+
 # Normalize covariates for gly_limma_
 .normalize_covariates <- function(covariates, n_samples, sample_names = NULL) {
   if (is.null(covariates)) {
@@ -243,6 +295,9 @@ gly_limma_ <- function(
   if ("groups" %in% colnames(covariates)) {
     cli::cli_abort("covariates cannot include a column named {.field groups}; rename it.")
   }
+  if ("subject" %in% colnames(covariates)) {
+    cli::cli_abort("covariates cannot include a column named {.field subject}; rename it.")
+  }
 
   covariates[] <- lapply(covariates, function(col) {
     if (is.character(col)) {
@@ -255,8 +310,62 @@ gly_limma_ <- function(
   covariates
 }
 
+# Normalize subjects for gly_limma_
+.normalize_subjects <- function(subjects, n_samples, sample_names = NULL) {
+  if (is.null(subjects)) {
+    return(NULL)
+  }
+
+  if (is.factor(subjects) || (is.vector(subjects) && !is.list(subjects))) {
+    # keep as is
+  } else if (is.matrix(subjects) || is.data.frame(subjects)) {
+    subjects <- as.data.frame(subjects, stringsAsFactors = FALSE)
+    if (ncol(subjects) == 0) {
+      return(NULL)
+    }
+    if (ncol(subjects) != 1) {
+      cli::cli_abort("subjects must have exactly 1 column.")
+    }
+    if (!is.null(sample_names)) {
+      subject_rows <- rownames(subjects)
+      if (!is.null(subject_rows)) {
+        if (setequal(subject_rows, sample_names)) {
+          subjects <- subjects[sample_names, , drop = FALSE]
+        } else if (!identical(subject_rows, as.character(seq_len(n_samples)))) {
+          cli::cli_abort("subjects row names must match expr_mat column names.")
+        }
+      }
+    }
+    subjects <- subjects[[1]]
+  } else {
+    cli::cli_abort("subjects must be a vector, matrix, or data.frame.")
+  }
+
+  if (length(subjects) != n_samples) {
+    cli::cli_abort("subjects must have {.val {n_samples}} values to match expr_mat columns.")
+  }
+
+  if (!is.null(sample_names)) {
+    subject_names <- names(subjects)
+    if (!is.null(subject_names)) {
+      if (setequal(subject_names, sample_names)) {
+        subjects <- subjects[sample_names]
+      } else if (!identical(subject_names, as.character(seq_len(n_samples)))) {
+        cli::cli_abort("subjects names must match expr_mat column names.")
+      }
+    }
+  }
+
+  if (!is.factor(subjects)) {
+    subjects <- factor(subjects)
+  }
+
+  subjects
+}
+
 # Limma-specific multi-group analysis function
-.gly_limma_multigroups <- function(expr_mat, groups, p_adj_method, contrasts = NULL, covariates = NULL, ...) {
+.gly_limma_multigroups <- function(expr_mat, groups, p_adj_method, contrasts = NULL,
+                                   covariates = NULL, subjects = NULL, ...) {
   group_levels <- levels(groups)
   n_groups <- length(group_levels)
 
@@ -264,11 +373,17 @@ gly_limma_ <- function(
   log_expr_mat <- log2(expr_mat + 1e-6)
 
   # Create design matrix without intercept (means model)
-  if (is.null(covariates)) {
+  if (is.null(covariates) && is.null(subjects)) {
     design_data <- data.frame(groups = groups, check.names = FALSE)
     design_formula <- stats::as.formula("~ 0 + groups")
   } else {
-    design_data <- data.frame(groups = groups, covariates, check.names = FALSE)
+    design_data <- data.frame(groups = groups, check.names = FALSE)
+    if (!is.null(subjects)) {
+      design_data$subject <- subjects
+    }
+    if (!is.null(covariates)) {
+      design_data <- data.frame(design_data, covariates, check.names = FALSE)
+    }
     design_formula <- stats::as.formula("~ 0 + groups + .")
   }
   design <- stats::model.matrix(design_formula, data = design_data)

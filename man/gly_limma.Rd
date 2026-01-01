@@ -13,6 +13,7 @@ gly_limma(
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
+  subject_cols = NULL,
   ...
 )
 
@@ -23,6 +24,7 @@ gly_limma_(
   ref_group = NULL,
   contrasts = NULL,
   covariates = NULL,
+  subjects = NULL,
   ...
 )
 }
@@ -54,6 +56,9 @@ Use the second format if group names contain hyphens.
 will be added to the result tibble. If FALSE, only the statistical results are returned.
 Only applicable to \code{gly_limma()}.}
 
+\item{subject_cols}{(Only for \code{\link[=gly_limma]{gly_limma()}}) A character string specifying the column name in sample information
+that contains subject identifiers for paired comparisons. Default is NULL.}
+
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
 
 \item{expr_mat}{(Only for \code{\link[=gly_limma_]{gly_limma_()}}) A numeric matrix with variables as rows and samples as columns.}
@@ -66,6 +71,10 @@ the levels coming first in the factor will be used as the reference group.}
 \item{covariates}{(Only for \code{\link[=gly_limma_]{gly_limma_()}}) A data frame, matrix, or vector of sample-level covariates.
 Must have the same number of rows as \code{expr_mat} has columns. If row names are provided and
 match \code{colnames(expr_mat)}, they will be aligned automatically. Default is NULL.}
+
+\item{subjects}{(Only for \code{\link[=gly_limma_]{gly_limma_()}}) A vector or factor of subject identifiers for paired comparisons.
+Must have length equal to \code{ncol(expr_mat)}. If names or row names are provided and match
+\code{colnames(expr_mat)}, they will be aligned automatically. Default is NULL.}
 }
 \value{
 A list with two elements:
@@ -106,6 +115,9 @@ custom contrasts are specified.
 
 If covariates are provided, they are added as additional terms in the design
 matrix and are not part of the group contrasts.
+
+If subjects are provided, they are included as a blocking factor in the design
+matrix using the formula \code{~ 0 + group + subject} (plus any covariates).
 
 When specifying custom contrasts, use either "group1-group2" or "group1_vs_group2" format.
 If group names contain hyphens and you use the first format, an error will be raised
