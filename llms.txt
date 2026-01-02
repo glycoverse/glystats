@@ -68,6 +68,9 @@ documentation for each function for more details.
 - [`get_tidy_result()`](https://glycoverse.github.io/glystats/reference/get_tidy_result.md)
   [`get_raw_result()`](https://glycoverse.github.io/glystats/reference/get_tidy_result.md)
   : Get the result of a glystats analysis
+- [`gly_ancova()`](https://glycoverse.github.io/glystats/reference/gly_ancova.md)
+  [`gly_ancova_()`](https://glycoverse.github.io/glystats/reference/gly_ancova.md)
+  : Analysis of Covariance (ANCOVA) for Differential Expression Analysis
 - [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md)
   [`gly_anova_()`](https://glycoverse.github.io/glystats/reference/gly_anova.md)
   : One-way ANOVA for Differential Expression Analysis

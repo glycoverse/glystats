@@ -56,7 +56,8 @@ gly_kmeans_(expr_mat, on = "variable", centers = 3, scale = TRUE, ...)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_kmeans_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 ## Value
 

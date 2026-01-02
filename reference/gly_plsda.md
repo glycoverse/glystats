@@ -30,8 +30,8 @@ gly_plsda_(expr_mat, groups, ncomp = 2, scale = TRUE, ...)
 
 - group_col:
 
-  A character string specifying the column name in sample information
-  that contains group labels. Default is "group".
+  (Only for `gly_plsda()`) A character string specifying the column name
+  in sample information that contains group labels. Default is "group".
 
 - ncomp:
 
@@ -56,12 +56,14 @@ gly_plsda_(expr_mat, groups, ncomp = 2, scale = TRUE, ...)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_plsda_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 - groups:
 
-  A factor or character vector specifying group membership for each
-  sample. Character vectors will be automatically converted to factors.
+  (Only for `gly_plsda_()`) A factor or character vector specifying
+  group membership for each sample. Character vectors will be
+  automatically converted to factors.
 
 ## Value
 

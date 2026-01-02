@@ -30,8 +30,9 @@ gly_ttest_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
 
 - group_col:
 
-  A character string specifying the column name of the grouping variable
-  in the sample information. Default is `"group"`.
+  (Only for `gly_ttest()`) A character string specifying the column name
+  of the grouping variable in the sample information. Default is
+  `"group"`.
 
 - p_adj_method:
 
@@ -57,13 +58,14 @@ gly_ttest_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_ttest_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 - groups:
 
-  A factor or character vector specifying group membership for each
-  sample. Must have exactly 2 levels. Character vectors will be
-  automatically converted to factors.
+  (Only for `gly_ttest_()`) A factor or character vector specifying
+  group membership for each sample. Must have exactly 2 levels.
+  Character vectors will be automatically converted to factors.
 
 ## Value
 

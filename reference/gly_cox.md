@@ -56,7 +56,8 @@ gly_cox_(expr_mat, time, event, p_adj_method = "BH", ...)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_cox_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 - time:
 

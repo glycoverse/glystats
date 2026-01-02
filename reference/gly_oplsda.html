@@ -9,7 +9,7 @@ The function uses ropls::opls() to perform OPLS-DA and returns tidy results."><m
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.8.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@ The function uses <code><a href="https://rdrr.io/pkg/ropls/man/opls.html" class=
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
-<dd><p>A character string specifying the column name in sample information
+<dd><p>(Only for <code>gly_oplsda()</code>) A character string specifying the column name in sample information
 that contains group labels. Default is "group".</p></dd>
 
 
@@ -90,11 +90,11 @@ Only applicable to <code>gly_oplsda()</code>.</p></dd>
 
 
 <dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
-<dd><p>A numeric matrix with variables as rows and samples as columns.</p></dd>
+<dd><p>(Only for <code>gly_oplsda_()</code>) A numeric matrix with variables as rows and samples as columns.</p></dd>
 
 
 <dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
-<dd><p>A factor or character vector specifying group membership for each sample.
+<dd><p>(Only for <code>gly_oplsda_()</code>) A factor or character vector specifying group membership for each sample.
 Must have exactly 2 levels. Character vectors will be automatically converted to factors.</p></dd>
 
 </dl></div>

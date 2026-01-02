@@ -23,9 +23,10 @@ gly_roc_(expr_mat, groups, pos_class = NULL)
 
 - group_col:
 
-  A character string specifying the column name of the grouping variable
-  in the sample information. Default is `"group"`. The grouping variable
-  must have exactly 2 levels for binary classification.
+  (Only for `gly_roc()`) A character string specifying the column name
+  of the grouping variable in the sample information. Default is
+  `"group"`. The grouping variable must have exactly 2 levels for binary
+  classification.
 
 - pos_class:
 
@@ -41,13 +42,14 @@ gly_roc_(expr_mat, groups, pos_class = NULL)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_roc_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 - groups:
 
-  A factor or character vector specifying group membership for each
-  sample. Must have exactly 2 levels. Character vectors will be
-  automatically converted to factors.
+  (Only for `gly_roc_()`) A factor or character vector specifying group
+  membership for each sample. Must have exactly 2 levels. Character
+  vectors will be automatically converted to factors.
 
 ## Value
 
@@ -61,6 +63,10 @@ A list with two elements:
     - `variable`: Variable name
 
     - `auc`: Area Under the Curve value
+
+    - `auc_ci_low`: Lower bound of 95% confidence interval for AUC
+
+    - `auc_ci_high`: Upper bound of 95% confidence interval for AUC
 
   - `coords`: A tibble containing ROC curve coordinates with the
     following columns:

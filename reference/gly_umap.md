@@ -42,7 +42,8 @@ gly_umap_(expr_mat, n_neighbors = 15, n_components = 2, ...)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_umap_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 ## Value
 

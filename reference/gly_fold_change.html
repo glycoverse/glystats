@@ -13,7 +13,7 @@ When you run this function, you will see message about "Ref Group" and "Test Gro
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.8.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,7 +61,7 @@ When you run this function, you will see message about "Ref Group" and "Test Gro
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
-<dd><p>The column name of the group information in the sample information.</p></dd>
+<dd><p>(Only for <code>gly_fold_change()</code>) The column name of the group information in the sample information.</p></dd>
 
 
 <dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
@@ -71,11 +71,11 @@ Only applicable to <code>gly_fold_change()</code>.</p></dd>
 
 
 <dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
-<dd><p>A numeric matrix with variables as rows and samples as columns.</p></dd>
+<dd><p>(Only for <code>gly_fold_change_()</code>) A numeric matrix with variables as rows and samples as columns.</p></dd>
 
 
 <dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
-<dd><p>A factor or character vector specifying group membership for each sample.
+<dd><p>(Only for <code>gly_fold_change_()</code>) A factor or character vector specifying group membership for each sample.
 Character vectors will be automatically converted to factors.
 If two groups, the first level is the reference group.
 If more than two groups, pairwise comparisons will be performed,

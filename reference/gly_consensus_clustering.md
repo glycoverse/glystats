@@ -101,7 +101,8 @@ gly_consensus_clustering_(
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_consensus_clustering_()`) A numeric matrix with
+  variables as rows and samples as columns.
 
 ## Value
 

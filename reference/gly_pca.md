@@ -44,7 +44,8 @@ gly_pca_(expr_mat, center = TRUE, scale = TRUE, ...)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_pca_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 ## Value
 

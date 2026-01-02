@@ -10,10 +10,12 @@ two-group and multi-group comparisons.
 gly_limma(
   exp,
   group_col = "group",
+  covariate_cols = NULL,
   p_adj_method = "BH",
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
+  subject_cols = NULL,
   ...
 )
 
@@ -23,6 +25,8 @@ gly_limma_(
   p_adj_method = "BH",
   ref_group = NULL,
   contrasts = NULL,
+  covariates = NULL,
+  subjects = NULL,
   ...
 )
 ```
@@ -36,8 +40,14 @@ gly_limma_(
 
 - group_col:
 
-  A character string specifying the column name in sample information
-  that contains group labels. Default is "group".
+  (Only for `gly_limma()`) A character string specifying the column name
+  in sample information that contains group labels. Default is "group".
+
+- covariate_cols:
+
+  (Only for `gly_limma()`) A character vector specifying column names in
+  sample information to include as covariates in the limma model.
+  Default is NULL.
 
 - p_adj_method:
 
@@ -54,18 +64,24 @@ gly_limma_(
 
 - contrasts:
 
-  A character vector specifying custom contrasts for multi-group
-  comparisons. If NULL (default), all pairwise comparisons are
-  automatically generated, and the levels coming first in the factor
-  will be used as the reference group. Supports two formats:
-  "group1-group2" or "group1_vs_group2". Use the second format if group
-  names contain hyphens. "group1" will be used as the reference group.
+  A character vector specifying custom contrasts. If NULL (default), all
+  pairwise comparisons are automatically generated, and the levels
+  coming first in the factor will be used as the reference group.
+  Supports two formats: "group1-group2" or "group1_vs_group2". Use the
+  second format if group names contain hyphens. "group1" will be used as
+  the reference group.
 
 - add_info:
 
   A logical value. If TRUE (default), variable information from the
   experiment will be added to the result tibble. If FALSE, only the
   statistical results are returned. Only applicable to `gly_limma()`.
+
+- subject_cols:
+
+  (Only for `gly_limma()`) A character string specifying the column name
+  in sample information that contains subject identifiers for paired
+  comparisons. Default is NULL.
 
 - ...:
 
@@ -74,15 +90,31 @@ gly_limma_(
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_limma_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 - groups:
 
-  A factor or character vector specifying group membership for each
-  sample. Must have at least 2 levels. Character vectors will be
-  automatically converted to factors. If `contrasts` is not provided,
-  the levels coming first in the factor will be used as the reference
-  group.
+  (Only for `gly_limma_()`) A factor or character vector specifying
+  group membership for each sample. Must have at least 2 levels.
+  Character vectors will be automatically converted to factors. If
+  `contrasts` is not provided, the levels coming first in the factor
+  will be used as the reference group.
+
+- covariates:
+
+  (Only for `gly_limma_()`) A data frame, matrix, or vector of
+  sample-level covariates. Must have the same number of rows as
+  `expr_mat` has columns. If row names are provided and match
+  `colnames(expr_mat)`, they will be aligned automatically. Default is
+  NULL.
+
+- subjects:
+
+  (Only for `gly_limma_()`) A vector or factor of subject identifiers
+  for paired comparisons. Must have length equal to `ncol(expr_mat)`. If
+  names or row names are provided and match `colnames(expr_mat)`, they
+  will be aligned automatically. Default is NULL.
 
 ## Value
 
@@ -127,10 +159,16 @@ metadata.
 vectors directly, providing more flexibility for users who don't use the
 glyexp package.
 
-For two-group comparisons, a simple contrast is performed between the
-groups. For multi-group comparisons (3+ groups), all pairwise
-comparisons are automatically generated and performed using contrast
+For two or more groups, all pairwise comparisons are automatically
+generated (one contrast for two groups) and performed using contrast
 matrices unless custom contrasts are specified.
+
+If covariates are provided, they are added as additional terms in the
+design matrix and are not part of the group contrasts.
+
+If subjects are provided, they are included as a blocking factor in the
+design matrix using the formula `~ 0 + group + subject` (plus any
+covariates).
 
 When specifying custom contrasts, use either "group1-group2" or
 "group1_vs_group2" format. If group names contain hyphens and you use

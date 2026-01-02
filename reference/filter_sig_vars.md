@@ -4,6 +4,7 @@ Filtering the experiment to keep only significant variables is a common
 task. This function provides a convenient way to do this. It supports
 results from all glystats DEA functions including
 [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md),
+[`gly_ancova()`](https://glycoverse.github.io/glystats/reference/gly_ancova.md),
 [`gly_kruskal()`](https://glycoverse.github.io/glystats/reference/gly_kruskal.md),
 [`gly_ttest()`](https://glycoverse.github.io/glystats/reference/gly_ttest.md),
 [`gly_wilcox()`](https://glycoverse.github.io/glystats/reference/gly_wilcox.md),
@@ -23,6 +24,18 @@ filter_sig_vars(
 )
 
 # S3 method for class 'glystats_anova_res'
+filter_sig_vars(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  on = "main_test",
+  comparison = NULL,
+  ...
+)
+
+# S3 method for class 'glystats_ancova_res'
 filter_sig_vars(
   exp,
   res,

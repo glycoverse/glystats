@@ -42,7 +42,8 @@ gly_tsne_(expr_mat, dims = 2, perplexity = 30, ...)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_tsne_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 ## Value
 

@@ -24,7 +24,8 @@ gly_enrich_reactome_(proteins, ...)
 
 - exp:
 
-  A
+  (Only for `gly_enrich_go()`, `gly_enrich_kegg()`,
+  `gly_enrich_reactome()`) A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object.
 
@@ -45,7 +46,8 @@ gly_enrich_reactome_(proteins, ...)
 
 - proteins:
 
-  A character vector of UniProt accession IDs.
+  (Only for `gly_enrich_go_()`, `gly_enrich_kegg_()`,
+  `gly_enrich_reactome_()`) A character vector of UniProt accession IDs.
 
 ## Value
 

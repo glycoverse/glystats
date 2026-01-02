@@ -24,7 +24,8 @@ gly_fold_change_(expr_mat, groups)
 
 - group_col:
 
-  The column name of the group information in the sample information.
+  (Only for `gly_fold_change()`) The column name of the group
+  information in the sample information.
 
 - add_info:
 
@@ -34,15 +35,16 @@ gly_fold_change_(expr_mat, groups)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_fold_change_()`) A numeric matrix with variables as
+  rows and samples as columns.
 
 - groups:
 
-  A factor or character vector specifying group membership for each
-  sample. Character vectors will be automatically converted to factors.
-  If two groups, the first level is the reference group. If more than
-  two groups, pairwise comparisons will be performed, with levels coming
-  first as reference groups.
+  (Only for `gly_fold_change_()`) A factor or character vector
+  specifying group membership for each sample. Character vectors will be
+  automatically converted to factors. If two groups, the first level is
+  the reference group. If more than two groups, pairwise comparisons
+  will be performed, with levels coming first as reference groups.
 
 ## Value
 

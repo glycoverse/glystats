@@ -31,8 +31,9 @@ gly_oplsda_(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, ...)
 
 - group_col:
 
-  A character string specifying the column name in sample information
-  that contains group labels. Default is "group".
+  (Only for `gly_oplsda()`) A character string specifying the column
+  name in sample information that contains group labels. Default is
+  "group".
 
 - pred_i:
 
@@ -62,13 +63,14 @@ gly_oplsda_(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, ...)
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_oplsda_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 - groups:
 
-  A factor or character vector specifying group membership for each
-  sample. Must have exactly 2 levels. Character vectors will be
-  automatically converted to factors.
+  (Only for `gly_oplsda_()`) A factor or character vector specifying
+  group membership for each sample. Must have exactly 2 levels.
+  Character vectors will be automatically converted to factors.
 
 ## Value
 

@@ -67,7 +67,8 @@ gly_hclust_(
 
 - expr_mat:
 
-  A numeric matrix with variables as rows and samples as columns.
+  (Only for `gly_hclust_()`) A numeric matrix with variables as rows and
+  samples as columns.
 
 ## Value
 

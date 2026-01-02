@@ -9,7 +9,7 @@ moderation from the limma package. Supports both two-group and multi-group compa
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.8.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,10 +44,12 @@ moderation from the limma package. Supports both two-group and multi-group compa
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_limma</span><span class="op">(</span></span>
 <span>  <span class="va">exp</span>,</span>
 <span>  group_col <span class="op">=</span> <span class="st">"group"</span>,</span>
+<span>  covariate_cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
 <span>  ref_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  contrasts <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  subject_cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -57,6 +59,8 @@ moderation from the limma package. Supports both two-group and multi-group compa
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
 <span>  ref_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  contrasts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subjects <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -70,8 +74,13 @@ moderation from the limma package. Supports both two-group and multi-group compa
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
-<dd><p>A character string specifying the column name in sample information
+<dd><p>(Only for <code>gly_limma()</code>) A character string specifying the column name in sample information
 that contains group labels. Default is "group".</p></dd>
+
+
+<dt id="arg-covariate-cols">covariate_cols<a class="anchor" aria-label="anchor" href="#arg-covariate-cols"></a></dt>
+<dd><p>(Only for <code>gly_limma()</code>) A character vector specifying column names in sample information
+to include as covariates in the limma model. Default is NULL.</p></dd>
 
 
 <dt id="arg-p-adj-method">p_adj_method<a class="anchor" aria-label="anchor" href="#arg-p-adj-method"></a></dt>
@@ -87,7 +96,7 @@ Only used for two-group comparisons.</p></dd>
 
 
 <dt id="arg-contrasts">contrasts<a class="anchor" aria-label="anchor" href="#arg-contrasts"></a></dt>
-<dd><p>A character vector specifying custom contrasts for multi-group comparisons.
+<dd><p>A character vector specifying custom contrasts.
 If NULL (default), all pairwise comparisons are automatically generated,
 and the levels coming first in the factor will be used as the reference group.
 Supports two formats: "group1-group2" or "group1_vs_group2".
@@ -101,19 +110,36 @@ will be added to the result tibble. If FALSE, only the statistical results are r
 Only applicable to <code>gly_limma()</code>.</p></dd>
 
 
+<dt id="arg-subject-cols">subject_cols<a class="anchor" aria-label="anchor" href="#arg-subject-cols"></a></dt>
+<dd><p>(Only for <code>gly_limma()</code>) A character string specifying the column name in sample information
+that contains subject identifiers for paired comparisons. Default is NULL.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://rdrr.io/pkg/limma/man/lmFit.html" class="external-link">limma::lmFit()</a></code>.</p></dd>
 
 
 <dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
-<dd><p>A numeric matrix with variables as rows and samples as columns.</p></dd>
+<dd><p>(Only for <code>gly_limma_()</code>) A numeric matrix with variables as rows and samples as columns.</p></dd>
 
 
 <dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
-<dd><p>A factor or character vector specifying group membership for each sample.
+<dd><p>(Only for <code>gly_limma_()</code>) A factor or character vector specifying group membership for each sample.
 Must have at least 2 levels. Character vectors will be automatically converted to factors.
 If <code>contrasts</code> is not provided,
 the levels coming first in the factor will be used as the reference group.</p></dd>
+
+
+<dt id="arg-covariates">covariates<a class="anchor" aria-label="anchor" href="#arg-covariates"></a></dt>
+<dd><p>(Only for <code>gly_limma_()</code>) A data frame, matrix, or vector of sample-level covariates.
+Must have the same number of rows as <code>expr_mat</code> has columns. If row names are provided and
+match <code>colnames(expr_mat)</code>, they will be aligned automatically. Default is NULL.</p></dd>
+
+
+<dt id="arg-subjects">subjects<a class="anchor" aria-label="anchor" href="#arg-subjects"></a></dt>
+<dd><p>(Only for <code>gly_limma_()</code>) A vector or factor of subject identifiers for paired comparisons.
+Must have length equal to <code>ncol(expr_mat)</code>. If names or row names are provided and match
+<code>colnames(expr_mat)</code>, they will be aligned automatically. Default is NULL.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -139,9 +165,13 @@ to improve statistical power, especially for small sample sizes.</p>
 the <code>add_info</code> parameter for joining experiment metadata.</p>
 <p><code>gly_limma_()</code> is the underlying API that works with matrices and factor vectors directly,
 providing more flexibility for users who don't use the glyexp package.</p>
-<p>For two-group comparisons, a simple contrast is performed between the groups.
-For multi-group comparisons (3+ groups), all pairwise comparisons are automatically
-generated and performed using contrast matrices unless custom contrasts are specified.</p>
+<p>For two or more groups, all pairwise comparisons are automatically generated
+(one contrast for two groups) and performed using contrast matrices unless
+custom contrasts are specified.</p>
+<p>If covariates are provided, they are added as additional terms in the design
+matrix and are not part of the group contrasts.</p>
+<p>If subjects are provided, they are included as a blocking factor in the design
+matrix using the formula <code>~ 0 + group + subject</code> (plus any covariates).</p>
 <p>When specifying custom contrasts, use either "group1-group2" or "group1_vs_group2" format.
 If group names contain hyphens and you use the first format, an error will be raised
 suggesting to use the second format.</p>
