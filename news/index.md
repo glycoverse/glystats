@@ -2,6 +2,29 @@
 
 ## glystats (development version)
 
+## glystats 0.6.0
+
+### New features
+
+- Add
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/reference/gly_ancova.md)
+  for Analysis of Covariance (ANCOVA).
+- Add covariate support to
+  [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
+  and
+  [`gly_limma_()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
+  through the `covariate_cols` and the `covariates` arguments.
+
+### Minor improvements and bug fixes
+
+- Use the “limma-trend” method in
+  [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
+  by default. This is more appropriate for glycomics and glycoproteomics
+  data.
+- Add CI to AUC values in the result of
+  [`gly_roc()`](https://glycoverse.github.io/glystats/reference/gly_roc.md).
+- Update documentations about arguments.
+
 ## glystats 0.5.8
 
 ### Breaking changes
