@@ -1,5 +1,15 @@
 # Changelog
 
+## glystats (development version)
+
+## glystats 0.6.1
+
+### Minor improvements and bug fixes
+
+- Fix the bug that
+  [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
+  fails to work with experiments with all-NA variables.
+
 ## glystats 0.6.0
 
 ### New features
