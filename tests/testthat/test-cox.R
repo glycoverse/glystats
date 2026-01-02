@@ -398,13 +398,13 @@ test_that("gly_cox works with test_gp_exp data", {
     dplyr::select(-base_hazard)
 
   # Update experiment with survival data
-  exp_with_survival <- glyexp::experiment(
+  exp_with_survival <- suppressMessages(glyexp::experiment(
     expr_mat = glyexp::get_expr_mat(exp_small),
     sample_info = survival_data,
     var_info = glyexp::get_var_info(exp_small),
     exp_type = glyexp::get_exp_type(exp_small),
     glycan_type = glyexp::get_glycan_type(exp_small)
-  )
+  ))
 
   # Test gly_cox function
   result <- suppressMessages(gly_cox(exp_with_survival))
