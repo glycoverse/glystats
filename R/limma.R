@@ -371,6 +371,15 @@ gly_limma_ <- function(
 
   # Prepare data for limma
   log_expr_mat <- log2(expr_mat + 1e-6)
+  row_has_data <- rowSums(is.finite(log_expr_mat)) > 0
+  missing_vars <- character(0)
+  if (!all(row_has_data)) {
+    missing_vars <- rownames(log_expr_mat)[!row_has_data]
+    log_expr_mat <- log_expr_mat[row_has_data, , drop = FALSE]
+  }
+  if (nrow(log_expr_mat) == 0) {
+    cli::cli_abort("No finite expression values remain after log2 transformation.")
+  }
 
   # Create design matrix without intercept (means model)
   if (is.null(covariates) && is.null(subjects)) {
@@ -428,15 +437,45 @@ gly_limma_ <- function(
 
   # Fit linear model
   fit <- limma::lmFit(log_expr_mat, design, ...)
+  if (is.null(rownames(fit$coefficients)) && !is.null(rownames(log_expr_mat))) {
+    rownames(fit$coefficients) <- rownames(log_expr_mat)
+    rownames(fit$stdev.unscaled) <- rownames(log_expr_mat)
+    names(fit$sigma) <- rownames(log_expr_mat)
+    names(fit$Amean) <- rownames(log_expr_mat)
+  }
 
   # Apply contrasts
   fit2 <- limma::contrasts.fit(fit, contrast_matrix)
 
   # Apply empirical Bayes moderation
-  fit2 <- limma::eBayes(fit2, trend = TRUE)
+  use_trend <- TRUE
+  if (is.null(fit2$Amean) || anyNA(fit2$Amean)) {
+    # limma::fitFDist errors on NA covariates when trend = TRUE
+    use_trend <- FALSE
+  }
+  fit2 <- limma::eBayes(fit2, trend = use_trend)
 
   # Extract results and convert to tibble
   tidy_result <- .gly_limma_multi_tibblify(fit2, p_adj_method, contrast_pairs)
+  if (length(missing_vars) > 0) {
+    missing_tbl <- purrr::map_dfr(contrast_pairs, function(pair) {
+      base_tbl <- tibble::tibble(
+        variable = missing_vars,
+        log2fc = NA_real_,
+        AveExpr = NA_real_,
+        t = NA_real_,
+        p_val = NA_real_,
+        b = NA_real_,
+        ref_group = pair[2],
+        test_group = pair[1]
+      )
+      if (!is.null(p_adj_method)) {
+        base_tbl$p_adj <- NA_real_
+      }
+      base_tbl
+    })
+    tidy_result <- dplyr::bind_rows(tidy_result, missing_tbl)
+  }
 
   # Return list with both tidy and raw results
   structure(

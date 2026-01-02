@@ -240,6 +240,25 @@ test_that("gly_limma works with covariate_cols", {
   expect_true("log2fc" %in% colnames(result$tidy_result))
 })
 
+test_that("gly_limma handles all-NA variables without covariates", {
+  set.seed(303)
+  var_info <- tibble::tibble(variable = c("V1", "V2"))
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:6),
+    group = factor(rep(c("A", "B"), each = 3), levels = c("A", "B"))
+  )
+  expr_mat <- matrix(rnorm(2 * 6, mean = 1, sd = 0.2), nrow = 2)
+  expr_mat[1, ] <- NA_real_
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
+
+  result <- suppressMessages(gly_limma(exp))
+
+  expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
+  expect_setequal(result$tidy_result$variable, var_info$variable)
+})
+
 test_that("gly_limma_ works with covariates", {
   set.seed(202)
   var_info <- tibble::tibble(variable = paste0("V", 1:4))
