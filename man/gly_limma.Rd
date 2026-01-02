@@ -9,11 +9,11 @@ gly_limma(
   exp,
   group_col = "group",
   covariate_cols = NULL,
+  subject_col = NULL,
   p_adj_method = "BH",
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
-  subject_cols = NULL,
   ...
 )
 
@@ -37,6 +37,9 @@ that contains group labels. Default is "group".}
 \item{covariate_cols}{(Only for \code{\link[=gly_limma]{gly_limma()}}) A character vector specifying column names in sample information
 to include as covariates in the limma model. Default is NULL.}
 
+\item{subject_col}{(Only for \code{\link[=gly_limma]{gly_limma()}}) A character string specifying the column name in sample information
+that contains subject identifiers for paired comparisons. Default is NULL.}
+
 \item{p_adj_method}{A character string specifying the method for multiple testing correction.
 Must be one of the methods supported by \code{stats::p.adjust()}. Default is "BH" (Benjamini-Hochberg).
 Set to NULL to skip p-value adjustment.}
@@ -55,9 +58,6 @@ Use the second format if group names contain hyphens.
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the statistical results are returned.
 Only applicable to \code{gly_limma()}.}
-
-\item{subject_cols}{(Only for \code{\link[=gly_limma]{gly_limma()}}) A character string specifying the column name in sample information
-that contains subject identifiers for paired comparisons. Default is NULL.}
 
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
 

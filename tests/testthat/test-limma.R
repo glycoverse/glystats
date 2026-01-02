@@ -390,7 +390,7 @@ test_that("gly_limma supports subject_cols for paired design", {
   colnames(expr_mat) <- sample_info$sample
   exp <- glyexp::experiment(expr_mat, sample_info, tibble::tibble(variable = rownames(expr_mat)), "others")
 
-  result_paired <- suppressMessages(gly_limma(exp, subject_cols = "subject", add_info = FALSE))
+  result_paired <- suppressMessages(gly_limma(exp, subject_col = "subject", add_info = FALSE))
   result_unpaired <- suppressMessages(gly_limma(exp, add_info = FALSE))
 
   expect_s3_class(result_paired, c("glystats_limma_res", "glystats_res"))
