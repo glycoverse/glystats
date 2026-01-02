@@ -9,7 +9,7 @@ moderation from the limma package. Supports both two-group and multi-group compa
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,11 +45,11 @@ moderation from the limma package. Supports both two-group and multi-group compa
 <span>  <span class="va">exp</span>,</span>
 <span>  group_col <span class="op">=</span> <span class="st">"group"</span>,</span>
 <span>  covariate_cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subject_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
 <span>  ref_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  contrasts <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  subject_cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -83,6 +83,11 @@ that contains group labels. Default is "group".</p></dd>
 to include as covariates in the limma model. Default is NULL.</p></dd>
 
 
+<dt id="arg-subject-col">subject_col<a class="anchor" aria-label="anchor" href="#arg-subject-col"></a></dt>
+<dd><p>(Only for <code>gly_limma()</code>) A character string specifying the column name in sample information
+that contains subject identifiers for paired comparisons. Default is NULL.</p></dd>
+
+
 <dt id="arg-p-adj-method">p_adj_method<a class="anchor" aria-label="anchor" href="#arg-p-adj-method"></a></dt>
 <dd><p>A character string specifying the method for multiple testing correction.
 Must be one of the methods supported by <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust()</a></code>. Default is "BH" (Benjamini-Hochberg).
@@ -108,11 +113,6 @@ Use the second format if group names contain hyphens.
 <dd><p>A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the statistical results are returned.
 Only applicable to <code>gly_limma()</code>.</p></dd>
-
-
-<dt id="arg-subject-cols">subject_cols<a class="anchor" aria-label="anchor" href="#arg-subject-cols"></a></dt>
-<dd><p>(Only for <code>gly_limma()</code>) A character string specifying the column name in sample information
-that contains subject identifiers for paired comparisons. Default is NULL.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

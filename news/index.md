@@ -1,5 +1,15 @@
 # Changelog
 
+## glystats (development version)
+
+## glystats 0.6.2
+
+### Breaking changes
+
+- The `subject_cols` argument in
+  [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
+  has been renamed into `subject_col`.
+
 ## glystats 0.6.1
 
 ### Minor improvements and bug fixes

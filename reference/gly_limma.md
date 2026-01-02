@@ -11,11 +11,11 @@ gly_limma(
   exp,
   group_col = "group",
   covariate_cols = NULL,
+  subject_col = NULL,
   p_adj_method = "BH",
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
-  subject_cols = NULL,
   ...
 )
 
@@ -49,6 +49,12 @@ gly_limma_(
   sample information to include as covariates in the limma model.
   Default is NULL.
 
+- subject_col:
+
+  (Only for `gly_limma()`) A character string specifying the column name
+  in sample information that contains subject identifiers for paired
+  comparisons. Default is NULL.
+
 - p_adj_method:
 
   A character string specifying the method for multiple testing
@@ -76,12 +82,6 @@ gly_limma_(
   A logical value. If TRUE (default), variable information from the
   experiment will be added to the result tibble. If FALSE, only the
   statistical results are returned. Only applicable to `gly_limma()`.
-
-- subject_cols:
-
-  (Only for `gly_limma()`) A character string specifying the column name
-  in sample information that contains subject identifiers for paired
-  comparisons. Default is NULL.
 
 - ...:
 
