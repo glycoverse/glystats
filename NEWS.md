@@ -1,4 +1,8 @@
-# glystats (development version)
+# glystats 0.6.3
+
+## Minor improvements and bug fixes
+
+* Fix the bug that `gly_limma()` fails for site-specific motif experiments.
 
 # glystats 0.6.2
 
