@@ -259,6 +259,37 @@ test_that("gly_limma handles all-NA variables without covariates", {
   expect_setequal(result$tidy_result$variable, var_info$variable)
 })
 
+test_that("gly_limma falls back when eBayes trend fails", {
+  set.seed(404)
+  expr_mat <- matrix(abs(rnorm(20)) + 1, nrow = 4)
+  rownames(expr_mat) <- paste0("V", 1:4)
+  colnames(expr_mat) <- paste0("S", 1:5)
+  groups <- factor(rep(c("A", "B"), length.out = 5), levels = c("A", "B"))
+
+  result <- NULL
+  trend_calls <- logical(0)
+  real_ebayes <- limma::eBayes
+
+  with_mocked_bindings({
+    expect_warning({
+      result <- suppressMessages(gly_limma_(expr_mat, groups))
+    }, "trend = FALSE")
+  },
+  eBayes = function(fit, trend = FALSE, ...) {
+    trend_calls <<- c(trend_calls, trend)
+    if (isTRUE(trend)) {
+      stop("Problem with covariate")
+    }
+    real_ebayes(fit, trend = trend, ...)
+  },
+  .package = "limma"
+  )
+
+  expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
+  expect_true(any(trend_calls))
+  expect_true(any(!trend_calls))
+})
+
 test_that("gly_limma_ works with covariates", {
   set.seed(202)
   var_info <- tibble::tibble(variable = paste0("V", 1:4))

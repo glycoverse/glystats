@@ -448,12 +448,20 @@ gly_limma_ <- function(
   fit2 <- limma::contrasts.fit(fit, contrast_matrix)
 
   # Apply empirical Bayes moderation
-  use_trend <- TRUE
-  if (is.null(fit2$Amean) || anyNA(fit2$Amean)) {
-    # limma::fitFDist errors on NA covariates when trend = TRUE
-    use_trend <- FALSE
-  }
-  fit2 <- limma::eBayes(fit2, trend = use_trend)
+  fit2 <- tryCatch(
+    limma::eBayes(fit2, trend = TRUE),
+    error = function(err) {
+      msg <- conditionMessage(err)
+      if (grepl("covariate", msg, ignore.case = TRUE)) {
+        cli::cli_warn(
+          "Limma trend fitting failed due to covariate issues; re-running eBayes with trend = FALSE."
+        )
+        limma::eBayes(fit2, trend = FALSE)
+      } else {
+        stop(err)
+      }
+    }
+  )
 
   # Extract results and convert to tibble
   tidy_result <- .gly_limma_multi_tibblify(fit2, p_adj_method, contrast_pairs)
