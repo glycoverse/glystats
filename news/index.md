@@ -1,5 +1,15 @@
 # Changelog
 
+## glystats (development version)
+
+## glystats 0.6.3
+
+### Minor improvements and bug fixes
+
+- Fix the bug that
+  [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
+  fails for site-specific motif experiments.
+
 ## glystats 0.6.2
 
 ### Breaking changes
