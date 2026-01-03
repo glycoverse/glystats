@@ -51,12 +51,12 @@ Let’s start by exploring our demo dataset:
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [79ms]
+#> ✔ Finding leader proteins [82ms]
 #> 
 #> ℹ Reading dataColumn group converted to <factor>.ℹ Parsing glycan compositions and structures
-#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [272ms]
+#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [294ms]
 #> 
-#> ℹ Reading data✔ Reading data [753ms]
+#> ℹ Reading data✔ Reading data [790ms]
 #> 
 #> 
 #> ── Normalizing data ──
