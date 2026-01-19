@@ -15,7 +15,7 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
 
   expect_equal(
     colnames(result_with_info),
-    c("variable", "protein", "gene", "glycan_composition", "glycan_structure", "protein_site", "log2fc")
+    c("variable", "protein", "glycan_composition", "protein_site", "gene", "log2fc")
   )
 })
 
