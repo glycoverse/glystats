@@ -43,7 +43,7 @@ RoxygenNote: 7.3.3
 URL: https://glycoverse.github.io/glystats/
 Imports:
     tibble,
-    glyexp (>= 0.10.0),
+    glyexp (>= 0.12.3.9000),
     rlang,
     tidyr,
     dplyr,
@@ -62,7 +62,7 @@ Imports:
 Depends: 
     R (>= 4.1)
 Remotes: 
-    glycoverse/glyexp@*release,
+    glycoverse/glyexp,
     glycoverse/glyclean@*release,
     glycoverse/glyread@*release,
     glycoverse/glyrepr
