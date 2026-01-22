@@ -28,7 +28,13 @@ It works seamlessly with the [glyexp](https://github.com/glycoverse/glyexp) pack
 
 ## Installation
 
-You can install the latest release of glystats from [GitHub](https://github.com/) with:
+You can install the latest release of glystats from [r-universe](https://glycoverse.r-universe.dev/glystats):
+
+```r
+install.packages('glystats', repos = c('https://glycoverse.r-universe.dev', 'https://cloud.r-project.org'))
+```
+
+Or from [GitHub](https://github.com/glycoverse/glystats):
 
 ``` r
 # install.packages("remotes")

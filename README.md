@@ -21,7 +21,13 @@ glycoproteomics and glycomics data. It works seamlessly with the
 ## Installation
 
 You can install the latest release of glystats from
-[GitHub](https://github.com/) with:
+[r-universe](https://glycoverse.r-universe.dev/glystats):
+
+``` r
+install.packages('glystats', repos = c('https://glycoverse.r-universe.dev', 'https://cloud.r-project.org'))
+```
+
+Or from [GitHub](https://github.com/glycoverse/glystats):
 
 ``` r
 # install.packages("remotes")
