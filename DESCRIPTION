@@ -34,8 +34,8 @@ Suggests:
     ConsensusClusterPlus,
     knitr,
     rmarkdown,
-    glyclean (>= 0.12.0.9000),
-    glyread (>= 0.8.4.9000)
+    glyclean (>= 0.12.0),
+    glyread (>= 0.8.4)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -43,7 +43,7 @@ RoxygenNote: 7.3.3
 URL: https://glycoverse.github.io/glystats/
 Imports:
     tibble,
-    glyexp (>= 0.12.3.9000),
+    glyexp (>= 0.12.3),
     rlang,
     tidyr,
     dplyr,
@@ -58,12 +58,11 @@ Imports:
     stringr,
     withr,
     survival,
-    glyrepr (>= 0.9.0.9000)
+    glyrepr (>= 0.9.0)
 Depends: 
     R (>= 4.1)
 Remotes: 
-    glycoverse/glyexp,
-    glycoverse/glyclean,
-    glycoverse/glyread,
-    glycoverse/glyrepr
+    glycoverse/glyexp@*release,
+    glycoverse/glyclean@*release,
+    glycoverse/glyread@*release
 VignetteBuilder: knitr
