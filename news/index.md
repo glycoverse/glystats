@@ -1,6 +1,6 @@
 # Changelog
 
-## glystats (development version)
+## glystats 0.6.4
 
 ## glystats 0.6.3
 
