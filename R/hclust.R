@@ -184,11 +184,18 @@ gly_hclust_ <- function(
   # 3. Try to create dendrogram data using ggdendro if available
   if (requireNamespace("ggdendro", quietly = TRUE)) {
     tryCatch({
-      # Prevent opening graphics device window on macOS using withr
-      withr::with_options(
-        list(device = function() grDevices::pdf(NULL)),
-        dendro_data <- ggdendro::dendro_data(hclust_res)
-      )
+      # Use a temporary device for ggdendro and always close it
+      grDevices::pdf(NULL)
+      dev_id <- grDevices::dev.cur()
+      on.exit({
+        devices <- grDevices::dev.list()
+        devices <- if (is.null(devices)) integer(0) else as.integer(devices)
+        if (dev_id %in% devices) {
+          grDevices::dev.off(dev_id)
+        }
+      }, add = TRUE)
+
+      dendro_data <- ggdendro::dendro_data(hclust_res)
       tidy_result$dendrogram <- tibble::as_tibble(dendro_data$segments)
       tidy_result$labels <- tibble::as_tibble(dendro_data$labels)
     }, error = function(e) {
