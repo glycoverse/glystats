@@ -1,3 +1,21 @@
+test_that("gly_hclust does not leak graphics devices when ggdendro is available", {
+  testthat::skip_if_not_installed("ggdendro")
+
+  open_devices <- grDevices::dev.list()
+  open_devices <- if (is.null(open_devices)) integer(0) else as.integer(open_devices)
+
+  exp_subset <- test_gp_exp |>
+    glyexp::slice_sample_var(n = 5) |>
+    glyexp::slice_sample_obs(n = 5)
+
+  suppressMessages(gly_hclust(exp_subset, on = "sample", k_values = c(2)))
+
+  after_devices <- grDevices::dev.list()
+  after_devices <- if (is.null(after_devices)) integer(0) else as.integer(after_devices)
+
+  expect_identical(after_devices, open_devices)
+})
+
 test_that("gly_hclust works with basic parameters (default: cluster variables)", {
   # Use a subset of test data for faster testing
   exp_subset <- test_gp_exp |>
