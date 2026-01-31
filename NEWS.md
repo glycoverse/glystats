@@ -2,6 +2,10 @@
 
 # glystats 0.6.4
 
+## Minor improvements and bug fixes
+
+* Fix the bug that `gly_hclust()` leaves a plotting device unclosed.
+
 # glystats 0.6.3
 
 ## Minor improvements and bug fixes
