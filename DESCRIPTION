@@ -61,8 +61,4 @@ Imports:
     glyrepr (>= 0.9.0)
 Depends: 
     R (>= 4.1)
-Remotes: 
-    glycoverse/glyexp@*release,
-    glycoverse/glyclean@*release,
-    glycoverse/glyread@*release
 VignetteBuilder: knitr
