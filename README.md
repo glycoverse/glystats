@@ -22,6 +22,17 @@ glycoproteomics and glycomics data. It works seamlessly with the
 
 ## Installation
 
+### Install glycoverse
+
+We recommend installing the meta-package
+[glycoverse](https://github.com/glycoverse/glycoverse), which includes
+this package and other core glycoverse packages.
+
+### Install glystats alone
+
+If you don’t want to install all glycoverse packages, you can only
+install glystats.
+
 You can install the latest release of glystats from
 [r-universe](https://glycoverse.r-universe.dev/glystats)
 (**recommended**):
@@ -43,6 +54,11 @@ Or install the development version (NOT recommended):
 ``` r
 pak::pkg_install("glycoverse/glystats")
 ```
+
+**Note:** Tips and troubleshooting for the meta-package
+[glycoverse](https://github.com/glycoverse/glycoverse) are also
+applicable here: [Installation of
+glycoverse](https://github.com/glycoverse/glycoverse#installation).
 
 ## Documentation
 
