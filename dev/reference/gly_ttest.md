@@ -1,0 +1,123 @@
+# Two-sample t-test for Differential Expression Analysis
+
+Perform two-sample t-test for glycomics or glycoproteomics data. The
+function supports Student's t-test for comparing two groups. P-values
+are adjusted for multiple testing using the method specified by
+`p_adj_method`.
+
+## Usage
+
+``` r
+gly_ttest(
+  exp,
+  group_col = "group",
+  p_adj_method = "BH",
+  ref_group = NULL,
+  add_info = TRUE,
+  ...
+)
+
+gly_ttest_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
+```
+
+## Arguments
+
+- exp:
+
+  A
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  object containing expression matrix and sample information.
+
+- group_col:
+
+  (Only for `gly_ttest()`) A character string specifying the column name
+  of the grouping variable in the sample information. Default is
+  `"group"`.
+
+- p_adj_method:
+
+  A character string specifying the method to adjust p-values. See
+  `p.adjust.methods` for available methods. Default is "BH". If NULL, no
+  adjustment is performed.
+
+- ref_group:
+
+  A character string specifying the reference group. If NULL (default),
+  the first level of the group factor is used as the reference.
+
+- add_info:
+
+  A logical value. If TRUE (default), variable information from the
+  experiment will be added to the result tibble. If FALSE, only the
+  statistical results are returned. Only applicable to `gly_ttest()`.
+
+- ...:
+
+  Additional arguments passed to
+  [`stats::t.test()`](https://rdrr.io/r/stats/t.test.html).
+
+- expr_mat:
+
+  (Only for `gly_ttest_()`) A numeric matrix with variables as rows and
+  samples as columns.
+
+- groups:
+
+  (Only for `gly_ttest_()`) A factor or character vector specifying
+  group membership for each sample. Must have exactly 2 levels.
+  Character vectors will be automatically converted to factors.
+
+## Value
+
+A list with two elements:
+
+- `tidy_result`: A tibble with t-test results containing the following
+  columns:
+
+  - `variable`: Variable name
+
+  - `estimate`: Difference in group means (group2 - group1)
+
+  - `estimate1`: Mean of group 1
+
+  - `estimate2`: Mean of group 2
+
+  - `statistic`: t-statistic
+
+  - `p_val`: Raw p-value from t-test
+
+  - `parameter`: Degrees of freedom
+
+  - `conf_low`: Lower bound of 95% confidence interval
+
+  - `conf_high`: Upper bound of 95% confidence interval
+
+  - `method`: Statistical method used
+
+  - `alternative`: Alternative hypothesis
+
+  - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
+
+  - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
+
+- `raw_result`: A list of `t.test` model objects The list has classes
+  `glystats_ttest_res` and `glystats_res`.
+
+## Details
+
+The function performs log2 transformation on the expression data
+(log2(x + 1)) before statistical testing. Exactly 2 groups are required
+in the grouping variable.
+
+`gly_ttest()` is the top-level API that works with
+[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+objects and supports the `add_info` parameter for joining experiment
+metadata.
+
+`gly_ttest_()` is the underlying API that works with matrices and factor
+vectors directly, providing more flexibility for users who don't use the
+glyexp package.
+
+## See also
+
+[`stats::t.test()`](https://rdrr.io/r/stats/t.test.html)
