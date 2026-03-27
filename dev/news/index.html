@@ -33,6 +33,10 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glystats-development-version">glystats (development version)<a class="anchor" aria-label="anchor" href="#glystats-development-version"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<ul><li>Refactored enrichment API (<code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>, <code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code>). These functions now use explicit parameters instead of <code>...</code>. Users must update their code to use named parameters (e.g., <code>pvalueCutoff = 0.05</code> instead of passing via <code>...</code>).</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.5" id="glystats-065">glystats 0.6.5<a class="anchor" aria-label="anchor" href="#glystats-065"></a></h2>
@@ -109,7 +113,7 @@
 <h2 class="pkg-version" data-toc-text="0.5.5" id="glystats-055">glystats 0.5.5<a class="anchor" aria-label="anchor" href="#glystats-055"></a></h2>
 <div class="section level3">
 <h3 id="minor-improvements-and-bug-fixes-0-5-5">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-5-5"></a></h3>
-<ul><li>The <code>universe</code> argument of <code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_go.html">gly_enrich_kegg()</a></code>, and <code><a href="../reference/gly_enrich_go.html">gly_enrich_reactome()</a></code> accepts a <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object now.</li>
+<ul><li>The <code>universe</code> argument of <code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>, and <code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code> accepts a <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object now.</li>
 <li>Optimize message output of <code><a href="../reference/gly_limma.html">gly_limma()</a></code>.</li>
 <li>The columns from sample information or variable information are joined right after the <code>sample</code> or <code>variable</code> column in the results now, not appending to the end as previously.</li>
 <li>Update documentation of <code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> to inform about using the same experiment used for DEA.</li>

@@ -2,6 +2,16 @@
 
 ## glystats (development version)
 
+### Breaking changes
+
+- Refactored enrichment API
+  ([`gly_enrich_go()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md),
+  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_kegg.md),
+  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_reactome.md)).
+  These functions now use explicit parameters instead of `...`. Users
+  must update their code to use named parameters (e.g.,
+  `pvalueCutoff = 0.05` instead of passing via `...`).
+
 ## glystats 0.6.5
 
 ### Minor improvements and bug fixes
@@ -94,9 +104,9 @@
 
 - The `universe` argument of
   [`gly_enrich_go()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md),
-  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md),
+  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_kegg.md),
   and
-  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md)
+  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_reactome.md)
   accepts a
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object now.

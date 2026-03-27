@@ -109,11 +109,13 @@ documentation for each function for more details.
   : Cox Proportional Hazards Model for Survival Analysis
 - [`gly_enrich_go()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md)
   [`gly_enrich_go_()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md)
-  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md)
-  [`gly_enrich_kegg_()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md)
-  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md)
-  [`gly_enrich_reactome_()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md)
-  : GO, KEGG, and Reactome over-representation analysis (ORA)
+  : GO over-representation analysis (ORA)
+- [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_kegg.md)
+  [`gly_enrich_kegg_()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_kegg.md)
+  : KEGG over-representation analysis (ORA)
+- [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_reactome.md)
+  [`gly_enrich_reactome_()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_reactome.md)
+  : Reactome pathway over-representation analysis (ORA)
 - [`gly_fold_change()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md)
   [`gly_fold_change_()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md)
   : Calculate fold change
