@@ -75,7 +75,17 @@ gly_consensus_clustering <- function(
   checkmate::assert_class(exp, "glyexp_experiment")
 
   expr_mat <- glyexp::get_expr_mat(exp)
-  result <- gly_consensus_clustering_(expr_mat, on, max_k, reps, p_item, cluster_alg, scale, output_file, ...)
+  result <- gly_consensus_clustering_(
+    expr_mat,
+    on,
+    max_k,
+    reps,
+    p_item,
+    cluster_alg,
+    scale,
+    output_file,
+    ...
+  )
   result <- .process_results_add_info(result, exp, add_info)
   result
 }
@@ -130,10 +140,25 @@ gly_consensus_clustering_ <- function(
       if (is.null(output_file)) {
         # When no output file is specified, disable plotting completely
         # Use a temporary directory to avoid any file generation
-        cc_res <- .cc_no_output(mat, maxK = max_k, reps = reps, pItem = p_item, clusterAlg = cluster_alg, ...)
+        cc_res <- .cc_no_output(
+          mat,
+          maxK = max_k,
+          reps = reps,
+          pItem = p_item,
+          clusterAlg = cluster_alg,
+          ...
+        )
       } else {
         # When output file is specified, use a temporary directory and then move the result
-        cc_res <- .cc_with_output(mat, output_file, maxK = max_k, reps = reps, pItem = p_item, clusterAlg = cluster_alg, ...)
+        cc_res <- .cc_with_output(
+          mat,
+          output_file,
+          maxK = max_k,
+          reps = reps,
+          pItem = p_item,
+          clusterAlg = cluster_alg,
+          ...
+        )
       }
     }
   )
@@ -152,7 +177,10 @@ gly_consensus_clustering_ <- function(
   colnames(cluster_results)[1] <- on
 
   # Add S3 class to tidy result
-  tidy_result <- structure(cluster_results, class = c("glystats_cc_res", "glystats_res", class(cluster_results)))
+  tidy_result <- structure(
+    cluster_results,
+    class = c("glystats_cc_res", "glystats_res", class(cluster_results))
+  )
 
   # Return list with both tidy and raw results
   structure(
@@ -169,7 +197,9 @@ gly_consensus_clustering_ <- function(
 
   dots <- rlang::list2(...)
   if ("d" %in% names(dots)) {
-    cli::cli_abort("{.field d} should not be supplied through `...`; data comes from the function inputs.")
+    cli::cli_abort(
+      "{.field d} should not be supplied through `...`; data comes from the function inputs."
+    )
   }
 
   # Capture and suppress all graphics output
@@ -201,7 +231,9 @@ gly_consensus_clustering_ <- function(
   temp_dir <- withr::local_tempdir("consensus_temp")
   dots <- rlang::list2(...)
   if ("d" %in% names(dots)) {
-    cli::cli_abort("{.field d} should not be supplied through `...`; data comes from the function inputs.")
+    cli::cli_abort(
+      "{.field d} should not be supplied through `...`; data comes from the function inputs."
+    )
   }
   cc_res <- suppressMessages({
     call_args <- c(

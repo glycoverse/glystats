@@ -64,7 +64,11 @@ gly_cox <- function(
 
   # Call the underlying API
   result <- gly_cox_(expr_mat, time, event, p_adj_method, ...)
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -81,14 +85,22 @@ gly_cox_ <- function(
   checkmate::assert_matrix(expr_mat, min.rows = 1, min.cols = 1)
   checkmate::assert_numeric(time, min.len = 1)
   checkmate::assert_numeric(event, min.len = 1)
-  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_choice(
+    p_adj_method,
+    stats::p.adjust.methods,
+    null.ok = TRUE
+  )
 
   # Check dimensions match
   if (ncol(expr_mat) != length(time)) {
-    cli::cli_abort("Number of samples in expression matrix ({ncol(expr_mat)}) must match length of time vector ({length(time)})")
+    cli::cli_abort(
+      "Number of samples in expression matrix ({ncol(expr_mat)}) must match length of time vector ({length(time)})"
+    )
   }
   if (ncol(expr_mat) != length(event)) {
-    cli::cli_abort("Number of samples in expression matrix ({ncol(expr_mat)}) must match length of event vector ({length(event)})")
+    cli::cli_abort(
+      "Number of samples in expression matrix ({ncol(expr_mat)}) must match length of event vector ({length(event)})"
+    )
   }
 
   # Check if survival package is available
@@ -125,19 +137,29 @@ gly_cox_ <- function(
     model = cox_models
   ) %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(params = list(if (rlang::is_na(.data$model)) NULL else broom::tidy(.data$model))) %>%
+    dplyr::mutate(
+      params = list(
+        if (rlang::is_na(.data$model)) NULL else broom::tidy(.data$model)
+      )
+    ) %>%
     dplyr::select(-all_of("model")) %>%
     tidyr::unnest(all_of("params")) %>%
     dplyr::ungroup() %>%
     # Rename columns to match expected names
-    dplyr::rename(all_of(c("coefficient" = "estimate", "p_val" = "p.value"))) %>%
+    dplyr::rename(all_of(c(
+      "coefficient" = "estimate",
+      "p_val" = "p.value"
+    ))) %>%
     # Calculate hazard ratio
     dplyr::mutate(hr = exp(.data$coefficient)) %>%
     # Remove the term column as it's redundant with variable
     dplyr::select(-all_of("term"))
 
   if (!is.null(p_adj_method)) {
-    result_df <- dplyr::mutate(result_df, p_adj = stats::p.adjust(.data$p_val, method = p_adj_method))
+    result_df <- dplyr::mutate(
+      result_df,
+      p_adj = stats::p.adjust(.data$p_val, method = p_adj_method)
+    )
   }
 
   result_df

@@ -60,7 +60,11 @@ gly_ttest <- function(
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_string(group_col)
-  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_choice(
+    p_adj_method,
+    stats::p.adjust.methods,
+    null.ok = TRUE
+  )
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
@@ -82,7 +86,11 @@ gly_ttest <- function(
   result <- gly_ttest_(expr_mat, groups, p_adj_method, ref_group, ...)
 
   # Process results with add_info logic
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -99,7 +107,11 @@ gly_ttest_ <- function(
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
-  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_choice(
+    p_adj_method,
+    stats::p.adjust.methods,
+    null.ok = TRUE
+  )
 
   # Validate group count
   if (length(levels(groups)) != 2) {
@@ -109,7 +121,14 @@ gly_ttest_ <- function(
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Perform t-test
-  result <- .gly_dea_2groups(expr_mat, groups, stats::t.test, p_adj_method, ref_group, ...)
+  result <- .gly_dea_2groups(
+    expr_mat,
+    groups,
+    stats::t.test,
+    p_adj_method,
+    ref_group,
+    ...
+  )
 
   # Add S3 class
   structure(result, class = c("glystats_ttest_res", "glystats_res"))
@@ -179,7 +198,11 @@ gly_wilcox <- function(
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_string(group_col)
-  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_choice(
+    p_adj_method,
+    stats::p.adjust.methods,
+    null.ok = TRUE
+  )
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
@@ -201,7 +224,11 @@ gly_wilcox <- function(
   result <- gly_wilcox_(expr_mat, groups, p_adj_method, ref_group, ...)
 
   # Process results with add_info logic
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -218,7 +245,11 @@ gly_wilcox_ <- function(
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
-  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_choice(
+    p_adj_method,
+    stats::p.adjust.methods,
+    null.ok = TRUE
+  )
 
   # Validate group count
   if (length(levels(groups)) != 2) {
@@ -228,7 +259,14 @@ gly_wilcox_ <- function(
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Perform Wilcoxon test
-  result <- .gly_dea_2groups(expr_mat, groups, stats::wilcox.test, p_adj_method, ref_group, ...)
+  result <- .gly_dea_2groups(
+    expr_mat,
+    groups,
+    stats::wilcox.test,
+    p_adj_method,
+    ref_group,
+    ...
+  )
 
   # Add S3 class
   structure(result, class = c("glystats_wilcox_res", "glystats_res"))
@@ -236,7 +274,14 @@ gly_wilcox_ <- function(
 
 # Internal helper functions for t-test and Wilcoxon test
 
-.gly_dea_2groups <- function(expr_mat, groups, .f, p_adj_method, ref_group, ...) {
+.gly_dea_2groups <- function(
+  expr_mat,
+  groups,
+  .f,
+  p_adj_method,
+  ref_group,
+  ...
+) {
   # Reorder groups if ref_group is specified
   if (!is.null(ref_group)) {
     groups <- .reorder_groups_for_ref(groups, ref_group)
@@ -244,7 +289,13 @@ gly_wilcox_ <- function(
   cli::cli_alert_info("Reference group: {.val {levels(groups)[1]}}")
 
   mod_list <- .gly_dea_2groups_raw(expr_mat, groups, .f, ...)
-  tidy_result <- .gly_dea_2groups_tibblify(mod_list, .f, p_adj_method, expr_mat, groups)
+  tidy_result <- .gly_dea_2groups_tibblify(
+    mod_list,
+    .f,
+    p_adj_method,
+    expr_mat,
+    groups
+  )
 
   # Return list with both tidy and raw results
   list(
@@ -261,19 +312,27 @@ gly_wilcox_ <- function(
     tibble::rownames_to_column("sample") %>%
     tibble::as_tibble() %>%
     dplyr::mutate(group = groups) %>%
-    tidyr::pivot_longer(cols = -all_of(c("sample", "group")), names_to = "variable", values_to = "value") %>%
+    tidyr::pivot_longer(
+      cols = -all_of(c("sample", "group")),
+      names_to = "variable",
+      values_to = "value"
+    ) %>%
     dplyr::mutate(log_value = log2(.data$value + 1))
 
   # Perform statistical tests and store raw results
   dots <- rlang::list2(...)
   disallowed_args <- intersect(names(dots), c("formula", "data"))
   if (length(disallowed_args) > 0) {
-    cli::cli_abort("Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; they are controlled internally.")
+    cli::cli_abort(
+      "Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; they are controlled internally."
+    )
   }
   safe_f <- purrr::possibly(function(...) rlang::exec(.f, ...), otherwise = NA)
   nested_data <- data %>%
     dplyr::nest_by(.data$variable) %>%
-    dplyr::mutate(test_result = list(safe_f(log_value ~ group, data = .data$data, !!!dots)))
+    dplyr::mutate(
+      test_result = list(safe_f(log_value ~ group, data = .data$data, !!!dots))
+    )
 
   # Return named list of raw results
   raw_results <- nested_data$test_result
@@ -286,7 +345,13 @@ gly_wilcox_ <- function(
 }
 
 # Convert raw model list to tibble for 2-group analysis
-.gly_dea_2groups_tibblify <- function(mod_list, .f, p_adj_method, expr_mat, groups) {
+.gly_dea_2groups_tibblify <- function(
+  mod_list,
+  .f,
+  p_adj_method,
+  expr_mat,
+  groups
+) {
   # Create a tibble from the model list
   var_names <- names(mod_list)
 
@@ -295,9 +360,12 @@ gly_wilcox_ <- function(
     test_result = mod_list
   ) %>%
     dplyr::mutate(
-      params = purrr::map(.data$test_result, ~ {
-        if (rlang::is_na(.x)) NULL else broom::tidy(.x)
-      }),
+      params = purrr::map(
+        .data$test_result,
+        ~ {
+          if (rlang::is_na(.x)) NULL else broom::tidy(.x)
+        }
+      ),
     ) %>%
     dplyr::select(all_of(c("variable", "params"))) %>%
     tidyr::unnest(all_of("params")) %>%
@@ -310,7 +378,10 @@ gly_wilcox_ <- function(
   }
 
   if (!is.null(p_adj_method)) {
-    result_tbl <- dplyr::mutate(result_tbl, p_adj = stats::p.adjust(.data$p_val, method = p_adj_method))
+    result_tbl <- dplyr::mutate(
+      result_tbl,
+      p_adj = stats::p.adjust(.data$p_val, method = p_adj_method)
+    )
   }
 
   # Calculate log2 fold change

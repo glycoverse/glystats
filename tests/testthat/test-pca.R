@@ -8,7 +8,10 @@ test_that("gly_pca works", {
 
   # Check tidy_result structure
   expect_type(pca_res$tidy_result, "list")
-  expect_setequal(names(pca_res$tidy_result), c("samples", "variables", "eigenvalues"))
+  expect_setequal(
+    names(pca_res$tidy_result),
+    c("samples", "variables", "eigenvalues")
+  )
 
   # Check raw_result
   expect_s3_class(pca_res$raw_result, "prcomp")
@@ -33,9 +36,12 @@ test_that("gly_pca_ works correctly", {
 
   # Check tidy_result
   expect_type(result$tidy_result, "list")
-  expect_setequal(names(result$tidy_result), c("samples", "variables", "eigenvalues"))
+  expect_setequal(
+    names(result$tidy_result),
+    c("samples", "variables", "eigenvalues")
+  )
   expect_true(tibble::is_tibble(result$tidy_result$samples))
-  expect_true(nrow(result$tidy_result$samples) > 0)  # Should have some samples
+  expect_true(nrow(result$tidy_result$samples) > 0) # Should have some samples
 
   # Check raw_result
   expect_s3_class(result$raw_result, "prcomp")

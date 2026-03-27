@@ -89,12 +89,18 @@ test_that("gly_kmeans add_info parameter works", {
   result_with_info <- suppressMessages(gly_kmeans(exp_subset, add_info = TRUE))
 
   # Test with add_info = FALSE
-  result_without_info <- suppressMessages(gly_kmeans(exp_subset, add_info = FALSE))
+  result_without_info <- suppressMessages(gly_kmeans(
+    exp_subset,
+    add_info = FALSE
+  ))
 
   # Both should have the same structure but different column counts
   expect_type(result_with_info, "list")
   expect_type(result_without_info, "list")
 
   # The result with add_info should have more columns
-  expect_gte(ncol(result_with_info$tidy_result), ncol(result_without_info$tidy_result))
+  expect_gte(
+    ncol(result_with_info$tidy_result),
+    ncol(result_without_info$tidy_result)
+  )
 })

@@ -1,26 +1,26 @@
 test_that("gly_cox works with basic survival data", {
   # Create test survival data
   set.seed(123)
-  
+
   # Create expression matrix (10 variables, 20 samples)
   expr_mat <- matrix(rnorm(200), nrow = 10, ncol = 20)
   rownames(expr_mat) <- paste0("var", 1:10)
   colnames(expr_mat) <- paste0("sample", 1:20)
-  
+
   # Create sample info with survival data
   sample_info <- tibble::tibble(
     sample = paste0("sample", 1:20),
-    time = rexp(20, rate = 0.1),  # Exponential survival times
-    event = rbinom(20, 1, 0.7),  # 70% event rate
+    time = rexp(20, rate = 0.1), # Exponential survival times
+    event = rbinom(20, 1, 0.7), # 70% event rate
     group = rep(c("A", "B"), each = 10)
   )
-  
+
   # Create variable info
   var_info <- tibble::tibble(
     variable = paste0("var", 1:10),
     type = rep("biomarker", 10)
   )
-  
+
   # Create experiment object
   exp <- glyexp::experiment(
     expr_mat = expr_mat,
@@ -28,7 +28,7 @@ test_that("gly_cox works with basic survival data", {
     var_info = var_info,
     exp_type = "others"
   )
-  
+
   # Test gly_cox function
   result <- suppressMessages(gly_cox(exp))
 
@@ -64,7 +64,7 @@ test_that("gly_cox assigns NA for failed variables", {
 
   # Create expression matrix (10 variables, 20 samples)
   expr_mat <- matrix(rnorm(200), nrow = 10, ncol = 20)
-  expr_mat[1:3, ] <- NA  # This will lead to stats::coxph() failing
+  expr_mat[1:3, ] <- NA # This will lead to stats::coxph() failing
   rownames(expr_mat) <- paste0("var", 1:10)
   colnames(expr_mat) <- paste0("sample", 1:20)
   na_vars <- paste0("var", 1:3)
@@ -72,8 +72,8 @@ test_that("gly_cox assigns NA for failed variables", {
   # Create sample info with survival data
   sample_info <- tibble::tibble(
     sample = paste0("sample", 1:20),
-    time = rexp(20, rate = 0.1),  # Exponential survival times
-    event = rbinom(20, 1, 0.7),  # 70% event rate
+    time = rexp(20, rate = 0.1), # Exponential survival times
+    event = rbinom(20, 1, 0.7), # 70% event rate
     group = rep(c("A", "B"), each = 10)
   )
 
@@ -108,10 +108,10 @@ test_that("gly_cox_ works with matrix input", {
   expr_mat <- matrix(rnorm(100), nrow = 10, ncol = 10)
   rownames(expr_mat) <- paste0("gene", 1:10)
   colnames(expr_mat) <- paste0("sample", 1:10)
-  
+
   time <- rexp(10, rate = 0.2)
   event <- rbinom(10, 1, 0.6)
-  
+
   # Test function execution
   result <- suppressMessages(gly_cox_(expr_mat, time, event))
 
@@ -175,7 +175,7 @@ test_that("gly_cox returns list with tidy and raw results", {
   # Check tidy_result
   expect_true(tibble::is_tibble(result$tidy_result))
   expect_equal(nrow(result$tidy_result), 5)
-  expect_true("type" %in% colnames(result$tidy_result))  # add_info worked
+  expect_true("type" %in% colnames(result$tidy_result)) # add_info worked
 
   # Check raw_result
   expect_type(result$raw_result, "list")
@@ -186,26 +186,26 @@ test_that("gly_cox returns list with tidy and raw results", {
 test_that("gly_cox add_info parameter works", {
   # Create test survival data
   set.seed(321)
-  
+
   # Create expression matrix (3 variables, 12 samples)
   expr_mat <- matrix(rnorm(36), nrow = 3, ncol = 12)
   rownames(expr_mat) <- paste0("var", 1:3)
   colnames(expr_mat) <- paste0("sample", 1:12)
-  
+
   # Create sample info with survival data
   sample_info <- tibble::tibble(
     sample = paste0("sample", 1:12),
     time = rexp(12, rate = 0.1),
     event = rbinom(12, 1, 0.75)
   )
-  
+
   # Create variable info
   var_info <- tibble::tibble(
     variable = paste0("var", 1:3),
     category = c("A", "B", "C"),
     importance = c(1, 2, 3)
   )
-  
+
   # Create experiment object
   exp <- glyexp::experiment(
     expr_mat = expr_mat,
@@ -213,7 +213,7 @@ test_that("gly_cox add_info parameter works", {
     var_info = var_info,
     exp_type = "others"
   )
-  
+
   # Test add_info = TRUE (default)
   result_with_info <- suppressMessages(gly_cox(exp, add_info = TRUE))
   expect_true("category" %in% colnames(result_with_info$tidy_result))
@@ -237,8 +237,8 @@ test_that("gly_cox custom time and event columns work", {
   # Create sample info with custom survival column names
   sample_info <- tibble::tibble(
     sample = paste0("sample", 1:10),
-    survival_time = rexp(10, rate = 0.2),  # Custom time column
-    death_event = rbinom(10, 1, 0.6)       # Custom event column
+    survival_time = rexp(10, rate = 0.2), # Custom time column
+    death_event = rbinom(10, 1, 0.6) # Custom event column
   )
 
   # Create variable info
@@ -256,7 +256,11 @@ test_that("gly_cox custom time and event columns work", {
   )
 
   # Test with custom column names
-  result <- suppressMessages(gly_cox(exp, time_col = "survival_time", event_col = "death_event"))
+  result <- suppressMessages(gly_cox(
+    exp,
+    time_col = "survival_time",
+    event_col = "death_event"
+  ))
 
   # Check result structure
   expect_s3_class(result, c("glystats_cox_res", "glystats_res"))
@@ -312,7 +316,10 @@ test_that("gly_cox p-value adjustment methods work", {
   expect_false("p_adj" %in% colnames(result_none$tidy_result))
 
   # Check that adjusted p-values are different between methods
-  expect_false(identical(result_bh$tidy_result$p_adj, result_bonf$tidy_result$p_adj))
+  expect_false(identical(
+    result_bh$tidy_result$p_adj,
+    result_bonf$tidy_result$p_adj
+  ))
 })
 
 test_that("gly_cox error handling works", {
@@ -351,10 +358,16 @@ test_that("gly_cox error handling works", {
     exp_type = "others"
   )
 
-  expect_error(suppressMessages(gly_cox(exp_no_time)), "Must be of type 'numeric'")
+  expect_error(
+    suppressMessages(gly_cox(exp_no_time)),
+    "Must be of type 'numeric'"
+  )
 
   # Test error when event column doesn't exist
-  expect_error(suppressMessages(gly_cox(exp_no_time, event_col = "nonexistent")), "Must be of type 'numeric'")
+  expect_error(
+    suppressMessages(gly_cox(exp_no_time, event_col = "nonexistent")),
+    "Must be of type 'numeric'"
+  )
 
   # Test error with invalid p_adj_method
   exp_valid <- glyexp::experiment(
@@ -364,8 +377,15 @@ test_that("gly_cox error handling works", {
     exp_type = "others"
   )
 
-  expect_error(suppressMessages(gly_cox_(expr_mat, sample_info_with_surv$time, sample_info_with_surv$event, p_adj_method = "invalid")),
-               "Must be element of set")
+  expect_error(
+    suppressMessages(gly_cox_(
+      expr_mat,
+      sample_info_with_surv$time,
+      sample_info_with_surv$event,
+      p_adj_method = "invalid"
+    )),
+    "Must be element of set"
+  )
 })
 
 test_that("gly_cox works with test_gp_exp data", {
@@ -422,8 +442,12 @@ test_that("gly_cox works with test_gp_exp data", {
 
   # Check that results are reasonable
   expect_true(all(is.finite(result$tidy_result$coefficient)))
-  expect_true(all(result$tidy_result$p_val >= 0 & result$tidy_result$p_val <= 1))
-  expect_true(all(result$tidy_result$p_adj >= 0 & result$tidy_result$p_adj <= 1))
+  expect_true(all(
+    result$tidy_result$p_val >= 0 & result$tidy_result$p_val <= 1
+  ))
+  expect_true(all(
+    result$tidy_result$p_adj >= 0 & result$tidy_result$p_adj <= 1
+  ))
 })
 
 test_that("gly_cox input validation works", {
@@ -436,24 +460,32 @@ test_that("gly_cox input validation works", {
   event <- rbinom(5, 1, 0.7)
 
   # Test with mismatched dimensions
-  expect_error(gly_cox_(expr_mat, time[1:3], event), "must match length of time vector")
-  expect_error(gly_cox_(expr_mat, time, event[1:3]), "must match length of event vector")
+  expect_error(
+    gly_cox_(expr_mat, time[1:3], event),
+    "must match length of time vector"
+  )
+  expect_error(
+    gly_cox_(expr_mat, time, event[1:3]),
+    "must match length of event vector"
+  )
 
   # Test with empty matrix
-  expect_error(gly_cox_(matrix(nrow = 0, ncol = 0), numeric(0), numeric(0)),
-               "Assertion on 'expr_mat' failed")
+  expect_error(
+    gly_cox_(matrix(nrow = 0, ncol = 0), numeric(0), numeric(0)),
+    "Assertion on 'expr_mat' failed"
+  )
 })
 
 test_that("gly_cox handles edge cases", {
   # Test with normal case (some events, some censoring) using larger sample size for stability
   set.seed(999)
-  expr_mat <- matrix(rnorm(80), nrow = 4, ncol = 20)  # Increased sample size
+  expr_mat <- matrix(rnorm(80), nrow = 4, ncol = 20) # Increased sample size
   rownames(expr_mat) <- paste0("var", 1:4)
   colnames(expr_mat) <- paste0("sample", 1:20)
 
   # Create more realistic survival times and events
   time <- rexp(20, rate = 0.1)
-  event <- rbinom(20, 1, 0.7)  # 70% event rate
+  event <- rbinom(20, 1, 0.7) # 70% event rate
 
   # This should work normally
   result <- suppressMessages(gly_cox_(expr_mat, time, event))

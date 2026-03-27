@@ -1,10 +1,14 @@
 test_that("gly_roc works with 2-group binary classification", {
   # Use test_gp_exp and filter to 2 groups for ROC analysis
   exp_2group <- exp_2groups() |>
-    glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
 
   # Run ROC analysis
-  result <- suppressMessages(gly_roc(exp_2group, group_col = "group", pos_class = "H"))
+  result <- suppressMessages(gly_roc(
+    exp_2group,
+    group_col = "group",
+    pos_class = "H"
+  ))
 
   # Test structure
   expect_s3_class(result, c("glystats_roc_res", "glystats_res"))
@@ -17,17 +21,39 @@ test_that("gly_roc works with 2-group binary classification", {
 
   # Test AUC
   expect_s3_class(result$tidy_result$auc, "tbl_df")
-  expect_true(all(c("variable", "auc", "auc_ci_low", "auc_ci_high") %in% colnames(result$tidy_result$auc)))
-  expect_true(all(result$tidy_result$auc$auc >= 0 & result$tidy_result$auc$auc <= 1))  # AUC should be between 0 and 1
-  expect_true(all(result$tidy_result$auc$auc_ci_low >= 0 & result$tidy_result$auc$auc_ci_low <= 1))
-  expect_true(all(result$tidy_result$auc$auc_ci_high >= 0 & result$tidy_result$auc$auc_ci_high <= 1))
-  expect_true(all(result$tidy_result$auc$auc_ci_low <= result$tidy_result$auc$auc_ci_high))
+  expect_true(all(
+    c("variable", "auc", "auc_ci_low", "auc_ci_high") %in%
+      colnames(result$tidy_result$auc)
+  ))
+  expect_true(all(
+    result$tidy_result$auc$auc >= 0 & result$tidy_result$auc$auc <= 1
+  )) # AUC should be between 0 and 1
+  expect_true(all(
+    result$tidy_result$auc$auc_ci_low >= 0 &
+      result$tidy_result$auc$auc_ci_low <= 1
+  ))
+  expect_true(all(
+    result$tidy_result$auc$auc_ci_high >= 0 &
+      result$tidy_result$auc$auc_ci_high <= 1
+  ))
+  expect_true(all(
+    result$tidy_result$auc$auc_ci_low <= result$tidy_result$auc$auc_ci_high
+  ))
 
   # Test coords
   expect_s3_class(result$tidy_result$coords, "tbl_df")
-  expect_true(all(c("variable", "threshold", "sensitivity", "specificity") %in% colnames(result$tidy_result$coords)))
-  expect_true(all(result$tidy_result$coords$sensitivity >= 0 & result$tidy_result$coords$sensitivity <= 1))
-  expect_true(all(result$tidy_result$coords$specificity >= 0 & result$tidy_result$coords$specificity <= 1))
+  expect_true(all(
+    c("variable", "threshold", "sensitivity", "specificity") %in%
+      colnames(result$tidy_result$coords)
+  ))
+  expect_true(all(
+    result$tidy_result$coords$sensitivity >= 0 &
+      result$tidy_result$coords$sensitivity <= 1
+  ))
+  expect_true(all(
+    result$tidy_result$coords$specificity >= 0 &
+      result$tidy_result$coords$specificity <= 1
+  ))
   expect_equal(length(unique(result$tidy_result$coords$variable)), 10)
 
   # Test raw_result
@@ -71,10 +97,16 @@ test_that("gly_roc error handling", {
     glyexp::filter_obs(group %in% c("C", "H")) |>
     glyexp::slice_sample_var(n = 5)
 
-  expect_error(suppressMessages(gly_roc(exp_2group, group_col = "nonexistent")), "not found in sample information")
+  expect_error(
+    suppressMessages(gly_roc(exp_2group, group_col = "nonexistent")),
+    "not found in sample information"
+  )
 
   # Test with invalid pos_class
-  expect_error(suppressMessages(gly_roc(exp_2group, pos_class = "invalid")), "not found in group levels")
+  expect_error(
+    suppressMessages(gly_roc(exp_2group, pos_class = "invalid")),
+    "not found in group levels"
+  )
 })
 
 test_that("gly_roc works with different group column names", {
@@ -83,7 +115,11 @@ test_that("gly_roc works with different group column names", {
     glyexp::slice_sample_var(n = 5) |>
     glyexp::mutate_obs(condition = group)
 
-  result <- suppressMessages(gly_roc(exp_2group, group_col = "condition", pos_class = "H"))
+  result <- suppressMessages(gly_roc(
+    exp_2group,
+    group_col = "condition",
+    pos_class = "H"
+  ))
 
   expect_s3_class(result, c("glystats_roc_res", "glystats_res"))
   expect_type(result, "list")
@@ -94,7 +130,7 @@ test_that("gly_roc assigns NA for failed variables", {
   # Use test_gp_exp and filter to 2 groups for ROC analysis
   exp_2group <- exp_2groups() |>
     glyexp::slice_sample_var(n = 10)
-  exp_2group$expr_mat[1:3, ] <- NA  # This will lead to pROC::roc() failing
+  exp_2group$expr_mat[1:3, ] <- NA # This will lead to pROC::roc() failing
   na_vars <- exp_2group$var_info$variable[1:3]
 
   # Run DEA with ROC analysis
@@ -140,7 +176,10 @@ test_that("gly_roc_ works correctly", {
   expect_type(result, "list")
   expect_setequal(names(result), c("tidy_result", "raw_result"))
   expect_true(tibble::is_tibble(result$tidy_result$auc))
-  expect_true(all(c("variable", "auc", "auc_ci_low", "auc_ci_high") %in% colnames(result$tidy_result$auc)))
+  expect_true(all(
+    c("variable", "auc", "auc_ci_low", "auc_ci_high") %in%
+      colnames(result$tidy_result$auc)
+  ))
   expect_equal(nrow(result$tidy_result$auc), 10)
   expect_equal(length(result$raw_result), 10)
 })

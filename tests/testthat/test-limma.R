@@ -4,7 +4,7 @@ test_that("gly_limma works with 2 groups", {
   # Use test_gp_exp and filter to 2 groups for limma
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
-    glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
 
   # Run DEA with limma
   result <- suppressMessages(gly_limma(exp_2group))
@@ -14,11 +14,11 @@ test_that("gly_limma works with 2 groups", {
   expect_true("tidy_result" %in% names(result))
   expect_true("raw_result" %in% names(result))
   expect_equal(nrow(result$tidy_result), 10)
-  expect_true("p_adj" %in% colnames(result$tidy_result))  # p_adj should exist
-  expect_true("log2fc" %in% colnames(result$tidy_result))  # log2fc should exist
-  expect_type(result$tidy_result$log2fc, "double")  # log2fc should be numeric
-  expect_true("t" %in% colnames(result$tidy_result))  # t-statistic
-  expect_true("b" %in% colnames(result$tidy_result))  # log-odds (B-statistic)
+  expect_true("p_adj" %in% colnames(result$tidy_result)) # p_adj should exist
+  expect_true("log2fc" %in% colnames(result$tidy_result)) # log2fc should exist
+  expect_type(result$tidy_result$log2fc, "double") # log2fc should be numeric
+  expect_true("t" %in% colnames(result$tidy_result)) # t-statistic
+  expect_true("b" %in% colnames(result$tidy_result)) # log-odds (B-statistic)
 })
 
 test_that("gly_limma direction is correct for 2 groups", {
@@ -31,7 +31,8 @@ test_that("gly_limma direction is correct for 2 groups", {
   )
   expr_mat <- matrix(
     c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1)),
-    nrow = 1, byrow = TRUE
+    nrow = 1,
+    byrow = TRUE
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
@@ -56,7 +57,8 @@ test_that("gly_limma respects custom contrasts for 2 groups", {
   )
   expr_mat <- matrix(
     c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1)),
-    nrow = 1, byrow = TRUE
+    nrow = 1,
+    byrow = TRUE
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
@@ -75,8 +77,10 @@ test_that("gly_limma error handling", {
   exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5)
 
   # Test various error conditions - group column not found
-  expect_error(suppressMessages(gly_limma(exp_small, group_col = "nonexistent")),
-               "not found in sample information")
+  expect_error(
+    suppressMessages(gly_limma(exp_small, group_col = "nonexistent")),
+    "not found in sample information"
+  )
 })
 
 test_that("gly_limma group validation", {
@@ -105,12 +109,22 @@ test_that("gly_limma ref_group parameter works", {
   result_ref_c <- suppressMessages(gly_limma(exp_2group, ref_group = "C"))
 
   # Check that log2fc values are negated when reference group changes
-  expect_equal(result_default$tidy_result$log2fc, -result_ref_h$tidy_result$log2fc, tolerance = 1e-10)
-  expect_equal(result_default$tidy_result$log2fc, result_ref_c$tidy_result$log2fc, tolerance = 1e-10)
+  expect_equal(
+    result_default$tidy_result$log2fc,
+    -result_ref_h$tidy_result$log2fc,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$log2fc,
+    result_ref_c$tidy_result$log2fc,
+    tolerance = 1e-10
+  )
 
   # Test invalid ref_group
-  expect_error(suppressMessages(gly_limma(exp_2group, ref_group = "invalid")),
-               "Must be element of set")
+  expect_error(
+    suppressMessages(gly_limma(exp_2group, ref_group = "invalid")),
+    "Must be element of set"
+  )
 })
 
 test_that("gly_limma works with multi-group data", {
@@ -118,24 +132,28 @@ test_that("gly_limma works with multi-group data", {
   exp_3group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
     glyexp::mutate_obs(group = factor(group, levels = c("H", "M", "C"))) |>
-    glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
 
   result <- suppressMessages(gly_limma(exp_3group))
 
   # Test core functionality
   expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
   expect_true(tibble::is_tibble(result$tidy_result))
-  expect_true("ref_group" %in% colnames(result$tidy_result))  # Should have contrast column
-  expect_true("test_group" %in% colnames(result$tidy_result))  # Should have contrast column
+  expect_true("ref_group" %in% colnames(result$tidy_result)) # Should have contrast column
+  expect_true("test_group" %in% colnames(result$tidy_result)) # Should have contrast column
   expect_true("log2fc" %in% colnames(result$tidy_result))
   expect_true("p_adj" %in% colnames(result$tidy_result))
 
   # Should have 3 pairwise comparisons: H_vs_C, H_vs_M, M_vs_C
-  contrasts <- stringr::str_c(result$tidy_result$ref_group, "_vs_", result$tidy_result$test_group)
+  contrasts <- stringr::str_c(
+    result$tidy_result$ref_group,
+    "_vs_",
+    result$tidy_result$test_group
+  )
   expect_setequal(unique(contrasts), c("H_vs_C", "H_vs_M", "M_vs_C"))
 
   # Each contrast should have the same number of variables
-  expect_equal(nrow(result$tidy_result), 10 * 3)  # 10 variables * 3 contrasts
+  expect_equal(nrow(result$tidy_result), 10 * 3) # 10 variables * 3 contrasts
 })
 
 test_that("gly_limma direction is correct for 3 groups", {
@@ -147,8 +165,13 @@ test_that("gly_limma direction is correct for 3 groups", {
     group = factor(rep(c("A", "B", "C"), each = 10), levels = c("A", "B", "C"))
   )
   expr_mat <- matrix(
-    c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1), rnorm(10, mean = 3, sd = 0.1)),
-    nrow = 1, byrow = TRUE
+    c(
+      rnorm(10, mean = 1, sd = 0.1),
+      rnorm(10, mean = 2, sd = 0.1),
+      rnorm(10, mean = 3, sd = 0.1)
+    ),
+    nrow = 1,
+    byrow = TRUE
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
@@ -171,8 +194,13 @@ test_that("gly_limma direction is correct for 3 groups with custom contrasts", {
     group = factor(rep(c("A", "B", "C"), each = 10), levels = c("A", "B", "C"))
   )
   expr_mat <- matrix(
-    c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1), rnorm(10, mean = 3, sd = 0.1)),
-    nrow = 1, byrow = TRUE
+    c(
+      rnorm(10, mean = 1, sd = 0.1),
+      rnorm(10, mean = 2, sd = 0.1),
+      rnorm(10, mean = 3, sd = 0.1)
+    ),
+    nrow = 1,
+    byrow = TRUE
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
@@ -195,12 +223,19 @@ test_that("gly_limma custom contrasts work with hyphen format", {
 
   # Test custom contrasts with hyphen format
   custom_contrasts <- c("H-C", "H-M", "H-Y")
-  result <- suppressMessages(gly_limma(exp_4group, contrasts = custom_contrasts))
+  result <- suppressMessages(gly_limma(
+    exp_4group,
+    contrasts = custom_contrasts
+  ))
 
   # Should have exactly 3 contrasts as specified
-  contrasts <- stringr::str_c(result$tidy_result$ref_group, "_vs_", result$tidy_result$test_group)
+  contrasts <- stringr::str_c(
+    result$tidy_result$ref_group,
+    "_vs_",
+    result$tidy_result$test_group
+  )
   expect_setequal(unique(contrasts), c("H_vs_C", "H_vs_M", "H_vs_Y"))
-  expect_equal(nrow(result$tidy_result), 5 * 3)  # 5 variables * 3 contrasts
+  expect_equal(nrow(result$tidy_result), 5 * 3) # 5 variables * 3 contrasts
 })
 
 test_that("gly_limma custom contrasts work with _vs_ format", {
@@ -211,12 +246,19 @@ test_that("gly_limma custom contrasts work with _vs_ format", {
 
   # Test custom contrasts with _vs_ format
   custom_contrasts <- c("H_vs_C", "M_vs_C", "Y_vs_C")
-  result <- suppressMessages(gly_limma(exp_4group, contrasts = custom_contrasts))
+  result <- suppressMessages(gly_limma(
+    exp_4group,
+    contrasts = custom_contrasts
+  ))
 
   # Should have exactly 3 contrasts as specified
-  contrasts <- stringr::str_c(result$tidy_result$ref_group, "_vs_", result$tidy_result$test_group)
+  contrasts <- stringr::str_c(
+    result$tidy_result$ref_group,
+    "_vs_",
+    result$tidy_result$test_group
+  )
   expect_setequal(contrasts, c("H_vs_C", "M_vs_C", "Y_vs_C"))
-  expect_equal(nrow(result$tidy_result), 5 * 3)  # 5 variables * 3 contrasts
+  expect_equal(nrow(result$tidy_result), 5 * 3) # 5 variables * 3 contrasts
 })
 
 test_that("gly_limma works with covariate_cols", {
@@ -270,19 +312,23 @@ test_that("gly_limma falls back when eBayes trend fails", {
   trend_calls <- logical(0)
   real_ebayes <- limma::eBayes
 
-  with_mocked_bindings({
-    expect_warning({
-      result <- suppressMessages(gly_limma_(expr_mat, groups))
-    }, "trend = FALSE")
-  },
-  eBayes = function(fit, trend = FALSE, ...) {
-    trend_calls <<- c(trend_calls, trend)
-    if (isTRUE(trend)) {
-      stop("Problem with covariate")
-    }
-    real_ebayes(fit, trend = trend, ...)
-  },
-  .package = "limma"
+  with_mocked_bindings(
+    {
+      expect_warning(
+        {
+          result <- suppressMessages(gly_limma_(expr_mat, groups))
+        },
+        "trend = FALSE"
+      )
+    },
+    eBayes = function(fit, trend = FALSE, ...) {
+      trend_calls <<- c(trend_calls, trend)
+      if (isTRUE(trend)) {
+        stop("Problem with covariate")
+      }
+      real_ebayes(fit, trend = trend, ...)
+    },
+    .package = "limma"
   )
 
   expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
@@ -305,7 +351,11 @@ test_that("gly_limma_ works with covariates", {
     stringsAsFactors = FALSE
   )
 
-  result <- suppressMessages(gly_limma_(expr_mat, groups, covariates = covariates))
+  result <- suppressMessages(gly_limma_(
+    expr_mat,
+    groups,
+    covariates = covariates
+  ))
 
   expect_s3_class(result, c("glystats_limma_res", "glystats_res"))
   expect_equal(nrow(result$tidy_result), 4)
@@ -350,8 +400,11 @@ test_that("gly_limma handles group names with hyphens correctly", {
   # Modify group names to include hyphens
   sample_info_modified <- glyexp::get_sample_info(exp_hyphen)
   sample_info_modified$group <- factor(
-    ifelse(sample_info_modified$group == "C", "Control-1",
-           ifelse(sample_info_modified$group == "H", "High-dose", "Medium-dose")),
+    ifelse(
+      sample_info_modified$group == "C",
+      "Control-1",
+      ifelse(sample_info_modified$group == "H", "High-dose", "Medium-dose")
+    ),
     levels = c("Control-1", "High-dose", "Medium-dose")
   )
 
@@ -366,13 +419,23 @@ test_that("gly_limma handles group names with hyphens correctly", {
 
   # Test that hyphen format fails with helpful error message
   expect_error(
-    suppressMessages(gly_limma(exp_hyphen_modified, contrasts = c("High-dose-Control-1"))),
+    suppressMessages(gly_limma(
+      exp_hyphen_modified,
+      contrasts = c("High-dose-Control-1")
+    )),
     "Group names contain hyphens.*Use the format.*_vs_"
   )
 
   # Test that _vs_ format works
-  result <- suppressMessages(gly_limma(exp_hyphen_modified, contrasts = c("High-dose_vs_Control-1")))
-  contrasts <- stringr::str_c(result$tidy_result$ref_group, "_vs_", result$tidy_result$test_group)
+  result <- suppressMessages(gly_limma(
+    exp_hyphen_modified,
+    contrasts = c("High-dose_vs_Control-1")
+  ))
+  contrasts <- stringr::str_c(
+    result$tidy_result$ref_group,
+    "_vs_",
+    result$tidy_result$test_group
+  )
   expect_setequal(contrasts, c("High-dose_vs_Control-1"))
 })
 
@@ -395,7 +458,7 @@ test_that("gly_limma_ works correctly", {
   expect_true("raw_result" %in% names(result))
   expect_true(tibble::is_tibble(result$tidy_result))
   expect_true("log2fc" %in% colnames(result$tidy_result))
-  expect_true("p_val" %in% colnames(result$tidy_result))  # Now uses p_val
+  expect_true("p_val" %in% colnames(result$tidy_result)) # Now uses p_val
   expect_equal(nrow(result$tidy_result), 10)
 })
 
@@ -419,13 +482,25 @@ test_that("gly_limma supports subject_cols for paired design", {
     subject = subjects
   )
   colnames(expr_mat) <- sample_info$sample
-  exp <- glyexp::experiment(expr_mat, sample_info, tibble::tibble(variable = rownames(expr_mat)), "others")
+  exp <- glyexp::experiment(
+    expr_mat,
+    sample_info,
+    tibble::tibble(variable = rownames(expr_mat)),
+    "others"
+  )
 
-  result_paired <- suppressMessages(gly_limma(exp, subject_col = "subject", add_info = FALSE))
+  result_paired <- suppressMessages(gly_limma(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE
+  ))
   result_unpaired <- suppressMessages(gly_limma(exp, add_info = FALSE))
 
   expect_s3_class(result_paired, c("glystats_limma_res", "glystats_res"))
-  expect_true(mean(abs(result_paired$tidy_result$t)) > mean(abs(result_unpaired$tidy_result$t)))
+  expect_true(
+    mean(abs(result_paired$tidy_result$t)) >
+      mean(abs(result_unpaired$tidy_result$t))
+  )
 })
 
 test_that("gly_limma_ supports subjects for paired design", {
@@ -444,11 +519,18 @@ test_that("gly_limma_ supports subjects for paired design", {
   rownames(expr_mat) <- paste0("V", seq_len(n_genes))
   colnames(expr_mat) <- paste0("sample", seq_len(n_samples))
 
-  result_paired <- suppressMessages(gly_limma_(expr_mat, groups, subjects = subjects))
+  result_paired <- suppressMessages(gly_limma_(
+    expr_mat,
+    groups,
+    subjects = subjects
+  ))
   result_unpaired <- suppressMessages(gly_limma_(expr_mat, groups))
 
   expect_s3_class(result_paired, c("glystats_limma_res", "glystats_res"))
-  expect_true(mean(abs(result_paired$tidy_result$t)) > mean(abs(result_unpaired$tidy_result$t)))
+  expect_true(
+    mean(abs(result_paired$tidy_result$t)) >
+      mean(abs(result_unpaired$tidy_result$t))
+  )
 })
 
 test_that("gly_limma_ validates subjects length", {

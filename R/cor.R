@@ -59,7 +59,11 @@ gly_cor <- function(
   checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_choice(on, c("variable", "sample"))
   checkmate::assert_choice(method, c("pearson", "spearman"))
-  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_choice(
+    p_adj_method,
+    stats::p.adjust.methods,
+    null.ok = TRUE
+  )
 
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -81,11 +85,17 @@ gly_cor_ <- function(
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_choice(on, c("variable", "sample"))
   checkmate::assert_choice(method, c("pearson", "spearman"))
-  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_choice(
+    p_adj_method,
+    stats::p.adjust.methods,
+    null.ok = TRUE
+  )
 
   # Check if Hmisc is available
   if (!requireNamespace("Hmisc", quietly = TRUE)) {
-    stop("Package 'Hmisc' is required for gly_cor. Please install it with: install.packages('Hmisc')")
+    stop(
+      "Package 'Hmisc' is required for gly_cor. Please install it with: install.packages('Hmisc')"
+    )
   }
 
   # Prepare data for correlation based on 'on' parameter
@@ -137,7 +147,10 @@ gly_cor_ <- function(
 
   # Adjust p-values if requested
   if (!is.null(p_adj_method)) {
-    tidy_result$p_adj <- stats::p.adjust(tidy_result$p_val, method = p_adj_method)
+    tidy_result$p_adj <- stats::p.adjust(
+      tidy_result$p_val,
+      method = p_adj_method
+    )
   }
 
   # Return list with both tidy and raw results

@@ -27,7 +27,14 @@
 #' sig_exp <- filter_sig_vars(exp, res)
 #'
 #' @export
-filter_sig_vars <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, ...) {
+filter_sig_vars <- function(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  ...
+) {
   UseMethod("filter_sig_vars", res)
 }
 
@@ -41,31 +48,113 @@ filter_sig_vars <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, 
 #'   If not provided, filtering will be performed on the main test results for [gly_anova()] and [gly_kruskal()],
 #'   and variables will be kept if they are significant in any comparison for [gly_limma()].
 #' @export
-filter_sig_vars.glystats_anova_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
-  .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+filter_sig_vars.glystats_anova_res <- function(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  on = "main_test",
+  comparison = NULL,
+  ...
+) {
+  .check_filter_sig_vars_args_anova(
+    exp,
+    res,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    on,
+    comparison
+  )
   fc_cutoff <- .decide_fc(exp, fc_cutoff)
-  .filter_sig_vars_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+  .filter_sig_vars_anova(
+    exp,
+    res,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    on,
+    comparison
+  )
 }
 
 #' @rdname filter_sig_vars
 #' @export
-filter_sig_vars.glystats_ancova_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
-  .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+filter_sig_vars.glystats_ancova_res <- function(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  on = "main_test",
+  comparison = NULL,
+  ...
+) {
+  .check_filter_sig_vars_args_anova(
+    exp,
+    res,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    on,
+    comparison
+  )
   fc_cutoff <- .decide_fc(exp, fc_cutoff)
-  .filter_sig_vars_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+  .filter_sig_vars_anova(
+    exp,
+    res,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    on,
+    comparison
+  )
 }
 
 #' @rdname filter_sig_vars
 #' @export
-filter_sig_vars.glystats_kruskal_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, on = "main_test", comparison = NULL, ...) {
-  .check_filter_sig_vars_args_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+filter_sig_vars.glystats_kruskal_res <- function(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  on = "main_test",
+  comparison = NULL,
+  ...
+) {
+  .check_filter_sig_vars_args_anova(
+    exp,
+    res,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    on,
+    comparison
+  )
   fc_cutoff <- .decide_fc(exp, fc_cutoff)
-  .filter_sig_vars_anova(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison)
+  .filter_sig_vars_anova(
+    exp,
+    res,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    on,
+    comparison
+  )
 }
 
 #' @rdname filter_sig_vars
 #' @export
-filter_sig_vars.glystats_ttest_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, ...) {
+filter_sig_vars.glystats_ttest_res <- function(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  ...
+) {
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
   fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
@@ -73,7 +162,14 @@ filter_sig_vars.glystats_ttest_res <- function(exp, res, p_adj_cutoff = 0.05, p_
 
 #' @rdname filter_sig_vars
 #' @export
-filter_sig_vars.glystats_wilcox_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, ...) {
+filter_sig_vars.glystats_wilcox_res <- function(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  ...
+) {
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
   fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
@@ -81,18 +177,48 @@ filter_sig_vars.glystats_wilcox_res <- function(exp, res, p_adj_cutoff = 0.05, p
 
 #' @rdname filter_sig_vars
 #' @export
-filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_val_cutoff = NULL, fc_cutoff = NULL, comparison = NULL, ...) {
-  .check_filter_sig_vars_args_limma(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison)
+filter_sig_vars.glystats_limma_res <- function(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  comparison = NULL,
+  ...
+) {
+  .check_filter_sig_vars_args_limma(
+    exp,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    comparison
+  )
   fc_cutoff <- .decide_fc(exp, fc_cutoff)
-  .filter_sig_vars_limma(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison)
+  .filter_sig_vars_limma(
+    exp,
+    res,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    comparison
+  )
 }
 
-.filter_sig_vars_anova <- function(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison) {
+.filter_sig_vars_anova <- function(
+  exp,
+  res,
+  p_adj_cutoff,
+  p_val_cutoff,
+  fc_cutoff,
+  on,
+  comparison
+) {
   res_df <- res$tidy_result[[on]]
 
   if (on == "main_test") {
     sig_df <- .add_filters(res_df, p_adj_cutoff, p_val_cutoff, NULL)
-  } else { # post_hoc_test
+  } else {
+    # post_hoc_test
     sig_df <- .add_filters(res_df, p_adj_cutoff, NULL, fc_cutoff)
     if (!is.null(comparison)) {
       sig_df <- .filter_comparison(sig_df, comparison)
@@ -103,7 +229,14 @@ filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_
   glyexp::filter_var(exp, .data$variable %in% sig_vars)
 }
 
-.filter_sig_vars_ttest <- function(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison) {
+.filter_sig_vars_ttest <- function(
+  exp,
+  res,
+  p_adj_cutoff,
+  p_val_cutoff,
+  fc_cutoff,
+  comparison
+) {
   sig_vars <- res$tidy_result |>
     .add_filters(p_adj_cutoff, p_val_cutoff, fc_cutoff) |>
     dplyr::pull("variable") |>
@@ -111,7 +244,14 @@ filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_
   glyexp::filter_var(exp, .data$variable %in% sig_vars)
 }
 
-.filter_sig_vars_limma <- function(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison) {
+.filter_sig_vars_limma <- function(
+  exp,
+  res,
+  p_adj_cutoff,
+  p_val_cutoff,
+  fc_cutoff,
+  comparison
+) {
   df <- res$tidy_result
   if (!is.null(comparison)) {
     df <- .filter_comparison(df, comparison)
@@ -136,12 +276,20 @@ filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_
 
 .filter_comparison <- function(df, comparison) {
   df |>
-    dplyr::mutate(comparison = paste0(.data$ref_group, "_vs_", .data$test_group)) |>
+    dplyr::mutate(
+      comparison = paste0(.data$ref_group, "_vs_", .data$test_group)
+    ) |>
     dplyr::filter(.data$comparison == .env$comparison) |>
     dplyr::select(-dplyr::all_of("comparison"))
 }
 
-.check_filter_sig_vars_args <- function(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison) {
+.check_filter_sig_vars_args <- function(
+  exp,
+  p_adj_cutoff,
+  p_val_cutoff,
+  fc_cutoff,
+  comparison
+) {
   # Type checking
   checkmate::assert_class(exp, "glyexp_experiment")
   checkmate::assert_number(p_adj_cutoff, lower = 0, upper = 1, null.ok = TRUE)
@@ -175,8 +323,22 @@ filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_
   }
 }
 
-.check_filter_sig_vars_args_anova <- function(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff, on, comparison) {
-  .check_filter_sig_vars_args(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison)
+.check_filter_sig_vars_args_anova <- function(
+  exp,
+  res,
+  p_adj_cutoff,
+  p_val_cutoff,
+  fc_cutoff,
+  on,
+  comparison
+) {
+  .check_filter_sig_vars_args(
+    exp,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    comparison
+  )
   checkmate::assert_choice(on, c("main_test", "post_hoc_test"))
   if (!is.null(p_val_cutoff) && on == "post_hoc_test") {
     cli::cli_abort(c(
@@ -205,7 +367,9 @@ filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_
   }
   if (!is.null(comparison)) {
     unique_comparisons <- res$tidy_result$post_hoc_test |>
-      dplyr::mutate(comparison = paste0(.data$ref_group, "_vs_", .data$test_group)) |>
+      dplyr::mutate(
+        comparison = paste0(.data$ref_group, "_vs_", .data$test_group)
+      ) |>
       dplyr::pull("comparison") |>
       unique()
     if (!comparison %in% unique_comparisons) {
@@ -229,12 +393,29 @@ filter_sig_vars.glystats_limma_res <- function(exp, res, p_adj_cutoff = 0.05, p_
   }
 }
 
-.check_filter_sig_vars_args_ttest <- function(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff) {
+.check_filter_sig_vars_args_ttest <- function(
+  exp,
+  p_adj_cutoff,
+  p_val_cutoff,
+  fc_cutoff
+) {
   .check_filter_sig_vars_args(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, NULL)
 }
 
-.check_filter_sig_vars_args_limma <- function(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison) {
-  .check_filter_sig_vars_args(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff, comparison)
+.check_filter_sig_vars_args_limma <- function(
+  exp,
+  p_adj_cutoff,
+  p_val_cutoff,
+  fc_cutoff,
+  comparison
+) {
+  .check_filter_sig_vars_args(
+    exp,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    comparison
+  )
 }
 
 .decide_fc <- function(exp, user_provided) {

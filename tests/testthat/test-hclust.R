@@ -2,7 +2,11 @@ test_that("gly_hclust does not leak graphics devices when ggdendro is available"
   testthat::skip_if_not_installed("ggdendro")
 
   open_devices <- grDevices::dev.list()
-  open_devices <- if (is.null(open_devices)) integer(0) else as.integer(open_devices)
+  open_devices <- if (is.null(open_devices)) {
+    integer(0)
+  } else {
+    as.integer(open_devices)
+  }
 
   exp_subset <- test_gp_exp |>
     glyexp::slice_sample_var(n = 5) |>
@@ -11,7 +15,11 @@ test_that("gly_hclust does not leak graphics devices when ggdendro is available"
   suppressMessages(gly_hclust(exp_subset, on = "sample", k_values = c(2)))
 
   after_devices <- grDevices::dev.list()
-  after_devices <- if (is.null(after_devices)) integer(0) else as.integer(after_devices)
+  after_devices <- if (is.null(after_devices)) {
+    integer(0)
+  } else {
+    as.integer(after_devices)
+  }
 
   expect_identical(after_devices, open_devices)
 })
@@ -65,7 +73,7 @@ test_that("gly_hclust works with basic parameters (default: cluster variables)",
   # Check that cluster assignments are valid
   expect_true(all(result$tidy_result$clusters$cluster_k2 %in% 1:2))
   expect_true(all(result$tidy_result$clusters$cluster_k3 %in% 1:3))
-  expect_equal(nrow(result$tidy_result$clusters), 10)  # Should match number of variables
+  expect_equal(nrow(result$tidy_result$clusters), 10) # Should match number of variables
 })
 
 test_that("gly_hclust works with on parameter", {
@@ -74,19 +82,30 @@ test_that("gly_hclust works with on parameter", {
     glyexp::slice_sample_obs(n = 6)
 
   # Test clustering variables (default)
-  result_var <- suppressMessages(gly_hclust(exp_subset, on = "variable", k_values = c(2, 3)))
+  result_var <- suppressMessages(gly_hclust(
+    exp_subset,
+    on = "variable",
+    k_values = c(2, 3)
+  ))
   expect_s3_class(result_var, "glystats_hclust_res")
   expect_true("variable" %in% colnames(result_var$tidy_result$clusters))
-  expect_equal(nrow(result_var$tidy_result$clusters), 8)  # Number of variables
+  expect_equal(nrow(result_var$tidy_result$clusters), 8) # Number of variables
 
   # Test clustering samples
-  result_sample <- suppressMessages(gly_hclust(exp_subset, on = "sample", k_values = c(2, 3)))
+  result_sample <- suppressMessages(gly_hclust(
+    exp_subset,
+    on = "sample",
+    k_values = c(2, 3)
+  ))
   expect_s3_class(result_sample, "glystats_hclust_res")
   expect_true("sample" %in% colnames(result_sample$tidy_result$clusters))
-  expect_equal(nrow(result_sample$tidy_result$clusters), 6)  # Number of samples
+  expect_equal(nrow(result_sample$tidy_result$clusters), 6) # Number of samples
 
   # Results should be different
-  expect_false(identical(result_var$tidy_result$clusters, result_sample$tidy_result$clusters))
+  expect_false(identical(
+    result_var$tidy_result$clusters,
+    result_sample$tidy_result$clusters
+  ))
 })
 
 test_that("gly_hclust works with different methods", {
@@ -115,7 +134,10 @@ test_that("gly_hclust works with different distance methods", {
 
   for (dist_method in dist_methods) {
     # Pass distance method via dist.method parameter
-    result <- suppressMessages(gly_hclust(exp_subset, dist.method = dist_method))
+    result <- suppressMessages(gly_hclust(
+      exp_subset,
+      dist.method = dist_method
+    ))
     expect_s3_class(result, "glystats_hclust_res")
     expect_true("clusters" %in% names(result$tidy_result))
   }
@@ -150,7 +172,6 @@ test_that("gly_hclust works with k_values = NULL", {
 })
 
 
-
 test_that("gly_hclust scale parameter works", {
   exp_subset <- test_gp_exp |>
     glyexp::slice_sample_var(n = 5) |>
@@ -164,7 +185,10 @@ test_that("gly_hclust scale parameter works", {
   expect_s3_class(result_unscaled, "glystats_hclust_res")
 
   # Results should be different when scaling is applied
-  expect_false(identical(result_scaled$tidy_result$heights, result_unscaled$tidy_result$heights))
+  expect_false(identical(
+    result_scaled$tidy_result$heights,
+    result_unscaled$tidy_result$heights
+  ))
 })
 
 test_that("gly_hclust add_info parameter works", {
@@ -177,15 +201,31 @@ test_that("gly_hclust add_info parameter works", {
   result_with_info <- suppressMessages(gly_hclust(exp_subset, add_info = TRUE))
 
   # With add_info = FALSE, should have fewer columns in clusters tibble
-  expect_true(ncol(result_no_info$tidy_result$clusters) < ncol(result_with_info$tidy_result$clusters))
+  expect_true(
+    ncol(result_no_info$tidy_result$clusters) <
+      ncol(result_with_info$tidy_result$clusters)
+  )
   expect_true("variable" %in% colnames(result_with_info$tidy_result$clusters))
 
   # Test with sample clustering
-  result_sample_no_info <- suppressMessages(gly_hclust(exp_subset, on = "sample", add_info = FALSE))
-  result_sample_with_info <- suppressMessages(gly_hclust(exp_subset, on = "sample", add_info = TRUE))
+  result_sample_no_info <- suppressMessages(gly_hclust(
+    exp_subset,
+    on = "sample",
+    add_info = FALSE
+  ))
+  result_sample_with_info <- suppressMessages(gly_hclust(
+    exp_subset,
+    on = "sample",
+    add_info = TRUE
+  ))
 
-  expect_true(ncol(result_sample_no_info$tidy_result$clusters) < ncol(result_sample_with_info$tidy_result$clusters))
-  expect_true("sample" %in% colnames(result_sample_with_info$tidy_result$clusters))
+  expect_true(
+    ncol(result_sample_no_info$tidy_result$clusters) <
+      ncol(result_sample_with_info$tidy_result$clusters)
+  )
+  expect_true(
+    "sample" %in% colnames(result_sample_with_info$tidy_result$clusters)
+  )
 })
 
 test_that("gly_hclust handles edge cases", {
@@ -209,9 +249,9 @@ test_that("gly_hclust input validation works", {
 
   # Test invalid inputs
   expect_error(gly_hclust("not_an_experiment"))
-  expect_error(gly_hclust(exp_subset, on = "invalid"))  # Invalid on parameter
+  expect_error(gly_hclust(exp_subset, on = "invalid")) # Invalid on parameter
   expect_error(gly_hclust(exp_subset, method = 123))
-  expect_error(gly_hclust(exp_subset, k_values = c(1)))  # k must be >= 2
+  expect_error(gly_hclust(exp_subset, k_values = c(1))) # k must be >= 2
   expect_error(gly_hclust(exp_subset, scale = "yes"))
   expect_error(gly_hclust(exp_subset, add_info = "yes"))
 })

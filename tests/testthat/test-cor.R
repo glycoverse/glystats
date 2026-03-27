@@ -34,33 +34,36 @@ test_that("gly_cor basic functionality works", {
   # Check raw_result structure
   raw_result <- result$raw_result
   expect_type(raw_result, "list")
-  expect_true("r" %in% names(raw_result))  # correlation matrix in rcorr
-  expect_true("P" %in% names(raw_result))  # p-value matrix in rcorr
+  expect_true("r" %in% names(raw_result)) # correlation matrix in rcorr
+  expect_true("P" %in% names(raw_result)) # p-value matrix in rcorr
   expect_true(is.matrix(raw_result$r))
   expect_true(is.matrix(raw_result$P))
 })
 
 test_that("gly_cor on parameter works correctly", {
   exp_subset <- test_gp_exp |>
-    glyexp::slice_sample_var(n = 6) |>  # Need >4 variables for sample correlation
-    glyexp::slice_sample_obs(n = 6)     # Need >4 samples for variable correlation
+    glyexp::slice_sample_var(n = 6) |> # Need >4 variables for sample correlation
+    glyexp::slice_sample_obs(n = 6) # Need >4 samples for variable correlation
 
   # Test correlating variables (default)
   result_var <- suppressMessages(gly_cor(exp_subset, on = "variable"))
   expect_s3_class(result_var, "glystats_cor_res")
   expect_true("variable1" %in% colnames(result_var$tidy_result))
   expect_true("variable2" %in% colnames(result_var$tidy_result))
-  expect_equal(nrow(result_var$tidy_result), 6 * 5 / 2)  # 6 choose 2
+  expect_equal(nrow(result_var$tidy_result), 6 * 5 / 2) # 6 choose 2
 
   # Test correlating samples
   result_sample <- suppressMessages(gly_cor(exp_subset, on = "sample"))
   expect_s3_class(result_sample, "glystats_cor_res")
   expect_true("sample1" %in% colnames(result_sample$tidy_result))
   expect_true("sample2" %in% colnames(result_sample$tidy_result))
-  expect_equal(nrow(result_sample$tidy_result), 6 * 5 / 2)  # 6 choose 2
+  expect_equal(nrow(result_sample$tidy_result), 6 * 5 / 2) # 6 choose 2
 
   # Results should be different
-  expect_false(identical(result_var$tidy_result$cor, result_sample$tidy_result$cor))
+  expect_false(identical(
+    result_var$tidy_result$cor,
+    result_sample$tidy_result$cor
+  ))
 })
 
 test_that("gly_cor works with different correlation methods", {
@@ -103,14 +106,13 @@ test_that("gly_cor raw_result contains expected structure", {
   result <- suppressMessages(gly_cor(exp_subset))
 
   expect_type(result$raw_result, "list")
-  expect_true("r" %in% names(result$raw_result))  # correlation matrix in rcorr
-  expect_true("P" %in% names(result$raw_result))  # p-value matrix in rcorr
+  expect_true("r" %in% names(result$raw_result)) # correlation matrix in rcorr
+  expect_true("P" %in% names(result$raw_result)) # p-value matrix in rcorr
   expect_true(is.matrix(result$raw_result$r))
   expect_true(is.matrix(result$raw_result$P))
   expect_equal(dim(result$raw_result$r), c(4, 4))
   expect_equal(dim(result$raw_result$P), c(4, 4))
 })
-
 
 
 test_that("gly_cor handles edge cases", {
@@ -122,7 +124,7 @@ test_that("gly_cor handles edge cases", {
   result <- suppressMessages(gly_cor(exp_minimal))
 
   expect_s3_class(result, "glystats_cor_res")
-  expect_equal(nrow(result$tidy_result), 3)  # 3 choose 2
+  expect_equal(nrow(result$tidy_result), 3) # 3 choose 2
   expect_true(all(result$tidy_result$cor >= -1 & result$tidy_result$cor <= 1))
 })
 
@@ -133,9 +135,9 @@ test_that("gly_cor input validation works", {
 
   # Test invalid inputs
   expect_error(gly_cor("not_an_experiment"))
-  expect_error(gly_cor(exp_subset, on = "invalid"))  # Invalid on parameter
-  expect_error(gly_cor(exp_subset, method = "invalid"))  # Invalid method
-  expect_error(gly_cor(exp_subset, p_adj_method = "invalid"))  # Invalid p_adj_method
+  expect_error(gly_cor(exp_subset, on = "invalid")) # Invalid on parameter
+  expect_error(gly_cor(exp_subset, method = "invalid")) # Invalid method
+  expect_error(gly_cor(exp_subset, p_adj_method = "invalid")) # Invalid p_adj_method
 })
 
 test_that("gly_cor produces consistent results", {
@@ -171,5 +173,5 @@ test_that("gly_cor_ works correctly", {
   expect_true("variable1" %in% colnames(result$tidy_result))
   expect_true("variable2" %in% colnames(result$tidy_result))
   expect_true("cor" %in% colnames(result$tidy_result))
-  expect_equal(nrow(result$tidy_result), 45)  # 10 choose 2 = 45 pairs
+  expect_equal(nrow(result$tidy_result), 45) # 10 choose 2 = 45 pairs
 })

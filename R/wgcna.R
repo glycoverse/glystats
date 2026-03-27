@@ -84,12 +84,22 @@ gly_wgcna <- function(
 
   # Call the underlying API
   result <- gly_wgcna_(
-    expr_mat, powers, network_type, tom_type, min_module_size,
-    deep_split, merge_cut_height, ...
+    expr_mat,
+    powers,
+    network_type,
+    tom_type,
+    min_module_size,
+    deep_split,
+    merge_cut_height,
+    ...
   )
 
   # Process results with add_info logic
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -111,7 +121,10 @@ gly_wgcna_ <- function(
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_numeric(powers, min.len = 1)
-  checkmate::assert_choice(network_type, c("unsigned", "signed", "signed hybrid"))
+  checkmate::assert_choice(
+    network_type,
+    c("unsigned", "signed", "signed hybrid")
+  )
   checkmate::assert_choice(tom_type, c("none", "unsigned", "signed"))
   checkmate::assert_int(min_module_size, lower = 1)
   checkmate::assert_int(deep_split, lower = 0, upper = 4)
@@ -119,7 +132,9 @@ gly_wgcna_ <- function(
 
   dots <- rlang::list2(...)
   if ("datExpr" %in% names(dots)) {
-    cli::cli_abort("{.field datExpr} should not be supplied through `...`; data comes from the function inputs.")
+    cli::cli_abort(
+      "{.field datExpr} should not be supplied through `...`; data comes from the function inputs."
+    )
   }
 
   # Prepare data for WGCNA (samples as rows, variables as columns)
@@ -130,13 +145,16 @@ gly_wgcna_ <- function(
     # Step 1: Choose soft threshold power
     # Suppress all output from pickSoftThreshold (including direct console output)
     threshold_res <- suppressMessages(suppressWarnings({
-      utils::capture.output({
-        threshold_res_temp <- WGCNA::pickSoftThreshold(
-          expr_mat,
-          powerVector = powers,
-          verbose = 0
-        )
-      }, type = "output")
+      utils::capture.output(
+        {
+          threshold_res_temp <- WGCNA::pickSoftThreshold(
+            expr_mat,
+            powerVector = powers,
+            verbose = 0
+          )
+        },
+        type = "output"
+      )
       threshold_res_temp
     }))
 
@@ -163,7 +181,9 @@ gly_wgcna_ <- function(
     cli::cli_alert_info("Selected soft threshold power: {.val {power}}")
   } else {
     power <- dots$power
-    cli::cli_alert_info("Using user-supplied soft threshold power: {.val {power}}")
+    cli::cli_alert_info(
+      "Using user-supplied soft threshold power: {.val {power}}"
+    )
   }
 
   # Step 2: Network construction and module detection
@@ -215,7 +235,6 @@ gly_wgcna_ <- function(
     ))
   })
 
-
   # Step 3: Process results
   tidy_result <- .process_wgcna_results(net, expr_mat, rownames(expr_mat))
 
@@ -247,7 +266,11 @@ gly_wgcna_ <- function(
     )
 
   # Calculate memberships
-  membership_df <- stats::cor(expr_mat, net$MEs, use = "pairwise.complete.obs") %>%
+  membership_df <- stats::cor(
+    expr_mat,
+    net$MEs,
+    use = "pairwise.complete.obs"
+  ) %>%
     as.data.frame() %>%
     tibble::rownames_to_column("variable") %>%
     tibble::as_tibble() %>%

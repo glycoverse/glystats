@@ -2,7 +2,7 @@ test_that("gly_ttest works with t-test method", {
   # Use test_gp_exp and filter to 2 groups for t-test
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
-    glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
 
   # Run DEA with t-test
   result <- suppressMessages(gly_ttest(exp_2group))
@@ -12,9 +12,9 @@ test_that("gly_ttest works with t-test method", {
   expect_type(result, "list")
   expect_setequal(names(result), c("tidy_result", "raw_result"))
   expect_equal(nrow(result$tidy_result), 10)
-  expect_true("p_adj" %in% colnames(result$tidy_result))  # p_adj should exist
-  expect_true("log2fc" %in% colnames(result$tidy_result))  # log2fc should exist
-  expect_type(result$tidy_result$log2fc, "double")  # log2fc should be numeric
+  expect_true("p_adj" %in% colnames(result$tidy_result)) # p_adj should exist
+  expect_true("log2fc" %in% colnames(result$tidy_result)) # log2fc should exist
+  expect_type(result$tidy_result$log2fc, "double") # log2fc should be numeric
 
   # Test raw_result
   expect_type(result$raw_result, "list")
@@ -27,7 +27,7 @@ test_that("gly_ttest assigns NA for failed variables", {
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
     glyexp::slice_sample_var(n = 10)
-  exp_2group$expr_mat[1:3, ] <- NA  # This will lead to stats::t.test() failing
+  exp_2group$expr_mat[1:3, ] <- NA # This will lead to stats::t.test() failing
   na_vars <- exp_2group$var_info$variable[1:3]
 
   # Run DEA with t-test
@@ -47,7 +47,7 @@ test_that("gly_wilcox works with wilcoxon method", {
   # Use test_gp_exp and filter to 2 groups for wilcoxon test
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("M", "Y")) |>
-    glyexp::slice_sample_var(n = 10)  # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
 
   # Run DEA with wilcoxon test
   result <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group)))
@@ -57,8 +57,8 @@ test_that("gly_wilcox works with wilcoxon method", {
   expect_type(result, "list")
   expect_setequal(names(result), c("tidy_result", "raw_result"))
   expect_equal(nrow(result$tidy_result), 10)
-  expect_true("log2fc" %in% colnames(result$tidy_result))  # Wilcoxon should now have log2fc
-  expect_type(result$tidy_result$log2fc, "double")  # log2fc should be numeric
+  expect_true("log2fc" %in% colnames(result$tidy_result)) # Wilcoxon should now have log2fc
+  expect_type(result$tidy_result$log2fc, "double") # log2fc should be numeric
 
   # Test raw_result
   expect_type(result$raw_result, "list")
@@ -112,8 +112,8 @@ test_that("gly_wilcox_ works correctly", {
 
 test_that("gly_ttest and gly_wilcox basic functionality works", {
   # Test both methods work with test_gp_exp
-  exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5)  # Use very small subset
-  
+  exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5) # Use very small subset
+
   # 2-group methods
   exp_2group <- exp_small |> glyexp::filter_obs(group %in% c("C", "H"))
   expect_no_error(suppressMessages(gly_ttest(exp_2group)))
@@ -123,12 +123,16 @@ test_that("gly_ttest and gly_wilcox basic functionality works", {
 test_that("gly_ttest and gly_wilcox error handling", {
   # Use test_gp_exp for error testing
   exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5)
-  
+
   # Test various error conditions - group column not found
-  expect_error(suppressMessages(gly_ttest(exp_small, group_col = "nonexistent")),
-               "not found in sample information")
-  expect_error(suppressMessages(gly_wilcox(exp_small, group_col = "nonexistent")),
-               "not found in sample information")
+  expect_error(
+    suppressMessages(gly_ttest(exp_small, group_col = "nonexistent")),
+    "not found in sample information"
+  )
+  expect_error(
+    suppressMessages(gly_wilcox(exp_small, group_col = "nonexistent")),
+    "not found in sample information"
+  )
 })
 
 test_that("gly_ttest and gly_wilcox group validation", {
@@ -136,16 +140,16 @@ test_that("gly_ttest and gly_wilcox group validation", {
   exp_3group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
     glyexp::slice_sample_var(n = 5)
-  
-  # Test with 1 group 
+
+  # Test with 1 group
   exp_1group <- test_gp_exp |>
     glyexp::filter_obs(group == "C") |>
     glyexp::slice_sample_var(n = 5)
-  
+
   # Test 3 groups with 2-group methods
   expect_error(suppressMessages(gly_ttest(exp_3group)), "exactly 2 levels")
   expect_error(suppressMessages(gly_wilcox(exp_3group)), "exactly 2 levels")
-  
+
   # Test 1 group with 2-group methods
   expect_error(suppressMessages(gly_ttest(exp_1group)), "exactly 2 levels")
   expect_error(suppressMessages(gly_wilcox(exp_1group)), "exactly 2 levels")
@@ -167,12 +171,22 @@ test_that("gly_ttest ref_group parameter works", {
   result_ref_c <- suppressMessages(gly_ttest(exp_2group, ref_group = "C"))
 
   # Check that log2fc values are negated when reference group changes
-  expect_equal(result_default$tidy_result$log2fc, -result_ref_h$tidy_result$log2fc, tolerance = 1e-10)
-  expect_equal(result_default$tidy_result$log2fc, result_ref_c$tidy_result$log2fc, tolerance = 1e-10)
+  expect_equal(
+    result_default$tidy_result$log2fc,
+    -result_ref_h$tidy_result$log2fc,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$log2fc,
+    result_ref_c$tidy_result$log2fc,
+    tolerance = 1e-10
+  )
 
   # Test invalid ref_group
-  expect_error(suppressMessages(gly_ttest(exp_2group, ref_group = "invalid")),
-               "Must be element of set")
+  expect_error(
+    suppressMessages(gly_ttest(exp_2group, ref_group = "invalid")),
+    "Must be element of set"
+  )
 })
 
 test_that("gly_wilcox ref_group parameter works", {
@@ -185,16 +199,32 @@ test_that("gly_wilcox ref_group parameter works", {
   result_default <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group)))
 
   # Test with ref_group = "Y" (should reverse the comparison)
-  result_ref_y <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group, ref_group = "Y")))
+  result_ref_y <- suppressMessages(suppressWarnings(gly_wilcox(
+    exp_2group,
+    ref_group = "Y"
+  )))
 
   # Test with ref_group = "M" (should be same as default since M is first alphabetically)
-  result_ref_m <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group, ref_group = "M")))
+  result_ref_m <- suppressMessages(suppressWarnings(gly_wilcox(
+    exp_2group,
+    ref_group = "M"
+  )))
 
   # Check that log2fc values are negated when reference group changes
-  expect_equal(result_default$tidy_result$log2fc, -result_ref_y$tidy_result$log2fc, tolerance = 1e-10)
-  expect_equal(result_default$tidy_result$log2fc, result_ref_m$tidy_result$log2fc, tolerance = 1e-10)
+  expect_equal(
+    result_default$tidy_result$log2fc,
+    -result_ref_y$tidy_result$log2fc,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$log2fc,
+    result_ref_m$tidy_result$log2fc,
+    tolerance = 1e-10
+  )
 
   # Test invalid ref_group
-  expect_error(suppressMessages(gly_wilcox(exp_2group, ref_group = "invalid")),
-               "Must be element of set")
+  expect_error(
+    suppressMessages(gly_wilcox(exp_2group, ref_group = "invalid")),
+    "Must be element of set"
+  )
 })

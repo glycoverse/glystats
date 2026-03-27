@@ -68,7 +68,11 @@ gly_kmeans <- function(
 
   # Call the underlying API
   result <- gly_kmeans_(expr_mat, on, centers, scale, ...)
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 

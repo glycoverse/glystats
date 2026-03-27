@@ -38,7 +38,11 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
   expr_mat <- glyexp::get_expr_mat(exp)
   result <- gly_tsne_(expr_mat, dims, perplexity, ...)
 
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -49,7 +53,7 @@ gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, ...) {
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
 
-  mat <- t(expr_mat)  # Samples as rows, variables as columns
+  mat <- t(expr_mat) # Samples as rows, variables as columns
 
   # Check if perplexity is appropriate for the number of samples
   # Perplexity should be smaller than the number of samples
@@ -66,7 +70,9 @@ gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, ...) {
   # Perform t-SNE
   dots <- rlang::list2(...)
   if ("X" %in% names(dots)) {
-    cli::cli_abort("{.field X} should not be supplied through `...`; data comes from the function inputs.")
+    cli::cli_abort(
+      "{.field X} should not be supplied through `...`; data comes from the function inputs."
+    )
   }
   call_args <- c(
     list(

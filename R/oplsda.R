@@ -54,7 +54,15 @@
 #'  - `raw_result`: The raw ropls opls object from `ropls::opls()`
 #' @seealso [ropls::opls()]
 #' @export
-gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale = TRUE, add_info = TRUE, ...) {
+gly_oplsda <- function(
+  exp,
+  group_col = "group",
+  pred_i = 1,
+  ortho_i = NA,
+  scale = TRUE,
+  add_info = TRUE,
+  ...
+) {
   # Check package availability
   rlang::check_installed("ropls")
 
@@ -84,13 +92,24 @@ gly_oplsda <- function(exp, group_col = "group", pred_i = 1, ortho_i = NA, scale
 
   # Call the underlying API
   result <- gly_oplsda_(expr_mat, groups, pred_i, ortho_i, scale, ...)
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
 #' @rdname gly_oplsda
 #' @export
-gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, ...) {
+gly_oplsda_ <- function(
+  expr_mat,
+  groups,
+  pred_i = 1,
+  ortho_i = NA,
+  scale = TRUE,
+  ...
+) {
   rlang::check_installed("ropls")
 
   # Validate inputs
@@ -104,7 +123,7 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   # Perform OPLS-DA
   # Set appropriate cross-validation folds based on sample size
   n_samples <- nrow(mat)
-  crossval_i <- min(7, n_samples - 1)  # Default is 7, but must be less than sample size
+  crossval_i <- min(7, n_samples - 1) # Default is 7, but must be less than sample size
 
   # Suppress plotting to prevent Rplots.pdf generation
   # Open a null device to capture any plotting output
@@ -117,7 +136,9 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   dots <- rlang::list2(...)
   disallowed_args <- intersect(names(dots), c("x", "y"))
   if (length(disallowed_args) > 0) {
-    cli::cli_abort("Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; data comes from the function inputs.")
+    cli::cli_abort(
+      "Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; data comes from the function inputs."
+    )
   }
 
   call_args <- c(
@@ -171,7 +192,11 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   ortho_scores <- oplsda_res@orthoScoreMN
 
   # Combine predictive and orthogonal scores
-  if (!is.null(ortho_scores) && ncol(ortho_scores) > 0 && nrow(ortho_scores) == nrow(pred_scores)) {
+  if (
+    !is.null(ortho_scores) &&
+      ncol(ortho_scores) > 0 &&
+      nrow(ortho_scores) == nrow(pred_scores)
+  ) {
     all_scores <- cbind(pred_scores, ortho_scores)
     # Create column names: p1, p2, ... for predictive, o1, o2, ... for orthogonal
     pred_names <- paste0("p", seq_len(ncol(pred_scores)))
@@ -198,7 +223,11 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   ortho_loadings <- oplsda_res@orthoLoadingMN
 
   # Combine predictive and orthogonal loadings
-  if (!is.null(ortho_loadings) && ncol(ortho_loadings) > 0 && nrow(ortho_loadings) == nrow(pred_loadings)) {
+  if (
+    !is.null(ortho_loadings) &&
+      ncol(ortho_loadings) > 0 &&
+      nrow(ortho_loadings) == nrow(pred_loadings)
+  ) {
     all_loadings <- cbind(pred_loadings, ortho_loadings)
     # Create column names: p1, p2, ... for predictive, o1, o2, ... for orthogonal
     pred_names <- paste0("p", seq_len(ncol(pred_loadings)))
@@ -230,11 +259,15 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
     t_i <- pred_scores[, i, drop = TRUE]
 
     # Calculate correlation between each variable and component i
-    pcorr_i <- apply(x_model, 2, function(x) stats::cor(x, t_i, use = "pairwise.complete.obs"))
+    pcorr_i <- apply(x_model, 2, function(x) {
+      stats::cor(x, t_i, use = "pairwise.complete.obs")
+    })
 
     # Add pcorr column to variables table
     pcorr_col_name <- paste0("pcorr", i)
-    variables_tbl[[pcorr_col_name]] <- as.numeric(pcorr_i[variables_tbl$variable])
+    variables_tbl[[pcorr_col_name]] <- as.numeric(pcorr_i[
+      variables_tbl$variable
+    ])
   }
 
   variables_tbl
@@ -289,7 +322,7 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
     tibble::as_tibble(perm_m, .name_repair = "minimal") |>
       dplyr::mutate(
         perm_id = dplyr::row_number() - 1,
-        model   = dplyr::if_else(.data$perm_id == 0, "Original", "Permutation")
+        model = dplyr::if_else(.data$perm_id == 0, "Original", "Permutation")
       ) |>
       dplyr::relocate(all_of(c("model", "perm_id")))
   } else {
@@ -301,7 +334,12 @@ gly_oplsda_ <- function(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE
   }
 }
 
-.format_oplsda_results <- function(oplsda_res, groups, sample_info, add_info = TRUE) {
+.format_oplsda_results <- function(
+  oplsda_res,
+  groups,
+  sample_info,
+  add_info = TRUE
+) {
   # Check if model was successfully built
   if (length(oplsda_res@scoreMN) == 0) {
     # Model building failed - provide informative error

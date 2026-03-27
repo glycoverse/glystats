@@ -26,7 +26,10 @@ test_that("gly_anova works with anova method", {
   # Test post_hoc_test tibble
   post_hoc_test <- result$tidy_result$post_hoc_test
   expect_true(tibble::is_tibble(post_hoc_test))
-  expect_true(all(c("variable", "ref_group", "test_group", "p_val", "p_adj", "log2fc") %in% colnames(post_hoc_test)))
+  expect_true(all(
+    c("variable", "ref_group", "test_group", "p_val", "p_adj", "log2fc") %in%
+      colnames(post_hoc_test)
+  ))
 
   # Test raw_result structure
   expect_type(result$raw_result, "list")
@@ -43,7 +46,8 @@ test_that("gly_anova comparison direction is correct for 2 groups", {
   )
   expr_mat <- matrix(
     c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1)),
-    nrow = 1, byrow = TRUE
+    nrow = 1,
+    byrow = TRUE
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
@@ -68,8 +72,13 @@ test_that("gly_anova comparison direction is correct for 3 groups", {
     group = factor(rep(c("A", "B", "C"), each = 10), levels = c("A", "B", "C"))
   )
   expr_mat <- matrix(
-    c(rnorm(10, mean = 1, sd = 0.1), rnorm(10, mean = 2, sd = 0.1), rnorm(10, mean = 3, sd = 0.1)),
-    nrow = 1, byrow = TRUE
+    c(
+      rnorm(10, mean = 1, sd = 0.1),
+      rnorm(10, mean = 2, sd = 0.1),
+      rnorm(10, mean = 3, sd = 0.1)
+    ),
+    nrow = 1,
+    byrow = TRUE
   )
   colnames(expr_mat) <- sample_info$sample
   rownames(expr_mat) <- var_info$variable
@@ -151,7 +160,7 @@ test_that("gly_anova assigns NA for failed variables", {
   exp_3group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
     glyexp::slice_sample_var(n = 10)
-  exp_3group$expr_mat[1:3, ] <- NA  # This will lead to stats::aov() failing
+  exp_3group$expr_mat[1:3, ] <- NA # This will lead to stats::aov() failing
   na_vars <- exp_3group$var_info$variable[1:3]
 
   # Run DEA with ANOVA
@@ -197,7 +206,10 @@ test_that("gly_kruskal works with kruskal method", {
   # Test post_hoc_test tibble
   post_hoc_test <- result$tidy_result$post_hoc_test
   expect_true(tibble::is_tibble(post_hoc_test))
-  expect_true(all(c("variable", "ref_group", "test_group", "p_val", "p_adj", "log2fc") %in% colnames(post_hoc_test)))
+  expect_true(all(
+    c("variable", "ref_group", "test_group", "p_val", "p_adj", "log2fc") %in%
+      colnames(post_hoc_test)
+  ))
 
   # Test raw_result structure
   expect_type(result$raw_result, "list")
@@ -206,8 +218,8 @@ test_that("gly_kruskal works with kruskal method", {
 
 test_that("gly_anova and gly_kruskal basic functionality works", {
   # Test multi-group methods work with test_gp_exp
-  exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5)  # Use very small subset
-  
+  exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5) # Use very small subset
+
   # Multi-group methods
   expect_no_error(suppressMessages(gly_anova(exp_small)))
   expect_no_error(suppressMessages(gly_kruskal(exp_small)))
@@ -216,12 +228,16 @@ test_that("gly_anova and gly_kruskal basic functionality works", {
 test_that("gly_anova and gly_kruskal error handling", {
   # Use test_gp_exp for error testing
   exp_small <- test_gp_exp |> glyexp::slice_sample_var(n = 5)
-  
+
   # Test various error conditions - group column not found
-  expect_error(suppressMessages(gly_anova(exp_small, group_col = "nonexistent")),
-               "not found in sample information")
-  expect_error(suppressMessages(gly_kruskal(exp_small, group_col = "nonexistent")),
-               "not found in sample information")
+  expect_error(
+    suppressMessages(gly_anova(exp_small, group_col = "nonexistent")),
+    "not found in sample information"
+  )
+  expect_error(
+    suppressMessages(gly_kruskal(exp_small, group_col = "nonexistent")),
+    "not found in sample information"
+  )
 })
 
 test_that("gly_anova and gly_kruskal group validation", {
@@ -229,16 +245,16 @@ test_that("gly_anova and gly_kruskal group validation", {
   exp_3group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
     glyexp::slice_sample_var(n = 5)
-  
-  # Test with 1 group 
+
+  # Test with 1 group
   exp_1group <- test_gp_exp |>
     glyexp::filter_obs(group == "C") |>
     glyexp::slice_sample_var(n = 5)
-  
+
   # Test 3 groups with multi-group methods (should work)
   expect_no_error(suppressMessages(gly_anova(exp_3group)))
   expect_no_error(suppressMessages(gly_kruskal(exp_3group)))
-  
+
   # Test 1 group with multi-group methods
   expect_error(suppressMessages(gly_anova(exp_1group)), "at least 2 levels")
   expect_error(suppressMessages(gly_kruskal(exp_1group)), "at least 2 levels")
@@ -289,27 +305,32 @@ test_that("gly_kruskal_ works correctly", {
 test_that("post_hoc_test should not contain NA rows when add_info is TRUE", {
   # Run ANOVA with add_info = TRUE (default)
   result <- suppressMessages(gly_anova(test_gp_exp))
-  
+
   post_hoc_test <- result$tidy_result$post_hoc_test
-  
+
   # Count total NA values in ref_group
   n_na_ref_group <- sum(is.na(post_hoc_test$ref_group))
-  
+
   # There should be no NA values in ref_group
   # because post_hoc_test should only contain variables with significant main effects
-  expect_equal(n_na_ref_group, 0, 
-               info = "post_hoc_test should not have NA values in ref_group column")
-  
+  expect_equal(
+    n_na_ref_group,
+    0,
+    info = "post_hoc_test should not have NA values in ref_group column"
+  )
+
   # Verify that all rows have complete data
   expect_equal(sum(is.na(post_hoc_test$test_group)), 0)
   expect_equal(sum(is.na(post_hoc_test$p_val)), 0)
   expect_equal(sum(is.na(post_hoc_test$p_adj)), 0)
-  
+
   # Verify that post_hoc_test only contains variables from main_test that are significant
   main_test <- result$tidy_result$main_test
   sig_vars <- main_test$variable[main_test$p_adj < 0.05]
-  
+
   # All variables in post_hoc_test should be significant in main_test
-  expect_true(all(post_hoc_test$variable %in% sig_vars),
-              info = "All variables in post_hoc_test should have significant main effects")
+  expect_true(
+    all(post_hoc_test$variable %in% sig_vars),
+    info = "All variables in post_hoc_test should have significant main effects"
+  )
 })

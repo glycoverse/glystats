@@ -46,7 +46,11 @@ gly_umap <- function(
   expr_mat <- glyexp::get_expr_mat(exp)
   result <- gly_umap_(expr_mat, n_neighbors, n_components, ...)
 
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -71,7 +75,9 @@ gly_umap_ <- function(
   # Perform UMAP
   dots <- rlang::list2(...)
   if ("X" %in% names(dots)) {
-    cli::cli_abort("{.field X} should not be supplied through `...`; data comes from the function inputs.")
+    cli::cli_abort(
+      "{.field X} should not be supplied through `...`; data comes from the function inputs."
+    )
   }
   call_args <- c(
     list(

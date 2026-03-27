@@ -5,8 +5,14 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
     glyexp::slice_sample_var(n = 5)
 
   # Test gly_fold_change
-  result_no_info <- suppressMessages(gly_fold_change(exp_2group, add_info = FALSE))
-  result_with_info <- suppressMessages(gly_fold_change(exp_2group, add_info = TRUE))
+  result_no_info <- suppressMessages(gly_fold_change(
+    exp_2group,
+    add_info = FALSE
+  ))
+  result_with_info <- suppressMessages(gly_fold_change(
+    exp_2group,
+    add_info = TRUE
+  ))
 
   expect_equal(
     colnames(result_no_info),
@@ -15,7 +21,14 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
 
   expect_equal(
     colnames(result_with_info),
-    c("variable", "protein", "glycan_composition", "protein_site", "gene", "log2fc")
+    c(
+      "variable",
+      "protein",
+      "glycan_composition",
+      "protein_site",
+      "gene",
+      "log2fc"
+    )
   )
 })
 

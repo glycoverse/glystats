@@ -72,7 +72,10 @@ test_that("gly_tsne has consistent sample names", {
   result <- gly_tsne(test_gp_exp, perplexity = 3)
 
   # Should have same sample names as input expression matrix
-  expect_equal(sort(result$tidy_result$sample), sort(colnames(test_gp_exp$expr_mat)))
+  expect_equal(
+    sort(result$tidy_result$sample),
+    sort(colnames(test_gp_exp$expr_mat))
+  )
 })
 
 test_that("gly_tsne_ works correctly", {

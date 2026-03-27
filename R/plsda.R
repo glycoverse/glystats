@@ -51,7 +51,14 @@
 #'  - `raw_result`: The raw ropls opls object from `ropls::opls()`
 #' @seealso [ropls::opls()]
 #' @export
-gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, add_info = TRUE, ...) {
+gly_plsda <- function(
+  exp,
+  group_col = "group",
+  ncomp = 2,
+  scale = TRUE,
+  add_info = TRUE,
+  ...
+) {
   # Check package availability
   rlang::check_installed("ropls")
 
@@ -78,7 +85,11 @@ gly_plsda <- function(exp, group_col = "group", ncomp = 2, scale = TRUE, add_inf
 
   # Call the underlying API
   result <- gly_plsda_(expr_mat, groups, ncomp, scale, ...)
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -98,7 +109,7 @@ gly_plsda_ <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
   # Perform PLS-DA using ropls::opls with orthoI = 0
   # Set appropriate cross-validation folds based on sample size
   n_samples <- nrow(mat)
-  crossval_i <- min(7, n_samples - 1)  # Default is 7, but must be less than sample size
+  crossval_i <- min(7, n_samples - 1) # Default is 7, but must be less than sample size
 
   # Suppress plotting to prevent Rplots.pdf generation
   # Open a null device to capture any plotting output
@@ -111,7 +122,9 @@ gly_plsda_ <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
   dots <- rlang::list2(...)
   disallowed_args <- intersect(names(dots), c("x", "y"))
   if (length(disallowed_args) > 0) {
-    cli::cli_abort("Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; data comes from the function inputs.")
+    cli::cli_abort(
+      "Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; data comes from the function inputs."
+    )
   }
 
   call_args <- c(

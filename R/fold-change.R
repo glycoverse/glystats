@@ -106,8 +106,15 @@ gly_fold_change_ <- function(expr_mat, groups) {
     sub_groups <- factor(groups[sample_mask], levels = c)
     .fc_2groups(expr_mat[, sample_mask, drop = FALSE], sub_groups)
   })
-  comparison_str <- purrr::map_chr(comparisons, ~ stringr::str_c(.x[1], "_vs_", .x[2]))
+  comparison_str <- purrr::map_chr(
+    comparisons,
+    ~ stringr::str_c(.x[1], "_vs_", .x[2])
+  )
   names(result_list) <- comparison_str
   dplyr::bind_rows(result_list, .id = "comparison") |>
-    tidyr::separate(col = "comparison", into = c("ref_group", "test_group"), sep = "_vs_")
+    tidyr::separate(
+      col = "comparison",
+      into = c("ref_group", "test_group"),
+      sep = "_vs_"
+    )
 }

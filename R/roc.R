@@ -56,7 +56,12 @@
 #' The list has classes `glystats_roc_res` and `glystats_res`.
 #' @seealso [pROC::roc()], [pROC::coords()]
 #' @export
-gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE) {
+gly_roc <- function(
+  exp,
+  group_col = "group",
+  pos_class = NULL,
+  add_info = TRUE
+) {
   rlang::check_installed("pROC")
 
   # Validate inputs
@@ -82,7 +87,11 @@ gly_roc <- function(exp, group_col = "group", pos_class = NULL, add_info = TRUE)
 
   # Call the underlying API
   result <- gly_roc_(expr_mat, groups, pos_class)
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -104,7 +113,7 @@ gly_roc_ <- function(expr_mat, groups, pos_class = NULL) {
 
   # Set positive class
   if (is.null(pos_class)) {
-    pos_class <- levels(groups)[2]  # Use second level alphabetically as default
+    pos_class <- levels(groups)[2] # Use second level alphabetically as default
     cli::cli_alert_info("Using {.val {pos_class}} as positive class")
   } else {
     if (!pos_class %in% levels(groups)) {
@@ -134,7 +143,10 @@ gly_roc_ <- function(expr_mat, groups, pos_class = NULL) {
     if (rlang::is_na(roc_obj)) {
       return(c(auc_ci_low = NA_real_, auc_ci_high = NA_real_))
     }
-    ci <- suppressWarnings(suppressMessages(safe_ci(roc_obj, conf.level = 0.95)))
+    ci <- suppressWarnings(suppressMessages(safe_ci(
+      roc_obj,
+      conf.level = 0.95
+    )))
     if (rlang::is_na(ci)) {
       return(c(auc_ci_low = NA_real_, auc_ci_high = NA_real_))
     }
@@ -149,7 +161,11 @@ gly_roc_ <- function(expr_mat, groups, pos_class = NULL) {
   )
 
   coords_tb <- roc_objs %>%
-    purrr::map(~ tibble::as_tibble(if (rlang::is_na(.x)) NULL else pROC::coords(.x, "all"))) %>%
+    purrr::map(
+      ~ tibble::as_tibble(
+        if (rlang::is_na(.x)) NULL else pROC::coords(.x, "all")
+      )
+    ) %>%
     rlang::set_names(rownames(expr_mat)) %>%
     dplyr::bind_rows(.id = "variable")
 

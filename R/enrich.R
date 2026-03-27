@@ -115,7 +115,9 @@ gly_enrich_go_ <- function(proteins, ...) {
     }
   }
   if ("gene" %in% names(dots)) {
-    cli::cli_abort("{.field gene} should not be supplied through `...`; use the function's first argument instead.")
+    cli::cli_abort(
+      "{.field gene} should not be supplied through `...`; use the function's first argument instead."
+    )
   }
 
   suppressMessages(
@@ -164,7 +166,9 @@ gly_enrich_kegg_ <- function(proteins, ...) {
 
   dots <- rlang::list2(...)
   if ("gene" %in% names(dots)) {
-    cli::cli_abort("{.field gene} should not be supplied through `...`; use the function's first argument instead.")
+    cli::cli_abort(
+      "{.field gene} should not be supplied through `...`; use the function's first argument instead."
+    )
   }
   call_args <- c(list(gene = proteins), dots)
   if (!"keyType" %in% names(call_args)) {
@@ -229,7 +233,9 @@ gly_enrich_reactome_ <- function(proteins, ...) {
   dots <- rlang::list2(...)
 
   if ("gene" %in% names(dots)) {
-    cli::cli_abort("{.field gene} should not be supplied through `...`; use the function's first argument instead.")
+    cli::cli_abort(
+      "{.field gene} should not be supplied through `...`; use the function's first argument instead."
+    )
   }
   if ("OrgDb" %in% names(dots)) {
     orgdb <- dots$OrgDb
@@ -291,7 +297,9 @@ gly_enrich_reactome_ <- function(proteins, ...) {
   if ("protein" %in% colnames(exp$var_info)) {
     uniprot <- exp$var_info$protein
   } else {
-    cli::cli_abort("{.field protein} column not found in the variable information tibble.")
+    cli::cli_abort(
+      "{.field protein} column not found in the variable information tibble."
+    )
   }
   unique(uniprot[!is.na(uniprot)])
 }
@@ -307,13 +315,20 @@ gly_enrich_reactome_ <- function(proteins, ...) {
 
 .uniprot_to_entrez <- function(uniprot, orgdb) {
   suppressWarnings(suppressMessages(
-    entrez_ids <- clusterProfiler::bitr(uniprot, fromType = "UNIPROT", toType = "ENTREZID", OrgDb = orgdb)$ENTREZID
+    entrez_ids <- clusterProfiler::bitr(
+      uniprot,
+      fromType = "UNIPROT",
+      toType = "ENTREZID",
+      OrgDb = orgdb
+    )$ENTREZID
   ))
   entrez_ids <- entrez_ids[!is.na(entrez_ids)]
   n_failed <- length(uniprot) - length(entrez_ids)
   if (n_failed > 0) {
     pct_failed <- round(n_failed / length(uniprot) * 100, 1)
-    cli::cli_alert_warning("{.val {n_failed}} of {.val {length(uniprot)}} ({.val {pct_failed}}%) proteins failed to map to Entrez IDs.")
+    cli::cli_alert_warning(
+      "{.val {n_failed}} of {.val {length(uniprot)}} ({.val {pct_failed}}%) proteins failed to map to Entrez IDs."
+    )
   }
   entrez_ids
 }

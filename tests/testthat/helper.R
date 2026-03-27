@@ -6,7 +6,7 @@ exp_2groups <- function() {
 exp_topliss_valid <- function() {
   # Create a dataset with 50 samples and 8 variables (ratio = 6.25)
   # Use deterministic patterns for maximum discrimination
-  set.seed(42)  # For reproducibility
+  set.seed(42) # For reproducibility
 
   # Generate sample names
   sample_names <- paste0("Sample_", 1:50)
@@ -57,7 +57,7 @@ exp_topliss_valid <- function() {
 # Create a multi-group dataset that satisfies Topliss ratio
 exp_multigroup_valid <- function() {
   # Create a dataset with 40 samples and 6 variables (ratio = 6.67)
-  set.seed(456)  # For reproducibility
+  set.seed(456) # For reproducibility
 
   # Generate sample information with 4 groups (glyexp will add the "sample" column automatically)
   sample_info <- data.frame(
@@ -73,13 +73,22 @@ exp_multigroup_valid <- function() {
 
   # Create group-specific patterns
   for (i in 1:4) {
-    start_col <- (i-1)*10 + 1
-    end_col <- i*10
+    start_col <- (i - 1) * 10 + 1
+    end_col <- i * 10
 
     # Each group has different expression patterns
-    expr_mat[1:2, start_col:end_col] <- matrix(rnorm(2*10, mean = i+2, sd = 0.8), nrow = 2)
-    expr_mat[3:4, start_col:end_col] <- matrix(rnorm(2*10, mean = 6-i, sd = 0.8), nrow = 2)
-    expr_mat[5:6, start_col:end_col] <- matrix(rnorm(2*10, mean = 3, sd = 0.5), nrow = 2)
+    expr_mat[1:2, start_col:end_col] <- matrix(
+      rnorm(2 * 10, mean = i + 2, sd = 0.8),
+      nrow = 2
+    )
+    expr_mat[3:4, start_col:end_col] <- matrix(
+      rnorm(2 * 10, mean = 6 - i, sd = 0.8),
+      nrow = 2
+    )
+    expr_mat[5:6, start_col:end_col] <- matrix(
+      rnorm(2 * 10, mean = 3, sd = 0.5),
+      nrow = 2
+    )
   }
 
   # Ensure all values are positive
@@ -93,5 +102,10 @@ exp_multigroup_valid <- function() {
   rownames(var_info) <- rownames(expr_mat)
 
   # Create glyexp object
-  glyexp::experiment(expr_mat = expr_mat, sample_info = sample_info, var_info = var_info, exp_type = "others")
+  glyexp::experiment(
+    expr_mat = expr_mat,
+    sample_info = sample_info,
+    var_info = var_info,
+    exp_type = "others"
+  )
 }

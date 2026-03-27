@@ -53,7 +53,11 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
 
   # Call the underlying API
   result <- gly_pca_(expr_mat, center, scale, ...)
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -84,7 +88,9 @@ gly_pca_ <- function(expr_mat, center = TRUE, scale = TRUE, ...) {
 
       # Check if we have any columns left
       if (ncol(mat) == 0) {
-        cli::cli_abort("No columns with non-zero variance remain after removing constant columns.")
+        cli::cli_abort(
+          "No columns with non-zero variance remain after removing constant columns."
+        )
       }
     }
   }
@@ -110,7 +116,6 @@ gly_pca_ <- function(expr_mat, center = TRUE, scale = TRUE, ...) {
     "variables" = variables_tbl,
     "eigenvalues" = eigenvalues_tbl
   )
-
 
   # Return list with both tidy and raw results
   structure(

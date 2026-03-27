@@ -104,7 +104,11 @@ gly_limma <- function(
   }
   checkmate::assert_character(covariate_cols, null.ok = TRUE)
   checkmate::assert_character(subject_col, null.ok = TRUE)
-  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_choice(
+    p_adj_method,
+    stats::p.adjust.methods,
+    null.ok = TRUE
+  )
   checkmate::assert_character(contrasts, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
 
@@ -125,18 +129,39 @@ gly_limma <- function(
   )
   groups <- group_info$groups
 
-  covariates <- .extract_covariates_from_sample_info(sample_info, covariate_cols, group_col)
-  subjects <- .extract_subjects_from_sample_info(sample_info, subject_col, group_col, covariate_cols)
+  covariates <- .extract_covariates_from_sample_info(
+    sample_info,
+    covariate_cols,
+    group_col
+  )
+  subjects <- .extract_subjects_from_sample_info(
+    sample_info,
+    subject_col,
+    group_col,
+    covariate_cols
+  )
 
   # Validate ref_group parameter
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
   # Call the underlying API
-  result <- gly_limma_(expr_mat, groups, p_adj_method, ref_group, contrasts, covariates,
-                       subjects = subjects, ...)
+  result <- gly_limma_(
+    expr_mat,
+    groups,
+    p_adj_method,
+    ref_group,
+    contrasts,
+    covariates,
+    subjects = subjects,
+    ...
+  )
 
   # Process results with add_info logic
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -156,7 +181,11 @@ gly_limma_ <- function(
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
-  checkmate::assert_choice(p_adj_method, stats::p.adjust.methods, null.ok = TRUE)
+  checkmate::assert_choice(
+    p_adj_method,
+    stats::p.adjust.methods,
+    null.ok = TRUE
+  )
   checkmate::assert_character(contrasts, null.ok = TRUE)
 
   # Check package availability
@@ -171,7 +200,11 @@ gly_limma_ <- function(
   # Validate ref_group parameter
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
-  covariates <- .normalize_covariates(covariates, ncol(expr_mat), colnames(expr_mat))
+  covariates <- .normalize_covariates(
+    covariates,
+    ncol(expr_mat),
+    colnames(expr_mat)
+  )
   subjects <- .normalize_subjects(subjects, ncol(expr_mat), colnames(expr_mat))
 
   # Align reference group for 2-group comparisons
@@ -180,7 +213,15 @@ gly_limma_ <- function(
   }
 
   # Use the multi-group workflow for all cases
-  result <- .gly_limma_multigroups(expr_mat, groups, p_adj_method, contrasts, covariates, subjects, ...)
+  result <- .gly_limma_multigroups(
+    expr_mat,
+    groups,
+    p_adj_method,
+    contrasts,
+    covariates,
+    subjects,
+    ...
+  )
 
   result
 }
@@ -199,7 +240,11 @@ gly_limma_ <- function(
 }
 
 # Extract covariates from sample_info for gly_limma
-.extract_covariates_from_sample_info <- function(sample_info, covariate_cols, group_col) {
+.extract_covariates_from_sample_info <- function(
+  sample_info,
+  covariate_cols,
+  group_col
+) {
   if (is.null(covariate_cols) || length(covariate_cols) == 0) {
     return(NULL)
   }
@@ -208,7 +253,9 @@ gly_limma_ <- function(
     cli::cli_abort("covariate_cols must be unique.")
   }
   if (group_col %in% covariate_cols) {
-    cli::cli_abort("covariate_cols cannot include the group column {.field {group_col}}.")
+    cli::cli_abort(
+      "covariate_cols cannot include the group column {.field {group_col}}."
+    )
   }
 
   missing_cols <- setdiff(covariate_cols, colnames(sample_info))
@@ -223,7 +270,12 @@ gly_limma_ <- function(
 }
 
 # Extract subjects from sample_info for gly_limma
-.extract_subjects_from_sample_info <- function(sample_info, subject_col, group_col, covariate_cols) {
+.extract_subjects_from_sample_info <- function(
+  sample_info,
+  subject_col,
+  group_col,
+  covariate_cols
+) {
   if (is.null(subject_col) || length(subject_col) == 0) {
     return(NULL)
   }
@@ -235,7 +287,9 @@ gly_limma_ <- function(
     cli::cli_abort("subject_col must contain exactly 1 column name.")
   }
   if (group_col %in% subject_col) {
-    cli::cli_abort("subject_col cannot include the group column {.field {group_col}}.")
+    cli::cli_abort(
+      "subject_col cannot include the group column {.field {group_col}}."
+    )
   }
   if (!is.null(covariate_cols) && any(subject_col %in% covariate_cols)) {
     cli::cli_abort("subject_col cannot overlap with covariate_cols.")
@@ -278,7 +332,9 @@ gly_limma_ <- function(
   }
 
   if (nrow(covariates) != n_samples) {
-    cli::cli_abort("covariates must have {.val {n_samples}} rows to match expr_mat columns.")
+    cli::cli_abort(
+      "covariates must have {.val {n_samples}} rows to match expr_mat columns."
+    )
   }
 
   if (!is.null(sample_names)) {
@@ -293,10 +349,14 @@ gly_limma_ <- function(
   }
 
   if ("groups" %in% colnames(covariates)) {
-    cli::cli_abort("covariates cannot include a column named {.field groups}; rename it.")
+    cli::cli_abort(
+      "covariates cannot include a column named {.field groups}; rename it."
+    )
   }
   if ("subject" %in% colnames(covariates)) {
-    cli::cli_abort("covariates cannot include a column named {.field subject}; rename it.")
+    cli::cli_abort(
+      "covariates cannot include a column named {.field subject}; rename it."
+    )
   }
 
   covariates[] <- lapply(covariates, function(col) {
@@ -342,7 +402,9 @@ gly_limma_ <- function(
   }
 
   if (length(subjects) != n_samples) {
-    cli::cli_abort("subjects must have {.val {n_samples}} values to match expr_mat columns.")
+    cli::cli_abort(
+      "subjects must have {.val {n_samples}} values to match expr_mat columns."
+    )
   }
 
   if (!is.null(sample_names)) {
@@ -364,8 +426,15 @@ gly_limma_ <- function(
 }
 
 # Limma-specific multi-group analysis function
-.gly_limma_multigroups <- function(expr_mat, groups, p_adj_method, contrasts = NULL,
-                                   covariates = NULL, subjects = NULL, ...) {
+.gly_limma_multigroups <- function(
+  expr_mat,
+  groups,
+  p_adj_method,
+  contrasts = NULL,
+  covariates = NULL,
+  subjects = NULL,
+  ...
+) {
   group_levels <- levels(groups)
   n_groups <- length(group_levels)
 
@@ -378,7 +447,9 @@ gly_limma_ <- function(
     log_expr_mat <- log_expr_mat[row_has_data, , drop = FALSE]
   }
   if (nrow(log_expr_mat) == 0) {
-    cli::cli_abort("No finite expression values remain after log2 transformation.")
+    cli::cli_abort(
+      "No finite expression values remain after log2 transformation."
+    )
   }
 
   # Create design matrix without intercept (means model)
@@ -406,7 +477,9 @@ gly_limma_ <- function(
   }
   group_cols <- which(attr(design, "assign") == group_term_index)
   if (length(group_cols) != length(valid_names)) {
-    cli::cli_abort("Group columns in the design matrix do not match group levels.")
+    cli::cli_abort(
+      "Group columns in the design matrix do not match group levels."
+    )
   }
   colnames(design)[group_cols] <- valid_names
 
@@ -424,16 +497,20 @@ gly_limma_ <- function(
 
   # Create contrast matrix using limma::makeContrasts
   # Use valid names for limma contrast matrix
-  contrast_strings <- purrr::map_chr(contrast_pairs, ~ {
-    valid_name1 <- name_mapping[.x[1]]
-    valid_name2 <- name_mapping[.x[2]]
-    stringr::str_c(valid_name1, "-", valid_name2)
-  })
+  contrast_strings <- purrr::map_chr(
+    contrast_pairs,
+    ~ {
+      valid_name1 <- name_mapping[.x[1]]
+      valid_name2 <- name_mapping[.x[2]]
+      stringr::str_c(valid_name1, "-", valid_name2)
+    }
+  )
 
   # Build the makeContrasts call
-  contrast_matrix <- do.call(limma::makeContrasts,
-                             c(as.list(contrast_strings),
-                               list(levels = colnames(design))))
+  contrast_matrix <- do.call(
+    limma::makeContrasts,
+    c(as.list(contrast_strings), list(levels = colnames(design)))
+  )
 
   # Fit linear model
   fit <- limma::lmFit(log_expr_mat, design, ...)
@@ -503,9 +580,9 @@ gly_limma_ <- function(
     top_table <- limma::topTable(
       fit,
       coef = i,
-      number = Inf,  # Get all genes
+      number = Inf, # Get all genes
       adjust.method = if (is.null(p_adj_method)) "none" else p_adj_method,
-      sort.by = "none"  # Keep original order
+      sort.by = "none" # Keep original order
     )
 
     # Convert to tibble and rename columns
@@ -545,7 +622,9 @@ gly_limma_ <- function(
       # Format: "group1_vs_group2"
       parts <- stringr::str_split(contrast, "_vs_")[[1]]
       if (length(parts) != 2) {
-        cli::cli_abort("Invalid contrast format: {.val {contrast}}. Expected format: {.val group1_vs_group2}")
+        cli::cli_abort(
+          "Invalid contrast format: {.val {contrast}}. Expected format: {.val group1_vs_group2}"
+        )
       }
       group1 <- parts[1]
       group2 <- parts[2]
@@ -560,7 +639,9 @@ gly_limma_ <- function(
       }
       parts <- stringr::str_split(contrast, "-")[[1]]
       if (length(parts) != 2) {
-        cli::cli_abort("Invalid contrast format: {.val {contrast}}. Expected format: {.val group1-group2}")
+        cli::cli_abort(
+          "Invalid contrast format: {.val {contrast}}. Expected format: {.val group1-group2}"
+        )
       }
       group1 <- parts[1]
       group2 <- parts[2]
@@ -573,10 +654,14 @@ gly_limma_ <- function(
 
     # Validate that both groups exist
     if (!group1 %in% group_levels) {
-      cli::cli_abort("Group {.val {group1}} not found in data. Available groups: {.val {group_levels}}")
+      cli::cli_abort(
+        "Group {.val {group1}} not found in data. Available groups: {.val {group_levels}}"
+      )
     }
     if (!group2 %in% group_levels) {
-      cli::cli_abort("Group {.val {group2}} not found in data. Available groups: {.val {group_levels}}")
+      cli::cli_abort(
+        "Group {.val {group2}} not found in data. Available groups: {.val {group_levels}}"
+      )
     }
 
     # Return as character vector

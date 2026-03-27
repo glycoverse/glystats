@@ -86,7 +86,11 @@ gly_hclust <- function(
 
   # Call the underlying API
   result <- gly_hclust_(expr_mat, on, k_values, scale, ...)
-  result$tidy_result <- .process_results_add_info(result$tidy_result, exp, add_info)
+  result$tidy_result <- .process_results_add_info(
+    result$tidy_result,
+    exp,
+    add_info
+  )
   result
 }
 
@@ -183,24 +187,32 @@ gly_hclust_ <- function(
 
   # 3. Try to create dendrogram data using ggdendro if available
   if (requireNamespace("ggdendro", quietly = TRUE)) {
-    tryCatch({
-      # Use a temporary device for ggdendro and always close it
-      grDevices::pdf(NULL)
-      dev_id <- grDevices::dev.cur()
-      on.exit({
-        devices <- grDevices::dev.list()
-        devices <- if (is.null(devices)) integer(0) else as.integer(devices)
-        if (dev_id %in% devices) {
-          grDevices::dev.off(dev_id)
-        }
-      }, add = TRUE)
+    tryCatch(
+      {
+        # Use a temporary device for ggdendro and always close it
+        grDevices::pdf(NULL)
+        dev_id <- grDevices::dev.cur()
+        on.exit(
+          {
+            devices <- grDevices::dev.list()
+            devices <- if (is.null(devices)) integer(0) else as.integer(devices)
+            if (dev_id %in% devices) {
+              grDevices::dev.off(dev_id)
+            }
+          },
+          add = TRUE
+        )
 
-      dendro_data <- ggdendro::dendro_data(hclust_res)
-      tidy_result$dendrogram <- tibble::as_tibble(dendro_data$segments)
-      tidy_result$labels <- tibble::as_tibble(dendro_data$labels)
-    }, error = function(e) {
-      cli::cli_warn("Failed to extract dendrogram data using ggdendro: {e$message}")
-    })
+        dendro_data <- ggdendro::dendro_data(hclust_res)
+        tidy_result$dendrogram <- tibble::as_tibble(dendro_data$segments)
+        tidy_result$labels <- tibble::as_tibble(dendro_data$labels)
+      },
+      error = function(e) {
+        cli::cli_warn(
+          "Failed to extract dendrogram data using ggdendro: {e$message}"
+        )
+      }
+    )
   } else {
     # Create basic dendrogram data without ggdendro
     # This is a simplified version that provides basic information
