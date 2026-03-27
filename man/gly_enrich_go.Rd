@@ -3,8 +3,6 @@
 \name{gly_enrich_go}
 \alias{gly_enrich_go}
 \alias{gly_enrich_go_}
-\alias{gly_enrich_kegg}
-\alias{gly_enrich_kegg_}
 \alias{gly_enrich_reactome}
 \alias{gly_enrich_reactome_}
 \title{GO over-representation analysis (ORA)}
@@ -30,10 +28,6 @@ gly_enrich_go_(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
-
-gly_enrich_kegg(exp, add_info = TRUE, ...)
-
-gly_enrich_kegg_(proteins, ...)
 
 gly_enrich_reactome(exp, add_info = TRUE, ...)
 
