@@ -103,24 +103,7 @@ gly_enrich_go_ <- function(
     )
   )
 
-  # Tidy result
-  tidy_result <- tibble::as_tibble(raw_result)
-  tidy_result <- janitor::clean_names(tidy_result)
-  if ("p_value" %in% colnames(tidy_result)) {
-    tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
-  }
-  if ("p_adjust" %in% colnames(tidy_result)) {
-    tidy_result <- dplyr::rename(tidy_result, p_adj = "p_adjust")
-  }
-
-  # Return list with both tidy and raw results
-  structure(
-    list(
-      tidy_result = tidy_result,
-      raw_result = raw_result
-    ),
-    class = c("glystats_go_ora_res", "glystats_res")
-  )
+  .package_enrich_result(raw_result, "glystats_go_ora_res")
 }
 
 #' KEGG over-representation analysis (ORA)
@@ -222,25 +205,7 @@ gly_enrich_kegg_ <- function(
     )
   )
 
-  tidy_result <- tibble::as_tibble(raw_result)
-  tidy_result <- janitor::clean_names(tidy_result)
-
-  # Rename p_value to p_val and p_adjust to p_adj for consistency
-  if ("p_value" %in% colnames(tidy_result)) {
-    tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
-  }
-  if ("p_adjust" %in% colnames(tidy_result)) {
-    tidy_result <- dplyr::rename(tidy_result, p_adj = "p_adjust")
-  }
-
-  # Return list with both tidy and raw results
-  structure(
-    list(
-      tidy_result = tidy_result,
-      raw_result = raw_result
-    ),
-    class = c("glystats_kegg_ora_res", "glystats_res")
-  )
+  .package_enrich_result(raw_result, "glystats_kegg_ora_res")
 }
 
 #' Reactome pathway over-representation analysis (ORA)
@@ -364,26 +329,7 @@ gly_enrich_reactome_ <- function(
     )
   )
 
-  # Tidy result
-  tidy_result <- tibble::as_tibble(raw_result)
-  tidy_result <- janitor::clean_names(tidy_result)
-
-  # Rename p_value to p_val and p_adjust to p_adj for consistency
-  if ("p_value" %in% colnames(tidy_result)) {
-    tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
-  }
-  if ("p_adjust" %in% colnames(tidy_result)) {
-    tidy_result <- dplyr::rename(tidy_result, p_adj = "p_adjust")
-  }
-
-  # Return list with both tidy and raw results
-  structure(
-    list(
-      tidy_result = tidy_result,
-      raw_result = raw_result
-    ),
-    class = c("glystats_reactome_ora_res", "glystats_res")
-  )
+  .package_enrich_result(raw_result, "glystats_reactome_ora_res")
 }
 
 #' Extract UniProt accessions from experiment object helper function
@@ -424,4 +370,34 @@ gly_enrich_reactome_ <- function(
     )
   }
   entrez_ids
+}
+
+#' Tidy and package enrichment result into standard format
+#'
+#' @param raw_result The raw enrichment result from clusterProfiler or ReactomePA.
+#' @param result_class The specific result class to assign (e.g., "glystats_go_ora_res").
+#'
+#' @returns A structured list with tidy_result and raw_result.
+#' @noRd
+.package_enrich_result <- function(raw_result, result_class) {
+  # Tidy result
+  tidy_result <- tibble::as_tibble(raw_result)
+  tidy_result <- janitor::clean_names(tidy_result)
+
+  # Rename p_value to p_val and p_adjust to p_adj for consistency
+  if ("p_value" %in% colnames(tidy_result)) {
+    tidy_result <- dplyr::rename(tidy_result, p_val = "p_value")
+  }
+  if ("p_adjust" %in% colnames(tidy_result)) {
+    tidy_result <- dplyr::rename(tidy_result, p_adj = "p_adjust")
+  }
+
+  # Return list with both tidy and raw results
+  structure(
+    list(
+      tidy_result = tidy_result,
+      raw_result = raw_result
+    ),
+    class = c(result_class, "glystats_res")
+  )
 }
