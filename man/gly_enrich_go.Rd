@@ -3,8 +3,6 @@
 \name{gly_enrich_go}
 \alias{gly_enrich_go}
 \alias{gly_enrich_go_}
-\alias{gly_enrich_reactome}
-\alias{gly_enrich_reactome_}
 \title{GO over-representation analysis (ORA)}
 \usage{
 gly_enrich_go(
@@ -28,10 +26,6 @@ gly_enrich_go_(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
-
-gly_enrich_reactome(exp, add_info = TRUE, ...)
-
-gly_enrich_reactome_(proteins, ...)
 }
 \arguments{
 \item{exp}{(Only for \code{\link[=gly_enrich_go]{gly_enrich_go()}}) A \code{glyexp::experiment()} object.}

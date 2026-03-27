@@ -243,70 +243,128 @@ gly_enrich_kegg_ <- function(
   )
 }
 
-#' @rdname gly_enrich_go
+#' Reactome pathway over-representation analysis (ORA)
+#'
+#' @description
+#' Perform Reactome pathway ORA for protein UniProt accessions using [ReactomePA::enrichPathway()].
+#' - `gly_enrich_reactome()` accepts a [glyexp::experiment()] and extracts protein information
+#' from the "protein" column in the variable information tibble.
+#' - `gly_enrich_reactome_()` accepts a character vector of Uniprot IDs.
+#'
+#' As [ReactomePA::enrichPathway()] only accepts Entrez IDs,
+#' the Uniprot IDs will be firsted transformed into Entrez IDs with [clusterProfiler::bitr()].
+#'
+#' @param exp (Only for [gly_enrich_reactome()]) A `glyexp::experiment()` object.
+#' @param proteins (Only for [gly_enrich_reactome_()]) A character vector of UniProt accession IDs.
+#' @param add_info A logical value. This parameter is included for API consistency but has no effect
+#'  since enrichment results do not contain variable or sample columns.
+#'  Only applicable to top-level APIs.
+#' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
+#'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
+#' @param organism Passed to `organism` of [ReactomePA::enrichPathway()].
+#'   Species name (e.g., "human", "mouse", "rat"). Defaults to "human".
+#' @param universe Background genes. If a character vector, directly passed to `universe` of [ReactomePA::enrichPathway()].
+#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
+#'   In this case all detected proteins in this experiment will be extracted and passed to
+#'   `universe` of [ReactomePA::enrichPathway()].
+#' @param p_adj_method Passed to `pAdjustMethod` of [ReactomePA::enrichPathway()].
+#' @param p_cutoff Passed to `pvalueCutoff` of [ReactomePA::enrichPathway()].
+#' @param q_cutoff Passed to `qvalueCutoff` of [ReactomePA::enrichPathway()].
+#'
+#' @section Required packages:
+#' These functions require the following packages to be installed:
+#' - `clusterProfiler` for ID conversion
+#' - `ReactomePA` for enrichment analysis
+#' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
+#'
+#' @return A list with two elements:
+#'  - `tidy_result`: A tibble with enrichment results containing the following columns:
+#'    - `id`: Term ID (e.g., R-HSA-XXXXXX)
+#'    - `description`: Term description
+#'    - `gene_ratio`: Ratio of genes in the term to total genes in the input
+#'    - `bg_ratio`: Ratio of genes in the term to total genes in the background
+#'    - `p_val`: Raw p-value from hypergeometric test
+#'    - `p_adj`: Adjusted p-value
+#'    - `q_value`: Q-value (FDR)
+#'    - `gene_id`: Gene IDs in the term (separated by "/")
+#'    - `count`: Number of genes in the term
+#'  - `raw_result`: The raw ReactomePA enrichPathway result object
+#' The list has classes `glystats_reactome_ora_res` and `glystats_res`.
+#' @seealso [ReactomePA::enrichPathway()]
 #' @export
-gly_enrich_reactome <- function(exp, add_info = TRUE, ...) {
+gly_enrich_reactome <- function(
+  exp,
+  add_info = TRUE,
+  orgdb = "org.Hs.eg.db",
+  organism = "human",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
   rlang::check_installed("clusterProfiler")
   rlang::check_installed("ReactomePA")
-
   checkmate::assert_logical(add_info, len = 1)
 
-  dots <- rlang::list2(...)
-  if (!"OrgDb" %in% names(dots)) {
-    rlang::check_installed("org.Hs.eg.db")
-  }
-
-  uniprot_ids <- .extract_uniprot_from_exp(exp)
-  rlang::exec(gly_enrich_reactome_, uniprot_ids, !!!dots)
+  proteins <- .extract_uniprot_from_exp(exp)
+  gly_enrich_reactome_(
+    proteins,
+    orgdb = orgdb,
+    organism = organism,
+    universe = universe,
+    p_adj_method = p_adj_method,
+    p_cutoff = p_cutoff,
+    q_cutoff = q_cutoff
+  )
 }
 
-#' @rdname gly_enrich_go
+#' @rdname gly_enrich_reactome
 #' @export
-gly_enrich_reactome_ <- function(proteins, ...) {
+gly_enrich_reactome_ <- function(
+  proteins,
+  orgdb = "org.Hs.eg.db",
+  organism = "human",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
   rlang::check_installed("clusterProfiler")
   rlang::check_installed("ReactomePA")
 
+  # Validate arguments
   checkmate::assert_character(proteins, min.len = 1)
 
-  dots <- rlang::list2(...)
-
-  if ("gene" %in% names(dots)) {
-    cli::cli_abort("{.field gene} should not be supplied through `...`; use the function's first argument instead.")
-  }
-  if ("OrgDb" %in% names(dots)) {
-    orgdb <- dots$OrgDb
-    dots$OrgDb <- NULL
-  } else {
-    orgdb <- "org.Hs.eg.db"
-  }
-  orgdb_obj <- .resolve_orgdb(orgdb)
-
+  # Convert foreground proteins to Entrez IDs
   cli::cli_alert_info("Converting foreground proteins to Entrez IDs")
-  fg_genes <- .uniprot_to_entrez(proteins, orgdb_obj)
+  fg_genes <- .uniprot_to_entrez(proteins, orgdb)
 
-  # Perform Reactome pathway analysis
-  call_args <- c(list(gene = fg_genes), dots)
-  if (!"organism" %in% names(call_args)) {
-    call_args$organism <- "human"
-  }
-  if (!"readable" %in% names(call_args)) {
-    call_args$readable <- TRUE
-  }
-  if ("universe" %in% names(dots)) {
+  # Handle universe if provided
+  bg_genes <- NULL
+  if (!is.null(universe)) {
     cli::cli_alert_info("Converting background proteins to Entrez IDs")
-    if (glyexp::is_experiment(dots$universe)) {
-      proteins <- .extract_uniprot_from_exp(dots$universe)
-      bg_genes <- .uniprot_to_entrez(proteins, orgdb_obj)
-      call_args$universe <- bg_genes
+    if (glyexp::is_experiment(universe)) {
+      universe_proteins <- .extract_uniprot_from_exp(universe)
+      bg_genes <- .uniprot_to_entrez(universe_proteins, orgdb)
     } else {
-      call_args$universe <- .uniprot_to_entrez(dots$universe, orgdb_obj)
+      bg_genes <- .uniprot_to_entrez(universe, orgdb)
     }
   }
 
+  # Perform Reactome pathway analysis
   suppressMessages(
-    raw_result <- do.call(ReactomePA::enrichPathway, call_args)
+    raw_result <- ReactomePA::enrichPathway(
+      gene = fg_genes,
+      organism = organism,
+      universe = bg_genes,
+      pAdjustMethod = p_adj_method,
+      pvalueCutoff = p_cutoff,
+      qvalueCutoff = q_cutoff,
+      readable = TRUE
+    )
   )
 
+  # Tidy result
   tidy_result <- tibble::as_tibble(raw_result)
   tidy_result <- janitor::clean_names(tidy_result)
 
@@ -336,22 +394,11 @@ gly_enrich_reactome_ <- function(proteins, ...) {
   if ("protein" %in% colnames(exp$var_info)) {
     uniprot <- exp$var_info$protein
   } else {
-    cli::cli_abort("{.field protein} column not found in the variable information tibble.")
+    cli::cli_abort(
+      "{.field protein} column not found in the variable information tibble."
+    )
   }
   unique(uniprot[!is.na(uniprot)])
-}
-
-#' Resolve the `OrgDb` argument
-#' @param orgdb The `OrgDb` argument.
-#' @returns The resolved OrgDb object.
-#' @noRd
-.resolve_orgdb <- function(orgdb) {
-  if (is.character(orgdb) && length(orgdb) == 1) {
-    rlang::check_installed(orgdb)
-    get(orgdb, envir = asNamespace(orgdb))
-  } else {
-    orgdb
-  }
 }
 
 #' Convert Uniprot IDs to Entrez IDs
@@ -361,13 +408,20 @@ gly_enrich_reactome_ <- function(proteins, ...) {
 #' @noRd
 .uniprot_to_entrez <- function(uniprot, orgdb) {
   suppressWarnings(suppressMessages(
-    entrez_ids <- clusterProfiler::bitr(uniprot, fromType = "UNIPROT", toType = "ENTREZID", OrgDb = orgdb)$ENTREZID
+    entrez_ids <- clusterProfiler::bitr(
+      uniprot,
+      fromType = "UNIPROT",
+      toType = "ENTREZID",
+      OrgDb = orgdb
+    )$ENTREZID
   ))
   entrez_ids <- entrez_ids[!is.na(entrez_ids)]
   n_failed <- length(uniprot) - length(entrez_ids)
   if (n_failed > 0) {
     pct_failed <- round(n_failed / length(uniprot) * 100, 1)
-    cli::cli_alert_warning("{.val {n_failed}} of {.val {length(uniprot)}} ({.val {pct_failed}}%) proteins failed to map to Entrez IDs.")
+    cli::cli_alert_warning(
+      "{.val {n_failed}} of {.val {length(uniprot)}} ({.val {pct_failed}}%) proteins failed to map to Entrez IDs."
+    )
   }
   entrez_ids
 }
