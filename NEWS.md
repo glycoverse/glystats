@@ -1,5 +1,9 @@
 # glystats (development version)
 
+## Breaking changes
+
+* Refactored enrichment API (`gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`). These functions now use explicit parameters instead of `...`. Users must update their code to use named parameters (e.g., `pvalueCutoff = 0.05` instead of passing via `...`).
+
 # glystats 0.6.5
 
 ## Minor improvements and bug fixes
