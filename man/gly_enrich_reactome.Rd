@@ -76,11 +76,11 @@ Perform Reactome pathway ORA for protein UniProt accessions using \code{\link[Re
 \itemize{
 \item \code{gly_enrich_reactome()} accepts a \code{\link[glyexp:experiment]{glyexp::experiment()}} and extracts protein information
 from the "protein" column in the variable information tibble.
-\item \code{gly_enrich_reactome_()} accepts a character vector of Uniprot IDs.
+\item \code{gly_enrich_reactome_()} accepts a character vector of UniProt IDs.
 }
 
 As \code{\link[ReactomePA:enrichPathway]{ReactomePA::enrichPathway()}} only accepts Entrez IDs,
-the Uniprot IDs will be firsted transformed into Entrez IDs with \code{\link[clusterProfiler:bitr]{clusterProfiler::bitr()}}.
+the UniProt IDs will be first transformed into Entrez IDs with \code{\link[clusterProfiler:bitr]{clusterProfiler::bitr()}}.
 }
 \section{Required packages}{
 

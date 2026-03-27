@@ -4,7 +4,7 @@
 #' Perform GO ORA for protein UniProt accessions using [clusterProfiler::enrichGO()].
 #' - `gly_enrich_go()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_go_()` accepts a character vector of Uniprot IDs.
+#' - `gly_enrich_go_()` accepts a character vector of UniProt IDs.
 #'
 #' @param exp (Only for [gly_enrich_go()]) A `glyexp::experiment()` object.
 #' @param proteins (Only for [gly_enrich_go_()]) A character vector of UniProt accession IDs.
@@ -108,7 +108,7 @@ gly_enrich_go_ <- function(
 #' Perform KEGG ORA for protein UniProt accessions using [clusterProfiler::enrichKEGG()].
 #' - `gly_enrich_kegg()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_kegg_()` accepts a character vector of Uniprot IDs.
+#' - `gly_enrich_kegg_()` accepts a character vector of UniProt IDs.
 #'
 #' @param exp (Only for [gly_enrich_kegg()]) A `glyexp::experiment()` object.
 #' @param proteins (Only for [gly_enrich_kegg_()]) A character vector of UniProt accession IDs.
@@ -206,10 +206,10 @@ gly_enrich_kegg_ <- function(
 #' Perform Reactome pathway ORA for protein UniProt accessions using [ReactomePA::enrichPathway()].
 #' - `gly_enrich_reactome()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_reactome_()` accepts a character vector of Uniprot IDs.
+#' - `gly_enrich_reactome_()` accepts a character vector of UniProt IDs.
 #'
 #' As [ReactomePA::enrichPathway()] only accepts Entrez IDs,
-#' the Uniprot IDs will be firsted transformed into Entrez IDs with [clusterProfiler::bitr()].
+#' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
 #'
 #' @param exp (Only for [gly_enrich_reactome()]) A `glyexp::experiment()` object.
 #' @param proteins (Only for [gly_enrich_reactome_()]) A character vector of UniProt accession IDs.
@@ -317,7 +317,7 @@ gly_enrich_reactome_ <- function(
 
 #' Extract UniProt accessions from experiment object helper function
 #' @param exp The experiment.
-#' @returns A character vector of Uniprot IDs.
+#' @returns A character vector of UniProt IDs.
 #' @noRd
 .extract_uniprot_from_exp <- function(exp) {
   if ("protein" %in% colnames(exp$var_info)) {
@@ -330,10 +330,10 @@ gly_enrich_reactome_ <- function(
   unique(uniprot[!is.na(uniprot)])
 }
 
-#' Convert Uniprot IDs to Entrez IDs
-#' @param uniprot The Uniprot IDs.
+#' Convert UniProt IDs to Entrez IDs
+#' @param uniprot The UniProt IDs.
 #' @param orgdb An OrgDb object.
-#' @returns The transformed Ectrez IDs.
+#' @returns The transformed Entrez IDs.
 #' @noRd
 .uniprot_to_entrez <- function(uniprot, orgdb) {
   suppressWarnings(suppressMessages(

@@ -75,7 +75,7 @@ Perform KEGG ORA for protein UniProt accessions using \code{\link[clusterProfile
 \itemize{
 \item \code{gly_enrich_kegg()} accepts a \code{\link[glyexp:experiment]{glyexp::experiment()}} and extracts protein information
 from the "protein" column in the variable information tibble.
-\item \code{gly_enrich_kegg_()} accepts a character vector of Uniprot IDs.
+\item \code{gly_enrich_kegg_()} accepts a character vector of UniProt IDs.
 }
 }
 \section{Required packages}{

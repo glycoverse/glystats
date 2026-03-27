@@ -77,7 +77,7 @@ Perform GO ORA for protein UniProt accessions using \code{\link[clusterProfiler:
 \itemize{
 \item \code{gly_enrich_go()} accepts a \code{\link[glyexp:experiment]{glyexp::experiment()}} and extracts protein information
 from the "protein" column in the variable information tibble.
-\item \code{gly_enrich_go_()} accepts a character vector of Uniprot IDs.
+\item \code{gly_enrich_go_()} accepts a character vector of UniProt IDs.
 }
 }
 \section{Required packages}{
