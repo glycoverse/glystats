@@ -82,11 +82,7 @@ gly_enrich_go_ <- function(
 
   # Validate and prepare arguments
   checkmate::assert_character(proteins, min.len = 1)
-  if (!is.null(universe)) {
-    if (glyexp::is_experiment(universe)) {
-      universe <- .extract_uniprot_from_exp(universe)
-    }
-  }
+  universe <- .prepare_universe_uniprot(universe)
 
   # Perform analysis
   suppressMessages(
@@ -187,11 +183,7 @@ gly_enrich_kegg_ <- function(
 
   # Validate and prepare arguments
   checkmate::assert_character(proteins, min.len = 1)
-  if (!is.null(universe)) {
-    if (glyexp::is_experiment(universe)) {
-      universe <- .extract_uniprot_from_exp(universe)
-    }
-  }
+  universe <- .prepare_universe_uniprot(universe)
 
   suppressMessages(
     raw_result <- clusterProfiler::enrichKEGG(
@@ -305,16 +297,7 @@ gly_enrich_reactome_ <- function(
   fg_genes <- .uniprot_to_entrez(proteins, orgdb)
 
   # Handle universe if provided
-  bg_genes <- NULL
-  if (!is.null(universe)) {
-    cli::cli_alert_info("Converting background proteins to Entrez IDs")
-    if (glyexp::is_experiment(universe)) {
-      universe_proteins <- .extract_uniprot_from_exp(universe)
-      bg_genes <- .uniprot_to_entrez(universe_proteins, orgdb)
-    } else {
-      bg_genes <- .uniprot_to_entrez(universe, orgdb)
-    }
-  }
+  bg_genes <- .prepare_universe_entrez(universe, orgdb)
 
   # Perform Reactome pathway analysis
   suppressMessages(
@@ -400,4 +383,40 @@ gly_enrich_reactome_ <- function(
     ),
     class = c(result_class, "glystats_res")
   )
+}
+
+#' Prepare universe for enrichment analysis (UniProt path)
+#'
+#' Extracts UniProt IDs from experiment if needed.
+#'
+#' @param universe Background genes. Can be NULL, a character vector, or a glyexp experiment.
+#' @returns Character vector of UniProt IDs or NULL.
+#' @noRd
+.prepare_universe_uniprot <- function(universe) {
+  if (is.null(universe)) {
+    return(NULL)
+  }
+  if (glyexp::is_experiment(universe)) {
+    universe <- .extract_uniprot_from_exp(universe)
+  }
+  universe
+}
+
+#' Prepare universe for enrichment analysis (Entrez path)
+#'
+#' Extracts UniProt IDs from experiment if needed, then converts to Entrez IDs.
+#'
+#' @param universe Background genes. Can be NULL, a character vector of UniProt IDs, or a glyexp experiment.
+#' @param orgdb An OrgDb object for ID conversion.
+#' @returns Character vector of Entrez IDs or NULL.
+#' @noRd
+.prepare_universe_entrez <- function(universe, orgdb) {
+  if (is.null(universe)) {
+    return(NULL)
+  }
+  if (glyexp::is_experiment(universe)) {
+    universe <- .extract_uniprot_from_exp(universe)
+  }
+  cli::cli_alert_info("Converting background proteins to Entrez IDs")
+  .uniprot_to_entrez(universe, orgdb)
 }
