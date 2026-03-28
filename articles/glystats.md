@@ -48,12 +48,12 @@ Let’s start by exploring our demo dataset:
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [88ms]
+#> ✔ Finding leader proteins [82ms]
 #> 
 #> ℹ Reading dataColumn group converted to <factor>.ℹ Parsing glycan compositions and structures
-#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [368ms]
+#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [355ms]
 #> 
-#> ℹ Reading data✔ Reading data [887ms]
+#> ℹ Reading data✔ Reading data [835ms]
 #> 
 #> 
 #> ── Normalizing data ──
@@ -106,16 +106,16 @@ get_var_info(exp)
 #> # A tibble: 225 × 5
 #>    variable                        protein glycan_composition protein_site gene 
 #>    <glue>                          <chr>   <comp>                    <int> <chr>
-#>  1 P08185-N176-Hex(5)HexNAc(4)Neu… P08185  Hex(5)HexNAc(4)Ne…          176 SERP…
-#>  2 P04196-N344-Hex(5)HexNAc(4)Neu… P04196  Hex(5)HexNAc(4)Ne…          344 HRG  
-#>  3 P04196-N344-Hex(5)HexNAc(4)     P04196  Hex(5)HexNAc(4)             344 HRG  
-#>  4 P10909-N291-Hex(6)HexNAc(5)     P10909  Hex(6)HexNAc(5)             291 CLU  
-#>  5 P04196-N344-Hex(5)HexNAc(4)Neu… P04196  Hex(5)HexNAc(4)Ne…          344 HRG  
-#>  6 P04196-N345-Hex(5)HexNAc(4)     P04196  Hex(5)HexNAc(4)             345 HRG  
-#>  7 P04196-N344-Hex(5)HexNAc(4)dHe… P04196  Hex(5)HexNAc(4)dH…          344 HRG  
-#>  8 P04196-N344-Hex(4)HexNAc(3)     P04196  Hex(4)HexNAc(3)             344 HRG  
-#>  9 P04196-N344-Hex(4)HexNAc(4)Neu… P04196  Hex(4)HexNAc(4)Ne…          344 HRG  
-#> 10 P10909-N291-Hex(5)HexNAc(4)     P10909  Hex(5)HexNAc(4)             291 CLU  
+#>  1 P08185-176-Hex(5)HexNAc(4)NeuA… P08185  Hex(5)HexNAc(4)Ne…          176 SERP…
+#>  2 P04196-344-Hex(5)HexNAc(4)NeuA… P04196  Hex(5)HexNAc(4)Ne…          344 HRG  
+#>  3 P04196-344-Hex(5)HexNAc(4)      P04196  Hex(5)HexNAc(4)             344 HRG  
+#>  4 P10909-291-Hex(6)HexNAc(5)      P10909  Hex(6)HexNAc(5)             291 CLU  
+#>  5 P04196-344-Hex(5)HexNAc(4)NeuA… P04196  Hex(5)HexNAc(4)Ne…          344 HRG  
+#>  6 P04196-345-Hex(5)HexNAc(4)      P04196  Hex(5)HexNAc(4)             345 HRG  
+#>  7 P04196-344-Hex(5)HexNAc(4)dHex… P04196  Hex(5)HexNAc(4)dH…          344 HRG  
+#>  8 P04196-344-Hex(4)HexNAc(3)      P04196  Hex(4)HexNAc(3)             344 HRG  
+#>  9 P04196-344-Hex(4)HexNAc(4)NeuA… P04196  Hex(4)HexNAc(4)Ne…          344 HRG  
+#> 10 P10909-291-Hex(5)HexNAc(4)      P10909  Hex(5)HexNAc(4)             291 CLU  
 #> # ℹ 215 more rows
 ```
 
@@ -198,16 +198,16 @@ get_tidy_result(anova_res, "main_test")
 #> # A tibble: 225 × 13
 #>    variable     protein glycan_composition protein_site gene  term     df  sumsq
 #>    <glue>       <chr>   <comp>                    <int> <chr> <chr> <dbl>  <dbl>
-#>  1 P08185-N176… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… group     3  67.7 
-#>  2 P04196-N344… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 161.  
-#>  3 P04196-N344… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 126.  
-#>  4 P10909-N291… P10909  Hex(6)HexNAc(5)             291 CLU   group     3  23.1 
-#>  5 P04196-N344… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 472.  
-#>  6 P04196-N345… P04196  Hex(5)HexNAc(4)             345 HRG   group     3  60.0 
-#>  7 P04196-N344… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 208.  
-#>  8 P04196-N344… P04196  Hex(4)HexNAc(3)             344 HRG   group     3 109.  
-#>  9 P04196-N344… P04196  Hex(4)HexNAc(4)Ne…          344 HRG   group     3   9.66
-#> 10 P10909-N291… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  87.0 
+#>  1 P08185-176-… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… group     3  67.7 
+#>  2 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 161.  
+#>  3 P04196-344-… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 126.  
+#>  4 P10909-291-… P10909  Hex(6)HexNAc(5)             291 CLU   group     3  23.1 
+#>  5 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 472.  
+#>  6 P04196-345-… P04196  Hex(5)HexNAc(4)             345 HRG   group     3  60.0 
+#>  7 P04196-344-… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 208.  
+#>  8 P04196-344-… P04196  Hex(4)HexNAc(3)             344 HRG   group     3 109.  
+#>  9 P04196-344-… P04196  Hex(4)HexNAc(4)Ne…          344 HRG   group     3   9.66
+#> 10 P10909-291-… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  87.0 
 #> # ℹ 215 more rows
 #> # ℹ 5 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
 #> #   post_hoc <chr>
@@ -243,16 +243,16 @@ exp |>
 #> # A tibble: 60 × 13
 #>    variable      protein glycan_composition protein_site gene  term     df sumsq
 #>    <glue>        <chr>   <comp>                    <int> <chr> <chr> <dbl> <dbl>
-#>  1 P04196-N344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 161. 
-#>  2 P04196-N344-… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 126. 
-#>  3 P04196-N344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 472. 
-#>  4 P04196-N344-… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 208. 
-#>  5 P10909-N291-… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  87.0
-#>  6 P04196-N344-… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 176. 
-#>  7 P13671-N855-… P13671  Hex(5)HexNAc(4)dH…          855 C6    group     3  81.1
-#>  8 P04196-N344-… P04196  Hex(4)HexNAc(3)dH…          344 HRG   group     3 159. 
-#>  9 P04196-N344-… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 150. 
-#> 10 P01019-N161-… P01019  Hex(5)HexNAc(4)Ne…          161 AGT   group     3  46.4
+#>  1 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 161. 
+#>  2 P04196-344-H… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 126. 
+#>  3 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 472. 
+#>  4 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 208. 
+#>  5 P10909-291-H… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  87.0
+#>  6 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 176. 
+#>  7 P13671-855-H… P13671  Hex(5)HexNAc(4)dH…          855 C6    group     3  81.1
+#>  8 P04196-344-H… P04196  Hex(4)HexNAc(3)dH…          344 HRG   group     3 159. 
+#>  9 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 150. 
+#> 10 P01019-161-H… P01019  Hex(5)HexNAc(4)Ne…          161 AGT   group     3  46.4
 #> # ℹ 50 more rows
 #> # ℹ 5 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
 #> #   post_hoc <chr>
@@ -320,9 +320,9 @@ toolkit for glycomics and glycoproteomics data analysis:
 - **🎯 Enrichment Analysis:**
   - [`gly_enrich_go()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md):
     Gene Ontology enrichment analysis
-  - [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md):
+  - [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_kegg.md):
     KEGG enrichment analysis
-  - [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md):
+  - [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_reactome.md):
     Reactome enrichment analysis
 - **🔧 Additional Tools:**
   - [`gly_cor()`](https://glycoverse.github.io/glystats/reference/gly_cor.md):

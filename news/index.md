@@ -1,6 +1,47 @@
 # Changelog
 
-## glystats (development version)
+## glystats 0.7.0
+
+### Breaking changes
+
+- Refactored enrichment API
+  ([`gly_enrich_go()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md),
+  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_kegg.md),
+  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_reactome.md)).
+  These functions now use explicit parameters instead of `...`. Users
+  must update their code to use new parameters (e.g., `p_cutoff` instead
+  of `pvalueCutoff`).
+- [`gly_wgcna()`](https://glycoverse.github.io/glystats/reference/gly_wgcna.md),
+  [`gly_wgcna_()`](https://glycoverse.github.io/glystats/reference/gly_wgcna.md),
+  [`gly_consensus_clustering()`](https://glycoverse.github.io/glystats/reference/gly_consensus_clustering.md),
+  and
+  [`gly_consensus_clustering_()`](https://glycoverse.github.io/glystats/reference/gly_consensus_clustering.md)
+  are deprecated and will be removed in a future version. These
+  functions are too interactive and complex for a pipeline-friendly
+  package.
+
+### New features
+
+- Add
+  [`gly_enrich_wikipathways()`](https://glycoverse.github.io/glystats/reference/gly_enrich_wikipathways.md)
+  and
+  [`gly_enrich_wikipathways_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_wikipathways.md)
+  for WikiPathways enrichment analysis.
+- Add
+  [`gly_enrich_do()`](https://glycoverse.github.io/glystats/reference/gly_enrich_do.md)
+  and
+  [`gly_enrich_do_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_do.md)
+  for Disease Ontology enrichment analysis.
+- Add
+  [`gly_enrich_ncg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_ncg.md)
+  and
+  [`gly_enrich_ncg_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_ncg.md)
+  for Network of Cancer Genes enrichment analysis.
+- Add
+  [`gly_enrich_dgn()`](https://glycoverse.github.io/glystats/reference/gly_enrich_dgn.md)
+  and
+  [`gly_enrich_dgn_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_dgn.md)
+  for DisGeNET enrichment analysis.
 
 ## glystats 0.6.5
 
@@ -94,9 +135,9 @@
 
 - The `universe` argument of
   [`gly_enrich_go()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md),
-  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md),
+  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_kegg.md),
   and
-  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md)
+  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_reactome.md)
   accepts a
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object now.

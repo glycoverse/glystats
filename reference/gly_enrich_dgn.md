@@ -1,34 +1,36 @@
-# GO over-representation analysis (ORA)
+# DisGeNET over-representation analysis (ORA)
 
-Perform GO ORA for protein UniProt accessions using
-[`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
+Perform DisGeNET ORA for protein UniProt accessions using
+[`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
 
-- `gly_enrich_go()` accepts a
+- `gly_enrich_dgn()` accepts a
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   and extracts protein information from the "protein" column in the
   variable information tibble.
 
-- `gly_enrich_go_()` accepts a character vector of UniProt IDs.
+- `gly_enrich_dgn_()` accepts a character vector of UniProt IDs.
+
+As [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html)
+only accepts Entrez IDs, the UniProt IDs will be first transformed into
+Entrez IDs with
+[`clusterProfiler::bitr()`](https://rdrr.io/pkg/clusterProfiler/man/bitr.html).
 
 ## Usage
 
 ``` r
-gly_enrich_go(
+gly_enrich_dgn(
   exp,
   add_info = TRUE,
   orgdb = "org.Hs.eg.db",
-  ont = "MF",
   universe = NULL,
   p_adj_method = "BH",
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
 
-gly_enrich_go_(
+gly_enrich_dgn_(
   proteins,
   orgdb = "org.Hs.eg.db",
-  keytype = "UNIPROT",
-  ont = "MF",
   universe = NULL,
   p_adj_method = "BH",
   p_cutoff = 0.05,
@@ -40,7 +42,7 @@ gly_enrich_go_(
 
 - exp:
 
-  (Only for `gly_enrich_go()`) A
+  (Only for `gly_enrich_dgn()`) A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object.
 
@@ -53,49 +55,42 @@ gly_enrich_go_(
 - orgdb:
 
   Passed to `OrgDb` of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
-
-- ont:
-
-  Passed to `ont` of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
-  "BP", "MF", "CC", or "ALL". Defaults to "MF".
+  [`clusterProfiler::bitr()`](https://rdrr.io/pkg/clusterProfiler/man/bitr.html).
+  Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to
+  "org.Hs.eg.db".
 
 - universe:
 
-  Background genes. If a character vector, directly passed to `universe`
-  of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
+  Background genes. If a character vector, it is expected to contain
+  UniProt accession IDs; these will be converted to Entrez Gene IDs and
+  then passed to `universe` of
+  [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
   You can also provide a
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object with "glycoproteomics" type. In this case all detected proteins
-  in this experiment will be extracted and passed to `universe` of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
+  in this experiment will be extracted as UniProt IDs, converted to
+  Entrez IDs, and then passed to `universe` of
+  [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
 
 - p_adj_method:
 
   Passed to `pAdjustMethod` of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
+  [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
 
 - p_cutoff:
 
   Passed to `pvalueCutoff` of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
+  [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
 
 - q_cutoff:
 
   Passed to `qvalueCutoff` of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
+  [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
 
 - proteins:
 
-  (Only for `gly_enrich_go_()`) A character vector of UniProt accession
+  (Only for `gly_enrich_dgn_()`) A character vector of UniProt accession
   IDs.
-
-- keytype:
-
-  Passed to `keyType` of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
 
 ## Value
 
@@ -123,17 +118,19 @@ A list with two elements:
 
   - `count`: Number of genes in the term
 
-- `raw_result`: The raw clusterProfiler enrichResult object The list has
-  classes `glystats_go_ora_res` and `glystats_res`.
+- `raw_result`: The raw DOSE enrichResult object The list has classes
+  `glystats_dgn_ora_res` and `glystats_res`.
 
 ## Required packages
 
 These functions require the following packages to be installed:
 
-- `clusterProfiler` for enrichment analysis
+- `clusterProfiler` for ID conversion
+
+- `DOSE` for enrichment analysis
 
 - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
 
 ## See also
 
-[`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html)
+[`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html)

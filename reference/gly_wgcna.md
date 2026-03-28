@@ -1,9 +1,6 @@
 # Weighted Gene Co-expression Network Analysis (WGCNA)
 
-Perform WGCNA analysis to identify co-expression modules and their
-eigenvalues. The function uses WGCNA package to construct weighted gene
-co-expression networks, detect modules, and calculate module membership
-and eigenvalues.
+**\[deprecated\]**
 
 ## Usage
 
@@ -119,6 +116,11 @@ A list with two elements:
   classes `glystats_wgcna_res` and `glystats_res`.
 
 ## Details
+
+Perform WGCNA analysis to identify co-expression modules and their
+eigenvalues. The function uses WGCNA package to construct weighted gene
+co-expression networks, detect modules, and calculate module membership
+and eigenvalues.
 
 The function performs log2 transformation on the expression data
 (log2(x + 1)) before WGCNA analysis.

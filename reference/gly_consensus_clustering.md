@@ -1,12 +1,6 @@
 # Consensus Clustering for Glycomics and Glycoproteomics Data
 
-Perform consensus clustering on the expression data using
-ConsensusClusterPlus. The function returns cluster assignments for all k
-values from 2 to max_k in long format. Setting `output_file` to
-visualize consensus CDF curves and consensus matrices, which helps you
-decide the optimal number of clusters. See [this
-tutorial](https://bioconductor.org/packages/release/bioc/vignettes/ConsensusClusterPlus/inst/doc/ConsensusClusterPlus.pdf)
-for more information.
+**\[deprecated\]**
 
 ## Usage
 
@@ -122,6 +116,14 @@ A list with two elements:
   `glystats_cc_res` and `glystats_res`.
 
 ## Details
+
+Perform consensus clustering on the expression data using
+ConsensusClusterPlus. The function returns cluster assignments for all k
+values from 2 to max_k in long format. Setting `output_file` to
+visualize consensus CDF curves and consensus matrices, which helps you
+decide the optimal number of clusters. See [this
+tutorial](https://bioconductor.org/packages/release/bioc/vignettes/ConsensusClusterPlus/inst/doc/ConsensusClusterPlus.pdf)
+for more information.
 
 The function performs log2 transformation on the expression data
 (log2(x + 1)) before consensus clustering. When `on = "sample"`
