@@ -2,7 +2,15 @@
 
 ## Breaking changes
 
-* Refactored enrichment API (`gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`). These functions now use explicit parameters instead of `...`. Users must update their code to use named parameters (e.g., `pvalueCutoff = 0.05` instead of passing via `...`).
+* Refactored enrichment API (`gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`). These functions now use explicit parameters instead of `...`. Users must update their code to use new parameters (e.g., `p_cutoff` instead of `pvalueCutoff`).
+* `gly_wgcna()`, `gly_wgcna_()`, `gly_consensus_clustering()`, and `gly_consensus_clustering_()` are deprecated and will be removed in a future version. These functions are too interactive and complex for a pipeline-friendly package.
+
+## New features
+
+* Add `gly_enrich_wikipathways()` and `gly_enrich_wikipathways_()` for WikiPathways enrichment analysis.
+* Add `gly_enrich_do()` and `gly_enrich_do_()` for Disease Ontology enrichment analysis.
+* Add `gly_enrich_ncg()` and `gly_enrich_ncg_()` for Network of Cancer Genes enrichment analysis.
+* Add `gly_enrich_dgn()` and `gly_enrich_dgn_()` for DisGeNET enrichment analysis.
 
 # glystats 0.6.5
 
