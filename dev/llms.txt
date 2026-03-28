@@ -100,7 +100,8 @@ documentation for each function for more details.
   : One-way ANOVA for Differential Expression Analysis
 - [`gly_consensus_clustering()`](https://glycoverse.github.io/glystats/dev/reference/gly_consensus_clustering.md)
   [`gly_consensus_clustering_()`](https://glycoverse.github.io/glystats/dev/reference/gly_consensus_clustering.md)
-  : Consensus Clustering for Glycomics and Glycoproteomics Data
+  **\[deprecated\]** : Consensus Clustering for Glycomics and
+  Glycoproteomics Data
 - [`gly_cor()`](https://glycoverse.github.io/glystats/dev/reference/gly_cor.md)
   [`gly_cor_()`](https://glycoverse.github.io/glystats/dev/reference/gly_cor.md)
   : Correlation Analysis for Glycomics and Glycoproteomics Data
@@ -166,7 +167,8 @@ documentation for each function for more details.
   : Uniform Manifold Approximation and Projection (UMAP)
 - [`gly_wgcna()`](https://glycoverse.github.io/glystats/dev/reference/gly_wgcna.md)
   [`gly_wgcna_()`](https://glycoverse.github.io/glystats/dev/reference/gly_wgcna.md)
-  : Weighted Gene Co-expression Network Analysis (WGCNA)
+  **\[deprecated\]** : Weighted Gene Co-expression Network Analysis
+  (WGCNA)
 - [`gly_wilcox()`](https://glycoverse.github.io/glystats/dev/reference/gly_wilcox.md)
   [`gly_wilcox_()`](https://glycoverse.github.io/glystats/dev/reference/gly_wilcox.md)
   : Wilcoxon rank-sum test for Differential Expression Analysis
