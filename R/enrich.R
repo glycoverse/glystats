@@ -335,10 +335,11 @@ gly_enrich_reactome_ <- function(
 #'   Species name (e.g., "Homo sapiens", "Mus musculus", "Rattus norvegicus"). Defaults to "Homo sapiens".
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
 #'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
-#' @param universe Background genes. If a character vector, directly passed to `universe` of [clusterProfiler::enrichWP()].
+#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
+#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [clusterProfiler::enrichWP()].
 #'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted and passed to
-#'   `universe` of [clusterProfiler::enrichWP()].
+#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
+#'   and then passed to `universe` of [clusterProfiler::enrichWP()].
 #' @param p_adj_method Passed to `pAdjustMethod` of [clusterProfiler::enrichWP()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [clusterProfiler::enrichWP()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [clusterProfiler::enrichWP()].
@@ -448,10 +449,11 @@ gly_enrich_wikipathways_ <- function(
 #'   Organism code. `"hsa"` for human (Homo sapiens), `"mmu"` for mouse (Mus musculus). Defaults to `"hsa"`.
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
 #'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
-#' @param universe Background genes. If a character vector, directly passed to `universe` of [DOSE::enrichDO()].
+#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
+#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [DOSE::enrichDO()].
 #'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted and passed to
-#'   `universe` of [DOSE::enrichDO()].
+#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
+#'   and then passed to `universe` of [DOSE::enrichDO()].
 #' @param p_adj_method Passed to `pAdjustMethod` of [DOSE::enrichDO()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [DOSE::enrichDO()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [DOSE::enrichDO()].
@@ -564,10 +566,11 @@ gly_enrich_do_ <- function(
 #'  Only applicable to top-level APIs.
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
 #'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
-#' @param universe Background genes. If a character vector, directly passed to `universe` of [DOSE::enrichNCG()].
+#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
+#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [DOSE::enrichNCG()].
 #'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted and passed to
-#'   `universe` of [DOSE::enrichNCG()].
+#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
+#'   and then passed to `universe` of [DOSE::enrichNCG()].
 #' @param p_adj_method Passed to `pAdjustMethod` of [DOSE::enrichNCG()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [DOSE::enrichNCG()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [DOSE::enrichNCG()].
@@ -672,10 +675,11 @@ gly_enrich_ncg_ <- function(
 #'  Only applicable to top-level APIs.
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
 #'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
-#' @param universe Background genes. If a character vector, directly passed to `universe` of [DOSE::enrichDGN()].
+#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
+#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [DOSE::enrichDGN()].
 #'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted and passed to
-#'   `universe` of [DOSE::enrichDGN()].
+#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
+#'   and then passed to `universe` of [DOSE::enrichDGN()].
 #' @param p_adj_method Passed to `pAdjustMethod` of [DOSE::enrichDGN()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [DOSE::enrichDGN()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [DOSE::enrichDGN()].

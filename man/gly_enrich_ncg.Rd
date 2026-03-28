@@ -34,10 +34,11 @@ Only applicable to top-level APIs.}
 \item{orgdb}{Passed to \code{OrgDb} of \code{\link[clusterProfiler:bitr]{clusterProfiler::bitr()}}.
 Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".}
 
-\item{universe}{Background genes. If a character vector, directly passed to \code{universe} of \code{\link[DOSE:enrichNCG]{DOSE::enrichNCG()}}.
+\item{universe}{Background genes. If a character vector, it is expected to contain UniProt accession IDs;
+these will be converted to Entrez Gene IDs and then passed to \code{universe} of \code{\link[DOSE:enrichNCG]{DOSE::enrichNCG()}}.
 You can also provide a \code{\link[glyexp:experiment]{glyexp::experiment()}} object with "glycoproteomics" type.
-In this case all detected proteins in this experiment will be extracted and passed to
-\code{universe} of \code{\link[DOSE:enrichNCG]{DOSE::enrichNCG()}}.}
+In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
+and then passed to \code{universe} of \code{\link[DOSE:enrichNCG]{DOSE::enrichNCG()}}.}
 
 \item{p_adj_method}{Passed to \code{pAdjustMethod} of \code{\link[DOSE:enrichNCG]{DOSE::enrichNCG()}}.}
 
