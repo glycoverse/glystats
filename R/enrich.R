@@ -315,7 +315,457 @@ gly_enrich_reactome_ <- function(
   .package_enrich_result(raw_result, "glystats_reactome_ora_res")
 }
 
-#' Extract UniProt accessions from experiment object helper function
+#' WikiPathways over-representation analysis (ORA)
+#'
+#' @description
+#' Perform WikiPathways ORA for protein UniProt accessions using [clusterProfiler::enrichWP()].
+#' - `gly_enrich_wikipathways()` accepts a [glyexp::experiment()] and extracts protein information
+#' from the "protein" column in the variable information tibble.
+#' - `gly_enrich_wikipathways_()` accepts a character vector of UniProt IDs.
+#'
+#' As [clusterProfiler::enrichWP()] only accepts Entrez IDs,
+#' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
+#'
+#' @param exp (Only for [gly_enrich_wikipathways()]) A `glyexp::experiment()` object.
+#' @param proteins (Only for [gly_enrich_wikipathways_()]) A character vector of UniProt accession IDs.
+#' @param add_info A logical value. This parameter is included for API consistency but has no effect
+#'  since enrichment results do not contain variable or sample columns.
+#'  Only applicable to top-level APIs.
+#' @param organism Passed to `organism` of [clusterProfiler::enrichWP()].
+#'   Species name (e.g., "Homo sapiens", "Mus musculus", "Rattus norvegicus"). Defaults to "Homo sapiens".
+#' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
+#'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
+#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
+#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [clusterProfiler::enrichWP()].
+#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
+#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
+#'   and then passed to `universe` of [clusterProfiler::enrichWP()].
+#' @param p_adj_method Passed to `pAdjustMethod` of [clusterProfiler::enrichWP()].
+#' @param p_cutoff Passed to `pvalueCutoff` of [clusterProfiler::enrichWP()].
+#' @param q_cutoff Passed to `qvalueCutoff` of [clusterProfiler::enrichWP()].
+#'
+#' @section Required packages:
+#' These functions require the following packages to be installed:
+#' - `clusterProfiler` for enrichment analysis and ID conversion
+#' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
+#'
+#' @return A list with two elements:
+#'  - `tidy_result`: A tibble with enrichment results containing the following columns:
+#'    - `id`: Term ID (e.g., WPXXXXX)
+#'    - `description`: Term description
+#'    - `gene_ratio`: Ratio of genes in the term to total genes in the input
+#'    - `bg_ratio`: Ratio of genes in the term to total genes in the background
+#'    - `p_val`: Raw p-value from hypergeometric test
+#'    - `p_adj`: Adjusted p-value
+#'    - `q_value`: Q-value (FDR)
+#'    - `gene_id`: Gene IDs in the term (separated by "/")
+#'    - `count`: Number of genes in the term
+#'  - `raw_result`: The raw clusterProfiler enrichResult object
+#' The list has classes `glystats_wikipathways_ora_res` and `glystats_res`.
+#' @seealso [clusterProfiler::enrichWP()]
+#' @export
+gly_enrich_wikipathways <- function(
+  exp,
+  add_info = TRUE,
+  organism = "Homo sapiens",
+  orgdb = "org.Hs.eg.db",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
+  rlang::check_installed("clusterProfiler")
+  checkmate::assert_logical(add_info, len = 1)
+
+  proteins <- .extract_uniprot_from_exp(exp)
+  gly_enrich_wikipathways_(
+    proteins,
+    organism = organism,
+    orgdb = orgdb,
+    universe = universe,
+    p_adj_method = p_adj_method,
+    p_cutoff = p_cutoff,
+    q_cutoff = q_cutoff
+  )
+}
+
+#' @rdname gly_enrich_wikipathways
+#' @export
+gly_enrich_wikipathways_ <- function(
+  proteins,
+  organism = "Homo sapiens",
+  orgdb = "org.Hs.eg.db",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
+  rlang::check_installed("clusterProfiler")
+
+  # Validate arguments
+  checkmate::assert_character(proteins, min.len = 1)
+
+  # Convert foreground proteins to Entrez IDs
+  cli::cli_alert_info("Converting foreground proteins to Entrez IDs")
+  fg_genes <- .uniprot_to_entrez(proteins, orgdb)
+
+  # Handle universe if provided
+  bg_genes <- .prepare_universe_entrez(universe, orgdb)
+
+  # Perform WikiPathways analysis
+  suppressMessages(
+    raw_result <- clusterProfiler::enrichWP(
+      gene = fg_genes,
+      organism = organism,
+      universe = bg_genes,
+      pAdjustMethod = p_adj_method,
+      pvalueCutoff = p_cutoff,
+      qvalueCutoff = q_cutoff
+    )
+  )
+  .package_enrich_result(raw_result, "glystats_wikipathways_ora_res")
+}
+
+#' Disease Ontology over-representation analysis (ORA)
+#'
+#' @description
+#' Perform Disease Ontology ORA for protein UniProt accessions using [DOSE::enrichDO()].
+#' - `gly_enrich_do()` accepts a [glyexp::experiment()] and extracts protein information
+#' from the "protein" column in the variable information tibble.
+#' - `gly_enrich_do_()` accepts a character vector of UniProt IDs.
+#'
+#' As [DOSE::enrichDO()] only accepts Entrez IDs,
+#' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
+#'
+#' @param exp (Only for [gly_enrich_do()]) A `glyexp::experiment()` object.
+#' @param proteins (Only for [gly_enrich_do_()]) A character vector of UniProt accession IDs.
+#' @param add_info A logical value. This parameter is included for API consistency but has no effect
+#'  since enrichment results do not contain variable or sample columns.
+#'  Only applicable to top-level APIs.
+#' @param ont Passed to `ont` of [DOSE::enrichDO()].
+#'   Disease Ontology type. Options: `"HDO"` (Human Disease Ontology), `"HPO"` (Human Phenotype Ontology),
+#'   `"MPO"` (Mammalian Phenotype Ontology). Defaults to `"HDO"`.
+#' @param organism Passed to `organism` of [DOSE::enrichDO()].
+#'   Organism code. `"hsa"` for human (Homo sapiens), `"mmu"` for mouse (Mus musculus). Defaults to `"hsa"`.
+#' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
+#'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
+#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
+#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [DOSE::enrichDO()].
+#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
+#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
+#'   and then passed to `universe` of [DOSE::enrichDO()].
+#' @param p_adj_method Passed to `pAdjustMethod` of [DOSE::enrichDO()].
+#' @param p_cutoff Passed to `pvalueCutoff` of [DOSE::enrichDO()].
+#' @param q_cutoff Passed to `qvalueCutoff` of [DOSE::enrichDO()].
+#'
+#' @section Required packages:
+#' These functions require the following packages to be installed:
+#' - `clusterProfiler` for ID conversion
+#' - `DOSE` for enrichment analysis
+#' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
+#'
+#' @return A list with two elements:
+#'  - `tidy_result`: A tibble with enrichment results containing the following columns:
+#'    - `id`: Term ID (e.g., DOID:XXXX)
+#'    - `description`: Term description
+#'    - `gene_ratio`: Ratio of genes in the term to total genes in the input
+#'    - `bg_ratio`: Ratio of genes in the term to total genes in the background
+#'    - `p_val`: Raw p-value from hypergeometric test
+#'    - `p_adj`: Adjusted p-value
+#'    - `q_value`: Q-value (FDR)
+#'    - `gene_id`: Gene IDs in the term (separated by "/")
+#'    - `count`: Number of genes in the term
+#'  - `raw_result`: The raw DOSE enrichResult object
+#' The list has classes `glystats_do_ora_res` and `glystats_res`.
+#' @seealso [DOSE::enrichDO()]
+#' @export
+gly_enrich_do <- function(
+  exp,
+  add_info = TRUE,
+  ont = "HDO",
+  organism = "hsa",
+  orgdb = "org.Hs.eg.db",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("DOSE")
+  checkmate::assert_logical(add_info, len = 1)
+
+  proteins <- .extract_uniprot_from_exp(exp)
+  gly_enrich_do_(
+    proteins,
+    ont = ont,
+    organism = organism,
+    orgdb = orgdb,
+    universe = universe,
+    p_adj_method = p_adj_method,
+    p_cutoff = p_cutoff,
+    q_cutoff = q_cutoff
+  )
+}
+
+#' @rdname gly_enrich_do
+#' @export
+gly_enrich_do_ <- function(
+  proteins,
+  ont = "HDO",
+  organism = "hsa",
+  orgdb = "org.Hs.eg.db",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("DOSE")
+
+  # Validate arguments
+  checkmate::assert_character(proteins, min.len = 1)
+
+  # Convert foreground proteins to Entrez IDs
+  cli::cli_alert_info("Converting foreground proteins to Entrez IDs")
+  fg_genes <- .uniprot_to_entrez(proteins, orgdb)
+
+  # Handle universe if provided
+  bg_genes <- .prepare_universe_entrez(universe, orgdb)
+
+  # Perform Disease Ontology analysis
+  suppressMessages(
+    raw_result <- DOSE::enrichDO(
+      gene = fg_genes,
+      ont = ont,
+      organism = organism,
+      universe = bg_genes,
+      pAdjustMethod = p_adj_method,
+      pvalueCutoff = p_cutoff,
+      qvalueCutoff = q_cutoff,
+      readable = TRUE
+    )
+  )
+  .package_enrich_result(raw_result, "glystats_do_ora_res")
+}
+
+#' Network of Cancer Genes (NCG) over-representation analysis (ORA)
+#'
+#' @description
+#' Perform NCG ORA for protein UniProt accessions using [DOSE::enrichNCG()].
+#' - `gly_enrich_ncg()` accepts a [glyexp::experiment()] and extracts protein information
+#' from the "protein" column in the variable information tibble.
+#' - `gly_enrich_ncg_()` accepts a character vector of UniProt IDs.
+#'
+#' As [DOSE::enrichNCG()] only accepts Entrez IDs,
+#' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
+#'
+#' @param exp (Only for [gly_enrich_ncg()]) A `glyexp::experiment()` object.
+#' @param proteins (Only for [gly_enrich_ncg_()]) A character vector of UniProt accession IDs.
+#' @param add_info A logical value. This parameter is included for API consistency but has no effect
+#'  since enrichment results do not contain variable or sample columns.
+#'  Only applicable to top-level APIs.
+#' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
+#'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
+#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
+#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [DOSE::enrichNCG()].
+#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
+#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
+#'   and then passed to `universe` of [DOSE::enrichNCG()].
+#' @param p_adj_method Passed to `pAdjustMethod` of [DOSE::enrichNCG()].
+#' @param p_cutoff Passed to `pvalueCutoff` of [DOSE::enrichNCG()].
+#' @param q_cutoff Passed to `qvalueCutoff` of [DOSE::enrichNCG()].
+#'
+#' @section Required packages:
+#' These functions require the following packages to be installed:
+#' - `clusterProfiler` for ID conversion
+#' - `DOSE` for enrichment analysis
+#' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
+#'
+#' @return A list with two elements:
+#'  - `tidy_result`: A tibble with enrichment results containing the following columns:
+#'    - `id`: Term ID
+#'    - `description`: Term description
+#'    - `gene_ratio`: Ratio of genes in the term to total genes in the input
+#'    - `bg_ratio`: Ratio of genes in the term to total genes in the background
+#'    - `p_val`: Raw p-value from hypergeometric test
+#'    - `p_adj`: Adjusted p-value
+#'    - `q_value`: Q-value (FDR)
+#'    - `gene_id`: Gene IDs in the term (separated by "/")
+#'    - `count`: Number of genes in the term
+#'  - `raw_result`: The raw DOSE enrichResult object
+#' The list has classes `glystats_ncg_ora_res` and `glystats_res`.
+#' @seealso [DOSE::enrichNCG()]
+#' @export
+gly_enrich_ncg <- function(
+  exp,
+  add_info = TRUE,
+  orgdb = "org.Hs.eg.db",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("DOSE")
+  checkmate::assert_logical(add_info, len = 1)
+
+  proteins <- .extract_uniprot_from_exp(exp)
+  gly_enrich_ncg_(
+    proteins,
+    orgdb = orgdb,
+    universe = universe,
+    p_adj_method = p_adj_method,
+    p_cutoff = p_cutoff,
+    q_cutoff = q_cutoff
+  )
+}
+
+#' @rdname gly_enrich_ncg
+#' @export
+gly_enrich_ncg_ <- function(
+  proteins,
+  orgdb = "org.Hs.eg.db",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("DOSE")
+
+  # Validate arguments
+  checkmate::assert_character(proteins, min.len = 1)
+
+  # Convert foreground proteins to Entrez IDs
+  cli::cli_alert_info("Converting foreground proteins to Entrez IDs")
+  fg_genes <- .uniprot_to_entrez(proteins, orgdb)
+
+  # Handle universe if provided
+  bg_genes <- .prepare_universe_entrez(universe, orgdb)
+
+  # Perform NCG analysis
+  suppressMessages(
+    raw_result <- DOSE::enrichNCG(
+      gene = fg_genes,
+      universe = bg_genes,
+      pAdjustMethod = p_adj_method,
+      pvalueCutoff = p_cutoff,
+      qvalueCutoff = q_cutoff,
+      readable = TRUE
+    )
+  )
+  .package_enrich_result(raw_result, "glystats_ncg_ora_res")
+}
+
+#' DisGeNET over-representation analysis (ORA)
+#'
+#' @description
+#' Perform DisGeNET ORA for protein UniProt accessions using [DOSE::enrichDGN()].
+#' - `gly_enrich_dgn()` accepts a [glyexp::experiment()] and extracts protein information
+#' from the "protein" column in the variable information tibble.
+#' - `gly_enrich_dgn_()` accepts a character vector of UniProt IDs.
+#'
+#' As [DOSE::enrichDGN()] only accepts Entrez IDs,
+#' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
+#'
+#' @param exp (Only for [gly_enrich_dgn()]) A `glyexp::experiment()` object.
+#' @param proteins (Only for [gly_enrich_dgn_()]) A character vector of UniProt accession IDs.
+#' @param add_info A logical value. This parameter is included for API consistency but has no effect
+#'  since enrichment results do not contain variable or sample columns.
+#'  Only applicable to top-level APIs.
+#' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
+#'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
+#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
+#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [DOSE::enrichDGN()].
+#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
+#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
+#'   and then passed to `universe` of [DOSE::enrichDGN()].
+#' @param p_adj_method Passed to `pAdjustMethod` of [DOSE::enrichDGN()].
+#' @param p_cutoff Passed to `pvalueCutoff` of [DOSE::enrichDGN()].
+#' @param q_cutoff Passed to `qvalueCutoff` of [DOSE::enrichDGN()].
+#'
+#' @section Required packages:
+#' These functions require the following packages to be installed:
+#' - `clusterProfiler` for ID conversion
+#' - `DOSE` for enrichment analysis
+#' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
+#'
+#' @return A list with two elements:
+#'  - `tidy_result`: A tibble with enrichment results containing the following columns:
+#'    - `id`: Term ID
+#'    - `description`: Term description
+#'    - `gene_ratio`: Ratio of genes in the term to total genes in the input
+#'    - `bg_ratio`: Ratio of genes in the term to total genes in the background
+#'    - `p_val`: Raw p-value from hypergeometric test
+#'    - `p_adj`: Adjusted p-value
+#'    - `q_value`: Q-value (FDR)
+#'    - `gene_id`: Gene IDs in the term (separated by "/")
+#'    - `count`: Number of genes in the term
+#'  - `raw_result`: The raw DOSE enrichResult object
+#' The list has classes `glystats_dgn_ora_res` and `glystats_res`.
+#' @seealso [DOSE::enrichDGN()]
+#' @export
+gly_enrich_dgn <- function(
+  exp,
+  add_info = TRUE,
+  orgdb = "org.Hs.eg.db",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("DOSE")
+  checkmate::assert_logical(add_info, len = 1)
+
+  proteins <- .extract_uniprot_from_exp(exp)
+  gly_enrich_dgn_(
+    proteins,
+    orgdb = orgdb,
+    universe = universe,
+    p_adj_method = p_adj_method,
+    p_cutoff = p_cutoff,
+    q_cutoff = q_cutoff
+  )
+}
+
+#' @rdname gly_enrich_dgn
+#' @export
+gly_enrich_dgn_ <- function(
+  proteins,
+  orgdb = "org.Hs.eg.db",
+  universe = NULL,
+  p_adj_method = "BH",
+  p_cutoff = 0.05,
+  q_cutoff = 0.2
+) {
+  rlang::check_installed("clusterProfiler")
+  rlang::check_installed("DOSE")
+
+  # Validate arguments
+  checkmate::assert_character(proteins, min.len = 1)
+
+  # Convert foreground proteins to Entrez IDs
+  cli::cli_alert_info("Converting foreground proteins to Entrez IDs")
+  fg_genes <- .uniprot_to_entrez(proteins, orgdb)
+
+  # Handle universe if provided
+  bg_genes <- .prepare_universe_entrez(universe, orgdb)
+
+  # Perform DisGeNET analysis
+  suppressMessages(
+    raw_result <- DOSE::enrichDGN(
+      gene = fg_genes,
+      universe = bg_genes,
+      pAdjustMethod = p_adj_method,
+      pvalueCutoff = p_cutoff,
+      qvalueCutoff = q_cutoff,
+      readable = TRUE
+    )
+  )
+  .package_enrich_result(raw_result, "glystats_dgn_ora_res")
+}
+
 #' @param exp The experiment.
 #' @returns A character vector of UniProt IDs.
 #' @noRd

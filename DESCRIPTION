@@ -27,6 +27,7 @@ Suggests:
     pROC,
     clusterProfiler,
     ReactomePA,
+    DOSE,
     ggdendro,
     Hmisc,
     limma,

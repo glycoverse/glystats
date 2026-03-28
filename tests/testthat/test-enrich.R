@@ -424,6 +424,546 @@ test_that("gly_enrich_reactome_ works correctly", {
   )
 })
 
+test_that("gly_enrich_wikipathways works with protein column and returns properly formatted results", {
+  # Mock the enrichWP function - create a mock data frame
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings(
+    {
+      exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
+      result <- suppressMessages(gly_enrich_wikipathways(exp_with_protein))
+      expect_s3_class(result, "glystats_wikipathways_ora_res")
+      expect_s3_class(result, "glystats_res")
+      expect_true(is.list(result))
+      expect_named(result, c("tidy_result", "raw_result"))
+      expect_true("id" %in% colnames(result$tidy_result)) # Check column name cleaning works
+    },
+    enrichWP = function(...) mock_result,
+    .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_wikipathways handles missing protein information", {
+  # Use smaller subset
+  exp_small <- test_gp_exp |>
+    glyexp::slice_head_var(n = 5)
+
+  # Remove protein column
+  exp_no_proteins <- exp_small
+  if ("protein" %in% colnames(exp_no_proteins$var_info)) {
+    exp_no_proteins$var_info <- exp_no_proteins$var_info |>
+      dplyr::select(-protein)
+  }
+
+  # Should error when no protein information is available
+  expect_error(
+    suppressMessages(gly_enrich_wikipathways(exp_no_proteins)),
+    "protein.*column not found"
+  )
+})
+
+test_that("gly_enrich_wikipathways filters out NA proteins", {
+  # Mock bitr to capture gene list
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+  captured_uniprot_ids <- NULL
+
+  with_mocked_bindings(
+    {
+      with_mocked_bindings(
+        {
+          # Create protein column with some NAs
+          exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
+          exp_with_nas <- exp_with_protein |>
+            glyexp::mutate_var(
+              protein = ifelse(
+                seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0,
+                NA_character_,
+                protein
+              )
+            )
+
+          suppressMessages(result <- gly_enrich_wikipathways(exp_with_nas))
+
+          expect_s3_class(result, "glystats_wikipathways_ora_res")
+          expect_s3_class(result, "glystats_res")
+          expect_true(is.list(result))
+          expect_named(result, c("tidy_result", "raw_result"))
+          # Check that NA values were filtered out
+          expect_true(all(!is.na(captured_uniprot_ids)))
+        },
+        enrichWP = function(gene, ...) {
+          # check if gene is empty as bitr returns empty df
+          if (length(gene) == 0) {
+            return(mock_result)
+          }
+          # fail if not empty
+          stop("enrichWP should have received an empty gene vector")
+        },
+        .package = "clusterProfiler"
+      )
+    },
+    bitr = function(gene_id, ...) {
+      captured_uniprot_ids <<- gene_id
+      data.frame(
+        UNIPROT = character(0),
+        ENTREZID = character(0),
+        stringsAsFactors = FALSE
+      )
+    },
+    .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_wikipathways_ works correctly", {
+  # Create test proteins
+  proteins <- c("P12345", "Q67890", "R11111")
+
+  # Mock the functions
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings(
+    {
+      with_mocked_bindings(
+        {
+          result <- suppressMessages(gly_enrich_wikipathways_(proteins))
+          expect_s3_class(result, "glystats_wikipathways_ora_res")
+          expect_s3_class(result, "glystats_res")
+          expect_true(is.list(result))
+          expect_named(result, c("tidy_result", "raw_result"))
+          expect_true("id" %in% colnames(result$tidy_result))
+        },
+        enrichWP = function(...) mock_result,
+        .package = "clusterProfiler"
+      )
+    },
+    bitr = function(...) {
+      data.frame(
+        UNIPROT = character(0),
+        ENTREZID = character(0),
+        stringsAsFactors = FALSE
+      )
+    },
+    .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_do works with protein column and returns properly formatted results", {
+  # Mock the enrichDO function - create a mock data frame
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings(
+    {
+      exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
+      result <- suppressMessages(gly_enrich_do(exp_with_protein))
+      expect_s3_class(result, "glystats_do_ora_res")
+      expect_s3_class(result, "glystats_res")
+      expect_true(is.list(result))
+      expect_named(result, c("tidy_result", "raw_result"))
+      expect_true("id" %in% colnames(result$tidy_result)) # Check column name cleaning works
+    },
+    enrichDO = function(...) mock_result,
+    .package = "DOSE"
+  )
+})
+
+test_that("gly_enrich_do handles missing protein information", {
+  # Use smaller subset
+  exp_small <- test_gp_exp |>
+    glyexp::slice_head_var(n = 5)
+
+  # Remove protein column
+  exp_no_proteins <- exp_small
+  if ("protein" %in% colnames(exp_no_proteins$var_info)) {
+    exp_no_proteins$var_info <- exp_no_proteins$var_info |>
+      dplyr::select(-protein)
+  }
+
+  # Should error when no protein information is available
+  expect_error(
+    suppressMessages(gly_enrich_do(exp_no_proteins)),
+    "protein.*column not found"
+  )
+})
+
+test_that("gly_enrich_do filters out NA proteins", {
+  # Mock bitr to capture gene list
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+  captured_uniprot_ids <- NULL
+
+  with_mocked_bindings(
+    {
+      with_mocked_bindings(
+        {
+          # Create protein column with some NAs
+          exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
+          exp_with_nas <- exp_with_protein |>
+            glyexp::mutate_var(
+              protein = ifelse(
+                seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0,
+                NA_character_,
+                protein
+              )
+            )
+
+          suppressMessages(result <- gly_enrich_do(exp_with_nas))
+
+          expect_s3_class(result, "glystats_do_ora_res")
+          expect_s3_class(result, "glystats_res")
+          expect_true(is.list(result))
+          expect_named(result, c("tidy_result", "raw_result"))
+          # Check that NA values were filtered out
+          expect_true(all(!is.na(captured_uniprot_ids)))
+        },
+        enrichDO = function(gene, ...) {
+          # check if gene is empty as bitr returns empty df
+          if (length(gene) == 0) {
+            return(mock_result)
+          }
+          # fail if not empty
+          stop("enrichDO should have received an empty gene vector")
+        },
+        .package = "DOSE"
+      )
+    },
+    bitr = function(gene_id, ...) {
+      captured_uniprot_ids <<- gene_id
+      data.frame(
+        UNIPROT = character(0),
+        ENTREZID = character(0),
+        stringsAsFactors = FALSE
+      )
+    },
+    .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_do_ works correctly", {
+  # Create test proteins
+  proteins <- c("P12345", "Q67890", "R11111")
+
+  # Mock the functions
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings(
+    {
+      with_mocked_bindings(
+        {
+          result <- suppressMessages(gly_enrich_do_(proteins))
+          expect_s3_class(result, "glystats_do_ora_res")
+          expect_s3_class(result, "glystats_res")
+          expect_true(is.list(result))
+          expect_named(result, c("tidy_result", "raw_result"))
+          expect_true("id" %in% colnames(result$tidy_result))
+        },
+        enrichDO = function(...) mock_result,
+        .package = "DOSE"
+      )
+    },
+    bitr = function(...) {
+      data.frame(
+        UNIPROT = character(0),
+        ENTREZID = character(0),
+        stringsAsFactors = FALSE
+      )
+    },
+    .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_ncg works with protein column and returns properly formatted results", {
+  # Mock the enrichNCG function - create a mock data frame
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings(
+    {
+      exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
+      result <- suppressMessages(gly_enrich_ncg(exp_with_protein))
+      expect_s3_class(result, "glystats_ncg_ora_res")
+      expect_s3_class(result, "glystats_res")
+      expect_true(is.list(result))
+      expect_named(result, c("tidy_result", "raw_result"))
+      expect_true("id" %in% colnames(result$tidy_result)) # Check column name cleaning works
+    },
+    enrichNCG = function(...) mock_result,
+    .package = "DOSE"
+  )
+})
+
+test_that("gly_enrich_ncg handles missing protein information", {
+  # Use smaller subset
+  exp_small <- test_gp_exp |>
+    glyexp::slice_head_var(n = 5)
+
+  # Remove protein column
+  exp_no_proteins <- exp_small
+  if ("protein" %in% colnames(exp_no_proteins$var_info)) {
+    exp_no_proteins$var_info <- exp_no_proteins$var_info |>
+      dplyr::select(-protein)
+  }
+
+  # Should error when no protein information is available
+  expect_error(
+    suppressMessages(gly_enrich_ncg(exp_no_proteins)),
+    "protein.*column not found"
+  )
+})
+
+test_that("gly_enrich_ncg filters out NA proteins", {
+  # Mock bitr to capture gene list
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+  captured_uniprot_ids <- NULL
+
+  with_mocked_bindings(
+    {
+      with_mocked_bindings(
+        {
+          # Create protein column with some NAs
+          exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
+          exp_with_nas <- exp_with_protein |>
+            glyexp::mutate_var(
+              protein = ifelse(
+                seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0,
+                NA_character_,
+                protein
+              )
+            )
+
+          suppressMessages(result <- gly_enrich_ncg(exp_with_nas))
+
+          expect_s3_class(result, "glystats_ncg_ora_res")
+          expect_s3_class(result, "glystats_res")
+          expect_true(is.list(result))
+          expect_named(result, c("tidy_result", "raw_result"))
+          # Check that NA values were filtered out
+          expect_true(all(!is.na(captured_uniprot_ids)))
+        },
+        enrichNCG = function(gene, ...) {
+          # check if gene is empty as bitr returns empty df
+          if (length(gene) == 0) {
+            return(mock_result)
+          }
+          # fail if not empty
+          stop("enrichNCG should have received an empty gene vector")
+        },
+        .package = "DOSE"
+      )
+    },
+    bitr = function(gene_id, ...) {
+      captured_uniprot_ids <<- gene_id
+      data.frame(
+        UNIPROT = character(0),
+        ENTREZID = character(0),
+        stringsAsFactors = FALSE
+      )
+    },
+    .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_ncg_ works correctly", {
+  # Create test proteins
+  proteins <- c("P12345", "Q67890", "R11111")
+
+  # Mock the functions
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings(
+    {
+      with_mocked_bindings(
+        {
+          result <- suppressMessages(gly_enrich_ncg_(proteins))
+          expect_s3_class(result, "glystats_ncg_ora_res")
+          expect_s3_class(result, "glystats_res")
+          expect_true(is.list(result))
+          expect_named(result, c("tidy_result", "raw_result"))
+          expect_true("id" %in% colnames(result$tidy_result))
+        },
+        enrichNCG = function(...) mock_result,
+        .package = "DOSE"
+      )
+    },
+    bitr = function(...) {
+      data.frame(
+        UNIPROT = character(0),
+        ENTREZID = character(0),
+        stringsAsFactors = FALSE
+      )
+    },
+    .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_dgn works with protein column and returns properly formatted results", {
+  # Mock the enrichDGN function - create a mock data frame
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings(
+    {
+      exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
+      result <- suppressMessages(gly_enrich_dgn(exp_with_protein))
+      expect_s3_class(result, "glystats_dgn_ora_res")
+      expect_s3_class(result, "glystats_res")
+      expect_true(is.list(result))
+      expect_named(result, c("tidy_result", "raw_result"))
+      expect_true("id" %in% colnames(result$tidy_result)) # Check column name cleaning works
+    },
+    enrichDGN = function(...) mock_result,
+    .package = "DOSE"
+  )
+})
+
+test_that("gly_enrich_dgn handles missing protein information", {
+  # Use smaller subset
+  exp_small <- test_gp_exp |>
+    glyexp::slice_head_var(n = 5)
+
+  # Remove protein column
+  exp_no_proteins <- exp_small
+  if ("protein" %in% colnames(exp_no_proteins$var_info)) {
+    exp_no_proteins$var_info <- exp_no_proteins$var_info |>
+      dplyr::select(-protein)
+  }
+
+  # Should error when no protein information is available
+  expect_error(
+    suppressMessages(gly_enrich_dgn(exp_no_proteins)),
+    "protein.*column not found"
+  )
+})
+
+test_that("gly_enrich_dgn filters out NA proteins", {
+  # Mock bitr to capture gene list
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+  captured_uniprot_ids <- NULL
+
+  with_mocked_bindings(
+    {
+      with_mocked_bindings(
+        {
+          # Create protein column with some NAs
+          exp_with_protein <- test_gp_exp |> glyexp::slice_head_var(n = 5)
+          exp_with_nas <- exp_with_protein |>
+            glyexp::mutate_var(
+              protein = ifelse(
+                seq_len(glyexp::n_variables(exp_with_protein)) %% 2 == 0,
+                NA_character_,
+                protein
+              )
+            )
+
+          suppressMessages(result <- gly_enrich_dgn(exp_with_nas))
+
+          expect_s3_class(result, "glystats_dgn_ora_res")
+          expect_s3_class(result, "glystats_res")
+          expect_true(is.list(result))
+          expect_named(result, c("tidy_result", "raw_result"))
+          # Check that NA values were filtered out
+          expect_true(all(!is.na(captured_uniprot_ids)))
+        },
+        enrichDGN = function(gene, ...) {
+          # check if gene is empty as bitr returns empty df
+          if (length(gene) == 0) {
+            return(mock_result)
+          }
+          # fail if not empty
+          stop("enrichDGN should have received an empty gene vector")
+        },
+        .package = "DOSE"
+      )
+    },
+    bitr = function(gene_id, ...) {
+      captured_uniprot_ids <<- gene_id
+      data.frame(
+        UNIPROT = character(0),
+        ENTREZID = character(0),
+        stringsAsFactors = FALSE
+      )
+    },
+    .package = "clusterProfiler"
+  )
+})
+
+test_that("gly_enrich_dgn_ works correctly", {
+  # Create test proteins
+  proteins <- c("P12345", "Q67890", "R11111")
+
+  # Mock the functions
+  mock_result <- data.frame(
+    ID = character(0),
+    Description = character(0),
+    stringsAsFactors = FALSE
+  )
+
+  with_mocked_bindings(
+    {
+      with_mocked_bindings(
+        {
+          result <- suppressMessages(gly_enrich_dgn_(proteins))
+          expect_s3_class(result, "glystats_dgn_ora_res")
+          expect_s3_class(result, "glystats_res")
+          expect_true(is.list(result))
+          expect_named(result, c("tidy_result", "raw_result"))
+          expect_true("id" %in% colnames(result$tidy_result))
+        },
+        enrichDGN = function(...) mock_result,
+        .package = "DOSE"
+      )
+    },
+    bitr = function(...) {
+      data.frame(
+        UNIPROT = character(0),
+        ENTREZID = character(0),
+        stringsAsFactors = FALSE
+      )
+    },
+    .package = "clusterProfiler"
+  )
+})
+
 test_that("gly_enrich_go_ supports custom OrgDb", {
   skip_if_not_installed("org.Mm.eg.db")
   proteins <- c(
