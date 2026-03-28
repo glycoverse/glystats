@@ -35,7 +35,16 @@
 <h2 class="pkg-version" data-toc-text="development version" id="glystats-development-version">glystats (development version)<a class="anchor" aria-label="anchor" href="#glystats-development-version"></a></h2>
 <div class="section level3">
 <h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
-<ul><li>Refactored enrichment API (<code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>, <code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code>). These functions now use explicit parameters instead of <code>...</code>. Users must update their code to use named parameters (e.g., <code>pvalueCutoff = 0.05</code> instead of passing via <code>...</code>).</li>
+<ul><li>Refactored enrichment API (<code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>, <code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code>). These functions now use explicit parameters instead of <code>...</code>. Users must update their code to use new parameters (e.g., <code>p_cutoff</code> instead of <code>pvalueCutoff</code>).</li>
+<li>
+<code><a href="../reference/gly_wgcna.html">gly_wgcna()</a></code>, <code><a href="../reference/gly_wgcna.html">gly_wgcna_()</a></code>, <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering()</a></code>, and <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering_()</a></code> are deprecated and will be removed in a future version. These functions are too interactive and complex for a pipeline-friendly package.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<ul><li>Add <code><a href="../reference/gly_enrich_wikipathways.html">gly_enrich_wikipathways()</a></code> and <code><a href="../reference/gly_enrich_wikipathways.html">gly_enrich_wikipathways_()</a></code> for WikiPathways enrichment analysis.</li>
+<li>Add <code><a href="../reference/gly_enrich_do.html">gly_enrich_do()</a></code> and <code><a href="../reference/gly_enrich_do.html">gly_enrich_do_()</a></code> for Disease Ontology enrichment analysis.</li>
+<li>Add <code><a href="../reference/gly_enrich_ncg.html">gly_enrich_ncg()</a></code> and <code><a href="../reference/gly_enrich_ncg.html">gly_enrich_ncg_()</a></code> for Network of Cancer Genes enrichment analysis.</li>
+<li>Add <code><a href="../reference/gly_enrich_dgn.html">gly_enrich_dgn()</a></code> and <code><a href="../reference/gly_enrich_dgn.html">gly_enrich_dgn_()</a></code> for DisGeNET enrichment analysis.</li>
 </ul></div>
 </div>
     <div class="section level2">
