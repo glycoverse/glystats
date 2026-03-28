@@ -78,14 +78,16 @@ The list has classes \code{glystats_cc_res} and \code{glystats_res}.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+}
+\details{
 Perform consensus clustering on the expression data using ConsensusClusterPlus.
 The function returns cluster assignments for all k values from 2 to max_k in long format.
 Setting \code{output_file} to visualize consensus CDF curves and consensus matrices,
 which helps you decide the optimal number of clusters.
 See \href{https://bioconductor.org/packages/release/bioc/vignettes/ConsensusClusterPlus/inst/doc/ConsensusClusterPlus.pdf}{this tutorial}
 for more information.
-}
-\details{
+
 The function performs log2 transformation on the expression data (log2(x + 1)) before
 consensus clustering. When \code{on = "sample"} (default), samples are clustered based
 on their expression profiles across variables. When \code{on = "variable"}, variables are clustered based on their

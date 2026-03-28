@@ -46,6 +46,7 @@ Imports:
     tibble,
     glyexp (>= 0.12.3),
     rlang,
+    lifecycle,
     tidyr,
     dplyr,
     tidyselect,

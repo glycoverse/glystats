@@ -1,5 +1,7 @@
 #' Consensus Clustering for Glycomics and Glycoproteomics Data
 #'
+#' `r lifecycle::badge("deprecated")`
+#'
 #' Perform consensus clustering on the expression data using ConsensusClusterPlus.
 #' The function returns cluster assignments for all k values from 2 to max_k in long format.
 #' Setting `output_file` to visualize consensus CDF curves and consensus matrices,
@@ -72,6 +74,11 @@ gly_consensus_clustering <- function(
   add_info = TRUE,
   ...
 ) {
+  lifecycle::deprecate_warn(
+    when = "0.7.0",
+    what = "gly_consensus_clustering()",
+    details = "This function will be removed in a future version."
+  )
   checkmate::assert_class(exp, "glyexp_experiment")
 
   expr_mat <- glyexp::get_expr_mat(exp)
@@ -103,6 +110,11 @@ gly_consensus_clustering_ <- function(
   output_file = NULL,
   ...
 ) {
+  lifecycle::deprecate_warn(
+    when = "0.7.0",
+    what = "gly_consensus_clustering_()",
+    details = "This function will be removed in a future version."
+  )
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_choice(on, c("sample", "variable"))

@@ -82,11 +82,13 @@ The list has classes \code{glystats_wgcna_res} and \code{glystats_res}.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+}
+\details{
 Perform WGCNA analysis to identify co-expression modules and their eigenvalues.
 The function uses WGCNA package to construct weighted gene co-expression networks,
 detect modules, and calculate module membership and eigenvalues.
-}
-\details{
+
 The function performs log2 transformation on the expression data (log2(x + 1)) before
 WGCNA analysis.
 

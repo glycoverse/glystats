@@ -1,5 +1,7 @@
 #' Weighted Gene Co-expression Network Analysis (WGCNA)
 #'
+#' `r lifecycle::badge("deprecated")`
+#'
 #' Perform WGCNA analysis to identify co-expression modules and their eigenvalues.
 #' The function uses WGCNA package to construct weighted gene co-expression networks,
 #' detect modules, and calculate module membership and eigenvalues.
@@ -75,6 +77,11 @@ gly_wgcna <- function(
   add_info = TRUE,
   ...
 ) {
+  lifecycle::deprecate_warn(
+    when = "0.7.0",
+    what = "gly_wgcna()",
+    details = "This function will be removed in a future version."
+  )
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
   # Other argments are validated in gly_wgcna_().
@@ -115,6 +122,11 @@ gly_wgcna_ <- function(
   merge_cut_height = 0.25,
   ...
 ) {
+  lifecycle::deprecate_warn(
+    when = "0.7.0",
+    what = "gly_wgcna_()",
+    details = "This function will be removed in a future version."
+  )
   # Check if WGCNA package is available
   rlang::check_installed("WGCNA")
 
