@@ -164,8 +164,6 @@ Here's your complete toolkit for glycomics and glycoproteomics data analysis:
 - **🧩 Clustering:**
   - `gly_kmeans()`: K-means clustering
   - `gly_hclust()`: Hierarchical clustering
-  - `gly_consensus_clustering()`: Consensus clustering
-  - `gly_wgcna()`: Weighted gene co-expression network analysis (WGCNA)
 
 - **⏱️ Survival Analysis:**
   - `gly_cox()`: Cox proportional hazards model
@@ -174,6 +172,10 @@ Here's your complete toolkit for glycomics and glycoproteomics data analysis:
   - `gly_enrich_go()`: Gene Ontology enrichment analysis
   - `gly_enrich_kegg()`: KEGG enrichment analysis
   - `gly_enrich_reactome()`: Reactome enrichment analysis
+  - `gly_enrich_wikipathways()`: WikiPathways enrichment analysis
+  - `gly_enrich_do()`: Disease Ontology enrichment analysis
+  - `gly_enrich_ncg()`: Network of Cancer Genes enrichment analysis
+  - `gly_enrich_dgn()`: DisGeNET enrichment analysis
 
 - **🔧 Additional Tools:**
   - `gly_cor()`: Correlation analysis
