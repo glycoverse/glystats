@@ -286,7 +286,6 @@ gly_wilcox_ <- function(
   if (!is.null(ref_group)) {
     groups <- .reorder_groups_for_ref(groups, ref_group)
   }
-  cli::cli_alert_info("Reference group: {.val {levels(groups)[1]}}")
 
   mod_list <- .gly_dea_2groups_raw(expr_mat, groups, .f, ...)
   tidy_result <- .gly_dea_2groups_tibblify(
