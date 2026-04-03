@@ -30,7 +30,7 @@
 #'    - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #'    If more than two groups, two additional columns `ref_group` and `test_group` will be added.
 #'  - `raw_result`: The raw result (same as tidy_result for this function)
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_fold_change()]): A list containing metadata from the input experiment
 #' @export
 gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   checkmate::assert_class(exp, "glyexp_experiment")

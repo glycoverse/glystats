@@ -55,7 +55,7 @@ A list with three elements:
 Additional columns from experiment metadata may be included if add_info = TRUE.
 }
 \item \code{raw_result}: A list of \code{wilcox.test} model objects
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_wilcox]{gly_wilcox()}}): A list containing metadata from the input experiment
 The list has classes \code{glystats_wilcox_res} and \code{glystats_res}.
 }
 }

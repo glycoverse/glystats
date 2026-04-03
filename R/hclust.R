@@ -61,7 +61,7 @@
 #'      - `x`, `y`: Position coordinates
 #'      - `label`: Label text
 #'  - `raw_result`: The raw hclust object from `stats::hclust()`
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_hclust()]): A list containing metadata from the input experiment
 #'
 #' @seealso [stats::hclust()], [stats::dist()], [stats::cutree()]
 #' @export

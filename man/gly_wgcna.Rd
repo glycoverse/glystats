@@ -78,7 +78,7 @@ A list with three elements:
 }
 }
 \item \code{raw_result}: The raw WGCNA blockwiseModules object
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_wgcna]{gly_wgcna()}}): A list containing metadata from the input experiment
 The list has classes \code{glystats_wgcna_res} and \code{glystats_res}.
 }
 }

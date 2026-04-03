@@ -44,7 +44,7 @@ A list with three elements:
 \item \code{cluster}: Cluster assignment
 }
 \item \code{raw_result}: The raw kmeans object from \code{stats::kmeans()}.
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_kmeans]{gly_kmeans()}}): A list containing metadata from the input experiment
 }
 }
 \description{

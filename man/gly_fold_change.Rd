@@ -36,7 +36,7 @@ A list with three elements:
 If more than two groups, two additional columns \code{ref_group} and \code{test_group} will be added.
 }
 \item \code{raw_result}: The raw result (same as tidy_result for this function)
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_fold_change]{gly_fold_change()}}): A list containing metadata from the input experiment
 }
 }
 \description{

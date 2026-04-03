@@ -34,7 +34,7 @@ A list with three elements:
 \item \code{tsne2}: Second t-SNE dimension
 }
 \item \code{raw_result}: The raw Rtsne object
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_tsne]{gly_tsne()}}): A list containing metadata from the input experiment
 The list has classes \code{glystats_tsne_res} and \code{glystats_res}.
 }
 }

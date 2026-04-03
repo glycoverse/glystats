@@ -55,7 +55,7 @@ A list with three elements:
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 }
 \item \code{raw_result}: A list of raw \code{coxph} model objects.
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_cox]{gly_cox()}}): A list containing metadata from the input experiment
 }
 }
 \description{

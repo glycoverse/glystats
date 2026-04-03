@@ -42,7 +42,7 @@
 #'    - `variable` or `sample`: Variable or sample name (depending on `on` parameter)
 #'    - `cluster`: Cluster assignment
 #'  - `raw_result`: The raw kmeans object from `stats::kmeans()`.
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_kmeans()]): A list containing metadata from the input experiment
 #'
 #' @seealso [stats::kmeans()]
 #' @export

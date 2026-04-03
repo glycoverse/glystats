@@ -29,7 +29,7 @@
 #'   - `umap2`: Second UMAP dimension
 #'   - `umap3`, `umap4`, etc.: Additional UMAP dimensions (if n_components > 2)
 #' - `raw_result`: The raw UMAP result matrix
-#' - `meta_data`: A list containing metadata from the input experiment
+#' - `meta_data` (only for [gly_umap()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_umap_res` and `glystats_res`.
 #' @seealso [uwot::umap()]
 #' @export

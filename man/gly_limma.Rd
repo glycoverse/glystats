@@ -92,7 +92,7 @@ A list with three elements:
 \item \code{test_group}: Test group
 }
 \item \code{raw_result}: The raw limma fit object(s).
-\item \code{meta_data}: The meta data from the experiment object (only for \code{gly_limma()}).
+\item \code{meta_data} (only for \code{\link[=gly_limma]{gly_limma()}}): A list containing metadata from the input experiment.
 }
 }
 \description{

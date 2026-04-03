@@ -38,7 +38,7 @@
 #'    - `hr`: Hazard ratio (exp(coefficient))
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: A list of raw `coxph` model objects.
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_cox()]): A list containing metadata from the input experiment
 #'
 #' @seealso [survival::coxph()], [survival::Surv()]
 #' @export

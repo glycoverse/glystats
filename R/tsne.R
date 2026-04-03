@@ -28,7 +28,7 @@
 #'   - `tsne1`: First t-SNE dimension
 #'   - `tsne2`: Second t-SNE dimension
 #' - `raw_result`: The raw Rtsne object
-#' - `meta_data`: A list containing metadata from the input experiment
+#' - `meta_data` (only for [gly_tsne()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_tsne_res` and `glystats_res`.
 #' @seealso [Rtsne::Rtsne()]
 #' @export

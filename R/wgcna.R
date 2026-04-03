@@ -58,7 +58,7 @@
 #'     - `sample`: Sample name
 #'     - `eigenvalue`: Module eigenvalue (first principal component of module expression)
 #' - `raw_result`: The raw WGCNA blockwiseModules object
-#' - `meta_data`: A list containing metadata from the input experiment
+#' - `meta_data` (only for [gly_wgcna()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_wgcna_res` and `glystats_res`.
 #'
 #' @seealso [WGCNA::pickSoftThreshold()], [WGCNA::blockwiseModules()]

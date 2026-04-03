@@ -60,7 +60,7 @@ A list with three elements:
 \item \code{log2fc}: Log2 fold change (log2(group2_mean / group1_mean))
 }
 \item \code{raw_result}: A list of \code{t.test} model objects
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_ttest]{gly_ttest()}}): A list containing metadata from the input experiment
 The list has classes \code{glystats_ttest_res} and \code{glystats_res}.
 }
 }

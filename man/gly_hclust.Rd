@@ -70,7 +70,7 @@ A list containing:
 }
 }
 \item \code{raw_result}: The raw hclust object from \code{stats::hclust()}
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_hclust]{gly_hclust()}}): A list containing metadata from the input experiment
 }
 }
 \description{

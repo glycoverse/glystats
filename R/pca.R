@@ -42,7 +42,7 @@
 #'      - `percent`: Percentage of variance explained
 #'      - `cumulative`: Cumulative percentage of variance explained
 #'  - `raw_result`: The raw prcomp object from `stats::prcomp()`
-#'  - `meta_data`: A list containing metadata from the experiment (only for [gly_pca()])
+#'  - `meta_data` (only for [gly_pca()]): A list containing metadata from the input experiment
 #' @seealso [stats::prcomp()]
 #' @export
 gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {

@@ -80,7 +80,7 @@
 #'    - `test_group`: Test group
 #'
 #'  - `raw_result`: The raw limma fit object(s).
-#'  - `meta_data`: The meta data from the experiment object (only for `gly_limma()`).
+#'  - `meta_data` (only for [gly_limma()]): A list containing metadata from the input experiment.
 #' @seealso [limma::lmFit()], [limma::eBayes()], [limma::makeContrasts()]
 #' @export
 gly_limma <- function(

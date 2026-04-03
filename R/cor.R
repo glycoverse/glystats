@@ -44,7 +44,7 @@
 #'    - `p_val`: Raw p-value from correlation test
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: The raw rcorr object from Hmisc::rcorr()
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_cor()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_cor_res` and `glystats_res`.
 #'
 #' @seealso [Hmisc::rcorr()], [stats::cor()]

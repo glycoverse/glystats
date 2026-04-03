@@ -46,7 +46,7 @@
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #' - `raw_result`: A list of `t.test` model objects
-#' - `meta_data`: A list containing metadata from the input experiment
+#' - `meta_data` (only for [gly_ttest()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_ttest_res` and `glystats_res`.
 #' @seealso [stats::t.test()]
 #' @export
@@ -183,7 +183,7 @@ gly_ttest_ <- function(
 #'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #'   Additional columns from experiment metadata may be included if add_info = TRUE.
 #' - `raw_result`: A list of `wilcox.test` model objects
-#' - `meta_data`: A list containing metadata from the input experiment
+#' - `meta_data` (only for [gly_wilcox()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_wilcox_res` and `glystats_res`.
 #'
 #' @seealso [stats::wilcox.test()]

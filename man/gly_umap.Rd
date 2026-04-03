@@ -35,7 +35,7 @@ A list with three elements:
 \item \code{umap3}, \code{umap4}, etc.: Additional UMAP dimensions (if n_components > 2)
 }
 \item \code{raw_result}: The raw UMAP result matrix
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_umap]{gly_umap()}}): A list containing metadata from the input experiment
 The list has classes \code{glystats_umap_res} and \code{glystats_res}.
 }
 }

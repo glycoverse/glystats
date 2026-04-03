@@ -39,7 +39,7 @@
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_enrich_go()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_go_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichGO()]
 #' @export
@@ -149,7 +149,7 @@ gly_enrich_go_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_enrich_kegg()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_kegg_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichKEGG()]
 #' @export
@@ -258,7 +258,7 @@ gly_enrich_kegg_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw ReactomePA enrichPathway result object
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_enrich_reactome()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_reactome_ora_res` and `glystats_res`.
 #' @seealso [ReactomePA::enrichPathway()]
 #' @export
@@ -379,7 +379,7 @@ gly_enrich_reactome_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_enrich_wikipathways()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_wikipathways_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichWP()]
 #' @export
@@ -500,7 +500,7 @@ gly_enrich_wikipathways_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw DOSE enrichResult object
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_enrich_do()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_do_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichDO()]
 #' @export
@@ -623,7 +623,7 @@ gly_enrich_do_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw DOSE enrichResult object
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_enrich_ncg()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_ncg_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichNCG()]
 #' @export
@@ -738,7 +738,7 @@ gly_enrich_ncg_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw DOSE enrichResult object
-#'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `meta_data` (only for [gly_enrich_dgn()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_dgn_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichDGN()]
 #' @export

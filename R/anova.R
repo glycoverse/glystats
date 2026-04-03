@@ -58,7 +58,7 @@
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `aov` model objects.
 #'     - `post_hoc_test`: A list of raw `TukeyHSD` objects.
-#'   - `meta_data`: A list containing metadata from the input experiment.
+#'   - `meta_data` (only for [gly_anova()]): A list containing metadata from the input experiment.
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
 #' @export

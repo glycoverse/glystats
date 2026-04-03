@@ -61,7 +61,7 @@ A list containing three elements:
 \item \code{main_test}: A list of raw \code{aov} model objects.
 \item \code{post_hoc_test}: A list of raw \code{TukeyHSD} objects.
 }
-\item \code{meta_data}: A list containing metadata from the input experiment.
+\item \code{meta_data} (only for \code{\link[=gly_anova]{gly_anova()}}): A list containing metadata from the input experiment.
 }
 }
 \description{

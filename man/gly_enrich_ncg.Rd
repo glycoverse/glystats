@@ -64,7 +64,7 @@ A list with three elements:
 \item \code{count}: Number of genes in the term
 }
 \item \code{raw_result}: The raw DOSE enrichResult object
-\item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{meta_data} (only for \code{\link[=gly_enrich_ncg]{gly_enrich_ncg()}}): A list containing metadata from the input experiment
 The list has classes \code{glystats_ncg_ora_res} and \code{glystats_res}.
 }
 }

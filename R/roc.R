@@ -53,7 +53,7 @@
 #'     - `specificity`: Specificity (True Negative Rate)
 #'     - `sensitivity`: Sensitivity (True Positive Rate)
 #' - `raw_result`: A list of `pROC` objects
-#' - `meta_data`: A list containing metadata from the input experiment
+#' - `meta_data` (only for [gly_roc()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_roc_res` and `glystats_res`.
 #' @seealso [pROC::roc()], [pROC::coords()]
 #' @export
