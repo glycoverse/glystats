@@ -101,7 +101,7 @@ Must have exactly 2 levels. Character vectors will be automatically converted to
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with t-test results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+    <p>A list with three elements:</p><ul><li><p><code>tidy_result</code>: A tibble with t-test results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>estimate</code>: Difference in group means (group2 - group1)</p></li>
 <li><p><code>estimate1</code>: Mean of group 1</p></li>
 <li><p><code>estimate2</code>: Mean of group 2</p></li>
@@ -115,7 +115,8 @@ Must have exactly 2 levels. Character vectors will be automatically converted to
 <li><p><code>p_adj</code>: Adjusted p-value (if p_adj_method is not NULL)</p></li>
 <li><p><code>log2fc</code>: Log2 fold change (log2(group2_mean / group1_mean))</p></li>
 </ul></li>
-<li><p><code>raw_result</code>: A list of <code>t.test</code> model objects
+<li><p><code>raw_result</code>: A list of <code>t.test</code> model objects</p></li>
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment
 The list has classes <code>glystats_ttest_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
     <div class="section level2">

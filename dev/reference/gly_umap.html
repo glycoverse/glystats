@@ -78,12 +78,13 @@ Only applicable to <code>gly_umap()</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with UMAP coordinates containing the following columns:</p><ul><li><p><code>sample</code>: Sample name</p></li>
+    <p>A list with three elements:</p><ul><li><p><code>tidy_result</code>: A tibble with UMAP coordinates containing the following columns:</p><ul><li><p><code>sample</code>: Sample name</p></li>
 <li><p><code>umap1</code>: First UMAP dimension</p></li>
 <li><p><code>umap2</code>: Second UMAP dimension</p></li>
 <li><p><code>umap3</code>, <code>umap4</code>, etc.: Additional UMAP dimensions (if n_components &gt; 2)</p></li>
 </ul></li>
-<li><p><code>raw_result</code>: The raw UMAP result matrix
+<li><p><code>raw_result</code>: The raw UMAP result matrix</p></li>
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment
 The list has classes <code>glystats_umap_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
     <div class="section level2">

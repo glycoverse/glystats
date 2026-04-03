@@ -92,7 +92,7 @@ Must have at least 2 levels. Character vectors will be automatically converted t
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing two elements:</p><ul><li><p><code>tidy_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A tibble with ANOVA results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+    <p>A list containing three elements:</p><ul><li><p><code>tidy_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A tibble with ANOVA results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>term</code>: ANOVA term (usually "groups")</p></li>
 <li><p><code>df</code>: Degrees of freedom</p></li>
 <li><p><code>sumsq</code>: Sum of squares</p></li>
@@ -112,6 +112,7 @@ Must have at least 2 levels. Character vectors will be automatically converted t
 <li><p><code>raw_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A list of raw <code>aov</code> model objects.</p></li>
 <li><p><code>post_hoc_test</code>: A list of raw <code>TukeyHSD</code> objects.</p></li>
 </ul></li>
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

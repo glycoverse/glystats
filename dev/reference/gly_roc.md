@@ -53,7 +53,7 @@ gly_roc_(expr_mat, groups, pos_class = NULL)
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A list containing two tibbles:
 
@@ -79,8 +79,10 @@ A list with two elements:
 
     - `sensitivity`: Sensitivity (True Positive Rate)
 
-- `raw_result`: A list of `pROC` objects The list has classes
-  `glystats_roc_res` and `glystats_res`.
+- `raw_result`: A list of `pROC` objects
+
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_roc_res` and `glystats_res`.
 
 ## Details
 

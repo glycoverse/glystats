@@ -47,7 +47,7 @@ gly_umap_(expr_mat, n_neighbors = 15, n_components = 2, ...)
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with UMAP coordinates containing the following
   columns:
@@ -61,8 +61,10 @@ A list with two elements:
   - `umap3`, `umap4`, etc.: Additional UMAP dimensions (if n_components
     \> 2)
 
-- `raw_result`: The raw UMAP result matrix The list has classes
-  `glystats_umap_res` and `glystats_res`.
+- `raw_result`: The raw UMAP result matrix
+
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_umap_res` and `glystats_res`.
 
 ## Details
 

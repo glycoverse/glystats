@@ -84,6 +84,9 @@ A list containing:
 - `raw_result`: The raw prcomp object from
   [`stats::prcomp()`](https://rdrr.io/r/stats/prcomp.html)
 
+- `meta_data`: A list containing metadata from the experiment (only for
+  `gly_pca()`)
+
 ## Details
 
 The function performs log transformation on the expression data (log(x +

@@ -89,7 +89,7 @@ gly_wgcna_(
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A list containing two tibbles:
 
@@ -112,8 +112,10 @@ A list with two elements:
     - `eigenvalue`: Module eigenvalue (first principal component of
       module expression)
 
-- `raw_result`: The raw WGCNA blockwiseModules object The list has
-  classes `glystats_wgcna_res` and `glystats_res`.
+- `raw_result`: The raw WGCNA blockwiseModules object
+
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_wgcna_res` and `glystats_res`.
 
 ## Details
 

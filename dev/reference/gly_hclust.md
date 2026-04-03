@@ -107,6 +107,8 @@ A list containing:
 - `raw_result`: The raw hclust object from
   [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html)
 
+- `meta_data`: A list containing metadata from the input experiment
+
 ## Details
 
 The function performs log2 transformation on the expression data

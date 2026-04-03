@@ -144,7 +144,7 @@ Must have length equal to <code>ncol(expr_mat)</code>. If names or row names are
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with limma results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+    <p>A list with three elements:</p><ul><li><p><code>tidy_result</code>: A tibble with limma results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>log2fc</code>: Log2 fold change</p></li>
 <li><p><code>AveExpr</code>: Average expression level</p></li>
 <li><p><code>t</code>: t-statistic</p></li>
@@ -155,6 +155,7 @@ Must have length equal to <code>ncol(expr_mat)</code>. If names or row names are
 <li><p><code>test_group</code>: Test group</p></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw limma fit object(s).</p></li>
+<li><p><code>meta_data</code>: The meta data from the experiment object (only for <code>gly_limma()</code>).</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

@@ -69,7 +69,7 @@ gly_ttest_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with t-test results containing the following
   columns:
@@ -100,8 +100,10 @@ A list with two elements:
 
   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 
-- `raw_result`: A list of `t.test` model objects The list has classes
-  `glystats_ttest_res` and `glystats_res`.
+- `raw_result`: A list of `t.test` model objects
+
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_ttest_res` and `glystats_res`.
 
 ## Details
 

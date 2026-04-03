@@ -70,7 +70,7 @@ gly_cox_(expr_mat, time, event, p_adj_method = "BH", ...)
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with Cox model results containing the
   following columns:
@@ -90,6 +90,8 @@ A list with two elements:
   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 
 - `raw_result`: A list of raw `coxph` model objects.
+
+- `meta_data`: A list containing metadata from the input experiment
 
 ## Details
 
