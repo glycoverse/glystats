@@ -36,7 +36,7 @@ Only applicable to \code{gly_kmeans()}.}
 \item{expr_mat}{(Only for \code{\link[=gly_kmeans_]{gly_kmeans_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A tibble with cluster assignments containing the following columns:
 \itemize{
@@ -44,6 +44,7 @@ A list with two elements:
 \item \code{cluster}: Cluster assignment
 }
 \item \code{raw_result}: The raw kmeans object from \code{stats::kmeans()}.
+\item \code{meta_data}: A list containing metadata from the input experiment
 }
 }
 \description{

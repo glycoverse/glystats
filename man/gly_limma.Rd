@@ -77,7 +77,7 @@ Must have length equal to \code{ncol(expr_mat)}. If names or row names are provi
 \code{colnames(expr_mat)}, they will be aligned automatically. Default is NULL.}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A tibble with limma results containing the following columns:
 \itemize{
@@ -92,6 +92,7 @@ A list with two elements:
 \item \code{test_group}: Test group
 }
 \item \code{raw_result}: The raw limma fit object(s).
+\item \code{meta_data}: The meta data from the experiment object (only for \code{gly_limma()}).
 }
 }
 \description{

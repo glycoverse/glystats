@@ -53,7 +53,7 @@ In this case all detected proteins in this experiment will be extracted and pass
 \item{proteins}{(Only for \code{\link[=gly_enrich_reactome_]{gly_enrich_reactome_()}}) A character vector of UniProt accession IDs.}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A tibble with enrichment results containing the following columns:
 \itemize{
@@ -68,6 +68,7 @@ A list with two elements:
 \item \code{count}: Number of genes in the term
 }
 \item \code{raw_result}: The raw ReactomePA enrichPathway result object
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_reactome_ora_res} and \code{glystats_res}.
 }
 }

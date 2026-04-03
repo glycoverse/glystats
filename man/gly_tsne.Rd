@@ -25,7 +25,7 @@ Only applicable to \code{gly_tsne()}.}
 \item{expr_mat}{(Only for \code{\link[=gly_tsne_]{gly_tsne_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A tibble with t-SNE coordinates containing the following columns:
 \itemize{
@@ -34,6 +34,7 @@ A list with two elements:
 \item \code{tsne2}: Second t-SNE dimension
 }
 \item \code{raw_result}: The raw Rtsne object
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_tsne_res} and \code{glystats_res}.
 }
 }
