@@ -36,7 +36,7 @@
 #' **Multiple Testing Correction:**
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'  - `tidy_result`: A tibble with correlation results containing the following columns:
 #'    - `variable1` or `sample1`: First element of the pair (depending on `on` parameter)
 #'    - `variable2` or `sample2`: Second element of the pair (depending on `on` parameter)
@@ -44,6 +44,7 @@
 #'    - `p_val`: Raw p-value from correlation test
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: The raw rcorr object from Hmisc::rcorr()
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_cor_res` and `glystats_res`.
 #'
 #' @seealso [Hmisc::rcorr()], [stats::cor()]
@@ -69,7 +70,12 @@ gly_cor <- function(
   expr_mat <- glyexp::get_expr_mat(exp)
 
   # Call the underlying API
-  gly_cor_(expr_mat, on, method, p_adj_method, ...)
+  result <- gly_cor_(expr_mat, on, method, p_adj_method, ...)
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
+  result
 }
 
 #' @rdname gly_cor

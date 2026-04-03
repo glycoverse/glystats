@@ -61,6 +61,7 @@
 #'      - `x`, `y`: Position coordinates
 #'      - `label`: Label text
 #'  - `raw_result`: The raw hclust object from `stats::hclust()`
+#'  - `meta_data`: A list containing metadata from the input experiment
 #'
 #' @seealso [stats::hclust()], [stats::dist()], [stats::cutree()]
 #' @export
@@ -91,6 +92,10 @@ gly_hclust <- function(
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 

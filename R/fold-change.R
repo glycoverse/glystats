@@ -24,10 +24,13 @@
 #' `gly_fold_change_()` is the underlying API that works with matrices and factor vectors directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
-#' @returns A tibble with fold change results containing the following columns:
-#'   - `variable`: Variable name
-#'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
-#'   If more than two groups, two additional columns `ref_group` and `test_group` will be added.
+#' @returns A list with three elements:
+#'  - `tidy_result`: A tibble with fold change results containing the following columns:
+#'    - `variable`: Variable name
+#'    - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
+#'    If more than two groups, two additional columns `ref_group` and `test_group` will be added.
+#'  - `raw_result`: The raw result (same as tidy_result for this function)
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' @export
 gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   checkmate::assert_class(exp, "glyexp_experiment")
@@ -47,10 +50,20 @@ gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   expr_mat <- exp$expr_mat
 
   # Call the underlying API
-  result <- gly_fold_change_(expr_mat, groups)
+  tidy_result <- gly_fold_change_(expr_mat, groups)
 
   # Process results with add_info logic
-  .process_results_add_info(result, exp, add_info)
+  tidy_result <- .process_results_add_info(tidy_result, exp, add_info)
+
+  # Build result list
+  result <- list(
+    tidy_result = tidy_result,
+    raw_result = tidy_result,
+    meta_data = glyexp::get_meta_data(exp)
+  )
+  class(result) <- c("glystats_fc_res", "glystats_res", class(result))
+
+  result
 }
 
 #' @rdname gly_fold_change

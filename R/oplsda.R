@@ -52,6 +52,7 @@
 #'      - `perm_id`: Permutation ID (0 for original model, 1+ for permutations)
 #'      - Additional columns from the permutation test matrix (e.g., R2X, R2Y, Q2, etc.)
 #'  - `raw_result`: The raw ropls opls object from `ropls::opls()`
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' @seealso [ropls::opls()]
 #' @export
 gly_oplsda <- function(
@@ -97,6 +98,10 @@ gly_oplsda <- function(
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 

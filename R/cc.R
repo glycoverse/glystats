@@ -52,12 +52,13 @@
 #' 1. Perform consensus clustering for k = 2 to max_k using ConsensusClusterPlus
 #' 2. Return cluster assignments for all k values in long format
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'  - `tidy_result`: A tibble with consensus clustering results containing the following columns:
 #'    - `variable` or `sample`: Variable or sample name (depending on `on` parameter)
 #'    - `k`: Number of clusters
 #'    - `cluster`: Cluster assignment for the corresponding k
 #'  - `raw_result`: The raw ConsensusClusterPlus object
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_cc_res` and `glystats_res`.
 #'
 #' @seealso [ConsensusClusterPlus::ConsensusClusterPlus()]
@@ -94,6 +95,10 @@ gly_consensus_clustering <- function(
     ...
   )
   result <- .process_results_add_info(result, exp, add_info)
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 

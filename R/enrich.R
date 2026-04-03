@@ -27,7 +27,7 @@
 #' - `clusterProfiler` for enrichment analysis
 #' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'  - `tidy_result`: A tibble with enrichment results containing the following columns:
 #'    - `id`: Term ID
 #'    - `description`: Term description
@@ -39,6 +39,7 @@
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_go_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichGO()]
 #' @export
@@ -55,7 +56,7 @@ gly_enrich_go <- function(
   rlang::check_installed("clusterProfiler")
   checkmate::assert_logical(add_info, len = 1)
   proteins <- .extract_uniprot_from_exp(exp)
-  gly_enrich_go_(
+  result <- gly_enrich_go_(
     proteins,
     orgdb = orgdb,
     ont = ont,
@@ -64,6 +65,11 @@ gly_enrich_go <- function(
     p_cutoff = p_cutoff,
     q_cutoff = q_cutoff
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
+  result
 }
 
 #' @rdname gly_enrich_go
@@ -131,7 +137,7 @@ gly_enrich_go_ <- function(
 #' These functions require the following packages to be installed:
 #' - `clusterProfiler` for enrichment analysis
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'  - `tidy_result`: A tibble with enrichment results containing the following columns:
 #'    - `id`: Term ID (e.g., hsa:XXXXX)
 #'    - `description`: Term description
@@ -143,6 +149,7 @@ gly_enrich_go_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_kegg_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichKEGG()]
 #' @export
@@ -158,7 +165,7 @@ gly_enrich_kegg <- function(
   rlang::check_installed("clusterProfiler")
   checkmate::assert_logical(add_info, len = 1)
   proteins <- .extract_uniprot_from_exp(exp)
-  gly_enrich_kegg_(
+  result <- gly_enrich_kegg_(
     proteins,
     organism = organism,
     universe = universe,
@@ -166,6 +173,11 @@ gly_enrich_kegg <- function(
     p_cutoff = p_cutoff,
     q_cutoff = q_cutoff
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
+  result
 }
 
 #' @rdname gly_enrich_kegg
@@ -234,7 +246,7 @@ gly_enrich_kegg_ <- function(
 #' - `ReactomePA` for enrichment analysis
 #' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'  - `tidy_result`: A tibble with enrichment results containing the following columns:
 #'    - `id`: Term ID (e.g., R-HSA-XXXXXX)
 #'    - `description`: Term description
@@ -246,6 +258,7 @@ gly_enrich_kegg_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw ReactomePA enrichPathway result object
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_reactome_ora_res` and `glystats_res`.
 #' @seealso [ReactomePA::enrichPathway()]
 #' @export
@@ -264,7 +277,7 @@ gly_enrich_reactome <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  gly_enrich_reactome_(
+  result <- gly_enrich_reactome_(
     proteins,
     orgdb = orgdb,
     organism = organism,
@@ -273,6 +286,11 @@ gly_enrich_reactome <- function(
     p_cutoff = p_cutoff,
     q_cutoff = q_cutoff
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
+  result
 }
 
 #' @rdname gly_enrich_reactome
@@ -349,7 +367,7 @@ gly_enrich_reactome_ <- function(
 #' - `clusterProfiler` for enrichment analysis and ID conversion
 #' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'  - `tidy_result`: A tibble with enrichment results containing the following columns:
 #'    - `id`: Term ID (e.g., WPXXXXX)
 #'    - `description`: Term description
@@ -361,6 +379,7 @@ gly_enrich_reactome_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_wikipathways_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichWP()]
 #' @export
@@ -378,7 +397,7 @@ gly_enrich_wikipathways <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  gly_enrich_wikipathways_(
+  result <- gly_enrich_wikipathways_(
     proteins,
     organism = organism,
     orgdb = orgdb,
@@ -387,6 +406,11 @@ gly_enrich_wikipathways <- function(
     p_cutoff = p_cutoff,
     q_cutoff = q_cutoff
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
+  result
 }
 
 #' @rdname gly_enrich_wikipathways
@@ -464,7 +488,7 @@ gly_enrich_wikipathways_ <- function(
 #' - `DOSE` for enrichment analysis
 #' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'  - `tidy_result`: A tibble with enrichment results containing the following columns:
 #'    - `id`: Term ID (e.g., DOID:XXXX)
 #'    - `description`: Term description
@@ -476,6 +500,7 @@ gly_enrich_wikipathways_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw DOSE enrichResult object
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_do_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichDO()]
 #' @export
@@ -495,7 +520,7 @@ gly_enrich_do <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  gly_enrich_do_(
+  result <- gly_enrich_do_(
     proteins,
     ont = ont,
     organism = organism,
@@ -505,6 +530,11 @@ gly_enrich_do <- function(
     p_cutoff = p_cutoff,
     q_cutoff = q_cutoff
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
+  result
 }
 
 #' @rdname gly_enrich_do
@@ -581,7 +611,7 @@ gly_enrich_do_ <- function(
 #' - `DOSE` for enrichment analysis
 #' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'  - `tidy_result`: A tibble with enrichment results containing the following columns:
 #'    - `id`: Term ID
 #'    - `description`: Term description
@@ -593,6 +623,7 @@ gly_enrich_do_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw DOSE enrichResult object
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_ncg_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichNCG()]
 #' @export
@@ -610,7 +641,7 @@ gly_enrich_ncg <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  gly_enrich_ncg_(
+  result <- gly_enrich_ncg_(
     proteins,
     orgdb = orgdb,
     universe = universe,
@@ -618,6 +649,11 @@ gly_enrich_ncg <- function(
     p_cutoff = p_cutoff,
     q_cutoff = q_cutoff
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
+  result
 }
 
 #' @rdname gly_enrich_ncg
@@ -690,7 +726,7 @@ gly_enrich_ncg_ <- function(
 #' - `DOSE` for enrichment analysis
 #' - `org.Hs.eg.db` for human gene annotation or other OrgDb packages
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #'  - `tidy_result`: A tibble with enrichment results containing the following columns:
 #'    - `id`: Term ID
 #'    - `description`: Term description
@@ -702,6 +738,7 @@ gly_enrich_ncg_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw DOSE enrichResult object
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_dgn_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichDGN()]
 #' @export
@@ -719,7 +756,7 @@ gly_enrich_dgn <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  gly_enrich_dgn_(
+  result <- gly_enrich_dgn_(
     proteins,
     orgdb = orgdb,
     universe = universe,
@@ -727,6 +764,11 @@ gly_enrich_dgn <- function(
     p_cutoff = p_cutoff,
     q_cutoff = q_cutoff
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
+  result
 }
 
 #' @rdname gly_enrich_dgn

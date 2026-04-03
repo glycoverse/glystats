@@ -22,12 +22,13 @@
 #' `gly_tsne_()` is the underlying API that works with matrices directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #' - `tidy_result`: A tibble with t-SNE coordinates containing the following columns:
 #'   - `sample`: Sample name
 #'   - `tsne1`: First t-SNE dimension
 #'   - `tsne2`: Second t-SNE dimension
 #' - `raw_result`: The raw Rtsne object
+#' - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_tsne_res` and `glystats_res`.
 #' @seealso [Rtsne::Rtsne()]
 #' @export
@@ -43,6 +44,10 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 

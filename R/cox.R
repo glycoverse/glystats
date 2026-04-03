@@ -28,7 +28,7 @@
 #'
 #' P-values are adjusted by Benjamini-Hochberg method by default.
 #'
-#' @returns A list with two elements:
+#' @returns A list with three elements:
 #'  - `tidy_result`: A tibble with Cox model results containing the following columns:
 #'    - `variable`: Variable name
 #'    - `coefficient`: Regression coefficient (log hazard ratio)
@@ -38,6 +38,7 @@
 #'    - `hr`: Hazard ratio (exp(coefficient))
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: A list of raw `coxph` model objects.
+#'  - `meta_data`: A list containing metadata from the input experiment
 #'
 #' @seealso [survival::coxph()], [survival::Surv()]
 #' @export
@@ -69,6 +70,10 @@ gly_cox <- function(
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 
