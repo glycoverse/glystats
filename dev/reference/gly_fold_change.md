@@ -61,7 +61,8 @@ A list with three elements:
 
 - `raw_result`: The raw result (same as tidy_result for this function)
 
-- `meta_data`: A list containing metadata from the input experiment
+- `meta_data` (only for `gly_fold_change()`): A list containing metadata
+  from the input experiment
 
 ## Details
 

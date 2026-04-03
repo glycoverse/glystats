@@ -81,8 +81,9 @@ A list with three elements:
 
 - `raw_result`: A list of `pROC` objects
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_roc_res` and `glystats_res`.
+- `meta_data` (only for `gly_roc()`): A list containing metadata from
+  the input experiment The list has classes `glystats_roc_res` and
+  `glystats_res`.
 
 ## Details
 

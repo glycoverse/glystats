@@ -74,7 +74,8 @@ A list with three elements:
 - `raw_result`: The raw kmeans object from
   [`stats::kmeans()`](https://rdrr.io/r/stats/kmeans.html).
 
-- `meta_data`: A list containing metadata from the input experiment
+- `meta_data` (only for `gly_kmeans()`): A list containing metadata from
+  the input experiment
 
 ## Details
 

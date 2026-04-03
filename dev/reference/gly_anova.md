@@ -103,7 +103,8 @@ A list containing three elements:
 
   - `post_hoc_test`: A list of raw `TukeyHSD` objects.
 
-- `meta_data`: A list containing metadata from the input experiment.
+- `meta_data` (only for `gly_anova()`): A list containing metadata from
+  the input experiment.
 
 ## Details
 

@@ -63,8 +63,9 @@ A list with three elements:
 
 - `raw_result`: The raw UMAP result matrix
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_umap_res` and `glystats_res`.
+- `meta_data` (only for `gly_umap()`): A list containing metadata from
+  the input experiment The list has classes `glystats_umap_res` and
+  `glystats_res`.
 
 ## Details
 

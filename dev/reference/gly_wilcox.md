@@ -92,8 +92,9 @@ A list with three elements:
 
 - `raw_result`: A list of `wilcox.test` model objects
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_wilcox_res` and `glystats_res`.
+- `meta_data` (only for `gly_wilcox()`): A list containing metadata from
+  the input experiment The list has classes `glystats_wilcox_res` and
+  `glystats_res`.
 
 ## Details
 

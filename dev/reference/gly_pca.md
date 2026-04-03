@@ -84,8 +84,8 @@ A list containing:
 - `raw_result`: The raw prcomp object from
   [`stats::prcomp()`](https://rdrr.io/r/stats/prcomp.html)
 
-- `meta_data`: A list containing metadata from the experiment (only for
-  `gly_pca()`)
+- `meta_data` (only for `gly_pca()`): A list containing metadata from
+  the input experiment
 
 ## Details
 

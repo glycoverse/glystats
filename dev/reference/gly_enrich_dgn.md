@@ -120,8 +120,9 @@ A list with three elements:
 
 - `raw_result`: The raw DOSE enrichResult object
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_dgn_ora_res` and `glystats_res`.
+- `meta_data` (only for `gly_enrich_dgn()`): A list containing metadata
+  from the input experiment The list has classes `glystats_dgn_ora_res`
+  and `glystats_res`.
 
 ## Required packages
 

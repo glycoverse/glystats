@@ -114,8 +114,9 @@ A list with three elements:
 
 - `raw_result`: The raw ConsensusClusterPlus object
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_cc_res` and `glystats_res`.
+- `meta_data` (only for `gly_consensus_clustering()`): A list containing
+  metadata from the input experiment The list has classes
+  `glystats_cc_res` and `glystats_res`.
 
 ## Details
 

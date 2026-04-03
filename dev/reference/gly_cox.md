@@ -91,7 +91,8 @@ A list with three elements:
 
 - `raw_result`: A list of raw `coxph` model objects.
 
-- `meta_data`: A list containing metadata from the input experiment
+- `meta_data` (only for `gly_cox()`): A list containing metadata from
+  the input experiment
 
 ## Details
 

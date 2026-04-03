@@ -143,8 +143,8 @@ A list with three elements:
 
 - `raw_result`: The raw limma fit object(s).
 
-- `meta_data`: The meta data from the experiment object (only for
-  `gly_limma()`).
+- `meta_data` (only for `gly_limma()`): A list containing metadata from
+  the input experiment.
 
 ## Details
 
