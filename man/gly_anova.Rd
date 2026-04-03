@@ -31,7 +31,7 @@ Only applicable to \code{gly_anova()}.}
 Must have at least 2 levels. Character vectors will be automatically converted to factors.}
 }
 \value{
-A list containing two elements:
+A list containing three elements:
 \itemize{
 \item \code{tidy_result}: A list containing:
 \itemize{
@@ -61,6 +61,7 @@ A list containing two elements:
 \item \code{main_test}: A list of raw \code{aov} model objects.
 \item \code{post_hoc_test}: A list of raw \code{TukeyHSD} objects.
 }
+\item \code{meta_data}: A list containing metadata from the input experiment.
 }
 }
 \description{
