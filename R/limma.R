@@ -67,7 +67,7 @@
 #' This function requires the following packages to be installed:
 #' - `limma` for linear model fitting and empirical Bayes moderation
 #'
-#' @returns A list with two elements:
+#' @returns A list with three elements:
 #'  - `tidy_result`: A tibble with limma results containing the following columns:
 #'    - `variable`: Variable name
 #'    - `log2fc`: Log2 fold change
@@ -80,6 +80,7 @@
 #'    - `test_group`: Test group
 #'
 #'  - `raw_result`: The raw limma fit object(s).
+#'  - `meta_data`: The meta data from the experiment object (only for `gly_limma()`).
 #' @seealso [limma::lmFit()], [limma::eBayes()], [limma::makeContrasts()]
 #' @export
 gly_limma <- function(
@@ -162,6 +163,10 @@ gly_limma <- function(
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 
