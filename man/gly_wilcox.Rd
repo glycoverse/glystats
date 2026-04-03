@@ -41,7 +41,7 @@ Only applicable to \code{gly_wilcox()}.}
 Must have exactly 2 levels. Character vectors will be automatically converted to factors.}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A tibble with Wilcoxon test results containing the following columns:
 \itemize{
@@ -55,6 +55,7 @@ A list with two elements:
 Additional columns from experiment metadata may be included if add_info = TRUE.
 }
 \item \code{raw_result}: A list of \code{wilcox.test} model objects
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_wilcox_res} and \code{glystats_res}.
 }
 }
