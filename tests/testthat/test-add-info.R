@@ -15,12 +15,12 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
   ))
 
   expect_equal(
-    colnames(result_no_info),
+    colnames(result_no_info$tidy_result),
     c("variable", "log2fc")
   )
 
   expect_equal(
-    colnames(result_with_info),
+    colnames(result_with_info$tidy_result),
     c(
       "variable",
       "protein",

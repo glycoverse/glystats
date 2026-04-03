@@ -37,11 +37,12 @@
 #' **Clustering Method:**
 #' K-means clustering is performed using `stats::kmeans()` with the specified parameters.
 #'
-#' @returns A list with two elements:
+#' @returns A list with three elements:
 #'  - `tidy_result`: A tibble with cluster assignments containing the following columns:
 #'    - `variable` or `sample`: Variable or sample name (depending on `on` parameter)
 #'    - `cluster`: Cluster assignment
 #'  - `raw_result`: The raw kmeans object from `stats::kmeans()`.
+#'  - `meta_data`: A list containing metadata from the input experiment
 #'
 #' @seealso [stats::kmeans()]
 #' @export
@@ -73,6 +74,10 @@ gly_kmeans <- function(
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 

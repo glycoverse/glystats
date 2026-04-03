@@ -25,7 +25,7 @@ Only applicable to \code{gly_umap()}.}
 \item{expr_mat}{(Only for \code{\link[=gly_umap_]{gly_umap_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A tibble with UMAP coordinates containing the following columns:
 \itemize{
@@ -35,6 +35,7 @@ A list with two elements:
 \item \code{umap3}, \code{umap4}, etc.: Additional UMAP dimensions (if n_components > 2)
 }
 \item \code{raw_result}: The raw UMAP result matrix
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_umap_res} and \code{glystats_res}.
 }
 }

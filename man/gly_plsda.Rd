@@ -73,6 +73,7 @@ A list containing:
 }
 }
 \item \code{raw_result}: The raw ropls opls object from \code{ropls::opls()}
+\item \code{meta_data}: A list containing metadata from the input experiment
 }
 }
 \description{

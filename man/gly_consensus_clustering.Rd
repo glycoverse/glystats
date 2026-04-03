@@ -65,7 +65,7 @@ Only applicable to \code{gly_consensus_clustering()}.}
 \item{expr_mat}{(Only for \code{\link[=gly_consensus_clustering_]{gly_consensus_clustering_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A tibble with consensus clustering results containing the following columns:
 \itemize{
@@ -74,6 +74,7 @@ A list with two elements:
 \item \code{cluster}: Cluster assignment for the corresponding k
 }
 \item \code{raw_result}: The raw ConsensusClusterPlus object
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_cc_res} and \code{glystats_res}.
 }
 }

@@ -37,7 +37,7 @@
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A list containing two elements:
+#' A list containing three elements:
 #'   - `tidy_result`: A list containing:
 #'     - `main_test`: A tibble with ANOVA results containing the following columns:
 #'       - `variable`: Variable name
@@ -58,6 +58,7 @@
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `aov` model objects.
 #'     - `post_hoc_test`: A list of raw `TukeyHSD` objects.
+#'   - `meta_data`: A list containing metadata from the input experiment.
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
 #' @export
@@ -99,6 +100,8 @@ gly_anova <- function(
     exp,
     add_info
   )
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
   result
 }
 
@@ -445,7 +448,7 @@ gly_ancova_ <- function(
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A list containing two elements:
+#' A list containing three elements:
 #'   - `tidy_result`: A list containing:
 #'     - `main_test`: A tibble with Kruskal-Wallis test results containing the following columns:
 #'       - `variable`: Variable name
@@ -464,6 +467,7 @@ gly_ancova_ <- function(
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `kruskal.test` objects.
 #'     - `post_hoc_test`: A list of raw `dunnTest` objects.
+#'   - `meta_data`: A list containing metadata from the input experiment.
 #'
 #' @seealso [stats::kruskal.test()], [FSA::dunnTest()]
 #' @export
@@ -508,6 +512,8 @@ gly_kruskal <- function(
     exp,
     add_info
   )
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
   result
 }
 

@@ -30,7 +30,7 @@
 #' `gly_ttest_()` is the underlying API that works with matrices and factor vectors directly,
 #' providing more flexibility for users who don't use the glyexp package.
 #'
-#' @returns A list with two elements:
+#' @returns A list with three elements:
 #' - `tidy_result`: A tibble with t-test results containing the following columns:
 #'   - `variable`: Variable name
 #'   - `estimate`: Difference in group means (group2 - group1)
@@ -46,6 +46,7 @@
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #' - `raw_result`: A list of `t.test` model objects
+#' - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_ttest_res` and `glystats_res`.
 #' @seealso [stats::t.test()]
 #' @export
@@ -91,6 +92,10 @@ gly_ttest <- function(
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 
@@ -167,7 +172,7 @@ gly_ttest_ <- function(
 #' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @returns
-#' A list with two elements:
+#' A list with three elements:
 #' - `tidy_result`: A tibble with Wilcoxon test results containing the following columns:
 #'   - `variable`: Variable name
 #'   - `statistic`: Wilcoxon test statistic
@@ -178,6 +183,7 @@ gly_ttest_ <- function(
 #'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #'   Additional columns from experiment metadata may be included if add_info = TRUE.
 #' - `raw_result`: A list of `wilcox.test` model objects
+#' - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_wilcox_res` and `glystats_res`.
 #'
 #' @seealso [stats::wilcox.test()]
@@ -229,6 +235,10 @@ gly_wilcox <- function(
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 

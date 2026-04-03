@@ -543,3 +543,30 @@ test_that("gly_limma_ validates subjects length", {
     "subjects must have"
   )
 })
+
+test_that("gly_limma returns meta_data from experiment", {
+  # Use test_gp_exp and filter to 2 groups for limma
+  exp_2group <- test_gp_exp |>
+    glyexp::filter_obs(group %in% c("C", "H")) |>
+    glyexp::slice_sample_var(n = 10)
+
+  result <- suppressMessages(gly_limma(exp_2group))
+
+  # Check that meta_data exists and contains expected values
+  expect_true("meta_data" %in% names(result))
+  expect_equal(result$meta_data$exp_type, "glycoproteomics")
+  expect_equal(result$meta_data$glycan_type, "N")
+})
+
+test_that("gly_limma_ does not return meta_data", {
+  # Use test_gp_exp and extract expression matrix
+  exp_2group <- test_gp_exp |>
+    glyexp::filter_obs(group %in% c("C", "H"))
+  expr_mat <- glyexp::get_expr_mat(exp_2group)
+  groups <- factor(rep(c("C", "H"), each = 3))
+
+  result <- suppressMessages(gly_limma_(expr_mat, groups))
+
+  # Check that meta_data does NOT exist
+  expect_false("meta_data" %in% names(result))
+})

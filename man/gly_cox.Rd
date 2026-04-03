@@ -42,7 +42,7 @@ Only applicable to \code{gly_cox()}.}
 \item{event}{A numeric vector specifying the event indicator for each sample (1 for event, 0 for censoring).}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A tibble with Cox model results containing the following columns:
 \itemize{
@@ -55,6 +55,7 @@ A list with two elements:
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 }
 \item \code{raw_result}: A list of raw \code{coxph} model objects.
+\item \code{meta_data}: A list containing metadata from the input experiment
 }
 }
 \description{

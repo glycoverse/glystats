@@ -40,7 +40,7 @@
 #' This function requires the `pROC` package to be installed for ROC curve computation.
 #'
 #' @returns
-#' A list with two elements:
+#' A list with three elements:
 #' - `tidy_result`: A list containing two tibbles:
 #'   - `auc`: A tibble containing AUC values for each variable with the following columns:
 #'     - `variable`: Variable name
@@ -53,6 +53,7 @@
 #'     - `specificity`: Specificity (True Negative Rate)
 #'     - `sensitivity`: Sensitivity (True Positive Rate)
 #' - `raw_result`: A list of `pROC` objects
+#' - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_roc_res` and `glystats_res`.
 #' @seealso [pROC::roc()], [pROC::coords()]
 #' @export
@@ -92,6 +93,10 @@ gly_roc <- function(
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 

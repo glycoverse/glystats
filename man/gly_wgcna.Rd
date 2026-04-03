@@ -60,7 +60,7 @@ to the modules tibble. Only applicable to \code{gly_wgcna()}.}
 \item{expr_mat}{(Only for \code{\link[=gly_wgcna_]{gly_wgcna_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A list containing two tibbles:
 \itemize{
@@ -78,6 +78,7 @@ A list with two elements:
 }
 }
 \item \code{raw_result}: The raw WGCNA blockwiseModules object
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_wgcna_res} and \code{glystats_res}.
 }
 }

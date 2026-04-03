@@ -14,7 +14,7 @@ test_that("gly_plsda works with valid dataset", {
 
   expect_s3_class(plsda_res, c("glystats_plsda_res", "glystats_res"))
   expect_type(plsda_res, "list")
-  expect_setequal(names(plsda_res), c("tidy_result", "raw_result"))
+  expect_setequal(names(plsda_res), c("tidy_result", "raw_result", "meta_data"))
 
   # Check tidy_result structure
   expect_type(plsda_res$tidy_result, "list")

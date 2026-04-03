@@ -47,7 +47,7 @@
 #' 3. Module membership calculation based on correlation with module eigengenes
 #' 4. Results formatting into standardized tibbles
 #'
-#' @return A list with two elements:
+#' @return A list with three elements:
 #' - `tidy_result`: A list containing two tibbles:
 #'   - `modules`: Module assignments and membership values containing the following columns:
 #'     - `variable`: Variable name
@@ -58,6 +58,7 @@
 #'     - `sample`: Sample name
 #'     - `eigenvalue`: Module eigenvalue (first principal component of module expression)
 #' - `raw_result`: The raw WGCNA blockwiseModules object
+#' - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_wgcna_res` and `glystats_res`.
 #'
 #' @seealso [WGCNA::pickSoftThreshold()], [WGCNA::blockwiseModules()]
@@ -107,6 +108,10 @@ gly_wgcna <- function(
     exp,
     add_info
   )
+
+  # Add meta_data from experiment
+  result$meta_data <- glyexp::get_meta_data(exp)
+
   result
 }
 

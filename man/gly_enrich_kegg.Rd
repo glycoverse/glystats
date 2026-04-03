@@ -52,7 +52,7 @@ In this case all detected proteins in this experiment will be extracted and pass
 Defaults to "uniprot".}
 }
 \value{
-A list with two elements:
+A list with three elements:
 \itemize{
 \item \code{tidy_result}: A tibble with enrichment results containing the following columns:
 \itemize{
@@ -67,6 +67,7 @@ A list with two elements:
 \item \code{count}: Number of genes in the term
 }
 \item \code{raw_result}: The raw clusterProfiler enrichResult object
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_kegg_ora_res} and \code{glystats_res}.
 }
 }

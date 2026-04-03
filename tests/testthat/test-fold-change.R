@@ -9,22 +9,25 @@ test_that("gly_fold_change works with basic 2-group comparison", {
 
   # Test core functionality
   expect_s3_class(result, "glystats_fc_res")
-  expect_equal(nrow(result), 10)
-  expect_equal(ncol(result), 2)
-  expect_setequal(colnames(result), c("variable", "log2fc"))
-  expect_type(result$variable, "character")
-  expect_type(result$log2fc, "double")
+  expect_equal(nrow(result$tidy_result), 10)
+  expect_equal(ncol(result$tidy_result), 2)
+  expect_setequal(colnames(result$tidy_result), c("variable", "log2fc"))
+  expect_type(result$tidy_result$variable, "character")
+  expect_type(result$tidy_result$log2fc, "double")
 
   # Check that all variables are included
-  expect_setequal(result$variable, glyexp::get_var_info(exp_2group)$variable)
+  expect_setequal(
+    result$tidy_result$variable,
+    glyexp::get_var_info(exp_2group)$variable
+  )
 
   # Test with add_info = TRUE (default)
   result_with_info <- suppressMessages(gly_fold_change(exp_2group))
   expect_s3_class(result_with_info, "glystats_fc_res")
-  expect_equal(nrow(result_with_info), 10)
-  expect_true(ncol(result_with_info) > 2) # Should have more columns with var_info
-  expect_true("variable" %in% colnames(result_with_info))
-  expect_true("log2fc" %in% colnames(result_with_info))
+  expect_equal(nrow(result_with_info$tidy_result), 10)
+  expect_true(ncol(result_with_info$tidy_result) > 2) # Should have more columns with var_info
+  expect_true("variable" %in% colnames(result_with_info$tidy_result))
+  expect_true("log2fc" %in% colnames(result_with_info$tidy_result))
 })
 
 test_that("gly_fold_change works with multi-group comparison", {
@@ -35,12 +38,16 @@ test_that("gly_fold_change works with multi-group comparison", {
     glyexp::slice_sample_var(n = 10)
 
   result <- suppressMessages(gly_fold_change(exp_3group, add_info = FALSE))
-  expect_equal(nrow(result), 30)
+  expect_equal(nrow(result$tidy_result), 30)
   expect_setequal(
-    colnames(result),
+    colnames(result$tidy_result),
     c("variable", "log2fc", "ref_group", "test_group")
   )
-  comparisons <- stringr::str_c(result$ref_group, "_vs_", result$test_group)
+  comparisons <- stringr::str_c(
+    result$tidy_result$ref_group,
+    "_vs_",
+    result$tidy_result$test_group
+  )
   expect_setequal(comparisons, c("H_vs_M", "H_vs_C", "M_vs_C"))
 })
 
@@ -66,9 +73,9 @@ test_that("gly_fold_change works with custom group column", {
   ))
 
   expect_s3_class(result, "glystats_fc_res")
-  expect_equal(nrow(result), 5)
-  expect_equal(ncol(result), 2)
-  expect_setequal(colnames(result), c("variable", "log2fc"))
+  expect_equal(nrow(result$tidy_result), 5)
+  expect_equal(ncol(result$tidy_result), 2)
+  expect_setequal(colnames(result$tidy_result), c("variable", "log2fc"))
 })
 
 test_that("gly_fold_change handles factor groups correctly", {
@@ -81,12 +88,12 @@ test_that("gly_fold_change handles factor groups correctly", {
   result <- suppressMessages(gly_fold_change(exp_2group))
 
   expect_s3_class(result, "glystats_fc_res")
-  expect_equal(nrow(result), 5)
-  expect_type(result$log2fc, "double")
+  expect_equal(nrow(result$tidy_result), 5)
+  expect_type(result$tidy_result$log2fc, "double")
 
   # Check that fold change is calculated correctly (C vs H, H is reference)
   # All values should be finite (no NA/Inf)
-  expect_true(all(is.finite(result$log2fc)))
+  expect_true(all(is.finite(result$tidy_result$log2fc)))
 })
 
 test_that("gly_fold_change error handling", {
@@ -115,8 +122,8 @@ test_that("gly_fold_change handles edge cases", {
   result <- suppressMessages(gly_fold_change(exp_minimal, add_info = FALSE))
 
   expect_s3_class(result, "glystats_fc_res")
-  expect_equal(nrow(result), 1)
-  expect_equal(ncol(result), 2)
+  expect_equal(nrow(result$tidy_result), 1)
+  expect_equal(ncol(result$tidy_result), 2)
 
   # Test with many variables to ensure performance
   exp_large <- test_gp_exp |>
@@ -138,7 +145,7 @@ test_that("gly_fold_change_ works correctly", {
     result <- gly_fold_change_(expr_mat, groups)
   })
 
-  # Verify results
+  # Verify results - gly_fold_change_ returns a tibble directly
   expect_s3_class(result, "glystats_fc_res")
   expect_true(tibble::is_tibble(result))
   expect_setequal(colnames(result), c("variable", "log2fc"))
@@ -165,7 +172,7 @@ test_that("gly_fold_change_ accepts character groups", {
     result_factor <- gly_fold_change_(expr_mat, groups_factor)
   })
 
-  # Results should be identical
+  # Results should be identical (gly_fold_change_ returns tibble directly)
   expect_equal(result_char, result_factor)
   expect_s3_class(result_char, "glystats_fc_res")
   expect_true(tibble::is_tibble(result_char))

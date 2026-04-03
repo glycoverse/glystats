@@ -14,7 +14,10 @@ test_that("gly_oplsda works with valid Topliss ratio", {
 
   expect_s3_class(oplsda_res, c("glystats_oplsda_res", "glystats_res"))
   expect_type(oplsda_res, "list")
-  expect_setequal(names(oplsda_res), c("tidy_result", "raw_result"))
+  expect_setequal(
+    names(oplsda_res),
+    c("tidy_result", "raw_result", "meta_data")
+  )
 
   # Check tidy_result structure
   expect_type(oplsda_res$tidy_result, "list")
