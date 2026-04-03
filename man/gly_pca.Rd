@@ -50,6 +50,7 @@ A list containing:
 }
 }
 \item \code{raw_result}: The raw prcomp object from \code{stats::prcomp()}
+\item \code{meta_data}: A list containing metadata from the experiment (only for \code{\link[=gly_pca]{gly_pca()}})
 }
 }
 \description{

@@ -4,7 +4,7 @@ test_that("gly_pca works", {
   pca_res <- gly_pca(test_gp_exp)
   expect_s3_class(pca_res, c("glystats_pca_res", "glystats_res"))
   expect_type(pca_res, "list")
-  expect_setequal(names(pca_res), c("tidy_result", "raw_result"))
+  expect_setequal(names(pca_res), c("tidy_result", "raw_result", "meta_data"))
 
   # Check tidy_result structure
   expect_type(pca_res$tidy_result, "list")
@@ -100,4 +100,47 @@ test_that("gly_pca_ handles all constant columns", {
     expect_warning(gly_pca_(expr_mat, scale = TRUE)),
     "No columns with non-zero variance remain"
   )
+})
+
+test_that("gly_pca returns meta_data from experiment", {
+  # Create a simple experiment with metadata
+  expr_mat <- matrix(runif(20), nrow = 5, ncol = 4)
+  colnames(expr_mat) <- c("S1", "S2", "S3", "S4")
+  rownames(expr_mat) <- c("V1", "V2", "V3", "V4", "V5")
+
+  sample_info <- tibble::tibble(
+    sample = c("S1", "S2", "S3", "S4"),
+    group = factor(c("A", "A", "B", "B"))
+  )
+
+  var_info <- tibble::tibble(
+    variable = c("V1", "V2", "V3", "V4", "V5"),
+    var_type = c("A", "B", "C", "D", "E")
+  )
+
+  exp <- glyexp::experiment(
+    expr_mat,
+    sample_info,
+    var_info,
+    exp_type = "others",
+    custom_field = "test_value"
+  )
+
+  result <- gly_pca(exp)
+
+  # Check that meta_data exists and contains expected values
+  expect_true("meta_data" %in% names(result))
+  expect_equal(result$meta_data$exp_type, "others")
+  expect_equal(result$meta_data$custom_field, "test_value")
+})
+
+test_that("gly_pca_ does not return meta_data", {
+  expr_mat <- matrix(runif(20), nrow = 5, ncol = 4)
+  colnames(expr_mat) <- c("S1", "S2", "S3", "S4")
+  rownames(expr_mat) <- c("V1", "V2", "V3", "V4", "V5")
+
+  result <- gly_pca_(expr_mat)
+
+  # Check that meta_data does NOT exist
+  expect_false("meta_data" %in% names(result))
 })
