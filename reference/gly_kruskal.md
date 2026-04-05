@@ -64,7 +64,7 @@ gly_kruskal_(expr_mat, groups, p_adj_method = "BH", ...)
 
 ## Value
 
-A list containing two elements:
+A list containing three elements:
 
 - `tidy_result`: A list containing:
 
@@ -104,6 +104,8 @@ A list containing two elements:
   - `main_test`: A list of raw `kruskal.test` objects.
 
   - `post_hoc_test`: A list of raw `dunnTest` objects.
+
+- `meta_data`: A list containing metadata from the input experiment.
 
 ## Details
 

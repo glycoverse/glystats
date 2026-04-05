@@ -48,13 +48,21 @@ gly_fold_change_(expr_mat, groups)
 
 ## Value
 
-A tibble with fold change results containing the following columns:
+A list with three elements:
 
-- `variable`: Variable name
+- `tidy_result`: A tibble with fold change results containing the
+  following columns:
 
-- `log2fc`: Log2 fold change (log2(group2_mean / group1_mean)) If more
-  than two groups, two additional columns `ref_group` and `test_group`
-  will be added.
+  - `variable`: Variable name
+
+  - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean)) If more
+    than two groups, two additional columns `ref_group` and `test_group`
+    will be added.
+
+- `raw_result`: The raw result (same as tidy_result for this function)
+
+- `meta_data` (only for `gly_fold_change()`): A list containing metadata
+  from the input experiment
 
 ## Details
 

@@ -105,7 +105,7 @@ gly_enrich_wikipathways_(
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with enrichment results containing the
   following columns:
@@ -129,8 +129,11 @@ A list with two elements:
 
   - `count`: Number of genes in the term
 
-- `raw_result`: The raw clusterProfiler enrichResult object The list has
-  classes `glystats_wikipathways_ora_res` and `glystats_res`.
+- `raw_result`: The raw clusterProfiler enrichResult object
+
+- `meta_data` (only for `gly_enrich_wikipathways()`): A list containing
+  metadata from the input experiment The list has classes
+  `glystats_wikipathways_ora_res` and `glystats_res`.
 
 ## Required packages
 

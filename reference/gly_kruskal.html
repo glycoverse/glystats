@@ -13,7 +13,7 @@ P-values are adjusted for multiple testing using the method specified by p_adj_m
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,7 +98,7 @@ Must have at least 2 levels. Character vectors will be automatically converted t
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing two elements:</p><ul><li><p><code>tidy_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A tibble with Kruskal-Wallis test results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+    <p>A list containing three elements:</p><ul><li><p><code>tidy_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A tibble with Kruskal-Wallis test results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>statistic</code>: Kruskal-Wallis test statistic</p></li>
 <li><p><code>p_val</code>: Raw p-value from Kruskal-Wallis test</p></li>
 <li><p><code>parameter</code>: Degrees of freedom</p></li>
@@ -116,6 +116,7 @@ Must have at least 2 levels. Character vectors will be automatically converted t
 <li><p><code>raw_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A list of raw <code>kruskal.test</code> objects.</p></li>
 <li><p><code>post_hoc_test</code>: A list of raw <code>dunnTest</code> objects.</p></li>
 </ul></li>
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

@@ -47,7 +47,7 @@ gly_tsne_(expr_mat, dims = 2, perplexity = 30, ...)
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with t-SNE coordinates containing the
   following columns:
@@ -58,8 +58,11 @@ A list with two elements:
 
   - `tsne2`: Second t-SNE dimension
 
-- `raw_result`: The raw Rtsne object The list has classes
-  `glystats_tsne_res` and `glystats_res`.
+- `raw_result`: The raw Rtsne object
+
+- `meta_data` (only for `gly_tsne()`): A list containing metadata from
+  the input experiment The list has classes `glystats_tsne_res` and
+  `glystats_res`.
 
 ## Details
 

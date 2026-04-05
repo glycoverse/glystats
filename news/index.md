@@ -1,5 +1,20 @@
 # Changelog
 
+## glystats 0.8.0
+
+### New features
+
+- Add `meta_data` to all glystats results. This allows storing
+  additional information with the result object that can be accessed
+  later (#7).
+
+### Minor improvements and bug fixes
+
+- Remove duplicate reference group message in
+  [`gly_ttest()`](https://glycoverse.github.io/glystats/reference/gly_ttest.md)
+  output.
+- Update vignette function list.
+
 ## glystats 0.7.0
 
 ### Breaking changes

@@ -133,6 +133,9 @@ A list containing:
 - `raw_result`: The raw ropls opls object from
   [`ropls::opls()`](https://rdrr.io/pkg/ropls/man/opls.html)
 
+- `meta_data` (only for `gly_oplsda()`): A list containing metadata from
+  the input experiment
+
 ## Details
 
 `gly_oplsda()` is the top-level API that works with

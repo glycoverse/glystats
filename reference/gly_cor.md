@@ -56,7 +56,7 @@ gly_cor_(
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with correlation results containing the
   following columns:
@@ -73,8 +73,11 @@ A list with two elements:
 
   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 
-- `raw_result`: The raw rcorr object from Hmisc::rcorr() The list has
-  classes `glystats_cor_res` and `glystats_res`.
+- `raw_result`: The raw rcorr object from Hmisc::rcorr()
+
+- `meta_data` (only for `gly_cor()`): A list containing metadata from
+  the input experiment The list has classes `glystats_cor_res` and
+  `glystats_res`.
 
 ## Details
 

@@ -13,7 +13,7 @@ When you run this function, you will see message about "Ref Group" and "Test Gro
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,9 +84,12 @@ with levels coming first as reference groups.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble with fold change results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+    <p>A list with three elements:</p><ul><li><p><code>tidy_result</code>: A tibble with fold change results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>log2fc</code>: Log2 fold change (log2(group2_mean / group1_mean))
 If more than two groups, two additional columns <code>ref_group</code> and <code>test_group</code> will be added.</p></li>
+</ul></li>
+<li><p><code>raw_result</code>: The raw result (same as tidy_result for this function)</p></li>
+<li><p><code>meta_data</code> (only for <code>gly_fold_change()</code>): A list containing metadata from the input experiment</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

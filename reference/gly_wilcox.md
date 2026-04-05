@@ -69,7 +69,7 @@ gly_wilcox_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with Wilcoxon test results containing the
   following columns:
@@ -90,8 +90,11 @@ A list with two elements:
     Additional columns from experiment metadata may be included if
     add_info = TRUE.
 
-- `raw_result`: A list of `wilcox.test` model objects The list has
-  classes `glystats_wilcox_res` and `glystats_res`.
+- `raw_result`: A list of `wilcox.test` model objects
+
+- `meta_data` (only for `gly_wilcox()`): A list containing metadata from
+  the input experiment The list has classes `glystats_wilcox_res` and
+  `glystats_res`.
 
 ## Details
 

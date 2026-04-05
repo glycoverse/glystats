@@ -100,7 +100,7 @@ gly_consensus_clustering_(
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with consensus clustering results containing
   the following columns:
@@ -112,7 +112,10 @@ A list with two elements:
 
   - `cluster`: Cluster assignment for the corresponding k
 
-- `raw_result`: The raw ConsensusClusterPlus object The list has classes
+- `raw_result`: The raw ConsensusClusterPlus object
+
+- `meta_data` (only for `gly_consensus_clustering()`): A list containing
+  metadata from the input experiment The list has classes
   `glystats_cc_res` and `glystats_res`.
 
 ## Details

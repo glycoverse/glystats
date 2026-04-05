@@ -94,7 +94,7 @@ gly_enrich_dgn_(
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with enrichment results containing the
   following columns:
@@ -118,8 +118,11 @@ A list with two elements:
 
   - `count`: Number of genes in the term
 
-- `raw_result`: The raw DOSE enrichResult object The list has classes
-  `glystats_dgn_ora_res` and `glystats_res`.
+- `raw_result`: The raw DOSE enrichResult object
+
+- `meta_data` (only for `gly_enrich_dgn()`): A list containing metadata
+  from the input experiment The list has classes `glystats_dgn_ora_res`
+  and `glystats_res`.
 
 ## Required packages
 

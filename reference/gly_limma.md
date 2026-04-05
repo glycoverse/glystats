@@ -118,7 +118,7 @@ gly_limma_(
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with limma results containing the following
   columns:
@@ -142,6 +142,9 @@ A list with two elements:
   - `test_group`: Test group
 
 - `raw_result`: The raw limma fit object(s).
+
+- `meta_data` (only for `gly_limma()`): A list containing metadata from
+  the input experiment.
 
 ## Details
 

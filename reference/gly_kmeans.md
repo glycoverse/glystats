@@ -61,7 +61,7 @@ gly_kmeans_(expr_mat, on = "variable", centers = 3, scale = TRUE, ...)
 
 ## Value
 
-A list with two elements:
+A list with three elements:
 
 - `tidy_result`: A tibble with cluster assignments containing the
   following columns:
@@ -73,6 +73,9 @@ A list with two elements:
 
 - `raw_result`: The raw kmeans object from
   [`stats::kmeans()`](https://rdrr.io/r/stats/kmeans.html).
+
+- `meta_data` (only for `gly_kmeans()`): A list containing metadata from
+  the input experiment
 
 ## Details
 

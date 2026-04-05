@@ -17,7 +17,7 @@ gly_enrich_kegg_() accepts a character vector of UniProt IDs.
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,7 +120,7 @@ Defaults to "uniprot".</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with two elements:</p><ul><li><p><code>tidy_result</code>: A tibble with enrichment results containing the following columns:</p><ul><li><p><code>id</code>: Term ID (e.g., hsa:XXXXX)</p></li>
+    <p>A list with three elements:</p><ul><li><p><code>tidy_result</code>: A tibble with enrichment results containing the following columns:</p><ul><li><p><code>id</code>: Term ID (e.g., hsa:XXXXX)</p></li>
 <li><p><code>description</code>: Term description</p></li>
 <li><p><code>gene_ratio</code>: Ratio of genes in the term to total genes in the input</p></li>
 <li><p><code>bg_ratio</code>: Ratio of genes in the term to total genes in the background</p></li>
@@ -130,7 +130,8 @@ Defaults to "uniprot".</p></dd>
 <li><p><code>gene_id</code>: Gene IDs in the term (separated by "/")</p></li>
 <li><p><code>count</code>: Number of genes in the term</p></li>
 </ul></li>
-<li><p><code>raw_result</code>: The raw clusterProfiler enrichResult object
+<li><p><code>raw_result</code>: The raw clusterProfiler enrichResult object</p></li>
+<li><p><code>meta_data</code> (only for <code>gly_enrich_kegg()</code>): A list containing metadata from the input experiment
 The list has classes <code>glystats_kegg_ora_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
     <div class="section level2">
