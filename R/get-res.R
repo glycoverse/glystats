@@ -31,13 +31,20 @@
 #' @export
 get_tidy_result <- function(res, which = NULL) {
   checkmate::check_class(res, "glystats_res")
-  if (is.null(which)) {
-    return(res$tidy_result)
+  if (is.null(which) && !tibble::is_tibble(res$tidy_result)) {
+    cli::cli_abort(c(
+      "{.arg which} must be provided for {.cls {class(res)[[1]]}} result.",
+      "i" = "Available tibbles: {.val {names(res$tidy_result)}}"
+    ))
   }
   if (!which %in% names(res$tidy_result)) {
     cli::cli_abort(c(
       "{.arg which} must be one of {.val {names(res$tidy_result)}}"
     ))
+  }
+
+  if (is.null(which)) {
+    return(res$tidy_result)
   }
   return(res$tidy_result[[which]])
 }
