@@ -30,6 +30,7 @@
 #'
 #' @export
 get_tidy_result <- function(res, which = NULL) {
+  checkmate::check_class(res, "glystats_res")
   if (is.null(which)) {
     return(res$tidy_result)
   }
@@ -44,6 +45,7 @@ get_tidy_result <- function(res, which = NULL) {
 #' @rdname get_tidy_result
 #' @export
 get_raw_result <- function(res, which = NULL) {
+  checkmate::check_class(res, "glystats_res")
   if (is.null(which)) {
     return(res$raw_result)
   }
