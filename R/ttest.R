@@ -337,14 +337,19 @@ gly_wilcox_ <- function(
     )
   }
   safe_f <- purrr::possibly(function(...) rlang::exec(.f, ...), otherwise = NA)
+  group_levels <- levels(groups)
   nested_data <- data %>%
-    dplyr::nest_by(.data$variable) %>%
-    dplyr::mutate(
-      test_result = list(safe_f(log_value ~ group, data = .data$data, !!!dots))
-    )
+    dplyr::nest_by(.data$variable)
 
-  # Return named list of raw results
-  raw_results <- nested_data$test_result
+  # Run tests as x = group2, y = group1 so direction-sensitive outputs align
+  # with the package convention used by log2fc.
+  raw_results <- purrr::map(nested_data$data, function(df) {
+    safe_f(
+      x = df$log_value[df$group == group_levels[2]],
+      y = df$log_value[df$group == group_levels[1]],
+      !!!dots
+    )
+  })
   names(raw_results) <- nested_data$variable
   n_na <- sum(is.na(raw_results))
   if (n_na > 0) {

@@ -88,6 +88,179 @@ test_that("gly_ttest_ works correctly", {
   expect_equal(nrow(result$tidy_result), 10)
 })
 
+test_that("gly_ttest_ direction matches log2fc and ref_group", {
+  expr_mat <- matrix(
+    c(10, 11, 12, 13, 14, 1, 2, 3, 4, 5),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:10))
+  )
+  groups <- factor(c(rep("A", 5), rep("B", 5)))
+
+  result_default <- suppressMessages(gly_ttest_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL
+  ))
+  result_ref_b <- suppressMessages(gly_ttest_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL,
+    ref_group = "B"
+  ))
+
+  expect_lt(result_default$tidy_result$log2fc, 0)
+  expect_lt(result_default$tidy_result$estimate, 0)
+  expect_lt(result_default$tidy_result$statistic, 0)
+  expect_lt(result_default$tidy_result$conf_low, 0)
+  expect_lt(result_default$tidy_result$conf_high, 0)
+
+  expect_equal(
+    result_default$tidy_result$estimate1,
+    result_ref_b$tidy_result$estimate2,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$estimate2,
+    result_ref_b$tidy_result$estimate1,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$log2fc,
+    -result_ref_b$tidy_result$log2fc,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$estimate,
+    -result_ref_b$tidy_result$estimate,
+    tolerance = 1e-4
+  )
+  expect_equal(
+    result_default$tidy_result$statistic,
+    -result_ref_b$tidy_result$statistic,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$conf_low,
+    -result_ref_b$tidy_result$conf_high,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$conf_high,
+    -result_ref_b$tidy_result$conf_low,
+    tolerance = 1e-10
+  )
+})
+
+test_that("gly_ttest_ reports one-sided alternatives in the output direction", {
+  expr_mat <- matrix(
+    c(10, 11, 12, 13, 14, 1, 2, 3, 4, 5),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:10))
+  )
+  groups <- factor(c(rep("A", 5), rep("B", 5)))
+
+  result_greater <- suppressMessages(gly_ttest_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL,
+    alternative = "greater"
+  ))
+  result_less <- suppressMessages(gly_ttest_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL,
+    alternative = "less"
+  ))
+
+  expect_identical(result_greater$tidy_result$alternative, "greater")
+  expect_identical(result_less$tidy_result$alternative, "less")
+  expect_gt(result_greater$tidy_result$p_val, 0.9)
+  expect_lt(result_less$tidy_result$p_val, 0.1)
+})
+
+test_that("gly_wilcox_ direction matches log2fc and ref_group", {
+  expr_mat <- matrix(
+    c(10, 11, 12, 13, 14, 1, 2, 3, 4, 5),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:10))
+  )
+  groups <- factor(c(rep("A", 5), rep("B", 5)))
+
+  result_default <- suppressMessages(suppressWarnings(gly_wilcox_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL,
+    conf.int = TRUE,
+    exact = FALSE
+  )))
+  result_ref_b <- suppressMessages(suppressWarnings(gly_wilcox_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL,
+    ref_group = "B",
+    conf.int = TRUE,
+    exact = FALSE
+  )))
+
+  expect_lt(result_default$tidy_result$log2fc, 0)
+  expect_lt(result_default$tidy_result$estimate, 0)
+  expect_lt(result_default$tidy_result$statistic, result_ref_b$tidy_result$statistic)
+  expect_lt(result_default$tidy_result$conf_low, 0)
+  expect_lt(result_default$tidy_result$conf_high, 0)
+
+  expect_equal(
+    result_default$tidy_result$log2fc,
+    -result_ref_b$tidy_result$log2fc,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$estimate,
+    -result_ref_b$tidy_result$estimate,
+    tolerance = 1e-4
+  )
+  expect_equal(
+    result_default$tidy_result$conf_low,
+    -result_ref_b$tidy_result$conf_high,
+    tolerance = 1e-10
+  )
+  expect_equal(
+    result_default$tidy_result$conf_high,
+    -result_ref_b$tidy_result$conf_low,
+    tolerance = 1e-10
+  )
+})
+
+test_that("gly_wilcox_ preserves one-sided alternatives in the output direction", {
+  expr_mat <- matrix(
+    c(10, 11, 12, 13, 14, 1, 2, 3, 4, 5),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:10))
+  )
+  groups <- factor(c(rep("A", 5), rep("B", 5)))
+
+  result_greater <- suppressMessages(suppressWarnings(gly_wilcox_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL,
+    alternative = "greater",
+    conf.int = TRUE,
+    exact = FALSE
+  )))
+  result_less <- suppressMessages(suppressWarnings(gly_wilcox_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL,
+    alternative = "less",
+    conf.int = TRUE,
+    exact = FALSE
+  )))
+
+  expect_identical(result_greater$tidy_result$alternative, "greater")
+  expect_identical(result_less$tidy_result$alternative, "less")
+  expect_gt(result_greater$tidy_result$p_val, 0.9)
+  expect_lt(result_less$tidy_result$p_val, 0.1)
+})
+
 test_that("gly_wilcox_ works correctly", {
   # Create test data
   set.seed(123)
