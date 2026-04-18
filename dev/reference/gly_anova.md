@@ -101,7 +101,9 @@ A list containing three elements:
 
   - `main_test`: A list of raw `aov` model objects.
 
-  - `post_hoc_test`: A list of raw `TukeyHSD` objects.
+  - `post_hoc_test`: A list of raw `TukeyHSD` objects. Post-hoc
+    comparison labels follow the package direction, i.e.
+    `test_group - ref_group`.
 
 - `meta_data` (only for `gly_anova()`): A list containing metadata from
   the input experiment.
