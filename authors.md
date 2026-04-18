@@ -8,13 +8,13 @@
 ## Citation
 
 Fu B (2026). *glystats: Statistical Analysis of Glycoproteomics and
-Glycomics Data*. R package version 0.8.0,
+Glycomics Data*. R package version 0.9.0,
 <https://glycoverse.github.io/glystats/>.
 
     @Manual{,
       title = {glystats: Statistical Analysis of Glycoproteomics and Glycomics Data},
       author = {Bin Fu},
       year = {2026},
-      note = {R package version 0.8.0},
+      note = {R package version 0.9.0},
       url = {https://glycoverse.github.io/glystats/},
     }

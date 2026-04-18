@@ -19,8 +19,12 @@ get_raw_result(res, which = NULL)
 
 - which:
 
-  Used to specify which element to get, when the result is a list. If
-  NULL, the whole result (tibble or list) will be returned.
+  Used to specify which element to get, when the result is a list. For
+  glystats results with only one tidy result (e.g.
+  [`gly_ttest()`](https://glycoverse.github.io/glystats/reference/gly_ttest.md)),
+  this argument is not needed. For others (e.g.
+  [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md)),
+  this argument is required to specify which tidy result to get.
 
 ## Value
 

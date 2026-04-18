@@ -9,7 +9,7 @@ It's useful to be used in pipes."><meta property="og:image" content="https://gly
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,8 @@ It's useful to be used in pipes.</p>
 
 <dt id="arg-which">which<a class="anchor" aria-label="anchor" href="#arg-which"></a></dt>
 <dd><p>Used to specify which element to get, when the result is a list.
-If NULL, the whole result (tibble or list) will be returned.</p></dd>
+For glystats results with only one tidy result (e.g. <code><a href="gly_ttest.html">gly_ttest()</a></code>), this argument is not needed.
+For others (e.g. <code><a href="gly_anova.html">gly_anova()</a></code>), this argument is required to specify which tidy result to get.</p></dd>
 
 </dl></div>
     <div class="section level2">

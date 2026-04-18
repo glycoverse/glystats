@@ -1,5 +1,35 @@
 # Changelog
 
+## glystats 0.9.0
+
+### Breaking changes
+
+- [`get_tidy_result()`](https://glycoverse.github.io/glystats/reference/get_tidy_result.md)
+  is now type-stable: it always returns a tibble (or errors), instead of
+  sometimes returning a list when `which` is omitted. When `tidy_result`
+  is a list, the `which` argument is now required (#9).
+
+### New features
+
+- Add effect size calculations to
+  [`gly_ttest()`](https://glycoverse.github.io/glystats/reference/gly_ttest.md),
+  [`gly_wilcox()`](https://glycoverse.github.io/glystats/reference/gly_wilcox.md),
+  [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md),
+  and
+  [`gly_kruskal()`](https://glycoverse.github.io/glystats/reference/gly_kruskal.md).
+  Effect sizes (Cohen’s d, rank-biserial correlation, eta-squared, and
+  epsilon-squared) are now included in the tidy results (#8).
+
+### Minor improvements and bug fixes
+
+- Fix a bug that caused statistics to have incorrect signs for
+  [`gly_ttest()`](https://glycoverse.github.io/glystats/reference/gly_ttest.md)
+  and
+  [`gly_wilcox()`](https://glycoverse.github.io/glystats/reference/gly_wilcox.md).
+- Fix a bug that caused the `estimate` sign to be inconsistent in
+  [`gly_kruskal()`](https://glycoverse.github.io/glystats/reference/gly_kruskal.md)
+  results.
+
 ## glystats 0.8.0
 
 ### New features

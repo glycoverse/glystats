@@ -81,6 +81,8 @@ A list containing three elements:
 
     - `method`: Statistical method used
 
+    - `effect_size`: Epsilon-squared
+
     - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 
     - `post_hoc`: Significant group pairs from post-hoc test, in the
@@ -103,7 +105,9 @@ A list containing three elements:
 
   - `main_test`: A list of raw `kruskal.test` objects.
 
-  - `post_hoc_test`: A list of raw `dunnTest` objects.
+  - `post_hoc_test`: A list of raw `dunnTest` objects. Post-hoc
+    comparison labels and direction-sensitive statistics follow the
+    package direction, i.e. `test_group - ref_group`.
 
 - `meta_data`: A list containing metadata from the input experiment.
 

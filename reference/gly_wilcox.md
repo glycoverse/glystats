@@ -80,6 +80,8 @@ A list with three elements:
 
   - `p_val`: Raw p-value from Wilcoxon test
 
+  - `effect_size`: Rank-biserial correlation
+
   - `method`: Statistical method used
 
   - `alternative`: Alternative hypothesis
