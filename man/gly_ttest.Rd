@@ -54,6 +54,7 @@ A list with three elements:
 \item \code{parameter}: Degrees of freedom
 \item \code{conf_low}: Lower bound of 95\% confidence interval
 \item \code{conf_high}: Upper bound of 95\% confidence interval
+\item \code{effect_size}: Cohen's d
 \item \code{method}: Statistical method used
 \item \code{alternative}: Alternative hypothesis
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)

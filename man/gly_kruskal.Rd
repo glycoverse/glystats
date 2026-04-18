@@ -48,6 +48,7 @@ A list containing three elements:
 \item \code{p_val}: Raw p-value from Kruskal-Wallis test
 \item \code{parameter}: Degrees of freedom
 \item \code{method}: Statistical method used
+\item \code{effect_size}: Epsilon-squared
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 \item \code{post_hoc}: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 }

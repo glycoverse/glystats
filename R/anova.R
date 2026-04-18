@@ -47,6 +47,7 @@
 #'       - `meansq`: Mean squares
 #'       - `statistic`: F-statistic
 #'       - `p_val`: Raw p-value from ANOVA
+#'       - `effect_size`: Eta-squared
 #'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'       - `post_hoc`: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 #'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
@@ -146,7 +147,10 @@ gly_anova_ <- function(
   main_test <- .tibblify_main_test_results(
     raw_main_test,
     stats::aov,
-    p_adj_method
+    p_adj_method,
+    effect_size_method = "eta_squared",
+    expr_mat = expr_mat,
+    groups = groups
   )
   post_hoc_vec <- .format_posthoc_results(
     raw_post_hoc_test,
@@ -458,6 +462,7 @@ gly_ancova_ <- function(
 #'       - `p_val`: Raw p-value from Kruskal-Wallis test
 #'       - `parameter`: Degrees of freedom
 #'       - `method`: Statistical method used
+#'       - `effect_size`: Epsilon-squared
 #'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'       - `post_hoc`: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 #'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
@@ -563,7 +568,10 @@ gly_kruskal_ <- function(
   main_test <- .tibblify_main_test_results(
     raw_main_test,
     stats::kruskal.test,
-    p_adj_method
+    p_adj_method,
+    effect_size_method = "epsilon_squared",
+    expr_mat = expr_mat,
+    groups = groups
   )
   post_hoc_vec <- .format_posthoc_results(
     raw_post_hoc_test,
@@ -772,7 +780,14 @@ gly_kruskal_ <- function(
 }
 
 # Helper function to convert main test raw results to tibble
-.tibblify_main_test_results <- function(main_test_raw, .f, p_adj_method) {
+.tibblify_main_test_results <- function(
+  main_test_raw,
+  .f,
+  p_adj_method,
+  effect_size_method = NULL,
+  expr_mat = NULL,
+  groups = NULL
+) {
   var_names <- names(main_test_raw)
   result_tbl <- tibble::tibble(
     variable = var_names,
@@ -810,7 +825,113 @@ gly_kruskal_ <- function(
     )
   }
 
+  if (!is.null(effect_size_method)) {
+    result_tbl <- .add_effect_size_to_main_test(
+      result_tbl,
+      effect_size_method,
+      expr_mat,
+      groups
+    )
+  }
+
   result_tbl
+}
+
+#' Add effect sizes to multi-group main test results
+#'
+#' @param result_tbl A tibble containing the tidy main test results.
+#' @param effect_size_method A character string naming the effect size to compute.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor specifying group membership for each sample.
+#'
+#' @return A tibble with an `effect_size` column added.
+#' @noRd
+.add_effect_size_to_main_test <- function(
+  result_tbl,
+  effect_size_method,
+  expr_mat,
+  groups
+) {
+  effect_size_values <- purrr::map_dbl(result_tbl$variable, function(var_name) {
+    if (identical(effect_size_method, "eta_squared")) {
+      .calculate_eta_squared(expr_mat, groups, var_name)
+    } else if (identical(effect_size_method, "epsilon_squared")) {
+      .calculate_epsilon_squared(expr_mat, groups, var_name)
+    } else {
+      NA_real_
+    }
+  })
+
+  result_tbl$effect_size <- effect_size_values
+  result_tbl
+}
+
+#' Calculate eta-squared for one-way ANOVA
+#'
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor specifying group membership for each sample.
+#' @param var_name A character string specifying the variable to evaluate.
+#'
+#' @return A numeric scalar containing eta-squared.
+#' @noRd
+.calculate_eta_squared <- function(expr_mat, groups, var_name) {
+  log_values <- log2(expr_mat[var_name, ] + 1)
+  valid_idx <- !is.na(log_values) & !is.na(groups)
+  log_values <- log_values[valid_idx]
+  groups <- droplevels(groups[valid_idx])
+
+  if (length(log_values) == 0 || nlevels(groups) < 2) {
+    return(NA_real_)
+  }
+
+  grand_mean <- mean(log_values)
+  group_means <- purrr::map_dbl(levels(groups), function(group) {
+    mean(log_values[groups == group])
+  })
+  group_sizes <- purrr::map_int(levels(groups), function(group) {
+    sum(groups == group)
+  })
+  ss_between <- sum(group_sizes * (group_means - grand_mean)^2)
+  ss_total <- sum((log_values - grand_mean)^2)
+
+  if (!is.finite(ss_total) || ss_total == 0) {
+    return(NA_real_)
+  }
+
+  ss_between / ss_total
+}
+
+#' Calculate epsilon-squared for the Kruskal-Wallis test
+#'
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor specifying group membership for each sample.
+#' @param var_name A character string specifying the variable to evaluate.
+#'
+#' @return A numeric scalar containing epsilon-squared.
+#' @noRd
+.calculate_epsilon_squared <- function(expr_mat, groups, var_name) {
+  log_values <- log2(expr_mat[var_name, ] + 1)
+  valid_idx <- !is.na(log_values) & !is.na(groups)
+  log_values <- log_values[valid_idx]
+  groups <- droplevels(groups[valid_idx])
+
+  if (
+    length(log_values) == 0 ||
+      nlevels(groups) < 2 ||
+      length(log_values) <= nlevels(groups)
+  ) {
+    return(NA_real_)
+  }
+
+  h_stat <- suppressWarnings(
+    unname(stats::kruskal.test(log_values, groups)$statistic)
+  )
+
+  if (!is.finite(h_stat)) {
+    return(NA_real_)
+  }
+
+  (h_stat - nlevels(groups) + 1) / (length(log_values) - nlevels(groups))
 }
 
 # Helper function to convert post-hoc raw results to tibble

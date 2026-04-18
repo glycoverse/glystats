@@ -48,6 +48,7 @@ A list with three elements:
 \item \code{variable}: Variable name
 \item \code{statistic}: Wilcoxon test statistic
 \item \code{p_val}: Raw p-value from Wilcoxon test
+\item \code{effect_size}: Rank-biserial correlation
 \item \code{method}: Statistical method used
 \item \code{alternative}: Alternative hypothesis
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)

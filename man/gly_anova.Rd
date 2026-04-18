@@ -44,6 +44,7 @@ A list containing three elements:
 \item \code{meansq}: Mean squares
 \item \code{statistic}: F-statistic
 \item \code{p_val}: Raw p-value from ANOVA
+\item \code{effect_size}: Eta-squared
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 \item \code{post_hoc}: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 }

@@ -14,7 +14,9 @@ test_that("gly_ttest works with t-test method", {
   expect_equal(nrow(result$tidy_result), 10)
   expect_true("p_adj" %in% colnames(result$tidy_result)) # p_adj should exist
   expect_true("log2fc" %in% colnames(result$tidy_result)) # log2fc should exist
+  expect_true("effect_size" %in% colnames(result$tidy_result))
   expect_type(result$tidy_result$log2fc, "double") # log2fc should be numeric
+  expect_type(result$tidy_result$effect_size, "double")
 
   # Test raw_result
   expect_type(result$raw_result, "list")
@@ -58,7 +60,9 @@ test_that("gly_wilcox works with wilcoxon method", {
   expect_setequal(names(result), c("tidy_result", "raw_result", "meta_data"))
   expect_equal(nrow(result$tidy_result), 10)
   expect_true("log2fc" %in% colnames(result$tidy_result)) # Wilcoxon should now have log2fc
+  expect_true("effect_size" %in% colnames(result$tidy_result))
   expect_type(result$tidy_result$log2fc, "double") # log2fc should be numeric
+  expect_type(result$tidy_result$effect_size, "double")
 
   # Test raw_result
   expect_type(result$raw_result, "list")
@@ -85,7 +89,34 @@ test_that("gly_ttest_ works correctly", {
   expect_setequal(names(result), c("tidy_result", "raw_result"))
   expect_true(nrow(result$tidy_result) > 0)
   expect_true("log2fc" %in% colnames(result$tidy_result))
+  expect_true("effect_size" %in% colnames(result$tidy_result))
   expect_equal(nrow(result$tidy_result), 10)
+})
+
+test_that("gly_ttest_ returns Cohen's d in effect_size", {
+  expr_mat <- matrix(
+    c(1, 2, 3, 8, 9, 10),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:6))
+  )
+  groups <- factor(c("A", "A", "A", "B", "B", "B"))
+
+  result <- suppressMessages(gly_ttest_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL
+  ))
+
+  log_values <- log2(c(1, 2, 3, 8, 9, 10) + 1)
+  group_a <- log_values[1:3]
+  group_b <- log_values[4:6]
+  pooled_sd <- sqrt((
+    ((length(group_a) - 1) * stats::sd(group_a)^2) +
+      ((length(group_b) - 1) * stats::sd(group_b)^2)
+  ) / (length(group_a) + length(group_b) - 2))
+  expected <- (mean(group_b) - mean(group_a)) / pooled_sd
+
+  expect_equal(result$tidy_result$effect_size, expected, tolerance = 1e-10)
 })
 
 test_that("gly_ttest_ direction matches log2fc and ref_group", {
@@ -280,7 +311,34 @@ test_that("gly_wilcox_ works correctly", {
   expect_setequal(names(result), c("tidy_result", "raw_result"))
   expect_true(nrow(result$tidy_result) > 0)
   expect_true("log2fc" %in% colnames(result$tidy_result))
+  expect_true("effect_size" %in% colnames(result$tidy_result))
   expect_equal(nrow(result$tidy_result), 10)
+})
+
+test_that("gly_wilcox_ returns rank-biserial correlation in effect_size", {
+  expr_mat <- matrix(
+    c(1, 2, 3, 8, 9, 10),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:6))
+  )
+  groups <- factor(c("A", "A", "A", "B", "B", "B"))
+
+  result <- suppressMessages(suppressWarnings(gly_wilcox_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL,
+    exact = FALSE
+  )))
+
+  log_values <- log2(c(1, 2, 3, 8, 9, 10) + 1)
+  ranks <- rank(log_values)
+  n_ref <- 3
+  n_test <- 3
+  w_stat <- sum(ranks[4:6])
+  u_stat <- w_stat - n_test * (n_test + 1) / 2
+  expected <- (2 * u_stat / (n_ref * n_test)) - 1
+
+  expect_equal(result$tidy_result$effect_size, expected, tolerance = 1e-10)
 })
 
 test_that("gly_ttest and gly_wilcox basic functionality works", {

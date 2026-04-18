@@ -41,6 +41,7 @@
 #'   - `parameter`: Degrees of freedom
 #'   - `conf_low`: Lower bound of 95% confidence interval
 #'   - `conf_high`: Upper bound of 95% confidence interval
+#'   - `effect_size`: Cohen's d
 #'   - `method`: Statistical method used
 #'   - `alternative`: Alternative hypothesis
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
@@ -177,6 +178,7 @@ gly_ttest_ <- function(
 #'   - `variable`: Variable name
 #'   - `statistic`: Wilcoxon test statistic
 #'   - `p_val`: Raw p-value from Wilcoxon test
+#'   - `effect_size`: Rank-biserial correlation
 #'   - `method`: Statistical method used
 #'   - `alternative`: Alternative hypothesis
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
@@ -400,6 +402,7 @@ gly_wilcox_ <- function(
 
   # Calculate log2 fold change
   result_tbl <- .add_log2fc_to_result(result_tbl, expr_mat, groups)
+  result_tbl <- .add_effect_size_to_2group_result(result_tbl, expr_mat, groups, .f)
 
   result_tbl
 }
@@ -428,6 +431,93 @@ gly_wilcox_ <- function(
   result_tbl$log2fc <- log2fc_values
 
   result_tbl
+}
+
+#' Add effect sizes to two-group differential analysis results
+#'
+#' @param result_tbl A tibble containing the tidy test results.
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor specifying group membership for each sample.
+#' @param .f The statistical test function used to generate the results.
+#'
+#' @return A tibble with an `effect_size` column added.
+#' @noRd
+.add_effect_size_to_2group_result <- function(result_tbl, expr_mat, groups, .f) {
+  effect_size_values <- purrr::map_dbl(result_tbl$variable, function(var_name) {
+    if (identical(.f, stats::t.test)) {
+      .calculate_cohens_d(expr_mat, groups, var_name)
+    } else if (identical(.f, stats::wilcox.test)) {
+      .calculate_rank_biserial(expr_mat, groups, var_name)
+    } else {
+      NA_real_
+    }
+  })
+
+  result_tbl$effect_size <- effect_size_values
+  result_tbl
+}
+
+#' Calculate Cohen's d for a two-group comparison
+#'
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor specifying group membership for each sample.
+#' @param var_name A character string specifying the variable to evaluate.
+#'
+#' @return A numeric scalar containing Cohen's d.
+#' @noRd
+.calculate_cohens_d <- function(expr_mat, groups, var_name) {
+  log_values <- log2(expr_mat[var_name, ] + 1)
+  group_levels <- levels(groups)
+  ref_values <- log_values[groups == group_levels[1]]
+  test_values <- log_values[groups == group_levels[2]]
+  ref_values <- ref_values[!is.na(ref_values)]
+  test_values <- test_values[!is.na(test_values)]
+
+  if (length(ref_values) < 2 || length(test_values) < 2) {
+    return(NA_real_)
+  }
+
+  pooled_sd <- sqrt(
+    (
+      ((length(ref_values) - 1) * stats::sd(ref_values)^2) +
+        ((length(test_values) - 1) * stats::sd(test_values)^2)
+    ) / (length(ref_values) + length(test_values) - 2)
+  )
+
+  if (!is.finite(pooled_sd) || pooled_sd == 0) {
+    return(NA_real_)
+  }
+
+  (mean(test_values) - mean(ref_values)) / pooled_sd
+}
+
+#' Calculate rank-biserial correlation for a two-group comparison
+#'
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#' @param groups A factor specifying group membership for each sample.
+#' @param var_name A character string specifying the variable to evaluate.
+#'
+#' @return A numeric scalar containing the rank-biserial correlation.
+#' @noRd
+.calculate_rank_biserial <- function(expr_mat, groups, var_name) {
+  log_values <- log2(expr_mat[var_name, ] + 1)
+  group_levels <- levels(groups)
+  ref_values <- log_values[groups == group_levels[1]]
+  test_values <- log_values[groups == group_levels[2]]
+  ref_values <- ref_values[!is.na(ref_values)]
+  test_values <- test_values[!is.na(test_values)]
+
+  if (length(ref_values) == 0 || length(test_values) == 0) {
+    return(NA_real_)
+  }
+
+  combined_values <- c(ref_values, test_values)
+  test_ranks <- rank(combined_values)[(length(ref_values) + 1):length(combined_values)]
+  test_size <- length(test_values)
+  ref_size <- length(ref_values)
+  u_stat <- sum(test_ranks) - test_size * (test_size + 1) / 2
+
+  (2 * u_stat / (ref_size * test_size)) - 1
 }
 
 # Helper function to reorder groups so that ref_group becomes the first level
