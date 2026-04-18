@@ -48,12 +48,12 @@ Let’s start by exploring our demo dataset:
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [88ms]
+#> ✔ Finding leader proteins [86ms]
 #> 
 #> ℹ Reading dataColumn group converted to <factor>.ℹ Parsing glycan compositions and structures
-#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [374ms]
+#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [377ms]
 #> 
-#> ℹ Reading data✔ Reading data [871ms]
+#> ℹ Reading data✔ Reading data [863ms]
 #> 
 #> 
 #> ── Normalizing data ──
@@ -195,7 +195,7 @@ to get the tidy result tibble:
 
 ``` r
 get_tidy_result(anova_res, "main_test")
-#> # A tibble: 225 × 13
+#> # A tibble: 225 × 14
 #>    variable     protein glycan_composition protein_site gene  term     df  sumsq
 #>    <glue>       <chr>   <comp>                    <int> <chr> <chr> <dbl>  <dbl>
 #>  1 P08185-176-… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… group     3  67.7 
@@ -209,8 +209,8 @@ get_tidy_result(anova_res, "main_test")
 #>  9 P04196-344-… P04196  Hex(4)HexNAc(4)Ne…          344 HRG   group     3   9.66
 #> 10 P10909-291-… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  87.0 
 #> # ℹ 215 more rows
-#> # ℹ 5 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
-#> #   post_hoc <chr>
+#> # ℹ 6 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
+#> #   effect_size <dbl>, post_hoc <chr>
 ```
 
 Notice something cool? 😎
@@ -240,7 +240,7 @@ exp |>
 #> ℹ Number of groups: 4
 #> ℹ Groups: "C", "H", "M", and "Y"
 #> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
-#> # A tibble: 60 × 13
+#> # A tibble: 60 × 14
 #>    variable      protein glycan_composition protein_site gene  term     df sumsq
 #>    <glue>        <chr>   <comp>                    <int> <chr> <chr> <dbl> <dbl>
 #>  1 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 161. 
@@ -254,8 +254,8 @@ exp |>
 #>  9 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 150. 
 #> 10 P01019-161-H… P01019  Hex(5)HexNAc(4)Ne…          161 AGT   group     3  46.4
 #> # ℹ 50 more rows
-#> # ℹ 5 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
-#> #   post_hoc <chr>
+#> # ℹ 6 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
+#> #   effect_size <dbl>, post_hoc <chr>
 ```
 
 ## 🔧 Maximum Flexibility Mode

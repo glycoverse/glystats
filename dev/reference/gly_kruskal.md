@@ -81,6 +81,8 @@ A list containing three elements:
 
     - `method`: Statistical method used
 
+    - `effect_size`: Epsilon-squared
+
     - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 
     - `post_hoc`: Significant group pairs from post-hoc test, in the

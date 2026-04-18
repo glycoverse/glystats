@@ -92,6 +92,8 @@ A list with three elements:
 
   - `conf_high`: Upper bound of 95% confidence interval
 
+  - `effect_size`: Cohen's d
+
   - `method`: Statistical method used
 
   - `alternative`: Alternative hypothesis

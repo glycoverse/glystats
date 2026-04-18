@@ -79,6 +79,8 @@ A list containing three elements:
 
     - `p_val`: Raw p-value from ANOVA
 
+    - `effect_size`: Eta-squared
+
     - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 
     - `post_hoc`: Significant group pairs from post-hoc test, in the
