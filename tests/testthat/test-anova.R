@@ -22,6 +22,8 @@ test_that("gly_anova works with anova method", {
   expect_equal(nrow(main_test), 10)
   expect_true("p_adj" %in% colnames(main_test))
   expect_true("post_hoc" %in% colnames(main_test))
+  expect_true("effect_size" %in% colnames(main_test))
+  expect_type(main_test$effect_size, "double")
 
   # Test post_hoc_test tibble
   post_hoc_test <- result$tidy_result$post_hoc_test
@@ -254,6 +256,8 @@ test_that("gly_kruskal works with kruskal method", {
   expect_true("method" %in% colnames(main_test))
 
   expect_true("post_hoc" %in% colnames(main_test))
+  expect_true("effect_size" %in% colnames(main_test))
+  expect_type(main_test$effect_size, "double")
   expect_false("log2fc" %in% colnames(main_test))
 
   # Test post_hoc_test tibble
@@ -332,6 +336,40 @@ test_that("gly_anova_ works correctly", {
   expect_named(result, c("tidy_result", "raw_result"))
   expect_true(tibble::is_tibble(result$tidy_result$main_test))
   expect_equal(nrow(result$tidy_result$main_test), 10)
+  expect_true("effect_size" %in% colnames(result$tidy_result$main_test))
+})
+
+test_that("gly_anova_ returns eta-squared in effect_size", {
+  expr_mat <- matrix(
+    c(1, 2, 3, 5, 6, 7, 9, 10, 11),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:9))
+  )
+  groups <- factor(rep(c("A", "B", "C"), each = 3))
+
+  result <- suppressMessages(gly_anova_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL
+  ))
+
+  log_values <- log2(c(1, 2, 3, 5, 6, 7, 9, 10, 11) + 1)
+  grand_mean <- mean(log_values)
+  group_means <- purrr::map_dbl(levels(groups), function(group) {
+    mean(log_values[groups == group])
+  })
+  group_sizes <- purrr::map_int(levels(groups), function(group) {
+    sum(groups == group)
+  })
+  ss_between <- sum(group_sizes * (group_means - grand_mean)^2)
+  ss_total <- sum((log_values - grand_mean)^2)
+  expected <- ss_between / ss_total
+
+  expect_equal(
+    result$tidy_result$main_test$effect_size,
+    expected,
+    tolerance = 1e-10
+  )
 })
 
 test_that("gly_kruskal_ works correctly", {
@@ -353,6 +391,65 @@ test_that("gly_kruskal_ works correctly", {
   expect_named(result, c("tidy_result", "raw_result"))
   expect_true(tibble::is_tibble(result$tidy_result$main_test))
   expect_equal(nrow(result$tidy_result$main_test), 10)
+  expect_true("effect_size" %in% colnames(result$tidy_result$main_test))
+})
+
+test_that("gly_kruskal_ returns epsilon-squared in effect_size", {
+  expr_mat <- matrix(
+    c(1, 2, 3, 5, 6, 7, 9, 10, 11),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:9))
+  )
+  groups <- factor(rep(c("A", "B", "C"), each = 3))
+
+  result <- suppressMessages(gly_kruskal_(
+    expr_mat,
+    groups,
+    p_adj_method = NULL
+  ))
+
+  log_values <- log2(c(1, 2, 3, 5, 6, 7, 9, 10, 11) + 1)
+  h_stat <- unname(stats::kruskal.test(log_values ~ groups)$statistic)
+  n_obs <- length(log_values)
+  n_groups <- nlevels(groups)
+  expected <- (h_stat - n_groups + 1) / (n_obs - n_groups)
+
+  expect_equal(
+    result$tidy_result$main_test$effect_size,
+    expected,
+    tolerance = 1e-10
+  )
+})
+
+test_that(".tibblify_main_test_results validates effect-size inputs", {
+  expr_mat <- matrix(
+    c(1, 2, 3, 5, 6, 7, 9, 10, 11),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:9))
+  )
+  groups <- factor(rep(c("A", "B", "C"), each = 3))
+  log_values <- log2(expr_mat["var1", ] + 1)
+  main_test_raw <- list(var1 = stats::kruskal.test(log_values ~ groups))
+
+  expect_error(
+    .tibblify_main_test_results(
+      main_test_raw,
+      stats::kruskal.test,
+      p_adj_method = NULL,
+      effect_size_method = "epsilon_squared"
+    ),
+    "must be supplied"
+  )
+
+  expect_error(
+    .add_effect_size_to_main_test(
+      tibble::tibble(variable = "var1", statistic = unname(main_test_raw$var1$statistic)),
+      effect_size_method = "bad_method",
+      expr_mat = expr_mat,
+      groups = groups
+    ),
+    "Must be element of set"
+  )
 })
 
 test_that("post_hoc_test should not contain NA rows when add_info is TRUE", {
