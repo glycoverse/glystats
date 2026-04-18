@@ -1,4 +1,17 @@
-# glystats (development version)
+# glystats 0.9.0
+
+## Breaking changes
+
+* `get_tidy_result()` is now type-stable: it always returns a tibble (or errors), instead of sometimes returning a list when `which` is omitted. When `tidy_result` is a list, the `which` argument is now required (#9).
+
+## New features
+
+* Add effect size calculations to `gly_ttest()`, `gly_wilcox()`, `gly_anova()`, and `gly_kruskal()`. Effect sizes (Cohen's d, rank-biserial correlation, eta-squared, and epsilon-squared) are now included in the tidy results (#8).
+
+## Minor improvements and bug fixes
+
+* Fix a bug that caused statistics to have incorrect signs for `gly_ttest()` and `gly_wilcox()`.
+* Fix a bug that caused the `estimate` sign to be inconsistent in `gly_kruskal()` results.
 
 # glystats 0.8.0
 
