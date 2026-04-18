@@ -154,6 +154,59 @@ test_that("gly_kruskal comparison direction is correct for 3 groups", {
   expect_true(all(result$tidy_result$post_hoc_test$log2fc > 0))
 })
 
+test_that("gly_anova raw post-hoc uses test-minus-reference direction", {
+  var_info <- tibble::tibble(variable = "V1")
+  sample_info <- tibble::tibble(
+    sample = paste0("S", 1:30),
+    group = factor(rep(c("A", "B", "C"), each = 10), levels = c("A", "B", "C"))
+  )
+  expr_mat <- matrix(1:30, nrow = 1, byrow = TRUE)
+  colnames(expr_mat) <- sample_info$sample
+  rownames(expr_mat) <- var_info$variable
+  exp <- glyexp::experiment(expr_mat, sample_info, var_info, "others")
+
+  result <- suppressMessages(gly_anova(exp))
+  raw_post_hoc <- result$raw_result$post_hoc_test[[1]]$group
+
+  expect_setequal(rownames(raw_post_hoc), c("B-A", "C-A", "C-B"))
+  expect_true(all(raw_post_hoc[, "diff"] > 0))
+  expect_true(all(raw_post_hoc[, "lwr"] > 0))
+  expect_true(all(raw_post_hoc[, "upr"] > 0))
+})
+
+test_that("gly_kruskal raw post-hoc uses test-minus-reference direction", {
+  var_info <- tibble::tibble(variable = "V1")
+
+  sample_info_2 <- tibble::tibble(
+    sample = paste0("S", 1:20),
+    group = factor(rep(c("A", "B"), each = 10), levels = c("A", "B"))
+  )
+  expr_mat_2 <- matrix(1:20, nrow = 1, byrow = TRUE)
+  colnames(expr_mat_2) <- sample_info_2$sample
+  rownames(expr_mat_2) <- var_info$variable
+  exp_2 <- glyexp::experiment(expr_mat_2, sample_info_2, var_info, "others")
+
+  result_2 <- suppressMessages(gly_kruskal(exp_2))
+  raw_post_hoc_2 <- result_2$raw_result$post_hoc_test[[1]]$res
+
+  expect_identical(raw_post_hoc_2$Comparison, "B - A")
+
+  sample_info_3 <- tibble::tibble(
+    sample = paste0("S", 1:30),
+    group = factor(rep(c("A", "B", "C"), each = 10), levels = c("A", "B", "C"))
+  )
+  expr_mat_3 <- matrix(1:30, nrow = 1, byrow = TRUE)
+  colnames(expr_mat_3) <- sample_info_3$sample
+  rownames(expr_mat_3) <- var_info$variable
+  exp_3 <- glyexp::experiment(expr_mat_3, sample_info_3, var_info, "others")
+
+  result_3 <- suppressMessages(gly_kruskal(exp_3))
+  raw_post_hoc_3 <- result_3$raw_result$post_hoc_test[[1]]$res
+
+  expect_setequal(raw_post_hoc_3$Comparison, c("B - A", "C - A", "C - B"))
+  expect_true(all(raw_post_hoc_3$Z > 0))
+})
+
 test_that("gly_anova assigns NA for failed variables", {
   # Use test_gp_exp with 3 groups for ANOVA
   # The first three variables are set to NA

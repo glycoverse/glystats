@@ -57,7 +57,9 @@
 #'       - `p_adj`: Adjusted p-value from Tukey's HSD test
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `aov` model objects.
-#'     - `post_hoc_test`: A list of raw `TukeyHSD` objects.
+#'     - `post_hoc_test`: A list of raw `TukeyHSD` objects. Post-hoc
+#'       comparison labels follow the package direction, i.e.
+#'       `test_group - ref_group`.
 #'   - `meta_data` (only for [gly_anova()]): A list containing metadata from the input experiment.
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
@@ -466,7 +468,9 @@ gly_ancova_ <- function(
 #'       - `p_adj`: Adjusted p-value from Dunn's test
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `kruskal.test` objects.
-#'     - `post_hoc_test`: A list of raw `dunnTest` objects.
+#'     - `post_hoc_test`: A list of raw `dunnTest` objects. Post-hoc
+#'       comparison labels and direction-sensitive statistics follow the package
+#'       direction, i.e. `test_group - ref_group`.
 #'   - `meta_data`: A list containing metadata from the input experiment.
 #'
 #' @seealso [stats::kruskal.test()], [FSA::dunnTest()]
@@ -647,7 +651,7 @@ gly_kruskal_ <- function(
           if (!is.na(p_matrix[i, j])) {
             group1 <- colnames(p_matrix)[j] # ref_group (column name)
             group2 <- rownames(p_matrix)[i] # test_group (row name)
-            comparisons <- c(comparisons, paste(group1, "-", group2))
+            comparisons <- c(comparisons, paste(group2, "-", group1))
             p_values <- c(p_values, p_matrix[i, j])
           }
         }
@@ -665,7 +669,9 @@ gly_kruskal_ <- function(
       )
     } else {
       # Use FSA::dunnTest for 3+ groups
-      FSA::dunnTest(log_value ~ group, data = data_nested, method = "holm")
+      .standardize_dunn_posthoc_result(
+        FSA::dunnTest(log_value ~ group, data = data_nested, method = "holm")
+      )
     }
   }
 }
@@ -837,10 +843,11 @@ gly_kruskal_ <- function(
     } else {
       dunn_df <- raw_result$res
       sig_pairs <- dunn_df$Comparison[dunn_df$P.adj < 0.05]
-      # Convert "A - B" format to "A_vs_B" format for consistency
+      # Raw Dunn results are standardized to "test - ref". Convert them back to
+      # the package-facing "ref_vs_test" label used elsewhere.
       sig_pairs <- purrr::map_chr(sig_pairs, function(x) {
         parts <- stringr::str_split(x, " - ", simplify = TRUE)
-        stringr::str_c(parts[, 1], "_vs_", parts[, 2])
+        stringr::str_c(parts[, 2], "_vs_", parts[, 1])
       })
       sig_str <- if (length(sig_pairs) == 0) {
         NA_character_
@@ -906,7 +913,7 @@ gly_kruskal_ <- function(
       # For Dunn test results
       dunn_df <- raw_result$res
 
-      # Parse group comparisons (format: "group1 - group2")
+      # Parse group comparisons (format: "test_group - ref_group")
       comparison_parts <- stringr::str_split(
         dunn_df$Comparison,
         " - ",
@@ -915,8 +922,8 @@ gly_kruskal_ <- function(
 
       tibble::tibble(
         variable = var_name,
-        ref_group = comparison_parts[, 1],
-        test_group = comparison_parts[, 2],
+        ref_group = comparison_parts[, 2],
+        test_group = comparison_parts[, 1],
         p_val = dunn_df$P.unadj, # Unadjusted p-value
         p_adj = dunn_df$P.adj # Adjusted p-value
       )
@@ -939,4 +946,27 @@ gly_kruskal_ <- function(
       by = c("ref_group", "test_group", "variable")
     ))
   }
+}
+
+.standardize_dunn_posthoc_result <- function(raw_result) {
+  if (!("res" %in% names(raw_result)) || nrow(raw_result$res) == 0) {
+    return(raw_result)
+  }
+
+  comparison_parts <- stringr::str_split(
+    raw_result$res$Comparison,
+    " - ",
+    simplify = TRUE
+  )
+  raw_result$res$Comparison <- stringr::str_c(
+    comparison_parts[, 2],
+    " - ",
+    comparison_parts[, 1]
+  )
+
+  if ("Z" %in% colnames(raw_result$res)) {
+    raw_result$res$Z <- -raw_result$res$Z
+  }
+
+  raw_result
 }

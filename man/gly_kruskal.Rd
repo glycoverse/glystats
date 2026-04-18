@@ -63,7 +63,9 @@ A list containing three elements:
 \item \code{raw_result}: A list containing:
 \itemize{
 \item \code{main_test}: A list of raw \code{kruskal.test} objects.
-\item \code{post_hoc_test}: A list of raw \code{dunnTest} objects.
+\item \code{post_hoc_test}: A list of raw \code{dunnTest} objects. Post-hoc
+comparison labels and direction-sensitive statistics follow the package
+direction, i.e. \code{test_group - ref_group}.
 }
 \item \code{meta_data}: A list containing metadata from the input experiment.
 }

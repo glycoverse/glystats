@@ -59,7 +59,9 @@ A list containing three elements:
 \item \code{raw_result}: A list containing:
 \itemize{
 \item \code{main_test}: A list of raw \code{aov} model objects.
-\item \code{post_hoc_test}: A list of raw \code{TukeyHSD} objects.
+\item \code{post_hoc_test}: A list of raw \code{TukeyHSD} objects. Post-hoc
+comparison labels follow the package direction, i.e.
+\code{test_group - ref_group}.
 }
 \item \code{meta_data} (only for \code{\link[=gly_anova]{gly_anova()}}): A list containing metadata from the input experiment.
 }
