@@ -30,7 +30,7 @@
 #'
 #' @export
 get_tidy_result <- function(res, which = NULL) {
-  checkmate::check_class(res, "glystats_res")
+  checkmate::assert_class(res, "glystats_res")
   if (is.null(which) && !tibble::is_tibble(res$tidy_result)) {
     cli::cli_abort(c(
       "{.arg which} must be provided for {.cls {class(res)[[1]]}} result.",
@@ -52,7 +52,7 @@ get_tidy_result <- function(res, which = NULL) {
 #' @rdname get_tidy_result
 #' @export
 get_raw_result <- function(res, which = NULL) {
-  checkmate::check_class(res, "glystats_res")
+  checkmate::assert_class(res, "glystats_res")
   if (is.null(which)) {
     return(res$raw_result)
   }
