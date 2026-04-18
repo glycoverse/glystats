@@ -17,3 +17,9 @@ test_that("get_tidy_result raises error if tidy_result is a list but no `which` 
   result <- suppressMessages(gly_anova(test_gp_exp))
   expect_error(get_tidy_result(result), "must be provided for")
 })
+
+test_that("get_tidy_result works when tidy_result is already a tibble", {
+  result <- suppressMessages(gly_fold_change(test_gp_exp))
+  expect_no_error(tidy_result <- get_tidy_result(result))
+  expect_s3_class(tidy_result, "tbl_df")
+})
