@@ -5,7 +5,8 @@
 #'
 #' @param res A glystats result object.
 #' @param which Used to specify which element to get, when the result is a list.
-#'   If NULL, the whole result (tibble or list) will be returned.
+#'   For glystats results with only one tidy result (e.g. [gly_ttest()]), this argument is not needed.
+#'   For others (e.g. [gly_anova()]), this argument is required to specify which tidy result to get.
 #'
 #' @returns A tibble.
 #'
