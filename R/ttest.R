@@ -299,13 +299,16 @@ gly_wilcox_ <- function(
     groups <- .reorder_groups_for_ref(groups, ref_group)
   }
 
-  mod_list <- .gly_dea_2groups_raw(expr_mat, groups, .f, ...)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat)
+
+  mod_list <- .gly_dea_2groups_raw(log_expr_mat, groups, .f, ...)
   tidy_result <- .gly_dea_2groups_tibblify(
     mod_list,
     .f,
     p_adj_method,
     expr_mat,
-    groups
+    groups,
+    log_expr_mat
   )
 
   # Return list with both tidy and raw results
@@ -316,8 +319,8 @@ gly_wilcox_ <- function(
 }
 
 # Generate raw model list for 2-group analysis
-.gly_dea_2groups_raw <- function(expr_mat, groups, .f, ...) {
-  data <- expr_mat %>%
+.gly_dea_2groups_raw <- function(log_expr_mat, groups, .f, ...) {
+  data <- log_expr_mat %>%
     t() %>%
     as.data.frame() %>%
     tibble::rownames_to_column("sample") %>%
@@ -326,9 +329,8 @@ gly_wilcox_ <- function(
     tidyr::pivot_longer(
       cols = -all_of(c("sample", "group")),
       names_to = "variable",
-      values_to = "value"
-    ) %>%
-    dplyr::mutate(log_value = log2(.data$value + 1))
+      values_to = "log_value"
+    )
 
   # Perform statistical tests and store raw results
   dots <- rlang::list2(...)
@@ -366,7 +368,8 @@ gly_wilcox_ <- function(
   .f,
   p_adj_method,
   expr_mat,
-  groups
+  groups,
+  log_expr_mat
 ) {
   # Create a tibble from the model list
   var_names <- names(mod_list)
@@ -402,7 +405,12 @@ gly_wilcox_ <- function(
 
   # Calculate log2 fold change
   result_tbl <- .add_log2fc_to_result(result_tbl, expr_mat, groups)
-  result_tbl <- .add_effect_size_to_2group_result(result_tbl, expr_mat, groups, .f)
+  result_tbl <- .add_effect_size_to_2group_result(
+    result_tbl,
+    log_expr_mat,
+    groups,
+    .f
+  )
 
   result_tbl
 }
@@ -466,7 +474,7 @@ gly_wilcox_ <- function(
 #' @return A numeric scalar containing Cohen's d.
 #' @noRd
 .calculate_cohens_d <- function(expr_mat, groups, var_name) {
-  log_values <- log2(expr_mat[var_name, ] + 1)
+  log_values <- expr_mat[var_name, ]
   group_levels <- levels(groups)
   ref_values <- log_values[groups == group_levels[1]]
   test_values <- log_values[groups == group_levels[2]]
@@ -500,7 +508,7 @@ gly_wilcox_ <- function(
 #' @return A numeric scalar containing the rank-biserial correlation.
 #' @noRd
 .calculate_rank_biserial <- function(expr_mat, groups, var_name) {
-  log_values <- log2(expr_mat[var_name, ] + 1)
+  log_values <- expr_mat[var_name, ]
   group_levels <- levels(groups)
   ref_values <- log_values[groups == group_levels[1]]
   test_values <- log_values[groups == group_levels[2]]
@@ -518,6 +526,16 @@ gly_wilcox_ <- function(
   u_stat <- sum(test_ranks) - test_size * (test_size + 1) / 2
 
   (2 * u_stat / (ref_size * test_size)) - 1
+}
+
+#' Log-transform an expression matrix
+#'
+#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
+#'
+#' @return A numeric matrix with log2(x + 1) values.
+#' @noRd
+.log_transform_expr_mat <- function(expr_mat) {
+  log2(expr_mat + 1)
 }
 
 # Helper function to reorder groups so that ref_group becomes the first level

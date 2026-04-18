@@ -421,6 +421,37 @@ test_that("gly_kruskal_ returns epsilon-squared in effect_size", {
   )
 })
 
+test_that(".tibblify_main_test_results validates effect-size inputs", {
+  expr_mat <- matrix(
+    c(1, 2, 3, 5, 6, 7, 9, 10, 11),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:9))
+  )
+  groups <- factor(rep(c("A", "B", "C"), each = 3))
+  log_values <- log2(expr_mat["var1", ] + 1)
+  main_test_raw <- list(var1 = stats::kruskal.test(log_values ~ groups))
+
+  expect_error(
+    .tibblify_main_test_results(
+      main_test_raw,
+      stats::kruskal.test,
+      p_adj_method = NULL,
+      effect_size_method = "epsilon_squared"
+    ),
+    "must be supplied"
+  )
+
+  expect_error(
+    .add_effect_size_to_main_test(
+      tibble::tibble(variable = "var1", statistic = unname(main_test_raw$var1$statistic)),
+      effect_size_method = "bad_method",
+      expr_mat = expr_mat,
+      groups = groups
+    ),
+    "Must be element of set"
+  )
+})
+
 test_that("post_hoc_test should not contain NA rows when add_info is TRUE", {
   # Run ANOVA with add_info = TRUE (default)
   result <- suppressMessages(gly_anova(test_gp_exp))

@@ -132,7 +132,8 @@ gly_anova_ <- function(
   }
 
   # Prepare data
-  data <- .prepare_multi_group_data(expr_mat, groups)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat)
+  data <- .prepare_multi_group_data(log_expr_mat, groups, is_logged = TRUE)
 
   # Generate raw results
   raw_main_test <- .generate_raw_main_results(data, stats::aov, ...)
@@ -149,7 +150,7 @@ gly_anova_ <- function(
     stats::aov,
     p_adj_method,
     effect_size_method = "eta_squared",
-    expr_mat = expr_mat,
+    expr_mat = log_expr_mat,
     groups = groups
   )
   post_hoc_vec <- .format_posthoc_results(
@@ -353,7 +354,13 @@ gly_ancova_ <- function(
   }
 
   # Prepare data
-  data <- .prepare_multi_group_data(expr_mat, groups, covariates)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat)
+  data <- .prepare_multi_group_data(
+    log_expr_mat,
+    groups,
+    covariates,
+    is_logged = TRUE
+  )
   ancova_formula <- stats::reformulate(
     termlabels = c("group", colnames(covariates)),
     response = "log_value"
@@ -553,7 +560,8 @@ gly_kruskal_ <- function(
   }
 
   # Prepare data
-  data <- .prepare_multi_group_data(expr_mat, groups)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat)
+  data <- .prepare_multi_group_data(log_expr_mat, groups, is_logged = TRUE)
 
   # Generate raw results
   raw_main_test <- .generate_raw_main_results(data, stats::kruskal.test, ...)
@@ -570,7 +578,7 @@ gly_kruskal_ <- function(
     stats::kruskal.test,
     p_adj_method,
     effect_size_method = "epsilon_squared",
-    expr_mat = expr_mat,
+    expr_mat = log_expr_mat,
     groups = groups
   )
   post_hoc_vec <- .format_posthoc_results(
@@ -752,7 +760,12 @@ gly_kruskal_ <- function(
 }
 
 # Helper function to prepare data for analysis
-.prepare_multi_group_data <- function(expr_mat, groups, covariates = NULL) {
+.prepare_multi_group_data <- function(
+  expr_mat,
+  groups,
+  covariates = NULL,
+  is_logged = FALSE
+) {
   data <- expr_mat %>%
     t() %>%
     as.data.frame() %>%
@@ -770,13 +783,19 @@ gly_kruskal_ <- function(
     keep_cols <- c(keep_cols, colnames(covariates))
   }
 
-  data %>%
+  data <- data %>%
     tidyr::pivot_longer(
       cols = -all_of(keep_cols),
       names_to = "variable",
-      values_to = "value"
-    ) %>%
-    dplyr::mutate(log_value = log2(.data$value + 1))
+      values_to = "log_value"
+    )
+
+  if (!is_logged) {
+    data <- data %>%
+      dplyr::mutate(log_value = log2(.data$log_value + 1))
+  }
+
+  data
 }
 
 # Helper function to convert main test raw results to tibble
@@ -826,6 +845,12 @@ gly_kruskal_ <- function(
   }
 
   if (!is.null(effect_size_method)) {
+    if (is.null(expr_mat) || is.null(groups)) {
+      cli::cli_abort(
+        "{.arg expr_mat} and {.arg groups} must be supplied when {.arg effect_size_method} is used."
+      )
+    }
+
     result_tbl <- .add_effect_size_to_main_test(
       result_tbl,
       effect_size_method,
@@ -852,15 +877,22 @@ gly_kruskal_ <- function(
   expr_mat,
   groups
 ) {
-  effect_size_values <- purrr::map_dbl(result_tbl$variable, function(var_name) {
-    if (identical(effect_size_method, "eta_squared")) {
-      .calculate_eta_squared(expr_mat, groups, var_name)
-    } else if (identical(effect_size_method, "epsilon_squared")) {
-      .calculate_epsilon_squared(expr_mat, groups, var_name)
-    } else {
-      NA_real_
+  checkmate::assert_choice(
+    effect_size_method,
+    c("eta_squared", "epsilon_squared")
+  )
+
+  effect_size_values <- purrr::map2_dbl(
+    result_tbl$variable,
+    result_tbl$statistic,
+    function(var_name, statistic) {
+      if (identical(effect_size_method, "eta_squared")) {
+        .calculate_eta_squared(expr_mat, groups, var_name)
+      } else {
+        .calculate_epsilon_squared(expr_mat, groups, var_name, statistic)
+      }
     }
-  })
+  )
 
   result_tbl$effect_size <- effect_size_values
   result_tbl
@@ -875,7 +907,7 @@ gly_kruskal_ <- function(
 #' @return A numeric scalar containing eta-squared.
 #' @noRd
 .calculate_eta_squared <- function(expr_mat, groups, var_name) {
-  log_values <- log2(expr_mat[var_name, ] + 1)
+  log_values <- expr_mat[var_name, ]
   valid_idx <- !is.na(log_values) & !is.na(groups)
   log_values <- log_values[valid_idx]
   groups <- droplevels(groups[valid_idx])
@@ -909,8 +941,8 @@ gly_kruskal_ <- function(
 #'
 #' @return A numeric scalar containing epsilon-squared.
 #' @noRd
-.calculate_epsilon_squared <- function(expr_mat, groups, var_name) {
-  log_values <- log2(expr_mat[var_name, ] + 1)
+.calculate_epsilon_squared <- function(expr_mat, groups, var_name, h_stat) {
+  log_values <- expr_mat[var_name, ]
   valid_idx <- !is.na(log_values) & !is.na(groups)
   log_values <- log_values[valid_idx]
   groups <- droplevels(groups[valid_idx])
@@ -922,10 +954,6 @@ gly_kruskal_ <- function(
   ) {
     return(NA_real_)
   }
-
-  h_stat <- suppressWarnings(
-    unname(stats::kruskal.test(log_values, groups)$statistic)
-  )
 
   if (!is.finite(h_stat)) {
     return(NA_real_)
