@@ -2,12 +2,28 @@
 
 ## glystats (development version)
 
+## glystats 0.10.0
+
 ### Breaking changes
 
 - `gly_wgcna()`, `gly_wgcna_()`, `gly_consensus_clustering()`, and
   `gly_consensus_clustering_()` are removed. These functions were
   deprecated in 0.7.0. Use the `WGCNA` and `ConsensusClusterPlus`
   packages directly.
+
+### Deprecations
+
+- All enrichment analysis functions are now deprecated and will be
+  removed in a future version:
+  [`gly_enrich_go()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md),
+  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_kegg.md),
+  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_reactome.md),
+  [`gly_enrich_wikipathways()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_wikipathways.md),
+  [`gly_enrich_do()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_do.md),
+  [`gly_enrich_ncg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_ncg.md),
+  and
+  [`gly_enrich_dgn()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_dgn.md).
+  Use the corresponding functions in the `glyfun` package instead.
 
 ## glystats 0.9.0
 
