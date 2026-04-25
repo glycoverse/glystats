@@ -2,6 +2,13 @@
 
 ## glystats (development version)
 
+### Breaking changes
+
+- `gly_wgcna()`, `gly_wgcna_()`, `gly_consensus_clustering()`, and
+  `gly_consensus_clustering_()` are removed. These functions were
+  deprecated in 0.7.0. Use the `WGCNA` and `ConsensusClusterPlus`
+  packages directly.
+
 ## glystats 0.9.0
 
 ### Breaking changes
@@ -58,14 +65,10 @@
   These functions now use explicit parameters instead of `...`. Users
   must update their code to use new parameters (e.g., `p_cutoff` instead
   of `pvalueCutoff`).
-- [`gly_wgcna()`](https://glycoverse.github.io/glystats/dev/reference/gly_wgcna.md),
-  [`gly_wgcna_()`](https://glycoverse.github.io/glystats/dev/reference/gly_wgcna.md),
-  [`gly_consensus_clustering()`](https://glycoverse.github.io/glystats/dev/reference/gly_consensus_clustering.md),
-  and
-  [`gly_consensus_clustering_()`](https://glycoverse.github.io/glystats/dev/reference/gly_consensus_clustering.md)
-  are deprecated and will be removed in a future version. These
-  functions are too interactive and complex for a pipeline-friendly
-  package.
+- `gly_wgcna()`, `gly_wgcna_()`, `gly_consensus_clustering()`, and
+  `gly_consensus_clustering_()` are deprecated and will be removed in a
+  future version. These functions are too interactive and complex for a
+  pipeline-friendly package.
 
 ### New features
 
@@ -387,14 +390,11 @@ makes `glystats` easier to use. And more importantly, it allows the
   column descriptions for the tibbles in `tidy_result`.
 - All `gly_xxx_()` functions now accept a character vector as the
   `groups` parameter.
-- Fix an issue that
-  [`gly_consensus_clustering()`](https://glycoverse.github.io/glystats/dev/reference/gly_consensus_clustering.md)
-  sends plots to the plot panel when `output_file` is NULL. This is an
-  inconsistent behavior compared to other functions, and it has been
-  fixed.
-- Update the documentation of
-  [`gly_consensus_clustering()`](https://glycoverse.github.io/glystats/dev/reference/gly_consensus_clustering.md)
-  to emphasize the importance of `output_file`.
+- Fix an issue that `gly_consensus_clustering()` sends plots to the plot
+  panel when `output_file` is NULL. This is an inconsistent behavior
+  compared to other functions, and it has been fixed.
+- Update the documentation of `gly_consensus_clustering()` to emphasize
+  the importance of `output_file`.
 - Add an introduction vignette.
 
 ## glystats 0.2.3
@@ -462,16 +462,9 @@ makes `glystats` easier to use. And more importantly, it allows the
   and
   [`gly_kmeans_()`](https://glycoverse.github.io/glystats/dev/reference/gly_kmeans.md)
   to perform K-means clustering.
-- Add
-  [`gly_wgcna()`](https://glycoverse.github.io/glystats/dev/reference/gly_wgcna.md)
-  and
-  [`gly_wgcna_()`](https://glycoverse.github.io/glystats/dev/reference/gly_wgcna.md)
-  to perform WGCNA analysis.
-- Add
-  [`gly_consensus_clustering()`](https://glycoverse.github.io/glystats/dev/reference/gly_consensus_clustering.md)
-  and
-  [`gly_consensus_clustering_()`](https://glycoverse.github.io/glystats/dev/reference/gly_consensus_clustering.md)
-  to perform consensus clustering.
+- Add `gly_wgcna()` and `gly_wgcna_()` to perform WGCNA analysis.
+- Add `gly_consensus_clustering()` and `gly_consensus_clustering_()` to
+  perform consensus clustering.
 - Add
   [`gly_cox()`](https://glycoverse.github.io/glystats/dev/reference/gly_cox.md)
   and

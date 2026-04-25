@@ -1,5 +1,11 @@
 # Disease Ontology over-representation analysis (ORA)
 
+**\[deprecated\]**
+
+This function was deprecated because we decided to move all enrichment
+analysis functions to the separate `glyfun` package, which has more
+features and better API design.
+
 Perform Disease Ontology ORA for protein UniProt accessions using
 [`DOSE::enrichDO()`](https://rdrr.io/pkg/DOSE/man/enrichDO.html).
 

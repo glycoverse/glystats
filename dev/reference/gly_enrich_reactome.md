@@ -1,5 +1,11 @@
 # Reactome pathway over-representation analysis (ORA)
 
+**\[deprecated\]**
+
+This function was deprecated because we decided to move all enrichment
+analysis functions to the separate `glyfun` package, which has more
+features and better API design.
+
 Perform Reactome pathway ORA for protein UniProt accessions using
 [`ReactomePA::enrichPathway()`](https://rdrr.io/pkg/ReactomePA/man/enrichPathway.html).
 

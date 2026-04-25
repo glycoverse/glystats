@@ -1,5 +1,11 @@
 # Network of Cancer Genes (NCG) over-representation analysis (ORA)
 
+**\[deprecated\]**
+
+This function was deprecated because we decided to move all enrichment
+analysis functions to the separate `glyfun` package, which has more
+features and better API design.
+
 Perform NCG ORA for protein UniProt accessions using
 [`DOSE::enrichNCG()`](https://rdrr.io/pkg/DOSE/man/enrichNCG.html).
 
