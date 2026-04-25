@@ -1,6 +1,11 @@
 #' Consensus Clustering for Glycomics and Glycoproteomics Data
 #'
+#' @description
 #' `r lifecycle::badge("deprecated")`
+#'
+#' This function is deprecated because we realized that the interactive nature of consensus clustering
+#' is not ideal for a programmatic API of glystats.
+#' Users are encouraged to use the `ConsensusClusterPlus` package directly.
 #'
 #' Perform consensus clustering on the expression data using ConsensusClusterPlus.
 #' The function returns cluster assignments for all k values from 2 to max_k in long format.
@@ -62,6 +67,7 @@
 #' The list has classes `glystats_cc_res` and `glystats_res`.
 #'
 #' @seealso [ConsensusClusterPlus::ConsensusClusterPlus()]
+#' @keywords internal
 #' @export
 gly_consensus_clustering <- function(
   exp,
@@ -78,7 +84,7 @@ gly_consensus_clustering <- function(
   lifecycle::deprecate_warn(
     when = "0.7.0",
     what = "gly_consensus_clustering()",
-    details = "This function will be removed in a future version."
+    details = "Please use the `ConsensusClusterPlus` package directly for consensus clustering analysis."
   )
   checkmate::assert_class(exp, "glyexp_experiment")
 

@@ -1,6 +1,11 @@
 #' Weighted Gene Co-expression Network Analysis (WGCNA)
 #'
+#' @description
 #' `r lifecycle::badge("deprecated")`
+#'
+#' This function is deprecated because we realized that the interactive nature of WGCNA
+#' is not ideal for a programmatic API of glystats.
+#' Users are encouraged to use the `WGCNA` package directly.
 #'
 #' Perform WGCNA analysis to identify co-expression modules and their eigenvalues.
 #' The function uses WGCNA package to construct weighted gene co-expression networks,
@@ -66,6 +71,8 @@
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #'
+#' @keywords internal
+#'
 #' @export
 gly_wgcna <- function(
   exp,
@@ -81,7 +88,7 @@ gly_wgcna <- function(
   lifecycle::deprecate_warn(
     when = "0.7.0",
     what = "gly_wgcna()",
-    details = "This function will be removed in a future version."
+    details = "Please use the `WGCNA` package directly for WGCNA analysis."
   )
   # Validate inputs
   checkmate::assert_class(exp, "glyexp_experiment")
