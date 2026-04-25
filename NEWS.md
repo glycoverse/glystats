@@ -1,5 +1,9 @@
 # glystats (development version)
 
+## Breaking changes
+
+* `gly_wgcna()`, `gly_wgcna_()`, `gly_consensus_clustering()`, and `gly_consensus_clustering_()` are removed. These functions were deprecated in 0.7.0. Use the `WGCNA` and `ConsensusClusterPlus` packages directly.
+
 # glystats 0.9.0
 
 ## Breaking changes
