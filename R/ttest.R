@@ -450,7 +450,12 @@ gly_wilcox_ <- function(
 #'
 #' @return A tibble with an `effect_size` column added.
 #' @noRd
-.add_effect_size_to_2group_result <- function(result_tbl, expr_mat, groups, .f) {
+.add_effect_size_to_2group_result <- function(
+  result_tbl,
+  expr_mat,
+  groups,
+  .f
+) {
   effect_size_values <- purrr::map_dbl(result_tbl$variable, function(var_name) {
     if (identical(.f, stats::t.test)) {
       .calculate_cohens_d(expr_mat, groups, var_name)
@@ -486,10 +491,9 @@ gly_wilcox_ <- function(
   }
 
   pooled_sd <- sqrt(
-    (
-      ((length(ref_values) - 1) * stats::sd(ref_values)^2) +
-        ((length(test_values) - 1) * stats::sd(test_values)^2)
-    ) / (length(ref_values) + length(test_values) - 2)
+    (((length(ref_values) - 1) * stats::sd(ref_values)^2) +
+      ((length(test_values) - 1) * stats::sd(test_values)^2)) /
+      (length(ref_values) + length(test_values) - 2)
   )
 
   if (!is.finite(pooled_sd) || pooled_sd == 0) {
@@ -520,7 +524,9 @@ gly_wilcox_ <- function(
   }
 
   combined_values <- c(ref_values, test_values)
-  test_ranks <- rank(combined_values)[(length(ref_values) + 1):length(combined_values)]
+  test_ranks <- rank(combined_values)[
+    (length(ref_values) + 1):length(combined_values)
+  ]
   test_size <- length(test_values)
   ref_size <- length(ref_values)
   u_stat <- sum(test_ranks) - test_size * (test_size + 1) / 2

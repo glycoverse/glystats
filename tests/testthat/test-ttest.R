@@ -110,10 +110,11 @@ test_that("gly_ttest_ returns Cohen's d in effect_size", {
   log_values <- log2(c(1, 2, 3, 8, 9, 10) + 1)
   group_a <- log_values[1:3]
   group_b <- log_values[4:6]
-  pooled_sd <- sqrt((
-    ((length(group_a) - 1) * stats::sd(group_a)^2) +
-      ((length(group_b) - 1) * stats::sd(group_b)^2)
-  ) / (length(group_a) + length(group_b) - 2))
+  pooled_sd <- sqrt(
+    (((length(group_a) - 1) * stats::sd(group_a)^2) +
+      ((length(group_b) - 1) * stats::sd(group_b)^2)) /
+      (length(group_a) + length(group_b) - 2)
+  )
   expected <- (mean(group_b) - mean(group_a)) / pooled_sd
 
   expect_equal(result$tidy_result$effect_size, expected, tolerance = 1e-10)
@@ -235,7 +236,10 @@ test_that("gly_wilcox_ direction matches log2fc and ref_group", {
 
   expect_lt(result_default$tidy_result$log2fc, 0)
   expect_lt(result_default$tidy_result$estimate, 0)
-  expect_lt(result_default$tidy_result$statistic, result_ref_b$tidy_result$statistic)
+  expect_lt(
+    result_default$tidy_result$statistic,
+    result_ref_b$tidy_result$statistic
+  )
   expect_lt(result_default$tidy_result$conf_low, 0)
   expect_lt(result_default$tidy_result$conf_high, 0)
 

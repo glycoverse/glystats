@@ -69,6 +69,11 @@ The list has classes \code{glystats_dgn_ora_res} and \code{glystats_res}.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+This function was deprecated because we decided to move all enrichment analysis functions
+to the separate \code{glyfun} package, which has more features and better API design.
+
 Perform DisGeNET ORA for protein UniProt accessions using \code{\link[DOSE:enrichDGN]{DOSE::enrichDGN()}}.
 \itemize{
 \item \code{gly_enrich_dgn()} accepts a \code{\link[glyexp:experiment]{glyexp::experiment()}} and extracts protein information
@@ -92,3 +97,4 @@ These functions require the following packages to be installed:
 \seealso{
 \code{\link[DOSE:enrichDGN]{DOSE::enrichDGN()}}
 }
+\keyword{internal}

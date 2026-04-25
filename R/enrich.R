@@ -1,6 +1,11 @@
 #' GO over-representation analysis (ORA)
 #'
 #' @description
+#' `r lifecycle::badge('deprecated')`
+#'
+#' This function was deprecated because we decided to move all enrichment analysis functions
+#' to the separate `glyfun` package, which has more features and better API design.
+#'
 #' Perform GO ORA for protein UniProt accessions using [clusterProfiler::enrichGO()].
 #' - `gly_enrich_go()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
@@ -42,6 +47,7 @@
 #'  - `meta_data` (only for [gly_enrich_go()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_go_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichGO()]
+#' @keywords internal
 #' @export
 gly_enrich_go <- function(
   exp,
@@ -53,6 +59,11 @@ gly_enrich_go <- function(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 ) {
+  lifecycle::deprecate_warn(
+    "0.10.0",
+    "gly_enrich_go()",
+    "glyfun::enrich_ora_go()"
+  )
   rlang::check_installed("clusterProfiler")
   checkmate::assert_logical(add_info, len = 1)
   proteins <- .extract_uniprot_from_exp(exp)
@@ -111,6 +122,11 @@ gly_enrich_go_ <- function(
 #' KEGG over-representation analysis (ORA)
 #'
 #' @description
+#' `r lifecycle::badge('deprecated')`
+#'
+#' This function was deprecated because we decided to move all enrichment analysis functions
+#' to the separate `glyfun` package, which has more features and better API design.
+#'
 #' Perform KEGG ORA for protein UniProt accessions using [clusterProfiler::enrichKEGG()].
 #' - `gly_enrich_kegg()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
@@ -152,6 +168,7 @@ gly_enrich_go_ <- function(
 #'  - `meta_data` (only for [gly_enrich_kegg()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_kegg_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichKEGG()]
+#' @keywords internal
 #' @export
 gly_enrich_kegg <- function(
   exp,
@@ -162,6 +179,11 @@ gly_enrich_kegg <- function(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 ) {
+  lifecycle::deprecate_warn(
+    "0.10.0",
+    "gly_enrich_kegg()",
+    "glyfun::enrich_ora_kegg()"
+  )
   rlang::check_installed("clusterProfiler")
   checkmate::assert_logical(add_info, len = 1)
   proteins <- .extract_uniprot_from_exp(exp)
@@ -215,6 +237,11 @@ gly_enrich_kegg_ <- function(
 #' Reactome pathway over-representation analysis (ORA)
 #'
 #' @description
+#' `r lifecycle::badge('deprecated')`
+#'
+#' This function was deprecated because we decided to move all enrichment analysis functions
+#' to the separate `glyfun` package, which has more features and better API design.
+#'
 #' Perform Reactome pathway ORA for protein UniProt accessions using [ReactomePA::enrichPathway()].
 #' - `gly_enrich_reactome()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
@@ -261,6 +288,7 @@ gly_enrich_kegg_ <- function(
 #'  - `meta_data` (only for [gly_enrich_reactome()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_reactome_ora_res` and `glystats_res`.
 #' @seealso [ReactomePA::enrichPathway()]
+#' @keywords internal
 #' @export
 gly_enrich_reactome <- function(
   exp,
@@ -272,6 +300,11 @@ gly_enrich_reactome <- function(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 ) {
+  lifecycle::deprecate_warn(
+    "0.10.0",
+    "gly_enrich_reactome()",
+    "glyfun::enrich_ora_reactome()"
+  )
   rlang::check_installed("clusterProfiler")
   rlang::check_installed("ReactomePA")
   checkmate::assert_logical(add_info, len = 1)
@@ -336,6 +369,11 @@ gly_enrich_reactome_ <- function(
 #' WikiPathways over-representation analysis (ORA)
 #'
 #' @description
+#' `r lifecycle::badge('deprecated')`
+#'
+#' This function was deprecated because we decided to move all enrichment analysis functions
+#' to the separate `glyfun` package, which has more features and better API design.
+#'
 #' Perform WikiPathways ORA for protein UniProt accessions using [clusterProfiler::enrichWP()].
 #' - `gly_enrich_wikipathways()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
@@ -382,6 +420,7 @@ gly_enrich_reactome_ <- function(
 #'  - `meta_data` (only for [gly_enrich_wikipathways()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_wikipathways_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichWP()]
+#' @keywords internal
 #' @export
 gly_enrich_wikipathways <- function(
   exp,
@@ -393,6 +432,11 @@ gly_enrich_wikipathways <- function(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 ) {
+  lifecycle::deprecate_warn(
+    "0.10.0",
+    "gly_enrich_wikipathways()",
+    "glyfun::enrich_ora_wp()"
+  )
   rlang::check_installed("clusterProfiler")
   checkmate::assert_logical(add_info, len = 1)
 
@@ -453,6 +497,11 @@ gly_enrich_wikipathways_ <- function(
 #' Disease Ontology over-representation analysis (ORA)
 #'
 #' @description
+#' `r lifecycle::badge('deprecated')`
+#'
+#' This function was deprecated because we decided to move all enrichment analysis functions
+#' to the separate `glyfun` package, which has more features and better API design.
+#'
 #' Perform Disease Ontology ORA for protein UniProt accessions using [DOSE::enrichDO()].
 #' - `gly_enrich_do()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
@@ -503,6 +552,7 @@ gly_enrich_wikipathways_ <- function(
 #'  - `meta_data` (only for [gly_enrich_do()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_do_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichDO()]
+#' @keywords internal
 #' @export
 gly_enrich_do <- function(
   exp,
@@ -515,6 +565,11 @@ gly_enrich_do <- function(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 ) {
+  lifecycle::deprecate_warn(
+    "0.10.0",
+    "gly_enrich_do()",
+    "glyfun::enrich_ora_do()"
+  )
   rlang::check_installed("clusterProfiler")
   rlang::check_installed("DOSE")
   checkmate::assert_logical(add_info, len = 1)
@@ -581,6 +636,11 @@ gly_enrich_do_ <- function(
 #' Network of Cancer Genes (NCG) over-representation analysis (ORA)
 #'
 #' @description
+#' `r lifecycle::badge('deprecated')`
+#'
+#' This function was deprecated because we decided to move all enrichment analysis functions
+#' to the separate `glyfun` package, which has more features and better API design.
+#'
 #' Perform NCG ORA for protein UniProt accessions using [DOSE::enrichNCG()].
 #' - `gly_enrich_ncg()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
@@ -626,6 +686,7 @@ gly_enrich_do_ <- function(
 #'  - `meta_data` (only for [gly_enrich_ncg()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_ncg_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichNCG()]
+#' @keywords internal
 #' @export
 gly_enrich_ncg <- function(
   exp,
@@ -636,6 +697,11 @@ gly_enrich_ncg <- function(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 ) {
+  lifecycle::deprecate_warn(
+    "0.10.0",
+    "gly_enrich_ncg()",
+    "glyfun::enrich_ora_ncg()"
+  )
   rlang::check_installed("clusterProfiler")
   rlang::check_installed("DOSE")
   checkmate::assert_logical(add_info, len = 1)
@@ -696,6 +762,11 @@ gly_enrich_ncg_ <- function(
 #' DisGeNET over-representation analysis (ORA)
 #'
 #' @description
+#' `r lifecycle::badge('deprecated')`
+#'
+#' This function was deprecated because we decided to move all enrichment analysis functions
+#' to the separate `glyfun` package, which has more features and better API design.
+#'
 #' Perform DisGeNET ORA for protein UniProt accessions using [DOSE::enrichDGN()].
 #' - `gly_enrich_dgn()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
@@ -741,6 +812,7 @@ gly_enrich_ncg_ <- function(
 #'  - `meta_data` (only for [gly_enrich_dgn()]): A list containing metadata from the input experiment
 #' The list has classes `glystats_dgn_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichDGN()]
+#' @keywords internal
 #' @export
 gly_enrich_dgn <- function(
   exp,
@@ -751,6 +823,7 @@ gly_enrich_dgn <- function(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 ) {
+  lifecycle::deprecate_warn("0.10.0", "gly_enrich_dgn()")
   rlang::check_installed("clusterProfiler")
   rlang::check_installed("DOSE")
   checkmate::assert_logical(add_info, len = 1)

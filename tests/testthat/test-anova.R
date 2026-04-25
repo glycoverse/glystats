@@ -443,7 +443,10 @@ test_that(".tibblify_main_test_results validates effect-size inputs", {
 
   expect_error(
     .add_effect_size_to_main_test(
-      tibble::tibble(variable = "var1", statistic = unname(main_test_raw$var1$statistic)),
+      tibble::tibble(
+        variable = "var1",
+        statistic = unname(main_test_raw$var1$statistic)
+      ),
       effect_size_method = "bad_method",
       expr_mat = expr_mat,
       groups = groups
