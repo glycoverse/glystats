@@ -1,5 +1,11 @@
 # DisGeNET over-representation analysis (ORA)
 
+**\[deprecated\]**
+
+This function was deprecated because we decided to move all enrichment
+analysis functions to the separate `glyfun` package, which has more
+features and better API design.
+
 Perform DisGeNET ORA for protein UniProt accessions using
 [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
 

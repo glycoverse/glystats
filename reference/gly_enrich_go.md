@@ -1,5 +1,11 @@
 # GO over-representation analysis (ORA)
 
+**\[deprecated\]**
+
+This function was deprecated because we decided to move all enrichment
+analysis functions to the separate `glyfun` package, which has more
+features and better API design.
+
 Perform GO ORA for protein UniProt accessions using
 [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
 

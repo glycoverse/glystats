@@ -13,37 +13,12 @@
 - [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md)
   [`gly_anova_()`](https://glycoverse.github.io/glystats/reference/gly_anova.md)
   : One-way ANOVA for Differential Expression Analysis
-- [`gly_consensus_clustering()`](https://glycoverse.github.io/glystats/reference/gly_consensus_clustering.md)
-  [`gly_consensus_clustering_()`](https://glycoverse.github.io/glystats/reference/gly_consensus_clustering.md)
-  **\[deprecated\]** : Consensus Clustering for Glycomics and
-  Glycoproteomics Data
 - [`gly_cor()`](https://glycoverse.github.io/glystats/reference/gly_cor.md)
   [`gly_cor_()`](https://glycoverse.github.io/glystats/reference/gly_cor.md)
   : Correlation Analysis for Glycomics and Glycoproteomics Data
 - [`gly_cox()`](https://glycoverse.github.io/glystats/reference/gly_cox.md)
   [`gly_cox_()`](https://glycoverse.github.io/glystats/reference/gly_cox.md)
   : Cox Proportional Hazards Model for Survival Analysis
-- [`gly_enrich_dgn()`](https://glycoverse.github.io/glystats/reference/gly_enrich_dgn.md)
-  [`gly_enrich_dgn_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_dgn.md)
-  : DisGeNET over-representation analysis (ORA)
-- [`gly_enrich_do()`](https://glycoverse.github.io/glystats/reference/gly_enrich_do.md)
-  [`gly_enrich_do_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_do.md)
-  : Disease Ontology over-representation analysis (ORA)
-- [`gly_enrich_go()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md)
-  [`gly_enrich_go_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md)
-  : GO over-representation analysis (ORA)
-- [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_kegg.md)
-  [`gly_enrich_kegg_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_kegg.md)
-  : KEGG over-representation analysis (ORA)
-- [`gly_enrich_ncg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_ncg.md)
-  [`gly_enrich_ncg_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_ncg.md)
-  : Network of Cancer Genes (NCG) over-representation analysis (ORA)
-- [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_reactome.md)
-  [`gly_enrich_reactome_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_reactome.md)
-  : Reactome pathway over-representation analysis (ORA)
-- [`gly_enrich_wikipathways()`](https://glycoverse.github.io/glystats/reference/gly_enrich_wikipathways.md)
-  [`gly_enrich_wikipathways_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_wikipathways.md)
-  : WikiPathways over-representation analysis (ORA)
 - [`gly_fold_change()`](https://glycoverse.github.io/glystats/reference/gly_fold_change.md)
   [`gly_fold_change_()`](https://glycoverse.github.io/glystats/reference/gly_fold_change.md)
   : Calculate fold change
@@ -80,10 +55,6 @@
 - [`gly_umap()`](https://glycoverse.github.io/glystats/reference/gly_umap.md)
   [`gly_umap_()`](https://glycoverse.github.io/glystats/reference/gly_umap.md)
   : Uniform Manifold Approximation and Projection (UMAP)
-- [`gly_wgcna()`](https://glycoverse.github.io/glystats/reference/gly_wgcna.md)
-  [`gly_wgcna_()`](https://glycoverse.github.io/glystats/reference/gly_wgcna.md)
-  **\[deprecated\]** : Weighted Gene Co-expression Network Analysis
-  (WGCNA)
 - [`gly_wilcox()`](https://glycoverse.github.io/glystats/reference/gly_wilcox.md)
   [`gly_wilcox_()`](https://glycoverse.github.io/glystats/reference/gly_wilcox.md)
   : Wilcoxon rank-sum test for Differential Expression Analysis

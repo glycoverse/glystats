@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,18 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.10.0" id="glystats-0100">glystats 0.10.0<a class="anchor" aria-label="anchor" href="#glystats-0100"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-10-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-10-0"></a></h3>
+<ul><li>
+<code>gly_wgcna()</code>, <code>gly_wgcna_()</code>, <code>gly_consensus_clustering()</code>, and <code>gly_consensus_clustering_()</code> are removed. These functions were deprecated in 0.7.0. Use the <code>WGCNA</code> and <code>ConsensusClusterPlus</code> packages directly.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="deprecations-0-10-0">Deprecations<a class="anchor" aria-label="anchor" href="#deprecations-0-10-0"></a></h3>
+<ul><li>All enrichment analysis functions are now deprecated and will be removed in a future version: <code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>, <code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code>, <code><a href="../reference/gly_enrich_wikipathways.html">gly_enrich_wikipathways()</a></code>, <code><a href="../reference/gly_enrich_do.html">gly_enrich_do()</a></code>, <code><a href="../reference/gly_enrich_ncg.html">gly_enrich_ncg()</a></code>, and <code><a href="../reference/gly_enrich_dgn.html">gly_enrich_dgn()</a></code>. Use the corresponding functions in the <code>glyfun</code> package instead.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.9.0" id="glystats-090">glystats 0.9.0<a class="anchor" aria-label="anchor" href="#glystats-090"></a></h2>
 <div class="section level3">
@@ -66,7 +78,7 @@
 <h3 id="breaking-changes-0-7-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-7-0"></a></h3>
 <ul><li>Refactored enrichment API (<code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>, <code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code>). These functions now use explicit parameters instead of <code>...</code>. Users must update their code to use new parameters (e.g., <code>p_cutoff</code> instead of <code>pvalueCutoff</code>).</li>
 <li>
-<code><a href="../reference/gly_wgcna.html">gly_wgcna()</a></code>, <code><a href="../reference/gly_wgcna.html">gly_wgcna_()</a></code>, <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering()</a></code>, and <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering_()</a></code> are deprecated and will be removed in a future version. These functions are too interactive and complex for a pipeline-friendly package.</li>
+<code>gly_wgcna()</code>, <code>gly_wgcna_()</code>, <code>gly_consensus_clustering()</code>, and <code>gly_consensus_clustering_()</code> are deprecated and will be removed in a future version. These functions are too interactive and complex for a pipeline-friendly package.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-0-7-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-0"></a></h3>
@@ -264,8 +276,8 @@
 <h3 id="minor-improvements-and-bug-fixes-0-3-0">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-3-0"></a></h3>
 <ul><li>Update the documentation of all functions to include the detailed column descriptions for the tibbles in <code>tidy_result</code>.</li>
 <li>All <code>gly_xxx_()</code> functions now accept a character vector as the <code>groups</code> parameter.</li>
-<li>Fix an issue that <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering()</a></code> sends plots to the plot panel when <code>output_file</code> is NULL. This is an inconsistent behavior compared to other functions, and it has been fixed.</li>
-<li>Update the documentation of <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering()</a></code> to emphasize the importance of <code>output_file</code>.</li>
+<li>Fix an issue that <code>gly_consensus_clustering()</code> sends plots to the plot panel when <code>output_file</code> is NULL. This is an inconsistent behavior compared to other functions, and it has been fixed.</li>
+<li>Update the documentation of <code>gly_consensus_clustering()</code> to emphasize the importance of <code>output_file</code>.</li>
 <li>Add an introduction vignette.</li>
 </ul></div>
 </div>
@@ -307,8 +319,8 @@
 <ul><li>Add a new set of API functions: all <code>gly_xxx()</code> functions now have a lower API counterpart <code>gly_xxx_()</code> that works with matrices directly, providing more flexibility for users who don’t use the glyexp package.</li>
 <li>Add <code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code><a href="../reference/gly_limma.html">gly_limma_()</a></code> to perform differential analysis using the limma package.</li>
 <li>Add <code><a href="../reference/gly_kmeans.html">gly_kmeans()</a></code> and <code><a href="../reference/gly_kmeans.html">gly_kmeans_()</a></code> to perform K-means clustering.</li>
-<li>Add <code><a href="../reference/gly_wgcna.html">gly_wgcna()</a></code> and <code><a href="../reference/gly_wgcna.html">gly_wgcna_()</a></code> to perform WGCNA analysis.</li>
-<li>Add <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering()</a></code> and <code><a href="../reference/gly_consensus_clustering.html">gly_consensus_clustering_()</a></code> to perform consensus clustering.</li>
+<li>Add <code>gly_wgcna()</code> and <code>gly_wgcna_()</code> to perform WGCNA analysis.</li>
+<li>Add <code>gly_consensus_clustering()</code> and <code>gly_consensus_clustering_()</code> to perform consensus clustering.</li>
 <li>Add <code><a href="../reference/gly_cox.html">gly_cox()</a></code> and <code><a href="../reference/gly_cox.html">gly_cox_()</a></code> to fit Cox proportional hazards model for survival analysis.</li>
 <li>Add <code>ref_group</code> parameter to <code>gly_ttext()</code> and <code><a href="../reference/gly_wilcox.html">gly_wilcox()</a></code>.</li>
 </ul></div>
