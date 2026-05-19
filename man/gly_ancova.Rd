@@ -83,7 +83,7 @@ For significant results, emmeans post-hoc comparisons (Tukey adjustment) are aut
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
-The function performs log2 transformation on the expression data (log2(x + 1)) before
+The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. At least 2 groups and at least 1 covariate are required.
 
 \code{gly_ancova()} is the top-level API that works with \code{glyexp::experiment()} objects and supports

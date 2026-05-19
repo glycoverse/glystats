@@ -19,7 +19,7 @@
 #' This function requires the `Hmisc` package for efficient correlation calculation.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' correlation analysis. When `on = "variable"` (default), correlations are calculated between
 #' variables across samples. When `on = "sample"`, correlations are calculated between
 #' samples across variables.
@@ -117,7 +117,7 @@ gly_cor_ <- function(
   }
 
   # Apply log transformation
-  mat <- log2(mat + 1)
+  mat <- .log_transform_expr_mat(mat)
 
   # Calculate correlation using Hmisc::rcorr
   rcorr_result <- Hmisc::rcorr(mat, type = method, ...)

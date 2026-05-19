@@ -74,7 +74,7 @@ For significant results, Tukey's HSD post-hoc test is automatically performed.
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
-The function performs log2 transformation on the expression data (log2(x + 1)) before
+The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. At least 2 groups are required in the grouping variable.
 
 \code{gly_anova()} is the top-level API that works with \code{glyexp::experiment()} objects and supports

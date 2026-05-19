@@ -353,7 +353,7 @@ test_that("gly_anova_ returns eta-squared in effect_size", {
     p_adj_method = NULL
   ))
 
-  log_values <- log2(c(1, 2, 3, 5, 6, 7, 9, 10, 11) + 1)
+  log_values <- log2(c(1, 2, 3, 5, 6, 7, 9, 10, 11) + 1e-6)
   grand_mean <- mean(log_values)
   group_means <- purrr::map_dbl(levels(groups), function(group) {
     mean(log_values[groups == group])
@@ -408,7 +408,7 @@ test_that("gly_kruskal_ returns epsilon-squared in effect_size", {
     p_adj_method = NULL
   ))
 
-  log_values <- log2(c(1, 2, 3, 5, 6, 7, 9, 10, 11) + 1)
+  log_values <- log2(c(1, 2, 3, 5, 6, 7, 9, 10, 11) + 1e-6)
   h_stat <- unname(stats::kruskal.test(log_values ~ groups)$statistic)
   n_obs <- length(log_values)
   n_groups <- nlevels(groups)
@@ -428,7 +428,7 @@ test_that(".tibblify_main_test_results validates effect-size inputs", {
     dimnames = list("var1", paste0("sample", 1:9))
   )
   groups <- factor(rep(c("A", "B", "C"), each = 3))
-  log_values <- log2(expr_mat["var1", ] + 1)
+  log_values <- log2(expr_mat["var1", ] + 1e-6)
   main_test_raw <- list(var1 = stats::kruskal.test(log_values ~ groups))
 
   expect_error(
