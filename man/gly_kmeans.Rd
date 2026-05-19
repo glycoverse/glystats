@@ -53,7 +53,7 @@ The function uses \code{stats::kmeans()} to perform clustering and provides
 tidy results with cluster assignments.
 }
 \details{
-The function performs log2 transformation on the expression data (log2(x + 1)) before
+The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 clustering. When \code{on = "variable"} (default), variables are clustered based on their
 expression patterns across samples. When \code{on = "sample"}, samples are clustered based
 on their expression profiles across variables.

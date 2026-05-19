@@ -39,7 +39,7 @@
 #' @param ... Additional arguments passed to `limma::lmFit()`.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. The analysis uses linear models with empirical Bayes moderation
 #' to improve statistical power, especially for small sample sizes.
 #'

@@ -20,7 +20,7 @@
 #' This function only uses base R packages and does not require additional dependencies.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' clustering. When `on = "variable"` (default), variables are clustered based on their
 #' expression patterns across samples. When `on = "sample"`, samples are clustered based
 #' on their expression profiles across variables.
@@ -111,7 +111,7 @@ gly_kmeans_ <- function(
   }
 
   # Apply log transformation
-  mat <- log2(mat + 1)
+  mat <- .log_transform_expr_mat(mat)
   # Scale data if requested
   if (scale) {
     mat <- scale(mat)

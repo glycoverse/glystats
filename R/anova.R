@@ -20,7 +20,7 @@
 #' @param ... Additional arguments passed to `stats::aov()`.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
 #'
 #' `gly_anova()` is the top-level API that works with `glyexp::experiment()` objects and supports
@@ -210,7 +210,7 @@ gly_anova_ <- function(
 #' @param ... Additional arguments passed to `stats::aov()`.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. At least 2 groups and at least 1 covariate are required.
 #'
 #' `gly_ancova()` is the top-level API that works with `glyexp::experiment()` objects and supports
@@ -444,7 +444,7 @@ gly_ancova_ <- function(
 #' This function requires the `FSA` package for Dunn's post-hoc test.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
 #'
 #' `gly_kruskal()` is the top-level API that works with `glyexp::experiment()` objects and supports
@@ -792,7 +792,7 @@ gly_kruskal_ <- function(
 
   if (!is_logged) {
     data <- data %>%
-      dplyr::mutate(log_value = log2(.data$log_value + 1))
+      dplyr::mutate(log_value = log2(.data$log_value + 1e-6))
   }
 
   data

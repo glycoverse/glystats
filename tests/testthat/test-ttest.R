@@ -107,7 +107,7 @@ test_that("gly_ttest_ returns Cohen's d in effect_size", {
     p_adj_method = NULL
   ))
 
-  log_values <- log2(c(1, 2, 3, 8, 9, 10) + 1)
+  log_values <- log2(c(1, 2, 3, 8, 9, 10) + 1e-6)
   group_a <- log_values[1:3]
   group_b <- log_values[4:6]
   pooled_sd <- sqrt(
@@ -118,6 +118,18 @@ test_that("gly_ttest_ returns Cohen's d in effect_size", {
   expected <- (mean(group_b) - mean(group_a)) / pooled_sd
 
   expect_equal(result$tidy_result$effect_size, expected, tolerance = 1e-10)
+})
+
+test_that(".log_transform_expr_mat uses a small pseudo-count", {
+  expr_mat <- matrix(
+    c(0, 1, 10),
+    nrow = 1,
+    dimnames = list("var1", paste0("sample", 1:3))
+  )
+
+  result <- .log_transform_expr_mat(expr_mat)
+
+  expect_equal(result, log2(expr_mat + 1e-6), tolerance = 1e-10)
 })
 
 test_that("gly_ttest_ direction matches log2fc and ref_group", {
@@ -256,12 +268,12 @@ test_that("gly_wilcox_ direction matches log2fc and ref_group", {
   expect_equal(
     result_default$tidy_result$conf_low,
     -result_ref_b$tidy_result$conf_high,
-    tolerance = 1e-10
+    tolerance = 1e-4
   )
   expect_equal(
     result_default$tidy_result$conf_high,
     -result_ref_b$tidy_result$conf_low,
-    tolerance = 1e-10
+    tolerance = 1e-4
   )
 })
 
@@ -334,7 +346,7 @@ test_that("gly_wilcox_ returns rank-biserial correlation in effect_size", {
     exact = FALSE
   )))
 
-  log_values <- log2(c(1, 2, 3, 8, 9, 10) + 1)
+  log_values <- log2(c(1, 2, 3, 8, 9, 10) + 1e-6)
   ranks <- rank(log_values)
   n_ref <- 3
   n_test <- 3

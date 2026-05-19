@@ -54,7 +54,7 @@ The function calculates correlation coefficients and p-values for all pairs,
 with optional multiple testing correction.
 }
 \details{
-The function performs log2 transformation on the expression data (log2(x + 1)) before
+The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 correlation analysis. When \code{on = "variable"} (default), correlations are calculated between
 variables across samples. When \code{on = "sample"}, correlations are calculated between
 samples across variables.

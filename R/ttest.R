@@ -21,7 +21,7 @@
 #' @param ... Additional arguments passed to `stats::t.test()`.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
 #'
 #' `gly_ttest()` is the top-level API that works with `glyexp::experiment()` objects and supports
@@ -163,7 +163,7 @@ gly_ttest_ <- function(
 #' @param ... Additional arguments passed to `stats::wilcox.test()`.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1)) before
+#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
 #'
 #' `gly_wilcox()` is the top-level API that works with `glyexp::experiment()` objects and supports
@@ -538,10 +538,10 @@ gly_wilcox_ <- function(
 #'
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
 #'
-#' @return A numeric matrix with log2(x + 1) values.
+#' @return A numeric matrix with log2(x + 1e-6) values.
 #' @noRd
 .log_transform_expr_mat <- function(expr_mat) {
-  log2(expr_mat + 1)
+  log2(expr_mat + 1e-6)
 }
 
 # Helper function to reorder groups so that ref_group becomes the first level
