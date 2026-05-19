@@ -19,6 +19,7 @@ This vignette focuses on the `gly_xxx()` interface. New to
 first to get up to speed.
 
 ``` r
+
 library(glystats)
 library(glyexp)
 library(glyread)
@@ -44,35 +45,35 @@ library(dplyr)
 Let’s start by exploring our demo dataset:
 
 ``` r
+
 # Here we use `glyread` to read in the data and use `glyclean` to perform preprocessing
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [89ms]
+#> ✔ Finding leader proteins [83ms]
 #> 
 #> ℹ Reading dataColumn group converted to <factor>.ℹ Parsing glycan compositions and structures
-#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [377ms]
+#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [345ms]
 #> 
-#> ℹ Reading data✔ Reading data [890ms]
+#> ℹ Reading data✔ Reading data [823ms]
 #> 
 #> 
 #> ── Normalizing data ──
 #> 
-#> ℹ No QC samples found. Using default normalization method based on experiment type.
-#> ℹ Experiment type is "glycoproteomics". Using `normalize_median()`.
+#> ℹ Normalization method: `normalize_median()`
+#> ℹ Reason: default for "glycoproteomics".
 #> ✔ Normalization completed.
 #> 
 #> ── Removing variables with too many missing values ──
 #> 
-#> ℹ No QC samples found. Using all samples.
 #> ℹ Applying preset "discovery"...
 #> ℹ Total removed: 2 (0.67%) variables.
 #> ✔ Variable removal completed.
 #> 
 #> ── Imputing missing values ──
 #> 
-#> ℹ No QC samples found. Using default imputation method based on sample size.
-#> ℹ Sample size <= 30, using `impute_sample_min()`.
+#> ℹ Imputation method: `impute_min_prob()`
+#> ℹ Reason: default for "glycoproteomics" with n_samples < 30.
 #> ✔ Imputation completed.
 #> 
 #> ── Aggregating data ──
@@ -82,13 +83,13 @@ exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info
 #> 
 #> ── Normalizing data again ──
 #> 
-#> ℹ No QC samples found. Using default normalization method based on experiment type.
-#> ℹ Experiment type is "glycoproteomics". Using `normalize_median()`.
+#> ℹ Normalization method: `normalize_median()`
+#> ℹ Reason: default for "glycoproteomics".
 #> ✔ Normalization completed.
 #> 
 #> ── Correcting batch effects ──
 #> 
-#> ℹ Batch column  not found in sample_info. Skipping batch correction.
+#> ℹ Batch column batch not found in sample_info. Skipping batch correction.
 #> ✔ Batch correction completed.
 exp
 #> 
@@ -102,6 +103,7 @@ Look at that! 🎉 We’ve got a \[glyexp::experiment()\] packed with 12
 samples and 263 glycoforms. That’s plenty of data to work with!
 
 ``` r
+
 get_var_info(exp)
 #> # A tibble: 225 × 5
 #>    variable                        protein glycan_composition protein_site gene 
@@ -124,6 +126,7 @@ glycoform 🆔 - it contains everything you need to know: the protein,
 glycosylation site, and glycan structures.
 
 ``` r
+
 get_sample_info(exp)
 #> # A tibble: 12 × 2
 #>    sample                  group
@@ -163,6 +166,7 @@ Let’s dive into action with an ANOVA analysis to identify differentially
 expressed glycoforms:
 
 ``` r
+
 anova_res <- gly_anova(exp)
 #> ℹ Number of groups: 4
 #> ℹ Groups: "C", "H", "M", and "Y"
@@ -194,20 +198,21 @@ You can use
 to get the tidy result tibble:
 
 ``` r
+
 get_tidy_result(anova_res, "main_test")
 #> # A tibble: 225 × 14
 #>    variable     protein glycan_composition protein_site gene  term     df  sumsq
 #>    <glue>       <chr>   <comp>                    <int> <chr> <chr> <dbl>  <dbl>
-#>  1 P08185-176-… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… group     3  67.7 
-#>  2 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 161.  
-#>  3 P04196-344-… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 126.  
-#>  4 P10909-291-… P10909  Hex(6)HexNAc(5)             291 CLU   group     3  23.1 
-#>  5 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 472.  
-#>  6 P04196-345-… P04196  Hex(5)HexNAc(4)             345 HRG   group     3  60.0 
-#>  7 P04196-344-… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 208.  
-#>  8 P04196-344-… P04196  Hex(4)HexNAc(3)             344 HRG   group     3 109.  
-#>  9 P04196-344-… P04196  Hex(4)HexNAc(4)Ne…          344 HRG   group     3   9.66
-#> 10 P10909-291-… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  87.0 
+#>  1 P08185-176-… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… group     3  55.7 
+#>  2 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 158.  
+#>  3 P04196-344-… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 138.  
+#>  4 P10909-291-… P10909  Hex(6)HexNAc(5)             291 CLU   group     3  22.5 
+#>  5 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 496.  
+#>  6 P04196-345-… P04196  Hex(5)HexNAc(4)             345 HRG   group     3  60.2 
+#>  7 P04196-344-… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 173.  
+#>  8 P04196-344-… P04196  Hex(4)HexNAc(3)             344 HRG   group     3  72.1 
+#>  9 P04196-344-… P04196  Hex(4)HexNAc(4)Ne…          344 HRG   group     3   9.65
+#> 10 P10909-291-… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  75.0 
 #> # ℹ 215 more rows
 #> # ℹ 6 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
 #> #   effect_size <dbl>, post_hoc <chr>
@@ -223,6 +228,7 @@ The `raw_result` houses two lists of models - one for the main test, one
 for post hoc comparisons:
 
 ``` r
+
 names(get_raw_result(anova_res))
 #> [1] "main_test"     "post_hoc_test"
 ```
@@ -233,6 +239,7 @@ and
 are useful to be used in pipes:
 
 ``` r
+
 exp |>
   gly_anova() |>
   get_tidy_result("main_test") |>
@@ -240,20 +247,20 @@ exp |>
 #> ℹ Number of groups: 4
 #> ℹ Groups: "C", "H", "M", and "Y"
 #> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
-#> # A tibble: 60 × 14
+#> # A tibble: 54 × 14
 #>    variable      protein glycan_composition protein_site gene  term     df sumsq
 #>    <glue>        <chr>   <comp>                    <int> <chr> <chr> <dbl> <dbl>
-#>  1 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 161. 
-#>  2 P04196-344-H… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 126. 
-#>  3 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 472. 
-#>  4 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 208. 
-#>  5 P10909-291-H… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  87.0
-#>  6 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 176. 
-#>  7 P13671-855-H… P13671  Hex(5)HexNAc(4)dH…          855 C6    group     3  81.1
-#>  8 P04196-344-H… P04196  Hex(4)HexNAc(3)dH…          344 HRG   group     3 159. 
-#>  9 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 150. 
-#> 10 P01019-161-H… P01019  Hex(5)HexNAc(4)Ne…          161 AGT   group     3  46.4
-#> # ℹ 50 more rows
+#>  1 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 158. 
+#>  2 P04196-344-H… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 138. 
+#>  3 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 496. 
+#>  4 P10909-291-H… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  75.0
+#>  5 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 127. 
+#>  6 P13671-855-H… P13671  Hex(5)HexNAc(4)dH…          855 C6    group     3  81.1
+#>  7 P04196-344-H… P04196  Hex(4)HexNAc(3)dH…          344 HRG   group     3 195. 
+#>  8 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 116. 
+#>  9 P01019-161-H… P01019  Hex(5)HexNAc(4)Ne…          161 AGT   group     3  46.4
+#> 10 P01019-161-H… P01019  Hex(4)HexNAc(3)Ne…          161 AGT   group     3  61.4
+#> # ℹ 44 more rows
 #> # ℹ 6 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
 #> #   effect_size <dbl>, post_hoc <chr>
 ```
@@ -267,6 +274,7 @@ works with standard R objects. For instance,
 happily accepts plain matrices:
 
 ``` r
+
 expr_mat <- get_expr_mat(exp)
 groups <- factor(get_sample_info(exp)$group)
 anova_res2 <- gly_anova_(expr_mat, groups)

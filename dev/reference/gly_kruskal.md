@@ -114,8 +114,8 @@ A list containing three elements:
 ## Details
 
 The function performs log2 transformation on the expression data
-(log2(x + 1)) before statistical testing. At least 2 groups are required
-in the grouping variable.
+(log2(x + 1e-6)) before statistical testing. At least 2 groups are
+required in the grouping variable.
 
 `gly_kruskal()` is the top-level API that works with
 [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
