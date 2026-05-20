@@ -2,6 +2,13 @@
 
 ## glystats (development version)
 
+## glystats 0.10.1
+
+### Minor improvements and bug fixes
+
+- Use a smaller log2 pseudo-count across DEA and clustering functions to
+  reduce bias for low-intensity values (#10).
+
 ## glystats 0.10.0
 
 ### Breaking changes
