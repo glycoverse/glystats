@@ -82,7 +82,7 @@ A list with three elements:
 ## Details
 
 The function performs log2 transformation on the expression data
-(log2(x + 1)) before correlation analysis. When `on = "variable"`
+(log2(x + 1e-6)) before correlation analysis. When `on = "variable"`
 (default), correlations are calculated between variables across samples.
 When `on = "sample"`, correlations are calculated between samples across
 variables.

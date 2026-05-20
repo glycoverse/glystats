@@ -80,7 +80,7 @@ A list with three elements:
 ## Details
 
 The function performs log2 transformation on the expression data
-(log2(x + 1)) before clustering. When `on = "variable"` (default),
+(log2(x + 1e-6)) before clustering. When `on = "variable"` (default),
 variables are clustered based on their expression patterns across
 samples. When `on = "sample"`, samples are clustered based on their
 expression profiles across variables.

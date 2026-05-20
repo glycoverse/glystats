@@ -22,6 +22,7 @@ You can install the latest release of glystats from
 (**recommended**):
 
 ``` r
+
 # install.packages("pak")
 pak::repo_add(glycoverse = "https://glycoverse.r-universe.dev")
 pak::pkg_install("glystats")
@@ -30,12 +31,14 @@ pak::pkg_install("glystats")
 Or from [GitHub](https://github.com/glycoverse/glystats):
 
 ``` r
+
 pak::pkg_install("glycoverse/glystats@*release")
 ```
 
 Or install the development version (NOT recommended):
 
 ``` r
+
 pak::pkg_install("glycoverse/glystats")
 ```
 
@@ -66,6 +69,7 @@ and then `glystats` to perform statistical analysis.
 Say we already have a preprocessed experiment object called `exp`:
 
 ``` r
+
 # Two-sample t-test
 ttest_res <- gly_ttest(exp)
 

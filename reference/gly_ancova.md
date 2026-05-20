@@ -125,8 +125,8 @@ A list containing two elements:
 ## Details
 
 The function performs log2 transformation on the expression data
-(log2(x + 1)) before statistical testing. At least 2 groups and at least
-1 covariate are required.
+(log2(x + 1e-6)) before statistical testing. At least 2 groups and at
+least 1 covariate are required.
 
 `gly_ancova()` is the top-level API that works with
 [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
