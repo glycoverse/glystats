@@ -44,9 +44,7 @@ If <code>scale = TRUE</code>, constant variables (zero variance) will be removed
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_pca</span><span class="op">(</span><span class="va">exp</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">TRUE</span>, add_info <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">gly_pca_</span><span class="op">(</span><span class="va">expr_mat</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_pca</span><span class="op">(</span><span class="va">exp</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">TRUE</span>, add_info <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -67,16 +65,11 @@ If <code>scale = TRUE</code>, constant variables (zero variance) will be removed
 
 <dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
 <dd><p>A logical value. If TRUE (default), sample and variable information from the experiment
-will be added to the result tibbles. If FALSE, only the PCA results are returned.
-Only applicable to <code>gly_pca()</code>.</p></dd>
+will be added to the result tibbles. If FALSE, only the PCA results are returned.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp()</a></code>.</p></dd>
-
-
-<dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
-<dd><p>(Only for <code>gly_pca_()</code>) A numeric matrix with variables as rows and samples as columns.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -96,16 +89,12 @@ Only applicable to <code>gly_pca()</code>.</p></dd>
 </ul></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw prcomp object from <code><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">stats::prcomp()</a></code></p></li>
-<li><p><code>meta_data</code> (only for <code>gly_pca()</code>): A list containing metadata from the input experiment</p></li>
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The function performs log transformation on the expression data (log(x + 1)) before
 PCA analysis.</p>
-<p><code>gly_pca()</code> is the top-level API that works with <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects and supports
-the <code>add_info</code> parameter for joining experiment metadata.</p>
-<p><code>gly_pca_()</code> is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.</p>
     </div>
     <div class="section level2">
     <h2 id="required-packages">Required packages<a class="anchor" aria-label="anchor" href="#required-packages"></a></h2>
@@ -127,7 +116,7 @@ providing more flexibility for users who don't use the glyexp package.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

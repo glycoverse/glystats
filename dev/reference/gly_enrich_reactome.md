@@ -14,8 +14,6 @@ Perform Reactome pathway ORA for protein UniProt accessions using
   and extracts protein information from the "protein" column in the
   variable information tibble.
 
-- `gly_enrich_reactome_()` accepts a character vector of UniProt IDs.
-
 As
 [`ReactomePA::enrichPathway()`](https://rdrr.io/pkg/ReactomePA/man/enrichPathway.html)
 only accepts Entrez IDs, the UniProt IDs will be first transformed into
@@ -35,23 +33,13 @@ gly_enrich_reactome(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
-
-gly_enrich_reactome_(
-  proteins,
-  orgdb = "org.Hs.eg.db",
-  organism = "human",
-  universe = NULL,
-  p_adj_method = "BH",
-  p_cutoff = 0.05,
-  q_cutoff = 0.2
-)
 ```
 
 ## Arguments
 
 - exp:
 
-  (Only for `gly_enrich_reactome()`) A
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object.
 
@@ -59,7 +47,7 @@ gly_enrich_reactome_(
 
   A logical value. This parameter is included for API consistency but
   has no effect since enrichment results do not contain variable or
-  sample columns. Only applicable to top-level APIs.
+  sample columns.
 
 - orgdb:
 
@@ -76,14 +64,10 @@ gly_enrich_reactome_(
 
 - universe:
 
-  Background genes. If a character vector, directly passed to `universe`
-  of
-  [`ReactomePA::enrichPathway()`](https://rdrr.io/pkg/ReactomePA/man/enrichPathway.html).
-  You can also provide a
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object with "glycoproteomics" type. In this case all detected proteins
-  in this experiment will be extracted and passed to `universe` of
-  [`ReactomePA::enrichPathway()`](https://rdrr.io/pkg/ReactomePA/man/enrichPathway.html).
+  defining the background proteins, or `NULL` to use the default
+  background.
 
 - p_adj_method:
 
@@ -99,11 +83,6 @@ gly_enrich_reactome_(
 
   Passed to `qvalueCutoff` of
   [`ReactomePA::enrichPathway()`](https://rdrr.io/pkg/ReactomePA/man/enrichPathway.html).
-
-- proteins:
-
-  (Only for `gly_enrich_reactome_()`) A character vector of UniProt
-  accession IDs.
 
 ## Value
 
@@ -133,9 +112,8 @@ A list with three elements:
 
 - `raw_result`: The raw ReactomePA enrichPathway result object
 
-- `meta_data` (only for `gly_enrich_reactome()`): A list containing
-  metadata from the input experiment The list has classes
-  `glystats_reactome_ora_res` and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_reactome_ora_res` and `glystats_res`.
 
 ## Required packages
 

@@ -5,7 +5,6 @@ to the separate glyfun package, which has more features and better API design.
 Perform WikiPathways ORA for protein UniProt accessions using clusterProfiler::enrichWP().
 gly_enrich_wikipathways() accepts a glyexp::experiment() and extracts protein information
 from the "protein" column in the variable information tibble.
-gly_enrich_wikipathways_() accepts a character vector of UniProt IDs.
 
 
 As clusterProfiler::enrichWP() only accepts Entrez IDs,
@@ -15,7 +14,6 @@ to the separate glyfun package, which has more features and better API design.
 Perform WikiPathways ORA for protein UniProt accessions using clusterProfiler::enrichWP().
 gly_enrich_wikipathways() accepts a glyexp::experiment() and extracts protein information
 from the "protein" column in the variable information tibble.
-gly_enrich_wikipathways_() accepts a character vector of UniProt IDs.
 
 
 As clusterProfiler::enrichWP() only accepts Entrez IDs,
@@ -58,7 +56,6 @@ the UniProt IDs will be first transformed into Entrez IDs with clusterProfiler::
 to the separate <code>glyfun</code> package, which has more features and better API design.</p>
 <p>Perform WikiPathways ORA for protein UniProt accessions using <code><a href="https://rdrr.io/pkg/clusterProfiler/man/enrichWP.html" class="external-link">clusterProfiler::enrichWP()</a></code>.</p><ul><li><p><code>gly_enrich_wikipathways()</code> accepts a <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> and extracts protein information
 from the "protein" column in the variable information tibble.</p></li>
-<li><p><code>gly_enrich_wikipathways_()</code> accepts a character vector of UniProt IDs.</p></li>
 </ul><p>As <code><a href="https://rdrr.io/pkg/clusterProfiler/man/enrichWP.html" class="external-link">clusterProfiler::enrichWP()</a></code> only accepts Entrez IDs,
 the UniProt IDs will be first transformed into Entrez IDs with <code><a href="https://rdrr.io/pkg/clusterProfiler/man/bitr.html" class="external-link">clusterProfiler::bitr()</a></code>.</p>
     </div>
@@ -74,16 +71,6 @@ the UniProt IDs will be first transformed into Entrez IDs with <code><a href="ht
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
 <span>  p_cutoff <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  q_cutoff <span class="op">=</span> <span class="fl">0.2</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">gly_enrich_wikipathways_</span><span class="op">(</span></span>
-<span>  <span class="va">proteins</span>,</span>
-<span>  organism <span class="op">=</span> <span class="st">"Homo sapiens"</span>,</span>
-<span>  orgdb <span class="op">=</span> <span class="st">"org.Hs.eg.db"</span>,</span>
-<span>  universe <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
-<span>  p_cutoff <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  q_cutoff <span class="op">=</span> <span class="fl">0.2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -92,13 +79,12 @@ the UniProt IDs will be first transformed into Entrez IDs with <code><a href="ht
 
 
 <dl><dt id="arg-exp">exp<a class="anchor" aria-label="anchor" href="#arg-exp"></a></dt>
-<dd><p>(Only for <code>gly_enrich_wikipathways()</code>) A <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object.</p></dd>
+<dd><p>A <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object.</p></dd>
 
 
 <dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
 <dd><p>A logical value. This parameter is included for API consistency but has no effect
-since enrichment results do not contain variable or sample columns.
-Only applicable to top-level APIs.</p></dd>
+since enrichment results do not contain variable or sample columns.</p></dd>
 
 
 <dt id="arg-organism">organism<a class="anchor" aria-label="anchor" href="#arg-organism"></a></dt>
@@ -112,11 +98,7 @@ Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.
 
 
 <dt id="arg-universe">universe<a class="anchor" aria-label="anchor" href="#arg-universe"></a></dt>
-<dd><p>Background genes. If a character vector, it is expected to contain UniProt accession IDs;
-these will be converted to Entrez Gene IDs and then passed to <code>universe</code> of <code><a href="https://rdrr.io/pkg/clusterProfiler/man/enrichWP.html" class="external-link">clusterProfiler::enrichWP()</a></code>.
-You can also provide a <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object with "glycoproteomics" type.
-In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
-and then passed to <code>universe</code> of <code><a href="https://rdrr.io/pkg/clusterProfiler/man/enrichWP.html" class="external-link">clusterProfiler::enrichWP()</a></code>.</p></dd>
+<dd><p>A <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> defining the background proteins, or <code>NULL</code> to use the default background.</p></dd>
 
 
 <dt id="arg-p-adj-method">p_adj_method<a class="anchor" aria-label="anchor" href="#arg-p-adj-method"></a></dt>
@@ -129,10 +111,6 @@ and then passed to <code>universe</code> of <code><a href="https://rdrr.io/pkg/c
 
 <dt id="arg-q-cutoff">q_cutoff<a class="anchor" aria-label="anchor" href="#arg-q-cutoff"></a></dt>
 <dd><p>Passed to <code>qvalueCutoff</code> of <code><a href="https://rdrr.io/pkg/clusterProfiler/man/enrichWP.html" class="external-link">clusterProfiler::enrichWP()</a></code>.</p></dd>
-
-
-<dt id="arg-proteins">proteins<a class="anchor" aria-label="anchor" href="#arg-proteins"></a></dt>
-<dd><p>(Only for <code>gly_enrich_wikipathways_()</code>) A character vector of UniProt accession IDs.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -148,7 +126,7 @@ and then passed to <code>universe</code> of <code><a href="https://rdrr.io/pkg/c
 <li><p><code>count</code>: Number of genes in the term</p></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw clusterProfiler enrichResult object</p></li>
-<li><p><code>meta_data</code> (only for <code>gly_enrich_wikipathways()</code>): A list containing metadata from the input experiment
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment
 The list has classes <code>glystats_wikipathways_ora_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
     <div class="section level2">
@@ -172,7 +150,7 @@ The list has classes <code>glystats_wikipathways_ora_res</code> and <code>glysta
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -14,8 +14,6 @@ Perform DisGeNET ORA for protein UniProt accessions using
   and extracts protein information from the "protein" column in the
   variable information tibble.
 
-- `gly_enrich_dgn_()` accepts a character vector of UniProt IDs.
-
 As [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html)
 only accepts Entrez IDs, the UniProt IDs will be first transformed into
 Entrez IDs with
@@ -33,22 +31,13 @@ gly_enrich_dgn(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
-
-gly_enrich_dgn_(
-  proteins,
-  orgdb = "org.Hs.eg.db",
-  universe = NULL,
-  p_adj_method = "BH",
-  p_cutoff = 0.05,
-  q_cutoff = 0.2
-)
 ```
 
 ## Arguments
 
 - exp:
 
-  (Only for `gly_enrich_dgn()`) A
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object.
 
@@ -56,7 +45,7 @@ gly_enrich_dgn_(
 
   A logical value. This parameter is included for API consistency but
   has no effect since enrichment results do not contain variable or
-  sample columns. Only applicable to top-level APIs.
+  sample columns.
 
 - orgdb:
 
@@ -67,16 +56,10 @@ gly_enrich_dgn_(
 
 - universe:
 
-  Background genes. If a character vector, it is expected to contain
-  UniProt accession IDs; these will be converted to Entrez Gene IDs and
-  then passed to `universe` of
-  [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
-  You can also provide a
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object with "glycoproteomics" type. In this case all detected proteins
-  in this experiment will be extracted as UniProt IDs, converted to
-  Entrez IDs, and then passed to `universe` of
-  [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
+  defining the background proteins, or `NULL` to use the default
+  background.
 
 - p_adj_method:
 
@@ -92,11 +75,6 @@ gly_enrich_dgn_(
 
   Passed to `qvalueCutoff` of
   [`DOSE::enrichDGN()`](https://rdrr.io/pkg/DOSE/man/enrichDGN.html).
-
-- proteins:
-
-  (Only for `gly_enrich_dgn_()`) A character vector of UniProt accession
-  IDs.
 
 ## Value
 
@@ -126,9 +104,8 @@ A list with three elements:
 
 - `raw_result`: The raw DOSE enrichResult object
 
-- `meta_data` (only for `gly_enrich_dgn()`): A list containing metadata
-  from the input experiment The list has classes `glystats_dgn_ora_res`
-  and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_dgn_ora_res` and `glystats_res`.
 
 ## Required packages
 

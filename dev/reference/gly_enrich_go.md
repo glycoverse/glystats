@@ -14,8 +14,6 @@ Perform GO ORA for protein UniProt accessions using
   and extracts protein information from the "protein" column in the
   variable information tibble.
 
-- `gly_enrich_go_()` accepts a character vector of UniProt IDs.
-
 ## Usage
 
 ``` r
@@ -29,24 +27,13 @@ gly_enrich_go(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
-
-gly_enrich_go_(
-  proteins,
-  orgdb = "org.Hs.eg.db",
-  keytype = "UNIPROT",
-  ont = "MF",
-  universe = NULL,
-  p_adj_method = "BH",
-  p_cutoff = 0.05,
-  q_cutoff = 0.2
-)
 ```
 
 ## Arguments
 
 - exp:
 
-  (Only for `gly_enrich_go()`) A
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object.
 
@@ -54,7 +41,7 @@ gly_enrich_go_(
 
   A logical value. This parameter is included for API consistency but
   has no effect since enrichment results do not contain variable or
-  sample columns. Only applicable to top-level APIs.
+  sample columns.
 
 - orgdb:
 
@@ -69,14 +56,10 @@ gly_enrich_go_(
 
 - universe:
 
-  Background genes. If a character vector, directly passed to `universe`
-  of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
-  You can also provide a
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object with "glycoproteomics" type. In this case all detected proteins
-  in this experiment will be extracted and passed to `universe` of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
+  defining the background proteins, or `NULL` to use the default
+  background.
 
 - p_adj_method:
 
@@ -91,16 +74,6 @@ gly_enrich_go_(
 - q_cutoff:
 
   Passed to `qvalueCutoff` of
-  [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
-
-- proteins:
-
-  (Only for `gly_enrich_go_()`) A character vector of UniProt accession
-  IDs.
-
-- keytype:
-
-  Passed to `keyType` of
   [`clusterProfiler::enrichGO()`](https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html).
 
 ## Value
@@ -131,9 +104,8 @@ A list with three elements:
 
 - `raw_result`: The raw clusterProfiler enrichResult object
 
-- `meta_data` (only for `gly_enrich_go()`): A list containing metadata
-  from the input experiment The list has classes `glystats_go_ora_res`
-  and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_go_ora_res` and `glystats_res`.
 
 ## Required packages
 

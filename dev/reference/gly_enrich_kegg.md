@@ -14,8 +14,6 @@ Perform KEGG ORA for protein UniProt accessions using
   and extracts protein information from the "protein" column in the
   variable information tibble.
 
-- `gly_enrich_kegg_()` accepts a character vector of UniProt IDs.
-
 ## Usage
 
 ``` r
@@ -28,23 +26,13 @@ gly_enrich_kegg(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
-
-gly_enrich_kegg_(
-  proteins,
-  keytype = "uniprot",
-  organism = "hsa",
-  universe = NULL,
-  p_adj_method = "BH",
-  p_cutoff = 0.05,
-  q_cutoff = 0.2
-)
 ```
 
 ## Arguments
 
 - exp:
 
-  (Only for `gly_enrich_kegg()`) A
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object.
 
@@ -52,7 +40,7 @@ gly_enrich_kegg_(
 
   A logical value. This parameter is included for API consistency but
   has no effect since enrichment results do not contain variable or
-  sample columns. Only applicable to top-level APIs.
+  sample columns.
 
 - organism:
 
@@ -63,14 +51,10 @@ gly_enrich_kegg_(
 
 - universe:
 
-  Background genes. If a character vector, directly passed to `universe`
-  of
-  [`clusterProfiler::enrichKEGG()`](https://rdrr.io/pkg/clusterProfiler/man/enrichKEGG.html).
-  You can also provide a
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object with "glycoproteomics" type. In this case all detected proteins
-  in this experiment will be extracted and passed to `universe` of
-  [`clusterProfiler::enrichKEGG()`](https://rdrr.io/pkg/clusterProfiler/man/enrichKEGG.html).
+  defining the background proteins, or `NULL` to use the default
+  background.
 
 - p_adj_method:
 
@@ -86,17 +70,6 @@ gly_enrich_kegg_(
 
   Passed to `qvalueCutoff` of
   [`clusterProfiler::enrichKEGG()`](https://rdrr.io/pkg/clusterProfiler/man/enrichKEGG.html).
-
-- proteins:
-
-  (Only for `gly_enrich_kegg_()`) A character vector of UniProt
-  accession IDs.
-
-- keytype:
-
-  Passed to `keyType` of
-  [`clusterProfiler::enrichKEGG()`](https://rdrr.io/pkg/clusterProfiler/man/enrichKEGG.html).
-  Defaults to "uniprot".
 
 ## Value
 
@@ -126,9 +99,8 @@ A list with three elements:
 
 - `raw_result`: The raw clusterProfiler enrichResult object
 
-- `meta_data` (only for `gly_enrich_kegg()`): A list containing metadata
-  from the input experiment The list has classes `glystats_kegg_ora_res`
-  and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_kegg_ora_res` and `glystats_res`.
 
 ## Required packages
 

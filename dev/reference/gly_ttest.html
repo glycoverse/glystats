@@ -51,9 +51,7 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 <span>  ref_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">gly_ttest_</span><span class="op">(</span><span class="va">expr_mat</span>, <span class="va">groups</span>, p_adj_method <span class="op">=</span> <span class="st">"BH"</span>, ref_group <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,7 +63,7 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
-<dd><p>(Only for <code>gly_ttest()</code>) A character string specifying the column name of the grouping variable
+<dd><p>A character string specifying the column name of the grouping variable
 in the sample information. Default is <code>"group"</code>.</p></dd>
 
 
@@ -82,21 +80,11 @@ If NULL (default), the first level of the group factor is used as the reference.
 
 <dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
 <dd><p>A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.
-Only applicable to <code>gly_ttest()</code>.</p></dd>
+will be added to the result tibble. If FALSE, only the statistical results are returned.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">stats::t.test()</a></code>.</p></dd>
-
-
-<dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
-<dd><p>(Only for <code>gly_ttest_()</code>) A numeric matrix with variables as rows and samples as columns.</p></dd>
-
-
-<dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
-<dd><p>(Only for <code>gly_ttest_()</code>) A factor or character vector specifying group membership for each sample.
-Must have exactly 2 levels. Character vectors will be automatically converted to factors.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -117,17 +105,13 @@ Must have exactly 2 levels. Character vectors will be automatically converted to
 <li><p><code>log2fc</code>: Log2 fold change (log2(group2_mean / group1_mean))</p></li>
 </ul></li>
 <li><p><code>raw_result</code>: A list of <code>t.test</code> model objects</p></li>
-<li><p><code>meta_data</code> (only for <code>gly_ttest()</code>): A list containing metadata from the input experiment
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment
 The list has classes <code>glystats_ttest_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. Exactly 2 groups are required in the grouping variable.</p>
-<p><code>gly_ttest()</code> is the top-level API that works with <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects and supports
-the <code>add_info</code> parameter for joining experiment metadata.</p>
-<p><code>gly_ttest_()</code> is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -143,7 +127,7 @@ providing more flexibility for users who don't use the glyexp package.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

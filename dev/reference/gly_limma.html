@@ -51,17 +51,6 @@ moderation from the limma package. Supports both two-group and multi-group compa
 <span>  contrasts <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">gly_limma_</span><span class="op">(</span></span>
-<span>  <span class="va">expr_mat</span>,</span>
-<span>  <span class="va">groups</span>,</span>
-<span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
-<span>  ref_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  contrasts <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  subjects <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -74,17 +63,17 @@ moderation from the limma package. Supports both two-group and multi-group compa
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
-<dd><p>(Only for <code>gly_limma()</code>) A character string specifying the column name in sample information
+<dd><p>A character string specifying the column name in sample information
 that contains group labels. Default is "group".</p></dd>
 
 
 <dt id="arg-covariate-cols">covariate_cols<a class="anchor" aria-label="anchor" href="#arg-covariate-cols"></a></dt>
-<dd><p>(Only for <code>gly_limma()</code>) A character vector specifying column names in sample information
+<dd><p>A character vector specifying column names in sample information
 to include as covariates in the limma model. Default is NULL.</p></dd>
 
 
 <dt id="arg-subject-col">subject_col<a class="anchor" aria-label="anchor" href="#arg-subject-col"></a></dt>
-<dd><p>(Only for <code>gly_limma()</code>) A character string specifying the column name in sample information
+<dd><p>A character string specifying the column name in sample information
 that contains subject identifiers for paired comparisons. Default is NULL.</p></dd>
 
 
@@ -111,35 +100,11 @@ Use the second format if group names contain hyphens.
 
 <dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
 <dd><p>A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.
-Only applicable to <code>gly_limma()</code>.</p></dd>
+will be added to the result tibble. If FALSE, only the statistical results are returned.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://rdrr.io/pkg/limma/man/lmFit.html" class="external-link">limma::lmFit()</a></code>.</p></dd>
-
-
-<dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
-<dd><p>(Only for <code>gly_limma_()</code>) A numeric matrix with variables as rows and samples as columns.</p></dd>
-
-
-<dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
-<dd><p>(Only for <code>gly_limma_()</code>) A factor or character vector specifying group membership for each sample.
-Must have at least 2 levels. Character vectors will be automatically converted to factors.
-If <code>contrasts</code> is not provided,
-the levels coming first in the factor will be used as the reference group.</p></dd>
-
-
-<dt id="arg-covariates">covariates<a class="anchor" aria-label="anchor" href="#arg-covariates"></a></dt>
-<dd><p>(Only for <code>gly_limma_()</code>) A data frame, matrix, or vector of sample-level covariates.
-Must have the same number of rows as <code>expr_mat</code> has columns. If row names are provided and
-match <code>colnames(expr_mat)</code>, they will be aligned automatically. Default is NULL.</p></dd>
-
-
-<dt id="arg-subjects">subjects<a class="anchor" aria-label="anchor" href="#arg-subjects"></a></dt>
-<dd><p>(Only for <code>gly_limma_()</code>) A vector or factor of subject identifiers for paired comparisons.
-Must have length equal to <code>ncol(expr_mat)</code>. If names or row names are provided and match
-<code>colnames(expr_mat)</code>, they will be aligned automatically. Default is NULL.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -155,17 +120,13 @@ Must have length equal to <code>ncol(expr_mat)</code>. If names or row names are
 <li><p><code>test_group</code>: Test group</p></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw limma fit object(s).</p></li>
-<li><p><code>meta_data</code> (only for <code>gly_limma()</code>): A list containing metadata from the input experiment.</p></li>
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. The analysis uses linear models with empirical Bayes moderation
 to improve statistical power, especially for small sample sizes.</p>
-<p><code>gly_limma()</code> is the top-level API that works with <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects and supports
-the <code>add_info</code> parameter for joining experiment metadata.</p>
-<p><code>gly_limma_()</code> is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.</p>
 <p>For two or more groups, all pairwise comparisons are automatically generated
 (one contrast for two groups) and performed using contrast matrices unless
 custom contrasts are specified.</p>
@@ -197,7 +158,7 @@ suggesting to use the second format.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

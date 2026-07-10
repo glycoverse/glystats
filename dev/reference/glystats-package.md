@@ -9,8 +9,8 @@ clustering), network analysis (weighted gene co-expression network
 analysis, WGCNA), survival modeling (Cox proportional hazards),
 enrichment analysis, correlation analysis, and ROC/AUC evaluation. All
 user-facing functions follow the gly\_\*() naming convention to
-facilitate auto-completion in RStudio. The package is designed to work
-seamlessly with 'glyexp' and tidy data workflows.
+facilitate auto-completion in RStudio. Analysis functions accept
+'glyexp' experiment objects as their unified data interface.
 
 ## See also
 

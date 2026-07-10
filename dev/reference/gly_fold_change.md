@@ -10,8 +10,6 @@ test/treatment/case group.
 
 ``` r
 gly_fold_change(exp, group_col = "group", add_info = TRUE)
-
-gly_fold_change_(expr_mat, groups)
 ```
 
 ## Arguments
@@ -24,27 +22,13 @@ gly_fold_change_(expr_mat, groups)
 
 - group_col:
 
-  (Only for `gly_fold_change()`) The column name of the group
-  information in the sample information.
+  The column name of the group information in the sample information.
 
 - add_info:
 
   A logical value. If TRUE (default), variable information from the
   experiment will be added to the result tibble. If FALSE, only the fold
-  change results are returned. Only applicable to `gly_fold_change()`.
-
-- expr_mat:
-
-  (Only for `gly_fold_change_()`) A numeric matrix with variables as
-  rows and samples as columns.
-
-- groups:
-
-  (Only for `gly_fold_change_()`) A factor or character vector
-  specifying group membership for each sample. Character vectors will be
-  automatically converted to factors. If two groups, the first level is
-  the reference group. If more than two groups, pairwise comparisons
-  will be performed, with levels coming first as reference groups.
+  change results are returned.
 
 ## Value
 
@@ -61,16 +45,4 @@ A list with three elements:
 
 - `raw_result`: The raw result (same as tidy_result for this function)
 
-- `meta_data` (only for `gly_fold_change()`): A list containing metadata
-  from the input experiment
-
-## Details
-
-`gly_fold_change()` is the top-level API that works with
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-objects and supports the `add_info` parameter for joining experiment
-metadata.
-
-`gly_fold_change_()` is the underlying API that works with matrices and
-factor vectors directly, providing more flexibility for users who don't
-use the glyexp package.
+- `meta_data`: A list containing metadata from the input experiment

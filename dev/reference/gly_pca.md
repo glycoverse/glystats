@@ -11,8 +11,6 @@ will be removed before PCA.
 
 ``` r
 gly_pca(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...)
-
-gly_pca_(expr_mat, center = TRUE, scale = TRUE, ...)
 ```
 
 ## Arguments
@@ -35,17 +33,12 @@ gly_pca_(expr_mat, center = TRUE, scale = TRUE, ...)
 
   A logical value. If TRUE (default), sample and variable information
   from the experiment will be added to the result tibbles. If FALSE,
-  only the PCA results are returned. Only applicable to `gly_pca()`.
+  only the PCA results are returned.
 
 - ...:
 
   Additional arguments passed to
   [`prcomp()`](https://rdrr.io/r/stats/prcomp.html).
-
-- expr_mat:
-
-  (Only for `gly_pca_()`) A numeric matrix with variables as rows and
-  samples as columns.
 
 ## Value
 
@@ -84,21 +77,12 @@ A list containing:
 - `raw_result`: The raw prcomp object from
   [`stats::prcomp()`](https://rdrr.io/r/stats/prcomp.html)
 
-- `meta_data` (only for `gly_pca()`): A list containing metadata from
-  the input experiment
+- `meta_data`: A list containing metadata from the input experiment
 
 ## Details
 
 The function performs log transformation on the expression data (log(x +
 1)) before PCA analysis.
-
-`gly_pca()` is the top-level API that works with
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-objects and supports the `add_info` parameter for joining experiment
-metadata.
-
-`gly_pca_()` is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
 
 ## Required packages
 

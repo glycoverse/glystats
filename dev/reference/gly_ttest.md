@@ -16,8 +16,6 @@ gly_ttest(
   add_info = TRUE,
   ...
 )
-
-gly_ttest_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
 ```
 
 ## Arguments
@@ -30,9 +28,8 @@ gly_ttest_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
 
 - group_col:
 
-  (Only for `gly_ttest()`) A character string specifying the column name
-  of the grouping variable in the sample information. Default is
-  `"group"`.
+  A character string specifying the column name of the grouping variable
+  in the sample information. Default is `"group"`.
 
 - p_adj_method:
 
@@ -49,23 +46,12 @@ gly_ttest_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
 
   A logical value. If TRUE (default), variable information from the
   experiment will be added to the result tibble. If FALSE, only the
-  statistical results are returned. Only applicable to `gly_ttest()`.
+  statistical results are returned.
 
 - ...:
 
   Additional arguments passed to
   [`stats::t.test()`](https://rdrr.io/r/stats/t.test.html).
-
-- expr_mat:
-
-  (Only for `gly_ttest_()`) A numeric matrix with variables as rows and
-  samples as columns.
-
-- groups:
-
-  (Only for `gly_ttest_()`) A factor or character vector specifying
-  group membership for each sample. Must have exactly 2 levels.
-  Character vectors will be automatically converted to factors.
 
 ## Value
 
@@ -104,24 +90,14 @@ A list with three elements:
 
 - `raw_result`: A list of `t.test` model objects
 
-- `meta_data` (only for `gly_ttest()`): A list containing metadata from
-  the input experiment The list has classes `glystats_ttest_res` and
-  `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_ttest_res` and `glystats_res`.
 
 ## Details
 
 The function performs log2 transformation on the expression data
 (log2(x + 1e-6)) before statistical testing. Exactly 2 groups are
 required in the grouping variable.
-
-`gly_ttest()` is the top-level API that works with
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-objects and supports the `add_info` parameter for joining experiment
-metadata.
-
-`gly_ttest_()` is the underlying API that works with matrices and factor
-vectors directly, providing more flexibility for users who don't use the
-glyexp package.
 
 ## See also
 

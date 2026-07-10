@@ -9,8 +9,6 @@ to perform UMAP analysis.
 
 ``` r
 gly_umap(exp, n_neighbors = 15, n_components = 2, add_info = TRUE, ...)
-
-gly_umap_(expr_mat, n_neighbors = 15, n_components = 2, ...)
 ```
 
 ## Arguments
@@ -33,17 +31,12 @@ gly_umap_(expr_mat, n_neighbors = 15, n_components = 2, ...)
 
   A logical value. If TRUE (default), sample information from the
   experiment will be added to the result tibble. If FALSE, only the UMAP
-  coordinates are returned. Only applicable to `gly_umap()`.
+  coordinates are returned.
 
 - ...:
 
   Additional arguments passed to
   [`uwot::umap()`](https://jlmelville.github.io/uwot/reference/umap.html).
-
-- expr_mat:
-
-  (Only for `gly_umap_()`) A numeric matrix with variables as rows and
-  samples as columns.
 
 ## Value
 
@@ -63,19 +56,8 @@ A list with three elements:
 
 - `raw_result`: The raw UMAP result matrix
 
-- `meta_data` (only for `gly_umap()`): A list containing metadata from
-  the input experiment The list has classes `glystats_umap_res` and
-  `glystats_res`.
-
-## Details
-
-`gly_umap()` is the top-level API that works with
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-objects and supports the `add_info` parameter for joining experiment
-metadata.
-
-`gly_umap_()` is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_umap_res` and `glystats_res`.
 
 ## Required packages
 

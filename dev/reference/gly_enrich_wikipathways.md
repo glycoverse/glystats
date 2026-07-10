@@ -14,9 +14,6 @@ Perform WikiPathways ORA for protein UniProt accessions using
   and extracts protein information from the "protein" column in the
   variable information tibble.
 
-- `gly_enrich_wikipathways_()` accepts a character vector of UniProt
-  IDs.
-
 As
 [`clusterProfiler::enrichWP()`](https://rdrr.io/pkg/clusterProfiler/man/enrichWP.html)
 only accepts Entrez IDs, the UniProt IDs will be first transformed into
@@ -36,23 +33,13 @@ gly_enrich_wikipathways(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
-
-gly_enrich_wikipathways_(
-  proteins,
-  organism = "Homo sapiens",
-  orgdb = "org.Hs.eg.db",
-  universe = NULL,
-  p_adj_method = "BH",
-  p_cutoff = 0.05,
-  q_cutoff = 0.2
-)
 ```
 
 ## Arguments
 
 - exp:
 
-  (Only for `gly_enrich_wikipathways()`) A
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object.
 
@@ -60,7 +47,7 @@ gly_enrich_wikipathways_(
 
   A logical value. This parameter is included for API consistency but
   has no effect since enrichment results do not contain variable or
-  sample columns. Only applicable to top-level APIs.
+  sample columns.
 
 - organism:
 
@@ -78,16 +65,10 @@ gly_enrich_wikipathways_(
 
 - universe:
 
-  Background genes. If a character vector, it is expected to contain
-  UniProt accession IDs; these will be converted to Entrez Gene IDs and
-  then passed to `universe` of
-  [`clusterProfiler::enrichWP()`](https://rdrr.io/pkg/clusterProfiler/man/enrichWP.html).
-  You can also provide a
+  A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object with "glycoproteomics" type. In this case all detected proteins
-  in this experiment will be extracted as UniProt IDs, converted to
-  Entrez IDs, and then passed to `universe` of
-  [`clusterProfiler::enrichWP()`](https://rdrr.io/pkg/clusterProfiler/man/enrichWP.html).
+  defining the background proteins, or `NULL` to use the default
+  background.
 
 - p_adj_method:
 
@@ -103,11 +84,6 @@ gly_enrich_wikipathways_(
 
   Passed to `qvalueCutoff` of
   [`clusterProfiler::enrichWP()`](https://rdrr.io/pkg/clusterProfiler/man/enrichWP.html).
-
-- proteins:
-
-  (Only for `gly_enrich_wikipathways_()`) A character vector of UniProt
-  accession IDs.
 
 ## Value
 
@@ -137,9 +113,8 @@ A list with three elements:
 
 - `raw_result`: The raw clusterProfiler enrichResult object
 
-- `meta_data` (only for `gly_enrich_wikipathways()`): A list containing
-  metadata from the input experiment The list has classes
-  `glystats_wikipathways_ora_res` and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_wikipathways_ora_res` and `glystats_res`.
 
 ## Required packages
 

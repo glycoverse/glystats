@@ -5,16 +5,11 @@ exciting territories like differential expression analysis, PCA,
 survival analysis, and much more! 🧬 `glystats` brings all these
 powerful analyses together under one unified, user-friendly interface.
 
-**🎯 Key Feature:** `glystats` offers two levels of interfaces to fit
-your workflow:
+**🎯 Key Feature:** Every `glystats` analysis accepts a
+\[glyexp::experiment()\], the unified data interface at the heart of the
+`glycoverse` ecosystem 💓
 
-- `gly_xxx()`: seamlessly works with \[glyexp::experiment()\], the
-  beating heart of the `glycoverse` ecosystem 💓
-- `gly_xxx_()`: flexible enough to work with general inputs like
-  matrices or data frames
-
-This vignette focuses on the `gly_xxx()` interface. New to
-\[glyexp::experiment()\]? No worries! Check out its
+New to \[glyexp::experiment()\]? No worries! Check out its
 [introduction](https://glycoverse.github.io/glyexp/articles/glyexp.html)
 first to get up to speed.
 
@@ -50,12 +45,12 @@ Let’s start by exploring our demo dataset:
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [85ms]
+#> ✔ Finding leader proteins [96ms]
 #> 
 #> ℹ Reading dataColumn group converted to <factor>.ℹ Parsing glycan compositions and structures
-#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [359ms]
+#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [372ms]
 #> 
-#> ℹ Reading data✔ Reading data [832ms]
+#> ℹ Reading data✔ Reading data [885ms]
 #> 
 #> 
 #> ── Normalizing data ──
@@ -264,25 +259,6 @@ exp |>
 #> # ℹ 6 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
 #> #   effect_size <dbl>, post_hoc <chr>
 ```
-
-## 🔧 Maximum Flexibility Mode
-
-Feeling constrained by \[glyexp::experiment()\]? Fear not! 🦸‍♀️ Every
-`gly_xxx()` function comes with a flexible `gly_xxx_()` sibling that
-works with standard R objects. For instance,
-[`gly_anova_()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
-happily accepts plain matrices:
-
-``` r
-
-expr_mat <- get_expr_mat(exp)
-groups <- factor(get_sample_info(exp)$group)
-anova_res2 <- gly_anova_(expr_mat, groups)
-```
-
-This adaptability makes `glystats` a perfect team player 🤝 - it
-seamlessly integrates into existing analysis pipelines and workflows, no
-matter what data structures you’re already using!
 
 ## 🎪 The Complete Analytical Arsenal
 

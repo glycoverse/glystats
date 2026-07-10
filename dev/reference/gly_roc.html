@@ -47,9 +47,7 @@ power between two groups.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_roc</span><span class="op">(</span><span class="va">exp</span>, group_col <span class="op">=</span> <span class="st">"group"</span>, pos_class <span class="op">=</span> <span class="cn">NULL</span>, add_info <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">gly_roc_</span><span class="op">(</span><span class="va">expr_mat</span>, <span class="va">groups</span>, pos_class <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_roc</span><span class="op">(</span><span class="va">exp</span>, group_col <span class="op">=</span> <span class="st">"group"</span>, pos_class <span class="op">=</span> <span class="cn">NULL</span>, add_info <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -61,7 +59,7 @@ power between two groups.</p>
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
-<dd><p>(Only for <code>gly_roc()</code>) A character string specifying the column name of the grouping variable
+<dd><p>A character string specifying the column name of the grouping variable
 in the sample information. Default is <code>"group"</code>. The grouping variable must have
 exactly 2 levels for binary classification.</p></dd>
 
@@ -74,17 +72,7 @@ used as the positive class.</p></dd>
 
 <dt id="arg-add-info">add_info<a class="anchor" aria-label="anchor" href="#arg-add-info"></a></dt>
 <dd><p>A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
-Only applicable to <code>gly_roc()</code>.</p></dd>
-
-
-<dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
-<dd><p>(Only for <code>gly_roc_()</code>) A numeric matrix with variables as rows and samples as columns.</p></dd>
-
-
-<dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
-<dd><p>(Only for <code>gly_roc_()</code>) A factor or character vector specifying group membership for each sample.
-Must have exactly 2 levels. Character vectors will be automatically converted to factors.</p></dd>
+will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -101,7 +89,7 @@ Must have exactly 2 levels. Character vectors will be automatically converted to
 </ul></li>
 </ul></li>
 <li><p><code>raw_result</code>: A list of <code>pROC</code> objects</p></li>
-<li><p><code>meta_data</code> (only for <code>gly_roc()</code>): A list containing metadata from the input experiment
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment
 The list has classes <code>glystats_roc_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
     <div class="section level2">
@@ -110,10 +98,6 @@ The list has classes <code>glystats_roc_res</code> and <code>glystats_res</code>
 and the binary group labels as response.</p>
 <p>The function requires exactly 2 groups in the specified grouping variable. If more than
 2 groups are present, an error will be thrown.</p>
-<p><code>gly_roc()</code> is the top-level API that works with <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects and supports
-the <code>add_info</code> parameter for joining experiment metadata.</p>
-<p><code>gly_roc_()</code> is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.</p>
 <p><strong>Underlying Function:</strong></p><ul><li><p>ROC analysis is performed using <code><a href="https://rdrr.io/pkg/pROC/man/roc.html" class="external-link">pROC::roc()</a></code></p></li>
 <li><p>Coordinates are extracted using <code><a href="https://rdrr.io/pkg/pROC/man/coords.html" class="external-link">pROC::coords()</a></code></p></li>
 </ul></div>
@@ -137,7 +121,7 @@ providing more flexibility for users who don't use the glyexp package.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
