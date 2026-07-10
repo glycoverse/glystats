@@ -316,7 +316,7 @@ test_that("gly_limma falls back when eBayes trend fails", {
     {
       expect_warning(
         {
-          result <- suppressMessages(gly_limma_(expr_mat, groups))
+          result <- suppressMessages(.analyze_limma(expr_mat, groups))
         },
         "trend = FALSE"
       )
@@ -336,7 +336,7 @@ test_that("gly_limma falls back when eBayes trend fails", {
   expect_true(any(!trend_calls))
 })
 
-test_that("gly_limma_ works with covariates", {
+test_that(".analyze_limma works with covariates", {
   set.seed(202)
   var_info <- tibble::tibble(variable = paste0("V", 1:4))
   sample_names <- paste0("S", 1:16)
@@ -351,7 +351,7 @@ test_that("gly_limma_ works with covariates", {
     stringsAsFactors = FALSE
   )
 
-  result <- suppressMessages(gly_limma_(
+  result <- suppressMessages(.analyze_limma(
     expr_mat,
     groups,
     covariates = covariates
@@ -361,13 +361,13 @@ test_that("gly_limma_ works with covariates", {
   expect_equal(nrow(result$tidy_result), 4)
 })
 
-test_that("gly_limma_ validates covariate rows", {
+test_that(".analyze_limma validates covariate rows", {
   expr_mat <- matrix(rnorm(3 * 10), nrow = 3)
   groups <- factor(rep(c("A", "B"), each = 5), levels = c("A", "B"))
   covariates <- data.frame(batch = rep(c("B1", "B2"), each = 4))
 
   expect_error(
-    suppressMessages(gly_limma_(expr_mat, groups, covariates = covariates)),
+    suppressMessages(.analyze_limma(expr_mat, groups, covariates = covariates)),
     "covariates must have"
   )
 })
@@ -439,7 +439,7 @@ test_that("gly_limma handles group names with hyphens correctly", {
   expect_setequal(contrasts, c("High-dose_vs_Control-1"))
 })
 
-test_that("gly_limma_ works correctly", {
+test_that(".analyze_limma works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -449,7 +449,7 @@ test_that("gly_limma_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_limma_(expr_mat, groups)
+    result <- .analyze_limma(expr_mat, groups)
   })
 
   # Verify results
@@ -503,7 +503,7 @@ test_that("gly_limma supports subject_cols for paired design", {
   )
 })
 
-test_that("gly_limma_ supports subjects for paired design", {
+test_that(".analyze_limma supports subjects for paired design", {
   set.seed(101)
   n_subjects <- 5
   subjects <- factor(rep(paste0("S", seq_len(n_subjects)), each = 2))
@@ -519,12 +519,12 @@ test_that("gly_limma_ supports subjects for paired design", {
   rownames(expr_mat) <- paste0("V", seq_len(n_genes))
   colnames(expr_mat) <- paste0("sample", seq_len(n_samples))
 
-  result_paired <- suppressMessages(gly_limma_(
+  result_paired <- suppressMessages(.analyze_limma(
     expr_mat,
     groups,
     subjects = subjects
   ))
-  result_unpaired <- suppressMessages(gly_limma_(expr_mat, groups))
+  result_unpaired <- suppressMessages(.analyze_limma(expr_mat, groups))
 
   expect_s3_class(result_paired, c("glystats_limma_res", "glystats_res"))
   expect_true(
@@ -533,13 +533,13 @@ test_that("gly_limma_ supports subjects for paired design", {
   )
 })
 
-test_that("gly_limma_ validates subjects length", {
+test_that(".analyze_limma validates subjects length", {
   expr_mat <- matrix(rnorm(3 * 6), nrow = 3)
   groups <- factor(rep(c("A", "B"), each = 3), levels = c("A", "B"))
   subjects <- factor(rep(c("S1", "S2"), each = 2))
 
   expect_error(
-    suppressMessages(gly_limma_(expr_mat, groups, subjects = subjects)),
+    suppressMessages(.analyze_limma(expr_mat, groups, subjects = subjects)),
     "subjects must have"
   )
 })
@@ -558,14 +558,14 @@ test_that("gly_limma returns meta_data from experiment", {
   expect_equal(result$meta_data$glycan_type, "N")
 })
 
-test_that("gly_limma_ does not return meta_data", {
+test_that(".analyze_limma does not return meta_data", {
   # Use test_gp_exp and extract expression matrix
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H"))
   expr_mat <- glyexp::get_expr_mat(exp_2group)
   groups <- factor(rep(c("C", "H"), each = 3))
 
-  result <- suppressMessages(gly_limma_(expr_mat, groups))
+  result <- suppressMessages(.analyze_limma(expr_mat, groups))
 
   # Check that meta_data does NOT exist
   expect_false("meta_data" %in% names(result))

@@ -20,16 +20,6 @@
   groups
 }
 
-# Convert groups to factor (for gly_xxx_() functions)
-.convert_groups_to_factor <- function(groups) {
-  if (is.character(groups)) {
-    groups <- factor(groups)
-  } else if (!is.factor(groups)) {
-    cli::cli_abort("groups must be a factor or character vector")
-  }
-  groups
-}
-
 # Helper function to generate validation error message
 .generate_validation_error <- function(
   group_col,

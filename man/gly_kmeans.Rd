@@ -2,7 +2,6 @@
 % Please edit documentation in R/kmeans.R
 \name{gly_kmeans}
 \alias{gly_kmeans}
-\alias{gly_kmeans_}
 \title{K-means Clustering for Glycomics and Glycoproteomics Data}
 \usage{
 gly_kmeans(
@@ -13,8 +12,6 @@ gly_kmeans(
   add_info = TRUE,
   ...
 )
-
-gly_kmeans_(expr_mat, on = "variable", centers = 3, scale = TRUE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -28,12 +25,9 @@ Default is 3.}
 \item{scale}{A logical indicating whether to scale the data before clustering. Default is TRUE.}
 
 \item{add_info}{A logical value. If TRUE (default), sample information from the experiment
-will be added to the result tibbles. If FALSE, only the clustering results are returned.
-Only applicable to \code{gly_kmeans()}.}
+will be added to the result tibbles. If FALSE, only the clustering results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::kmeans()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_kmeans_]{gly_kmeans_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with three elements:
@@ -44,7 +38,7 @@ A list with three elements:
 \item \code{cluster}: Cluster assignment
 }
 \item \code{raw_result}: The raw kmeans object from \code{stats::kmeans()}.
-\item \code{meta_data} (only for \code{\link[=gly_kmeans]{gly_kmeans()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 }
 }
 \description{
@@ -57,12 +51,6 @@ The function performs log2 transformation on the expression data (log2(x + 1e-6)
 clustering. When \code{on = "variable"} (default), variables are clustered based on their
 expression patterns across samples. When \code{on = "sample"}, samples are clustered based
 on their expression profiles across variables.
-
-\code{gly_kmeans()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_kmeans_()} is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
 
 \strong{Data Preparation:}
 Data is log2-transformed and optionally scaled before clustering.

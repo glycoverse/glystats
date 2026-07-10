@@ -20,13 +20,9 @@ PCA, survival analysis, and much more! 🧬
 `glystats` brings all these powerful analyses together under one unified,
 user-friendly interface.
 
-**🎯 Key Feature:** `glystats` offers two levels of interfaces to fit your workflow:
+**🎯 Key Feature:** Every `glystats` analysis accepts a [glyexp::experiment()],
+the unified data interface at the heart of the `glycoverse` ecosystem 💓
 
-- `gly_xxx()`: seamlessly works with [glyexp::experiment()],
-  the beating heart of the `glycoverse` ecosystem 💓
-- `gly_xxx_()`: flexible enough to work with general inputs like matrices or data frames
-
-This vignette focuses on the `gly_xxx()` interface.
 New to [glyexp::experiment()]?
 No worries! Check out its [introduction](https://glycoverse.github.io/glyexp/articles/glyexp.html) first
 to get up to speed.
@@ -123,23 +119,6 @@ exp |>
   get_tidy_result("main_test") |>
   filter(p_adj < 0.05)
 ```
-
-## 🔧 Maximum Flexibility Mode
-
-Feeling constrained by [glyexp::experiment()]? Fear not! 🦸‍♀️
-Every `gly_xxx()` function comes with a flexible `gly_xxx_()` sibling that works with
-standard R objects.
-For instance, `gly_anova_()` happily accepts plain matrices:
-
-```{r}
-expr_mat <- get_expr_mat(exp)
-groups <- factor(get_sample_info(exp)$group)
-anova_res2 <- gly_anova_(expr_mat, groups)
-```
-
-This adaptability makes `glystats` a perfect team player 🤝 -
-it seamlessly integrates into existing analysis pipelines and workflows,
-no matter what data structures you're already using!
 
 ## 🎪 The Complete Analytical Arsenal
 

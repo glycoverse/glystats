@@ -2,12 +2,9 @@
 % Please edit documentation in R/umap.R
 \name{gly_umap}
 \alias{gly_umap}
-\alias{gly_umap_}
 \title{Uniform Manifold Approximation and Projection (UMAP)}
 \usage{
 gly_umap(exp, n_neighbors = 15, n_components = 2, add_info = TRUE, ...)
-
-gly_umap_(expr_mat, n_neighbors = 15, n_components = 2, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -17,12 +14,9 @@ gly_umap_(expr_mat, n_neighbors = 15, n_components = 2, ...)
 \item{n_components}{Number of output dimensions. Default is 2.}
 
 \item{add_info}{A logical value. If TRUE (default), sample information from the experiment
-will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.
-Only applicable to \code{gly_umap()}.}
+will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.}
 
 \item{...}{Additional arguments passed to \code{uwot::umap()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_umap_]{gly_umap_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with three elements:
@@ -35,20 +29,13 @@ A list with three elements:
 \item \code{umap3}, \code{umap4}, etc.: Additional UMAP dimensions (if n_components > 2)
 }
 \item \code{raw_result}: The raw UMAP result matrix
-\item \code{meta_data} (only for \code{\link[=gly_umap]{gly_umap()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_umap_res} and \code{glystats_res}.
 }
 }
 \description{
 Perform UMAP dimensionality reduction on the expression data.
 The function uses \code{uwot::umap()} to perform UMAP analysis.
-}
-\details{
-\code{gly_umap()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_umap_()} is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
 }
 \section{Required packages}{
 

@@ -2,7 +2,6 @@
 % Please edit documentation in R/anova.R
 \name{gly_kruskal}
 \alias{gly_kruskal}
-\alias{gly_kruskal_}
 \title{Kruskal-Wallis test for Differential Expression Analysis}
 \usage{
 gly_kruskal(
@@ -12,13 +11,11 @@ gly_kruskal(
   add_info = TRUE,
   ...
 )
-
-gly_kruskal_(expr_mat, groups, p_adj_method = "BH", ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{group_col}{(Only for \code{\link[=gly_kruskal]{gly_kruskal()}}) A character string specifying the column name of the grouping variable
+\item{group_col}{A character string specifying the column name of the grouping variable
 in the sample information. Default is \code{"group"}.}
 
 \item{p_adj_method}{A character string specifying the method to adjust p-values.
@@ -26,15 +23,9 @@ See \code{p.adjust.methods} for available methods. Default is "BH".
 If NULL, no adjustment is performed.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.
-Only applicable to \code{gly_kruskal()}.}
+will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::kruskal.test()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_kruskal_]{gly_kruskal_()}}) A numeric matrix with variables as rows and samples as columns.}
-
-\item{groups}{(Only for \code{\link[=gly_kruskal_]{gly_kruskal_()}}) A factor or character vector specifying group membership for each sample.
-Must have at least 2 levels. Character vectors will be automatically converted to factors.}
 }
 \value{
 A list containing three elements:
@@ -80,12 +71,6 @@ P-values are adjusted for multiple testing using the method specified by \code{p
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. At least 2 groups are required in the grouping variable.
-
-\code{gly_kruskal()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_kruskal_()} is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.
 
 For any variable failed to fit a \code{stats::kruskal.test()} model,
 NAs will be assigned to the results in both main test and post-hoc test.

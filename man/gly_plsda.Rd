@@ -2,7 +2,6 @@
 % Please edit documentation in R/plsda.R
 \name{gly_plsda}
 \alias{gly_plsda}
-\alias{gly_plsda_}
 \title{Partial Least Squares Discriminant Analysis (PLS-DA)}
 \usage{
 gly_plsda(
@@ -13,13 +12,11 @@ gly_plsda(
   add_info = TRUE,
   ...
 )
-
-gly_plsda_(expr_mat, groups, ncomp = 2, scale = TRUE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{group_col}{(Only for \code{\link[=gly_plsda]{gly_plsda()}}) A character string specifying the column name in sample information
+\item{group_col}{A character string specifying the column name in sample information
 that contains group labels. Default is "group".}
 
 \item{ncomp}{An integer indicating the number of components to include. Default is 2.}
@@ -27,15 +24,9 @@ that contains group labels. Default is "group".}
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
 
 \item{add_info}{A logical value. If TRUE (default), sample and variable information from the experiment
-will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.
-Only applicable to \code{gly_plsda()}.}
+will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.}
 
 \item{...}{Additional arguments passed to \code{ropls::opls()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_plsda_]{gly_plsda_()}}) A numeric matrix with variables as rows and samples as columns.}
-
-\item{groups}{(Only for \code{\link[=gly_plsda_]{gly_plsda_()}}) A factor or character vector specifying group membership for each sample.
-Character vectors will be automatically converted to factors.}
 }
 \value{
 A list containing:
@@ -73,19 +64,12 @@ A list containing:
 }
 }
 \item \code{raw_result}: The raw ropls opls object from \code{ropls::opls()}
-\item \code{meta_data} (only for \code{\link[=gly_plsda]{gly_plsda()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 }
 }
 \description{
 Perform partial least squares discriminant analysis on the expression data.
 The function uses \code{ropls::opls()} to perform PLS-DA and returns tidy results.
-}
-\details{
-\code{gly_plsda()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_plsda_()} is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.
 }
 \section{Required packages}{
 

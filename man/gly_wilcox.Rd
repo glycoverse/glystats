@@ -2,7 +2,6 @@
 % Please edit documentation in R/ttest.R
 \name{gly_wilcox}
 \alias{gly_wilcox}
-\alias{gly_wilcox_}
 \title{Wilcoxon rank-sum test for Differential Expression Analysis}
 \usage{
 gly_wilcox(
@@ -13,13 +12,11 @@ gly_wilcox(
   add_info = TRUE,
   ...
 )
-
-gly_wilcox_(expr_mat, groups, p_adj_method = "BH", ref_group = NULL, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{group_col}{(Only for \code{\link[=gly_wilcox]{gly_wilcox()}}) A character string specifying the column name of the grouping variable
+\item{group_col}{A character string specifying the column name of the grouping variable
 in the sample information. Default is \code{"group"}.}
 
 \item{p_adj_method}{A character string specifying the method to adjust p-values.
@@ -30,15 +27,9 @@ If NULL, no adjustment is performed.}
 If NULL (default), the first level of the group factor is used as the reference.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.
-Only applicable to \code{gly_wilcox()}.}
+will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::wilcox.test()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_wilcox_]{gly_wilcox_()}}) A numeric matrix with variables as rows and samples as columns.}
-
-\item{groups}{(Only for \code{\link[=gly_wilcox_]{gly_wilcox_()}}) A factor or character vector specifying group membership for each sample.
-Must have exactly 2 levels. Character vectors will be automatically converted to factors.}
 }
 \value{
 A list with three elements:
@@ -56,7 +47,7 @@ A list with three elements:
 Additional columns from experiment metadata may be included if add_info = TRUE.
 }
 \item \code{raw_result}: A list of \code{wilcox.test} model objects
-\item \code{meta_data} (only for \code{\link[=gly_wilcox]{gly_wilcox()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_wilcox_res} and \code{glystats_res}.
 }
 }
@@ -68,12 +59,6 @@ P-values are adjusted for multiple testing using the method specified by \code{p
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. Exactly 2 groups are required in the grouping variable.
-
-\code{gly_wilcox()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_wilcox_()} is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.
 }
 \seealso{
 \code{\link[stats:wilcox.test]{stats::wilcox.test()}}

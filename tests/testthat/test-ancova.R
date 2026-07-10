@@ -68,7 +68,7 @@ test_that("gly_ancova comparison direction is correct for 2 groups", {
   expect_identical(result$tidy_result$post_hoc_test$test_group, "B")
 })
 
-test_that("gly_ancova_ works correctly", {
+test_that(".analyze_ancova works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -79,7 +79,7 @@ test_that("gly_ancova_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_ancova_(expr_mat, groups, covariates)
+    result <- .analyze_ancova(expr_mat, groups, covariates)
   })
 
   # Verify results
@@ -99,11 +99,11 @@ test_that("gly_ancova error handling", {
     "covariate_cols not found"
   )
 
-  # Missing covariates for gly_ancova_
+  # Missing covariates for .analyze_ancova
   expr_mat <- glyexp::get_expr_mat(exp_small)
-  groups <- glyexp::get_sample_info(exp_small)$group
+  groups <- factor(glyexp::get_sample_info(exp_small)$group)
   expect_error(
-    suppressMessages(gly_ancova_(expr_mat, groups, covariates = NULL)),
+    suppressMessages(.analyze_ancova(expr_mat, groups, covariates = NULL)),
     "covariates must be provided"
   )
 })

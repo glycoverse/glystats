@@ -25,7 +25,7 @@ test_that("gly_kmeans works with basic parameters", {
   expect_s3_class(result$raw_result, "kmeans")
 })
 
-test_that("gly_kmeans_ works correctly", {
+test_that(".analyze_kmeans works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -34,7 +34,7 @@ test_that("gly_kmeans_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_kmeans_(expr_mat)
+    result <- .analyze_kmeans(expr_mat)
   })
 
   # Verify results

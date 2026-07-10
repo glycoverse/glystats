@@ -317,7 +317,7 @@ test_that("gly_anova and gly_kruskal group validation", {
   expect_error(suppressMessages(gly_kruskal(exp_1group)), "at least 2 levels")
 })
 
-test_that("gly_anova_ works correctly", {
+test_that(".analyze_anova works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -327,7 +327,7 @@ test_that("gly_anova_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_anova_(expr_mat, groups)
+    result <- .analyze_anova(expr_mat, groups)
   })
 
   # Verify results
@@ -339,7 +339,7 @@ test_that("gly_anova_ works correctly", {
   expect_true("effect_size" %in% colnames(result$tidy_result$main_test))
 })
 
-test_that("gly_anova_ returns eta-squared in effect_size", {
+test_that(".analyze_anova returns eta-squared in effect_size", {
   expr_mat <- matrix(
     c(1, 2, 3, 5, 6, 7, 9, 10, 11),
     nrow = 1,
@@ -347,7 +347,7 @@ test_that("gly_anova_ returns eta-squared in effect_size", {
   )
   groups <- factor(rep(c("A", "B", "C"), each = 3))
 
-  result <- suppressMessages(gly_anova_(
+  result <- suppressMessages(.analyze_anova(
     expr_mat,
     groups,
     p_adj_method = NULL
@@ -372,7 +372,7 @@ test_that("gly_anova_ returns eta-squared in effect_size", {
   )
 })
 
-test_that("gly_kruskal_ works correctly", {
+test_that(".analyze_kruskal works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -382,7 +382,7 @@ test_that("gly_kruskal_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_kruskal_(expr_mat, groups)
+    result <- .analyze_kruskal(expr_mat, groups)
   })
 
   # Verify results
@@ -394,7 +394,7 @@ test_that("gly_kruskal_ works correctly", {
   expect_true("effect_size" %in% colnames(result$tidy_result$main_test))
 })
 
-test_that("gly_kruskal_ returns epsilon-squared in effect_size", {
+test_that(".analyze_kruskal returns epsilon-squared in effect_size", {
   expr_mat <- matrix(
     c(1, 2, 3, 5, 6, 7, 9, 10, 11),
     nrow = 1,
@@ -402,7 +402,7 @@ test_that("gly_kruskal_ returns epsilon-squared in effect_size", {
   )
   groups <- factor(rep(c("A", "B", "C"), each = 3))
 
-  result <- suppressMessages(gly_kruskal_(
+  result <- suppressMessages(.analyze_kruskal(
     expr_mat,
     groups,
     p_adj_method = NULL

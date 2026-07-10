@@ -2,7 +2,6 @@
 % Please edit documentation in R/oplsda.R
 \name{gly_oplsda}
 \alias{gly_oplsda}
-\alias{gly_oplsda_}
 \title{Orthogonal Partial Least Squares Discriminant Analysis (OPLS-DA)}
 \usage{
 gly_oplsda(
@@ -14,13 +13,11 @@ gly_oplsda(
   add_info = TRUE,
   ...
 )
-
-gly_oplsda_(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{group_col}{(Only for \code{\link[=gly_oplsda]{gly_oplsda()}}) A character string specifying the column name in sample information
+\item{group_col}{A character string specifying the column name in sample information
 that contains group labels. Default is "group".}
 
 \item{pred_i}{An integer indicating the number of predictive components to include. Default is 1.}
@@ -30,15 +27,9 @@ that contains group labels. Default is "group".}
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
 
 \item{add_info}{A logical value. If TRUE (default), sample and variable information from the experiment
-will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.
-Only applicable to \code{gly_oplsda()}.}
+will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.}
 
 \item{...}{Additional arguments passed to \code{ropls::opls()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_oplsda_]{gly_oplsda_()}}) A numeric matrix with variables as rows and samples as columns.}
-
-\item{groups}{(Only for \code{\link[=gly_oplsda_]{gly_oplsda_()}}) A factor or character vector specifying group membership for each sample.
-Must have exactly 2 levels. Character vectors will be automatically converted to factors.}
 }
 \value{
 A list containing:
@@ -78,19 +69,12 @@ A list containing:
 }
 }
 \item \code{raw_result}: The raw ropls opls object from \code{ropls::opls()}
-\item \code{meta_data} (only for \code{\link[=gly_oplsda]{gly_oplsda()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 }
 }
 \description{
 Perform orthogonal partial least squares discriminant analysis on the expression data.
 The function uses \code{ropls::opls()} to perform OPLS-DA and returns tidy results.
-}
-\details{
-\code{gly_oplsda()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_oplsda_()} is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.
 }
 \section{Required packages}{
 

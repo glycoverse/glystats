@@ -2,12 +2,9 @@
 % Please edit documentation in R/tsne.R
 \name{gly_tsne}
 \alias{gly_tsne}
-\alias{gly_tsne_}
 \title{t-Distributed Stochastic Neighbor Embedding (t-SNE)}
 \usage{
 gly_tsne(exp, dims = 2, perplexity = 30, add_info = TRUE, ...)
-
-gly_tsne_(expr_mat, dims = 2, perplexity = 30, ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -17,12 +14,9 @@ gly_tsne_(expr_mat, dims = 2, perplexity = 30, ...)
 \item{perplexity}{Perplexity parameter for t-SNE. Default is 30.}
 
 \item{add_info}{A logical value. If TRUE (default), sample information from the experiment
-will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.
-Only applicable to \code{gly_tsne()}.}
+will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.}
 
 \item{...}{Additional arguments passed to \code{Rtsne::Rtsne()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_tsne_]{gly_tsne_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with three elements:
@@ -34,20 +28,13 @@ A list with three elements:
 \item \code{tsne2}: Second t-SNE dimension
 }
 \item \code{raw_result}: The raw Rtsne object
-\item \code{meta_data} (only for \code{\link[=gly_tsne]{gly_tsne()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_tsne_res} and \code{glystats_res}.
 }
 }
 \description{
 Perform t-SNE dimensionality reduction on the expression data.
 The function uses \code{Rtsne::Rtsne()} to perform t-SNE analysis.
-}
-\details{
-\code{gly_tsne()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_tsne_()} is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
 }
 \section{Required packages}{
 

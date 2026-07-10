@@ -337,7 +337,7 @@ test_that("gly_enrich_reactome filters out NA proteins", {
   )
 })
 
-test_that("gly_enrich_go_ works correctly", {
+test_that(".analyze_enrich_go works correctly", {
   # Create test proteins
   proteins <- c("P12345", "Q67890", "R11111")
 
@@ -350,7 +350,7 @@ test_that("gly_enrich_go_ works correctly", {
 
   with_mocked_bindings(
     {
-      result <- suppressMessages(gly_enrich_go_(proteins))
+      result <- suppressMessages(.analyze_enrich_go(proteins))
       expect_s3_class(result, "glystats_go_ora_res")
       expect_s3_class(result, "glystats_res")
       expect_true(is.list(result))
@@ -362,7 +362,7 @@ test_that("gly_enrich_go_ works correctly", {
   )
 })
 
-test_that("gly_enrich_kegg_ works correctly", {
+test_that(".analyze_enrich_kegg works correctly", {
   # Create test proteins
   proteins <- c("P12345", "Q67890", "R11111")
 
@@ -375,7 +375,7 @@ test_that("gly_enrich_kegg_ works correctly", {
 
   with_mocked_bindings(
     {
-      result <- suppressMessages(gly_enrich_kegg_(proteins))
+      result <- suppressMessages(.analyze_enrich_kegg(proteins))
       expect_s3_class(result, "glystats_kegg_ora_res")
       expect_s3_class(result, "glystats_res")
       expect_true(is.list(result))
@@ -387,7 +387,7 @@ test_that("gly_enrich_kegg_ works correctly", {
   )
 })
 
-test_that("gly_enrich_reactome_ works correctly", {
+test_that(".analyze_enrich_reactome works correctly", {
   # Create test proteins
   proteins <- c("P12345", "Q67890", "R11111")
 
@@ -402,7 +402,7 @@ test_that("gly_enrich_reactome_ works correctly", {
     {
       with_mocked_bindings(
         {
-          result <- suppressMessages(gly_enrich_reactome_(proteins))
+          result <- suppressMessages(.analyze_enrich_reactome(proteins))
           expect_s3_class(result, "glystats_reactome_ora_res")
           expect_s3_class(result, "glystats_res")
           expect_true(is.list(result))
@@ -522,7 +522,7 @@ test_that("gly_enrich_wikipathways filters out NA proteins", {
   )
 })
 
-test_that("gly_enrich_wikipathways_ works correctly", {
+test_that(".analyze_enrich_wikipathways works correctly", {
   # Create test proteins
   proteins <- c("P12345", "Q67890", "R11111")
 
@@ -537,7 +537,7 @@ test_that("gly_enrich_wikipathways_ works correctly", {
     {
       with_mocked_bindings(
         {
-          result <- suppressMessages(gly_enrich_wikipathways_(proteins))
+          result <- suppressMessages(.analyze_enrich_wikipathways(proteins))
           expect_s3_class(result, "glystats_wikipathways_ora_res")
           expect_s3_class(result, "glystats_res")
           expect_true(is.list(result))
@@ -657,7 +657,7 @@ test_that("gly_enrich_do filters out NA proteins", {
   )
 })
 
-test_that("gly_enrich_do_ works correctly", {
+test_that(".analyze_enrich_do works correctly", {
   # Create test proteins
   proteins <- c("P12345", "Q67890", "R11111")
 
@@ -672,7 +672,7 @@ test_that("gly_enrich_do_ works correctly", {
     {
       with_mocked_bindings(
         {
-          result <- suppressMessages(gly_enrich_do_(proteins))
+          result <- suppressMessages(.analyze_enrich_do(proteins))
           expect_s3_class(result, "glystats_do_ora_res")
           expect_s3_class(result, "glystats_res")
           expect_true(is.list(result))
@@ -792,7 +792,7 @@ test_that("gly_enrich_ncg filters out NA proteins", {
   )
 })
 
-test_that("gly_enrich_ncg_ works correctly", {
+test_that(".analyze_enrich_ncg works correctly", {
   # Create test proteins
   proteins <- c("P12345", "Q67890", "R11111")
 
@@ -807,7 +807,7 @@ test_that("gly_enrich_ncg_ works correctly", {
     {
       with_mocked_bindings(
         {
-          result <- suppressMessages(gly_enrich_ncg_(proteins))
+          result <- suppressMessages(.analyze_enrich_ncg(proteins))
           expect_s3_class(result, "glystats_ncg_ora_res")
           expect_s3_class(result, "glystats_res")
           expect_true(is.list(result))
@@ -927,7 +927,7 @@ test_that("gly_enrich_dgn filters out NA proteins", {
   )
 })
 
-test_that("gly_enrich_dgn_ works correctly", {
+test_that(".analyze_enrich_dgn works correctly", {
   # Create test proteins
   proteins <- c("P12345", "Q67890", "R11111")
 
@@ -942,7 +942,7 @@ test_that("gly_enrich_dgn_ works correctly", {
     {
       with_mocked_bindings(
         {
-          result <- suppressMessages(gly_enrich_dgn_(proteins))
+          result <- suppressMessages(.analyze_enrich_dgn(proteins))
           expect_s3_class(result, "glystats_dgn_ora_res")
           expect_s3_class(result, "glystats_res")
           expect_true(is.list(result))
@@ -964,7 +964,7 @@ test_that("gly_enrich_dgn_ works correctly", {
   )
 })
 
-test_that("gly_enrich_go_ supports custom OrgDb", {
+test_that(".analyze_enrich_go supports custom OrgDb", {
   skip_if_not_installed("org.Mm.eg.db")
   proteins <- c(
     "Q9WV54",
@@ -976,7 +976,10 @@ test_that("gly_enrich_go_ supports custom OrgDb", {
     "P09470",
     "Q9CYA0"
   )
-  result <- suppressMessages(gly_enrich_go_(proteins, OrgDb = "org.Mm.eg.db"))
+  result <- suppressMessages(.analyze_enrich_go(
+    proteins,
+    OrgDb = "org.Mm.eg.db"
+  ))
   expect_s3_class(result, "glystats_go_ora_res")
   expect_s3_class(result, "glystats_res")
   expect_true(is.list(result))

@@ -4,28 +4,17 @@
 #' The function uses `ropls::opls()` to perform PLS-DA and returns tidy results.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_plsda_()]) A numeric matrix with variables as rows and samples as columns.
-#' @param groups (Only for [gly_plsda_()]) A factor or character vector specifying group membership for each sample.
-#'   Character vectors will be automatically converted to factors.
-#' @param group_col (Only for [gly_plsda()]) A character string specifying the column name in sample information
+#' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param ncomp An integer indicating the number of components to include. Default is 2.
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.
-#'  Only applicable to `gly_plsda()`.
 #' @param ... Additional arguments passed to `ropls::opls()`.
 #'
 #' @section Required packages:
 #' This function requires the following packages to be installed:
 #' - `ropls` for PLS-DA analysis
-#'
-#' @details
-#' `gly_plsda()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_plsda_()` is the underlying API that works with matrices and factor vectors directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @return A list containing:
 #'  - `tidy_result`: A list of tibbles with PLS-DA results:
@@ -49,7 +38,7 @@
 #'      - `perm_id`: Permutation ID (0 for original model, 1+ for permutations)
 #'      - Additional columns from the permutation test matrix (e.g., R2X, R2Y, Q2, etc.)
 #'  - `raw_result`: The raw ropls opls object from `ropls::opls()`
-#'  - `meta_data` (only for [gly_plsda()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' @seealso [ropls::opls()]
 #' @export
 gly_plsda <- function(
@@ -84,8 +73,8 @@ gly_plsda <- function(
   )
   groups <- group_info$groups
 
-  # Call the underlying API
-  result <- gly_plsda_(expr_mat, groups, ncomp, scale, ...)
+  # Run the internal computation
+  result <- .analyze_plsda(expr_mat, groups, ncomp, scale, ...)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -98,14 +87,16 @@ gly_plsda <- function(
   result
 }
 
-#' @rdname gly_plsda
-#' @export
-gly_plsda_ <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
+#' Run the internal computation for `gly_plsda()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_plsda <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
   rlang::check_installed("ropls")
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
   # Prepare data matrix (samples as rows, variables as columns)

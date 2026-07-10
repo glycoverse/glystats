@@ -2,7 +2,6 @@
 % Please edit documentation in R/enrich.R
 \name{gly_enrich_do}
 \alias{gly_enrich_do}
-\alias{gly_enrich_do_}
 \title{Disease Ontology over-representation analysis (ORA)}
 \usage{
 gly_enrich_do(
@@ -16,24 +15,12 @@ gly_enrich_do(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
-
-gly_enrich_do_(
-  proteins,
-  ont = "HDO",
-  organism = "hsa",
-  orgdb = "org.Hs.eg.db",
-  universe = NULL,
-  p_adj_method = "BH",
-  p_cutoff = 0.05,
-  q_cutoff = 0.2
-)
 }
 \arguments{
-\item{exp}{(Only for \code{\link[=gly_enrich_do]{gly_enrich_do()}}) A \code{glyexp::experiment()} object.}
+\item{exp}{A \code{glyexp::experiment()} object.}
 
 \item{add_info}{A logical value. This parameter is included for API consistency but has no effect
-since enrichment results do not contain variable or sample columns.
-Only applicable to top-level APIs.}
+since enrichment results do not contain variable or sample columns.}
 
 \item{ont}{Passed to \code{ont} of \code{\link[DOSE:enrichDO]{DOSE::enrichDO()}}.
 Disease Ontology type. Options: \code{"HDO"} (Human Disease Ontology), \code{"HPO"} (Human Phenotype Ontology),
@@ -45,19 +32,13 @@ Organism code. \code{"hsa"} for human (Homo sapiens), \code{"mmu"} for mouse (Mu
 \item{orgdb}{Passed to \code{OrgDb} of \code{\link[clusterProfiler:bitr]{clusterProfiler::bitr()}}.
 Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".}
 
-\item{universe}{Background genes. If a character vector, it is expected to contain UniProt accession IDs;
-these will be converted to Entrez Gene IDs and then passed to \code{universe} of \code{\link[DOSE:enrichDO]{DOSE::enrichDO()}}.
-You can also provide a \code{\link[glyexp:experiment]{glyexp::experiment()}} object with "glycoproteomics" type.
-In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
-and then passed to \code{universe} of \code{\link[DOSE:enrichDO]{DOSE::enrichDO()}}.}
+\item{universe}{A \code{glyexp::experiment()} defining the background proteins, or \code{NULL} to use the default background.}
 
 \item{p_adj_method}{Passed to \code{pAdjustMethod} of \code{\link[DOSE:enrichDO]{DOSE::enrichDO()}}.}
 
 \item{p_cutoff}{Passed to \code{pvalueCutoff} of \code{\link[DOSE:enrichDO]{DOSE::enrichDO()}}.}
 
 \item{q_cutoff}{Passed to \code{qvalueCutoff} of \code{\link[DOSE:enrichDO]{DOSE::enrichDO()}}.}
-
-\item{proteins}{(Only for \code{\link[=gly_enrich_do_]{gly_enrich_do_()}}) A character vector of UniProt accession IDs.}
 }
 \value{
 A list with three elements:
@@ -75,7 +56,7 @@ A list with three elements:
 \item \code{count}: Number of genes in the term
 }
 \item \code{raw_result}: The raw DOSE enrichResult object
-\item \code{meta_data} (only for \code{\link[=gly_enrich_do]{gly_enrich_do()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_do_ora_res} and \code{glystats_res}.
 }
 }
@@ -89,7 +70,6 @@ Perform Disease Ontology ORA for protein UniProt accessions using \code{\link[DO
 \itemize{
 \item \code{gly_enrich_do()} accepts a \code{\link[glyexp:experiment]{glyexp::experiment()}} and extracts protein information
 from the "protein" column in the variable information tibble.
-\item \code{gly_enrich_do_()} accepts a character vector of UniProt IDs.
 }
 
 As \code{\link[DOSE:enrichDO]{DOSE::enrichDO()}} only accepts Entrez IDs,

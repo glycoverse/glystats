@@ -2,7 +2,6 @@
 % Please edit documentation in R/cox.R
 \name{gly_cox}
 \alias{gly_cox}
-\alias{gly_cox_}
 \title{Cox Proportional Hazards Model for Survival Analysis}
 \usage{
 gly_cox(
@@ -13,8 +12,6 @@ gly_cox(
   add_info = TRUE,
   ...
 )
-
-gly_cox_(expr_mat, time, event, p_adj_method = "BH", ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -30,16 +27,9 @@ See \code{p.adjust.methods} for available methods. Default is "BH".
 If NULL, no adjustment is performed.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the Cox model results are returned.
-Only applicable to \code{gly_cox()}.}
+will be added to the result tibble. If FALSE, only the Cox model results are returned.}
 
 \item{...}{Additional arguments passed to \code{survival::coxph()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_cox_]{gly_cox_()}}) A numeric matrix with variables as rows and samples as columns.}
-
-\item{time}{A numeric vector specifying the survival time for each sample.}
-
-\item{event}{A numeric vector specifying the event indicator for each sample (1 for event, 0 for censoring).}
 }
 \value{
 A list with three elements:
@@ -55,7 +45,7 @@ A list with three elements:
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 }
 \item \code{raw_result}: A list of raw \code{coxph} model objects.
-\item \code{meta_data} (only for \code{\link[=gly_cox]{gly_cox()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 }
 }
 \description{

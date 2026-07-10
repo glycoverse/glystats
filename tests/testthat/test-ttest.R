@@ -70,7 +70,7 @@ test_that("gly_wilcox works with wilcoxon method", {
   expect_true(all(purrr::map_lgl(result$raw_result, ~ inherits(.x, "htest"))))
 })
 
-test_that("gly_ttest_ works correctly", {
+test_that(".analyze_ttest works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -80,7 +80,7 @@ test_that("gly_ttest_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_ttest_(expr_mat, groups)
+    result <- .analyze_ttest(expr_mat, groups)
   })
 
   # Verify results
@@ -93,7 +93,7 @@ test_that("gly_ttest_ works correctly", {
   expect_equal(nrow(result$tidy_result), 10)
 })
 
-test_that("gly_ttest_ returns Cohen's d in effect_size", {
+test_that(".analyze_ttest returns Cohen's d in effect_size", {
   expr_mat <- matrix(
     c(1, 2, 3, 8, 9, 10),
     nrow = 1,
@@ -101,7 +101,7 @@ test_that("gly_ttest_ returns Cohen's d in effect_size", {
   )
   groups <- factor(c("A", "A", "A", "B", "B", "B"))
 
-  result <- suppressMessages(gly_ttest_(
+  result <- suppressMessages(.analyze_ttest(
     expr_mat,
     groups,
     p_adj_method = NULL
@@ -132,7 +132,7 @@ test_that(".log_transform_expr_mat uses a small pseudo-count", {
   expect_equal(result, log2(expr_mat + 1e-6), tolerance = 1e-10)
 })
 
-test_that("gly_ttest_ direction matches log2fc and ref_group", {
+test_that(".analyze_ttest direction matches log2fc and ref_group", {
   expr_mat <- matrix(
     c(10, 11, 12, 13, 14, 1, 2, 3, 4, 5),
     nrow = 1,
@@ -140,12 +140,12 @@ test_that("gly_ttest_ direction matches log2fc and ref_group", {
   )
   groups <- factor(c(rep("A", 5), rep("B", 5)))
 
-  result_default <- suppressMessages(gly_ttest_(
+  result_default <- suppressMessages(.analyze_ttest(
     expr_mat,
     groups,
     p_adj_method = NULL
   ))
-  result_ref_b <- suppressMessages(gly_ttest_(
+  result_ref_b <- suppressMessages(.analyze_ttest(
     expr_mat,
     groups,
     p_adj_method = NULL,
@@ -195,7 +195,7 @@ test_that("gly_ttest_ direction matches log2fc and ref_group", {
   )
 })
 
-test_that("gly_ttest_ reports one-sided alternatives in the output direction", {
+test_that(".analyze_ttest reports one-sided alternatives in the output direction", {
   expr_mat <- matrix(
     c(10, 11, 12, 13, 14, 1, 2, 3, 4, 5),
     nrow = 1,
@@ -203,13 +203,13 @@ test_that("gly_ttest_ reports one-sided alternatives in the output direction", {
   )
   groups <- factor(c(rep("A", 5), rep("B", 5)))
 
-  result_greater <- suppressMessages(gly_ttest_(
+  result_greater <- suppressMessages(.analyze_ttest(
     expr_mat,
     groups,
     p_adj_method = NULL,
     alternative = "greater"
   ))
-  result_less <- suppressMessages(gly_ttest_(
+  result_less <- suppressMessages(.analyze_ttest(
     expr_mat,
     groups,
     p_adj_method = NULL,
@@ -222,7 +222,7 @@ test_that("gly_ttest_ reports one-sided alternatives in the output direction", {
   expect_lt(result_less$tidy_result$p_val, 0.1)
 })
 
-test_that("gly_wilcox_ direction matches log2fc and ref_group", {
+test_that(".analyze_wilcox direction matches log2fc and ref_group", {
   expr_mat <- matrix(
     c(10, 11, 12, 13, 14, 1, 2, 3, 4, 5),
     nrow = 1,
@@ -230,14 +230,14 @@ test_that("gly_wilcox_ direction matches log2fc and ref_group", {
   )
   groups <- factor(c(rep("A", 5), rep("B", 5)))
 
-  result_default <- suppressMessages(suppressWarnings(gly_wilcox_(
+  result_default <- suppressMessages(suppressWarnings(.analyze_wilcox(
     expr_mat,
     groups,
     p_adj_method = NULL,
     conf.int = TRUE,
     exact = FALSE
   )))
-  result_ref_b <- suppressMessages(suppressWarnings(gly_wilcox_(
+  result_ref_b <- suppressMessages(suppressWarnings(.analyze_wilcox(
     expr_mat,
     groups,
     p_adj_method = NULL,
@@ -277,7 +277,7 @@ test_that("gly_wilcox_ direction matches log2fc and ref_group", {
   )
 })
 
-test_that("gly_wilcox_ preserves one-sided alternatives in the output direction", {
+test_that(".analyze_wilcox preserves one-sided alternatives in the output direction", {
   expr_mat <- matrix(
     c(10, 11, 12, 13, 14, 1, 2, 3, 4, 5),
     nrow = 1,
@@ -285,7 +285,7 @@ test_that("gly_wilcox_ preserves one-sided alternatives in the output direction"
   )
   groups <- factor(c(rep("A", 5), rep("B", 5)))
 
-  result_greater <- suppressMessages(suppressWarnings(gly_wilcox_(
+  result_greater <- suppressMessages(suppressWarnings(.analyze_wilcox(
     expr_mat,
     groups,
     p_adj_method = NULL,
@@ -293,7 +293,7 @@ test_that("gly_wilcox_ preserves one-sided alternatives in the output direction"
     conf.int = TRUE,
     exact = FALSE
   )))
-  result_less <- suppressMessages(suppressWarnings(gly_wilcox_(
+  result_less <- suppressMessages(suppressWarnings(.analyze_wilcox(
     expr_mat,
     groups,
     p_adj_method = NULL,
@@ -308,7 +308,7 @@ test_that("gly_wilcox_ preserves one-sided alternatives in the output direction"
   expect_lt(result_less$tidy_result$p_val, 0.1)
 })
 
-test_that("gly_wilcox_ works correctly", {
+test_that(".analyze_wilcox works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -318,7 +318,7 @@ test_that("gly_wilcox_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_wilcox_(expr_mat, groups)
+    result <- .analyze_wilcox(expr_mat, groups)
   })
 
   # Verify results
@@ -331,7 +331,7 @@ test_that("gly_wilcox_ works correctly", {
   expect_equal(nrow(result$tidy_result), 10)
 })
 
-test_that("gly_wilcox_ returns rank-biserial correlation in effect_size", {
+test_that(".analyze_wilcox returns rank-biserial correlation in effect_size", {
   expr_mat <- matrix(
     c(1, 2, 3, 8, 9, 10),
     nrow = 1,
@@ -339,7 +339,7 @@ test_that("gly_wilcox_ returns rank-biserial correlation in effect_size", {
   )
   groups <- factor(c("A", "A", "A", "B", "B", "B"))
 
-  result <- suppressMessages(suppressWarnings(gly_wilcox_(
+  result <- suppressMessages(suppressWarnings(.analyze_wilcox(
     expr_mat,
     groups,
     p_adj_method = NULL,

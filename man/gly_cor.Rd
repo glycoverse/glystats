@@ -2,18 +2,9 @@
 % Please edit documentation in R/cor.R
 \name{gly_cor}
 \alias{gly_cor}
-\alias{gly_cor_}
 \title{Correlation Analysis for Glycomics and Glycoproteomics Data}
 \usage{
 gly_cor(exp, on = "variable", method = "pearson", p_adj_method = "BH", ...)
-
-gly_cor_(
-  expr_mat,
-  on = "variable",
-  method = "pearson",
-  p_adj_method = "BH",
-  ...
-)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
@@ -29,8 +20,6 @@ See \code{p.adjust.methods} for available methods. Default is "BH".
 If NULL, no adjustment is performed.}
 
 \item{...}{Additional arguments passed to \code{Hmisc::rcorr()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_cor_]{gly_cor_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list with three elements:
@@ -44,7 +33,7 @@ A list with three elements:
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 }
 \item \code{raw_result}: The raw rcorr object from Hmisc::rcorr()
-\item \code{meta_data} (only for \code{\link[=gly_cor]{gly_cor()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_cor_res} and \code{glystats_res}.
 }
 }
@@ -58,11 +47,6 @@ The function performs log2 transformation on the expression data (log2(x + 1e-6)
 correlation analysis. When \code{on = "variable"} (default), correlations are calculated between
 variables across samples. When \code{on = "sample"}, correlations are calculated between
 samples across variables.
-
-\code{gly_cor()} is the top-level API that works with \code{glyexp::experiment()} objects。
-
-\code{gly_cor_()} is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
 
 \strong{Correlation Calculation:}
 Correlation coefficients and p-values are calculated using \code{Hmisc::rcorr()} which is

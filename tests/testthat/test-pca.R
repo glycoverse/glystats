@@ -17,7 +17,7 @@ test_that("gly_pca works", {
   expect_s3_class(pca_res$raw_result, "prcomp")
 })
 
-test_that("gly_pca_ works correctly", {
+test_that(".analyze_pca works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -26,7 +26,7 @@ test_that("gly_pca_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_pca_(expr_mat)
+    result <- .analyze_pca(expr_mat)
   })
 
   # Verify results structure
@@ -61,7 +61,7 @@ test_that("gly_pca add_info works", {
   ))
 })
 
-test_that("gly_pca_ handles constant columns with scale = TRUE", {
+test_that(".analyze_pca handles constant columns with scale = TRUE", {
   # Create test data with a constant column
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -73,7 +73,7 @@ test_that("gly_pca_ handles constant columns with scale = TRUE", {
 
   # With scale = TRUE (default), should warn and remove the constant column
   expect_warning(
-    result <- gly_pca_(expr_mat, scale = TRUE),
+    result <- .analyze_pca(expr_mat, scale = TRUE),
     "Removed 1 constant column before PCA"
   )
   expect_s3_class(result, "glystats_pca_res")
@@ -82,14 +82,14 @@ test_that("gly_pca_ handles constant columns with scale = TRUE", {
 
   # With scale = FALSE, no need to remove constant columns
   expect_no_warning(
-    result_no_scale <- gly_pca_(expr_mat, scale = FALSE)
+    result_no_scale <- .analyze_pca(expr_mat, scale = FALSE)
   )
   expect_s3_class(result_no_scale, "glystats_pca_res")
   # The constant variable should be in the loadings (with zero loading)
   expect_true("var1" %in% result_no_scale$tidy_result$variables$variable)
 })
 
-test_that("gly_pca_ handles all constant columns", {
+test_that(".analyze_pca handles all constant columns", {
   # Create test data where all columns become constant after log transformation
   expr_mat <- matrix(0, nrow = 10, ncol = 10)
   rownames(expr_mat) <- paste0("var", 1:10)
@@ -97,7 +97,7 @@ test_that("gly_pca_ handles all constant columns", {
 
   # Should error because no columns with variance remain
   expect_error(
-    expect_warning(gly_pca_(expr_mat, scale = TRUE)),
+    expect_warning(.analyze_pca(expr_mat, scale = TRUE)),
     "No columns with non-zero variance remain"
   )
 })
@@ -134,12 +134,12 @@ test_that("gly_pca returns meta_data from experiment", {
   expect_equal(result$meta_data$custom_field, "test_value")
 })
 
-test_that("gly_pca_ does not return meta_data", {
+test_that(".analyze_pca does not return meta_data", {
   expr_mat <- matrix(runif(20), nrow = 5, ncol = 4)
   colnames(expr_mat) <- c("S1", "S2", "S3", "S4")
   rownames(expr_mat) <- c("V1", "V2", "V3", "V4", "V5")
 
-  result <- gly_pca_(expr_mat)
+  result <- .analyze_pca(expr_mat)
 
   # Check that meta_data does NOT exist
   expect_false("meta_data" %in% names(result))

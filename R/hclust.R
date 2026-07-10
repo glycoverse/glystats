@@ -6,7 +6,6 @@
 #' and merge heights.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_hclust_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param on A character string specifying what to cluster. Either "variable" (default) to cluster
 #'   variables/features, or "sample" to cluster samples/observations.
 #' @param k_values A numeric vector specifying the number of clusters to cut the tree into.
@@ -14,7 +13,6 @@
 #' @param scale A logical indicating whether to scale the data before clustering. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
-#'   Only applicable to `gly_hclust()`.
 #' @param ... Additional arguments passed to `stats::dist()` and `stats::hclust()`.
 #'   Note: if both functions need a `method` parameter, use `dist.method` for distance
 #'   and `hclust.method` for clustering method.
@@ -29,12 +27,6 @@
 #' clustering. When `on = "variable"` (default), variables are clustered based on their
 #' expression patterns across samples. When `on = "sample"`, samples are clustered based
 #' on their expression profiles across variables.
-#'
-#' `gly_hclust()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_hclust_()` is the underlying API that works with matrices directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' **Distance Calculation:**
 #' Distance is calculated using `stats::dist()` with the specified method.
@@ -61,7 +53,7 @@
 #'      - `x`, `y`: Position coordinates
 #'      - `label`: Label text
 #'  - `raw_result`: The raw hclust object from `stats::hclust()`
-#'  - `meta_data` (only for [gly_hclust()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #'
 #' @seealso [stats::hclust()], [stats::dist()], [stats::cutree()]
 #' @export
@@ -85,8 +77,8 @@ gly_hclust <- function(
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
 
-  # Call the underlying API
-  result <- gly_hclust_(expr_mat, on, k_values, scale, ...)
+  # Run the internal computation
+  result <- .analyze_hclust(expr_mat, on, k_values, scale, ...)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -99,9 +91,12 @@ gly_hclust <- function(
   result
 }
 
-#' @rdname gly_hclust
-#' @export
-gly_hclust_ <- function(
+#' Run the internal computation for `gly_hclust()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_hclust <- function(
   expr_mat,
   on = "variable",
   k_values = c(2, 3, 4, 5),
