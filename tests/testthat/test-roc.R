@@ -1,7 +1,8 @@
 test_that("gly_roc works with 2-group binary classification", {
   # Use test_gp_exp and filter to 2 groups for ROC analysis
   exp_2group <- exp_2groups() |>
-    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) |>
+    as_test_se() # Use smaller subset for faster testing
 
   # Run ROC analysis
   result <- suppressMessages(gly_roc(

@@ -5,7 +5,7 @@
 #' When you run this function, you will see message about "Ref Group" and "Test Group".
 #' "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
 #'
-#' @param exp A `glyexp::experiment()` object.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object.
 #' @param group_col The column name of the group information in the sample information.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the fold change results are returned.
@@ -19,12 +19,12 @@
 #'  - `meta_data`: A list containing metadata from the input experiment
 #' @export
 gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(group_col)
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract and validate groups using helper function
-  sample_info <- glyexp::get_sample_info(exp)
+  sample_info <- .get_sample_info(exp)
   group_info <- .extract_and_validate_groups(
     sample_info = sample_info,
     group_col = group_col,
@@ -34,7 +34,7 @@ gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   )
   groups <- group_info$groups
 
-  expr_mat <- glyexp::get_expr_mat(exp)
+  expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
   tidy_result <- .analyze_fold_change(expr_mat, groups)
@@ -46,7 +46,7 @@ gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   result <- list(
     tidy_result = tidy_result,
     raw_result = tidy_result,
-    meta_data = glyexp::get_meta_data(exp)
+    meta_data = .get_meta_data(exp)
   )
   class(result) <- c("glystats_fc_res", "glystats_res", class(result))
 

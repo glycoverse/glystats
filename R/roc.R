@@ -5,7 +5,8 @@
 #' Area Under the Curve (AUC) values for each variable to assess their discriminatory
 #' power between two groups.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'   in the sample information. Default is `"group"`. The grouping variable must have
 #'   exactly 2 levels for binary classification.
@@ -56,14 +57,14 @@ gly_roc <- function(
   rlang::check_installed("pROC")
 
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(group_col)
   checkmate::assert_string(pos_class, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
-  sample_info <- glyexp::get_sample_info(exp)
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
 
   # Extract and validate groups using helper function
   group_info <- .extract_and_validate_groups(
@@ -85,7 +86,7 @@ gly_roc <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

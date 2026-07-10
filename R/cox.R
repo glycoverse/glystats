@@ -3,7 +3,8 @@
 #' Fit a Cox proportional hazards model for each variable in the expression data,
 #' and extract p-values and hazard ratios from it.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param time_col A character string specifying the column name in sample information
 #'   that contains survival time. Default is "time".
 #' @param event_col A character string specifying the column name in sample information
@@ -47,13 +48,13 @@ gly_cox <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(time_col)
   checkmate::assert_string(event_col)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
-  sample_info <- glyexp::get_sample_info(exp)
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
 
   # Extract time and event vectors
   time <- sample_info[[time_col]]
@@ -68,7 +69,7 @@ gly_cox <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

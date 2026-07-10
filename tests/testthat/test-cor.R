@@ -1,7 +1,8 @@
 test_that("gly_cor basic functionality works", {
   exp_subset <- test_gp_exp |>
     glyexp::slice_sample_var(n = 5) |>
-    glyexp::slice_sample_obs(n = 6)
+    glyexp::slice_sample_obs(n = 6) |>
+    as_test_se()
 
   result <- suppressMessages(gly_cor(exp_subset))
 

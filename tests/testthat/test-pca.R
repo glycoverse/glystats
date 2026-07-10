@@ -1,7 +1,7 @@
 test_that("gly_pca works", {
   # Note: this integration test only makes sure the function runs,
   # it doesn't promise the result is correct.
-  pca_res <- gly_pca(test_gp_exp)
+  pca_res <- gly_pca(test_gp_se)
   expect_s3_class(pca_res, c("glystats_pca_res", "glystats_res"))
   expect_type(pca_res, "list")
   expect_setequal(names(pca_res), c("tidy_result", "raw_result", "meta_data"))
@@ -49,10 +49,10 @@ test_that(".analyze_pca works correctly", {
 
 test_that("gly_pca add_info works", {
   # Test with add_info = TRUE (default)
-  pca_with_info <- gly_pca(test_gp_exp, add_info = TRUE)
+  pca_with_info <- gly_pca(test_gp_se, add_info = TRUE)
 
   # Test with add_info = FALSE
-  pca_without_info <- gly_pca(test_gp_exp, add_info = FALSE)
+  pca_without_info <- gly_pca(test_gp_se, add_info = FALSE)
 
   # Results should be different when add_info is different
   expect_false(identical(
@@ -102,7 +102,7 @@ test_that(".analyze_pca handles all constant columns", {
   )
 })
 
-test_that("gly_pca returns meta_data from experiment", {
+test_that("gly_pca keeps experiment compatibility", {
   # Create a simple experiment with metadata
   expr_mat <- matrix(runif(20), nrow = 5, ncol = 4)
   colnames(expr_mat) <- c("S1", "S2", "S3", "S4")

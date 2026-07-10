@@ -2,7 +2,8 @@ test_that("gly_anova works with anova method", {
   # Use test_gp_exp with 3 groups for ANOVA
   exp_3group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
-    glyexp::slice_sample_var(n = 10)
+    glyexp::slice_sample_var(n = 10) |>
+    as_test_se()
 
   # Run DEA with ANOVA
   result <- suppressMessages(gly_anova(exp_3group))
@@ -214,9 +215,10 @@ test_that("gly_anova assigns NA for failed variables", {
   # The first three variables are set to NA
   exp_3group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
-    glyexp::slice_sample_var(n = 10)
-  exp_3group$expr_mat[1:3, ] <- NA # This will lead to stats::aov() failing
-  na_vars <- exp_3group$var_info$variable[1:3]
+    glyexp::slice_sample_var(n = 10) |>
+    as_test_se()
+  SummarizedExperiment::assay(exp_3group)[1:3, ] <- NA
+  na_vars <- rownames(exp_3group)[1:3]
 
   # Run DEA with ANOVA
   expect_warning(result <- suppressMessages(gly_anova(exp_3group)))

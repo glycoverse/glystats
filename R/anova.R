@@ -5,7 +5,8 @@
 #' For significant results, Tukey's HSD post-hoc test is automatically performed.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -63,7 +64,7 @@ gly_anova <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -73,8 +74,8 @@ gly_anova <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
-  sample_info <- glyexp::get_sample_info(exp)
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
 
   # Extract and validate groups
   group_info <- .extract_and_validate_groups(
@@ -94,7 +95,7 @@ gly_anova <- function(
     add_info
   )
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
   result
 }
 
@@ -183,7 +184,8 @@ gly_anova <- function(
 #' For significant results, emmeans post-hoc comparisons (Tukey adjustment) are automatically performed.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param covariate_cols A character vector specifying column names in sample information
@@ -243,7 +245,7 @@ gly_ancova <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -258,8 +260,8 @@ gly_ancova <- function(
   checkmate::assert_character(covariate_cols, min.len = 1)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
-  sample_info <- glyexp::get_sample_info(exp)
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
 
   # Extract and validate groups
   group_info <- .extract_and_validate_groups(
@@ -408,7 +410,8 @@ gly_ancova <- function(
 #' For significant results, Dunn's post-hoc test is automatically performed.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -467,7 +470,7 @@ gly_kruskal <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -480,8 +483,8 @@ gly_kruskal <- function(
   rlang::check_installed("FSA")
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
-  sample_info <- glyexp::get_sample_info(exp)
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
 
   # Extract and validate groups
   group_info <- .extract_and_validate_groups(
@@ -501,7 +504,7 @@ gly_kruskal <- function(
     add_info
   )
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
   result
 }
 

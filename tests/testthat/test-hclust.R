@@ -10,7 +10,8 @@ test_that("gly_hclust does not leak graphics devices when ggdendro is available"
 
   exp_subset <- test_gp_exp |>
     glyexp::slice_sample_var(n = 5) |>
-    glyexp::slice_sample_obs(n = 5)
+    glyexp::slice_sample_obs(n = 5) |>
+    as_test_se()
 
   suppressMessages(gly_hclust(exp_subset, on = "sample", k_values = c(2)))
 

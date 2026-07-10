@@ -287,8 +287,8 @@ test_that(".analyze_oplsda works correctly", {
   skip_if_not_installed("ropls")
 
   exp <- exp_topliss_valid()
-  expr_mat <- glyexp::get_expr_mat(exp)
-  groups <- factor(glyexp::get_sample_info(exp)$group)
+  expr_mat <- SummarizedExperiment::assay(exp)
+  groups <- factor(SummarizedExperiment::colData(exp)$group)
 
   # Test function execution
   suppressMessages(suppressWarnings({

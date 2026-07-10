@@ -4,7 +4,8 @@
 #' The function uses `prcomp()` to perform PCA and `broom::tidy()` to tidy the results.
 #' If `scale = TRUE`, constant variables (zero variance) will be removed before PCA.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param center A logical indicating whether to center the data. Default is TRUE.
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
@@ -38,11 +39,11 @@
 #' @seealso [stats::prcomp()]
 #' @export
 gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
+  expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
   result <- .analyze_pca(expr_mat, center, scale, ...)
@@ -53,7 +54,7 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

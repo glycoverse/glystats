@@ -1,3 +1,18 @@
+as_test_se <- function(exp) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    return(exp)
+  }
+
+  switch(
+    glyexp::get_exp_type(exp),
+    glycomics = glyexp::as_glycomic_se(exp),
+    glycoproteomics = glyexp::as_glycoproteomic_se(exp),
+    glyexp::as_se(exp)
+  )
+}
+
+test_gp_se <- glyexp::as_glycoproteomic_se(test_gp_exp)
+
 exp_2groups <- function() {
   glyexp::filter_obs(test_gp_exp, group %in% c("C", "H"))
 }
@@ -51,7 +66,8 @@ exp_topliss_valid <- function() {
   rownames(var_info) <- rownames(expr_mat)
 
   # Create glyexp object
-  glyexp::experiment(expr_mat, sample_info, var_info, "others")
+  glyexp::experiment(expr_mat, sample_info, var_info, "others") |>
+    glyexp::as_se()
 }
 
 # Create a multi-group dataset that satisfies Topliss ratio
@@ -107,5 +123,6 @@ exp_multigroup_valid <- function() {
     sample_info = sample_info,
     var_info = var_info,
     exp_type = "others"
-  )
+  ) |>
+    glyexp::as_se()
 }

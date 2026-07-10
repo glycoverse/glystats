@@ -2,7 +2,8 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
   # Use test_gp_exp and filter to 2 groups
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
-    glyexp::slice_sample_var(n = 5)
+    glyexp::slice_sample_var(n = 5) |>
+    as_test_se()
 
   # Test gly_fold_change
   result_no_info <- suppressMessages(gly_fold_change(
@@ -35,7 +36,8 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
 test_that("add_info parameter works correctly for functions returning tibbles with sample column", {
   # Use test_gp_exp
   exp_subset <- test_gp_exp |>
-    glyexp::slice_sample_var(n = 10)
+    glyexp::slice_sample_var(n = 10) |>
+    as_test_se()
 
   # Test gly_pca
   result_pca_no_info <- suppressMessages(gly_pca(exp_subset, add_info = FALSE))

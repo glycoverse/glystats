@@ -3,7 +3,8 @@
 #' Perform UMAP dimensionality reduction on the expression data.
 #' The function uses `uwot::umap()` to perform UMAP analysis.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param n_neighbors Number of neighbors to consider for each point. Default is 15.
 #' @param n_components Number of output dimensions. Default is 2.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
@@ -32,10 +33,10 @@ gly_umap <- function(
   ...
 ) {
   rlang::check_installed("uwot")
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_flag(add_info)
 
-  expr_mat <- glyexp::get_expr_mat(exp)
+  expr_mat <- .get_expr_mat(exp)
   result <- .analyze_umap(expr_mat, n_neighbors, n_components, ...)
 
   result$tidy_result <- .process_results_add_info(
@@ -45,7 +46,7 @@ gly_umap <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

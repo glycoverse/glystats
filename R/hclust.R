@@ -5,7 +5,8 @@
 #' tidy results including cluster assignments, dendrogram data for plotting,
 #' and merge heights.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param on A character string specifying what to cluster. Either "variable" (default) to cluster
 #'   variables/features, or "sample" to cluster samples/observations.
 #' @param k_values A numeric vector specifying the number of clusters to cut the tree into.
@@ -66,7 +67,7 @@ gly_hclust <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_choice(on, c("variable", "sample"))
   if (!is.null(k_values)) {
     checkmate::assert_integerish(k_values, lower = 2, min.len = 1)
@@ -75,7 +76,7 @@ gly_hclust <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
+  expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
   result <- .analyze_hclust(expr_mat, on, k_values, scale, ...)
@@ -86,7 +87,7 @@ gly_hclust <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

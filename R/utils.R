@@ -1,3 +1,113 @@
+# Data-container helpers -------------------------------------------------------
+
+#' Check a glystats data-container input
+#'
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object.
+#'
+#' @returns `NULL` invisibly, or an error if `exp` is unsupported.
+#' @noRd
+.assert_data_container <- function(exp) {
+  if (glyexp::is_experiment(exp) || methods::is(exp, "SummarizedExperiment")) {
+    return(invisible(NULL))
+  }
+
+  cli::cli_abort(
+    "{.arg exp} must be a {.cls glyexp_experiment} or {.cls SummarizedExperiment} object."
+  )
+}
+
+#' Extract the expression matrix from a glystats data container
+#'
+#' @inheritParams .assert_data_container
+#'
+#' @returns A numeric matrix with variables in rows and samples in columns.
+#' @noRd
+.get_expr_mat <- function(exp) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    return(as.matrix(SummarizedExperiment::assay(exp, 1)))
+  }
+  glyexp::get_expr_mat(exp)
+}
+
+#' Extract sample information from a glystats data container
+#'
+#' @inheritParams .assert_data_container
+#'
+#' @returns A tibble with a `sample` identifier column.
+#' @noRd
+.get_sample_info <- function(exp) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    return(.as_info_tibble(SummarizedExperiment::colData(exp), "sample"))
+  }
+  glyexp::get_sample_info(exp)
+}
+
+#' Extract variable information from a glystats data container
+#'
+#' @inheritParams .assert_data_container
+#'
+#' @returns A tibble with a `variable` identifier column.
+#' @noRd
+.get_var_info <- function(exp) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    return(.as_info_tibble(SummarizedExperiment::rowData(exp), "variable"))
+  }
+  glyexp::get_var_info(exp)
+}
+
+#' Convert row or column data to a tibble with an identifier
+#'
+#' @param info A `DataFrame` containing row or column metadata.
+#' @param id The identifier column name to use when `info` does not already
+#'   contain it.
+#'
+#' @returns A tibble that preserves an existing identifier column or adds row
+#'   names under `id`.
+#' @noRd
+.as_info_tibble <- function(info, id) {
+  if (id %in% colnames(info)) {
+    return(tibble::as_tibble(info))
+  }
+  tibble::as_tibble(info, rownames = id)
+}
+
+#' Extract metadata from a glystats data container
+#'
+#' @inheritParams .assert_data_container
+#'
+#' @returns A metadata list.
+#' @noRd
+.get_meta_data <- function(exp) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    return(S4Vectors::metadata(exp))
+  }
+  glyexp::get_meta_data(exp)
+}
+
+#' Extract the experiment type from a glystats data container
+#'
+#' @inheritParams .assert_data_container
+#'
+#' @returns A character scalar or `NULL`.
+#' @noRd
+.get_exp_type <- function(exp) {
+  .get_meta_data(exp)$exp_type
+}
+
+#' Filter variables in a glystats data container
+#'
+#' @inheritParams .assert_data_container
+#' @param variables A character vector of variable identifiers to retain.
+#'
+#' @returns The filtered container, preserving its input class.
+#' @noRd
+.filter_variables <- function(exp, variables) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    return(exp[rownames(exp) %in% variables, ])
+  }
+  glyexp::filter_var(exp, .data$variable %in% .env$variables)
+}
+
 # Group extraction, validation, and conversion helper functions ---------------
 
 # Check if group column exists in sample information
@@ -142,7 +252,7 @@
     return(tbl)
   }
 
-  var_info <- glyexp::get_var_info(exp)
+  var_info <- .get_var_info(exp)
   # Remove the variable column from var_info to avoid duplication
   var_info_subset <- var_info[,
     !colnames(var_info) %in% "variable",
@@ -164,7 +274,7 @@
     return(tbl)
   }
 
-  sample_info <- glyexp::get_sample_info(exp)
+  sample_info <- .get_sample_info(exp)
   # Remove the sample column from sample_info to avoid duplication
   sample_info_subset <- sample_info[,
     !colnames(sample_info) %in% "sample",

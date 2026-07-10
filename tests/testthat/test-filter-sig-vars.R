@@ -4,7 +4,8 @@ small_exp <- function() {
     glyexp::slice_head_var(n = 10) |>
     glyexp::mutate_obs(
       group = factor(.data$group, levels = c("H", "M", "Y", "C"))
-    )
+    ) |>
+    as_test_se()
 }
 
 # ----- ANOVA main test results -----
@@ -29,6 +30,7 @@ test_that("filter_sig_vars works for ANOVA with default settings", {
   result$tidy_result$main_test$p_adj <- c(rep(0.01, 5), rep(1, 5))
   sig_exp <- filter_sig_vars(exp, result)
   expect_equal(nrow(sig_exp), 5)
+  expect_s4_class(sig_exp, "GlycoproteomicSE")
 })
 
 test_that("filter_sig_vars works for ANOVA with p_val_cutoff", {
@@ -158,7 +160,8 @@ small_exp2 <- function() {
   test_gp_exp |>
     glyexp::slice_head_var(n = 10) |>
     glyexp::filter_obs(.data$group %in% c("C", "H")) |>
-    glyexp::mutate_obs(group = factor(.data$group, levels = c("H", "C")))
+    glyexp::mutate_obs(group = factor(.data$group, levels = c("H", "C"))) |>
+    as_test_se()
 }
 
 # ----- t-test results -----

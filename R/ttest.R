@@ -4,7 +4,8 @@
 #' The function supports Student's t-test for comparing two groups.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -50,7 +51,7 @@ gly_ttest <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -60,8 +61,8 @@ gly_ttest <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
-  sample_info <- glyexp::get_sample_info(exp)
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
 
   # Extract and validate groups
   group_info <- .extract_and_validate_groups(
@@ -85,7 +86,7 @@ gly_ttest <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }
@@ -138,7 +139,8 @@ gly_ttest <- function(
 #' The function supports non-parametric comparison of two groups.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -186,7 +188,7 @@ gly_wilcox <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -196,8 +198,8 @@ gly_wilcox <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
-  sample_info <- glyexp::get_sample_info(exp)
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
 
   # Extract and validate groups
   group_info <- .extract_and_validate_groups(
@@ -221,7 +223,7 @@ gly_wilcox <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }
