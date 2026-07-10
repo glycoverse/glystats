@@ -2,7 +2,7 @@
 
 ## Breaking changes
 
-* All `gly_*_()` matrix and vector interfaces are removed. Pass a `glyexp::experiment()` to the corresponding `gly_*()` function instead.
+* All `gly_*_()` matrix and vector interfaces are removed. Pass a `glyexp::experiment()` to the corresponding `gly_*()` function instead. (#12)
 
 # glystats 0.10.1
 
