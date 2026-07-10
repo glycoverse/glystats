@@ -24,7 +24,9 @@ gly_limma(
 
 - exp:
 
-  A `glyexp_experiment` object containing expression data and sample
+  A
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  or `SummarizedExperiment` object containing expression data and sample
   information.
 
 - group_col:

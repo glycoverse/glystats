@@ -17,7 +17,8 @@ gly_umap(exp, n_neighbors = 15, n_components = 2, add_info = TRUE, ...)
 
   A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object containing expression matrix and sample information.
+  or `SummarizedExperiment` object containing an expression matrix and
+  sample information.
 
 - n_neighbors:
 

@@ -22,7 +22,8 @@ gly_cox(
 
   A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object containing expression matrix and sample information.
+  or `SummarizedExperiment` object containing an expression matrix and
+  sample information.
 
 - time_col:
 

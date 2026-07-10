@@ -18,7 +18,7 @@ gly_fold_change(exp, group_col = "group", add_info = TRUE)
 
   A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object.
+  or `SummarizedExperiment` object.
 
 - group_col:
 

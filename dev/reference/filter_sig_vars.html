@@ -129,7 +129,8 @@ It supports results from all glystats DEA functions including
 
 
 <dl><dt id="arg-exp">exp<a class="anchor" aria-label="anchor" href="#arg-exp"></a></dt>
-<dd><p>An <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code>. Please use the same experiment used to generate the DEA result.</p></dd>
+<dd><p>A <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> or <code>SummarizedExperiment</code> object. Use the
+same object used to generate the DEA result.</p></dd>
 
 
 <dt id="arg-res">res<a class="anchor" aria-label="anchor" href="#arg-res"></a></dt>
@@ -171,7 +172,7 @@ and variables will be kept if they are significant in any comparison for <code><
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An new <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object.</p>
+    <p>A filtered object of the same class as <code>exp</code>.</p>
     </div>
 
     <div class="section level2">
