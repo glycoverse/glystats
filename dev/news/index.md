@@ -7,6 +7,11 @@
 - All `gly_*_()` matrix and vector interfaces are removed. Pass a
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   to the corresponding `gly_*()` function instead. (#12)
+- `gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`,
+  `gly_enrich_wikipathways()`, `gly_enrich_do()`, `gly_enrich_ncg()`,
+  and `gly_enrich_dgn()` are removed. These functions were deprecated in
+  0.10.0. Use the corresponding functions in the `glyfun` package
+  instead. (#13)
 
 ## glystats 0.10.1
 
@@ -27,16 +32,10 @@
 ### Deprecations
 
 - All enrichment analysis functions are now deprecated and will be
-  removed in a future version:
-  [`gly_enrich_go()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md),
-  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_kegg.md),
-  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_reactome.md),
-  [`gly_enrich_wikipathways()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_wikipathways.md),
-  [`gly_enrich_do()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_do.md),
-  [`gly_enrich_ncg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_ncg.md),
-  and
-  [`gly_enrich_dgn()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_dgn.md).
-  Use the corresponding functions in the `glyfun` package instead.
+  removed in a future version: `gly_enrich_go()`, `gly_enrich_kegg()`,
+  `gly_enrich_reactome()`, `gly_enrich_wikipathways()`,
+  `gly_enrich_do()`, `gly_enrich_ncg()`, and `gly_enrich_dgn()`. Use the
+  corresponding functions in the `glyfun` package instead.
 
 ## glystats 0.9.0
 
@@ -87,13 +86,10 @@
 
 ### Breaking changes
 
-- Refactored enrichment API
-  ([`gly_enrich_go()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md),
-  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_kegg.md),
-  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_reactome.md)).
-  These functions now use explicit parameters instead of `...`. Users
-  must update their code to use new parameters (e.g., `p_cutoff` instead
-  of `pvalueCutoff`).
+- Refactored enrichment API (`gly_enrich_go()`, `gly_enrich_kegg()`,
+  `gly_enrich_reactome()`). These functions now use explicit parameters
+  instead of `...`. Users must update their code to use new parameters
+  (e.g., `p_cutoff` instead of `pvalueCutoff`).
 - `gly_wgcna()`, `gly_wgcna_()`, `gly_consensus_clustering()`, and
   `gly_consensus_clustering_()` are deprecated and will be removed in a
   future version. These functions are too interactive and complex for a
@@ -101,19 +97,14 @@
 
 ### New features
 
-- Add
-  [`gly_enrich_wikipathways()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_wikipathways.md)
-  and `gly_enrich_wikipathways_()` for WikiPathways enrichment analysis.
-- Add
-  [`gly_enrich_do()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_do.md)
-  and `gly_enrich_do_()` for Disease Ontology enrichment analysis.
-- Add
-  [`gly_enrich_ncg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_ncg.md)
-  and `gly_enrich_ncg_()` for Network of Cancer Genes enrichment
+- Add `gly_enrich_wikipathways()` and `gly_enrich_wikipathways_()` for
+  WikiPathways enrichment analysis.
+- Add `gly_enrich_do()` and `gly_enrich_do_()` for Disease Ontology
+  enrichment analysis.
+- Add `gly_enrich_ncg()` and `gly_enrich_ncg_()` for Network of Cancer
+  Genes enrichment analysis.
+- Add `gly_enrich_dgn()` and `gly_enrich_dgn_()` for DisGeNET enrichment
   analysis.
-- Add
-  [`gly_enrich_dgn()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_dgn.md)
-  and `gly_enrich_dgn_()` for DisGeNET enrichment analysis.
 
 ## glystats 0.6.5
 
@@ -204,12 +195,8 @@
 
 ### Minor improvements and bug fixes
 
-- The `universe` argument of
-  [`gly_enrich_go()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md),
-  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_kegg.md),
-  and
-  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_reactome.md)
-  accepts a
+- The `universe` argument of `gly_enrich_go()`, `gly_enrich_kegg()`, and
+  `gly_enrich_reactome()` accepts a
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object now.
 - Optimize message output of
@@ -386,9 +373,7 @@ DEA functions. Now you can ensure these properties for all DEA results:
   where the column for the first orthogonal component score (`o1`) could
   be missing from the result.
 - Suppressed messages from dependency packages and extra blank lines
-  when running
-  [`gly_enrich_go()`](https://glycoverse.github.io/glystats/dev/reference/gly_enrich_go.md)
-  for a cleaner console output.
+  when running `gly_enrich_go()` for a cleaner console output.
 - Removed redundant `glystats` S3 classes from the tibbles in the
   `tidy_result`, simplifying the output object structure.
 
