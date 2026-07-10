@@ -3,6 +3,7 @@
 ## Breaking changes
 
 * All `gly_*_()` matrix and vector interfaces are removed. Pass a `glyexp::experiment()` to the corresponding `gly_*()` function instead. (#12)
+* `gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`, `gly_enrich_wikipathways()`, `gly_enrich_do()`, `gly_enrich_ncg()`, and `gly_enrich_dgn()` are removed. These functions were deprecated in 0.10.0. Use the corresponding functions in the `glyfun` package instead. (#13)
 
 # glystats 0.10.1
 

@@ -10,8 +10,8 @@ Description: Provides a unified toolbox for bioinformatics analyses of glycomics
     and visualization (PCA, t-SNE, UMAP), supervised learning (PLS-DA, OPLS-DA),
     clustering (k-means, hierarchical, consensus clustering), network analysis
     (weighted gene co-expression network analysis, WGCNA), survival modeling
-    (Cox proportional hazards), enrichment analysis, correlation analysis, and
-    ROC/AUC evaluation. All user-facing functions follow the gly_*() naming
+    (Cox proportional hazards), correlation analysis, and ROC/AUC evaluation.
+    All user-facing functions follow the gly_*() naming
     convention to facilitate auto-completion in RStudio. Analysis functions
     accept 'glyexp' experiment objects as their unified data interface.
 License: MIT + file LICENSE
@@ -20,14 +20,9 @@ Suggests:
     FSA,
     emmeans,
     ropls,
-    mockery,
     Rtsne,
-    org.Hs.eg.db,
     uwot,
     pROC,
-    clusterProfiler,
-    ReactomePA,
-    DOSE,
     ggdendro,
     Hmisc,
     limma,
@@ -46,7 +41,6 @@ Imports:
     tibble,
     glyexp (>= 0.12.3),
     rlang,
-    lifecycle,
     tidyr,
     dplyr,
     tidyselect,
