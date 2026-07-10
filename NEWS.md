@@ -2,7 +2,7 @@
 
 ## New features
 
-* All `gly_*()` analysis functions and `filter_sig_vars()` now accept `SummarizedExperiment` objects in addition to `glyexp::experiment()` objects.
+* All `gly_*()` analysis functions and `filter_sig_vars()` now accept `SummarizedExperiment` objects in addition to `glyexp::experiment()` objects. (#14)
 
 ## Breaking changes
 
