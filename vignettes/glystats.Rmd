@@ -147,15 +147,6 @@ Here's your complete toolkit for glycomics and glycoproteomics data analysis:
 - **⏱️ Survival Analysis:**
   - `gly_cox()`: Cox proportional hazards model
 
-- **🎯 Enrichment Analysis:**
-  - `gly_enrich_go()`: Gene Ontology enrichment analysis
-  - `gly_enrich_kegg()`: KEGG enrichment analysis
-  - `gly_enrich_reactome()`: Reactome enrichment analysis
-  - `gly_enrich_wikipathways()`: WikiPathways enrichment analysis
-  - `gly_enrich_do()`: Disease Ontology enrichment analysis
-  - `gly_enrich_ncg()`: Network of Cancer Genes enrichment analysis
-  - `gly_enrich_dgn()`: DisGeNET enrichment analysis
-
 - **🔧 Additional Tools:**
   - `gly_cor()`: Correlation analysis
   - `gly_roc()`: Receiver operating characteristic (ROC) analysis
