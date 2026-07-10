@@ -5,7 +5,8 @@ test_that("gly_ancova works with ancova method", {
   exp_3group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H", "M")) |>
     glyexp::slice_sample_var(n = 10) |>
-    glyexp::mutate_obs(covar = seq_along(.data$group))
+    glyexp::mutate_obs(covar = seq_along(.data$group)) |>
+    as_test_se()
 
   # Run DEA with ANCOVA
   result <- suppressMessages(gly_ancova(exp_3group, covariate_cols = "covar"))

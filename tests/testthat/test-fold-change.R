@@ -2,7 +2,8 @@ test_that("gly_fold_change works with basic 2-group comparison", {
   # Use test_gp_exp and filter to 2 groups
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
-    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) |>
+    as_test_se() # Use smaller subset for faster testing
 
   # Run fold change calculation with add_info = FALSE for basic test
   result <- suppressMessages(gly_fold_change(exp_2group, add_info = FALSE))
@@ -18,7 +19,7 @@ test_that("gly_fold_change works with basic 2-group comparison", {
   # Check that all variables are included
   expect_setequal(
     result$tidy_result$variable,
-    glyexp::get_var_info(exp_2group)$variable
+    rownames(exp_2group)
   )
 
   # Test with add_info = TRUE (default)

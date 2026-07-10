@@ -7,7 +7,8 @@
 gly_pca(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
+\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
+an expression matrix and sample information.}
 
 \item{center}{A logical indicating whether to center the data. Default is TRUE.}
 

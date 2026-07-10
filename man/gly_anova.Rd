@@ -7,7 +7,8 @@
 gly_anova(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, ...)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
+\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
+an expression matrix and sample information.}
 
 \item{group_col}{A character string specifying the column name of the grouping variable
 in the sample information. Default is \code{"group"}.}

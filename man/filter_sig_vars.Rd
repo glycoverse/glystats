@@ -81,7 +81,8 @@ filter_sig_vars(
 )
 }
 \arguments{
-\item{exp}{An \code{\link[glyexp:experiment]{glyexp::experiment()}}. Please use the same experiment used to generate the DEA result.}
+\item{exp}{A \code{\link[glyexp:experiment]{glyexp::experiment()}} or \code{SummarizedExperiment} object. Use the
+same object used to generate the DEA result.}
 
 \item{res}{A glystats result object from a glystats DEA function.}
 
@@ -107,7 +108,7 @@ If not provided, filtering will be performed on the main test results for \code{
 and variables will be kept if they are significant in any comparison for \code{\link[=gly_limma]{gly_limma()}}.}
 }
 \value{
-An new \code{\link[glyexp:experiment]{glyexp::experiment()}} object.
+A filtered object of the same class as \code{exp}.
 }
 \description{
 Filtering the experiment to keep only significant variables is a common task.

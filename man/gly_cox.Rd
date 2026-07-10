@@ -14,7 +14,8 @@ gly_cox(
 )
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
+\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
+an expression matrix and sample information.}
 
 \item{time_col}{A character string specifying the column name in sample information
 that contains survival time. Default is "time".}

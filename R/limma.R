@@ -3,7 +3,8 @@
 #' Perform differential expression analysis using linear models with empirical Bayes
 #' moderation from the limma package. Supports both two-group and multi-group comparisons.
 #'
-#' @param exp A `glyexp_experiment` object containing expression data and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   expression data and sample information.
 #' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param covariate_cols A character vector specifying column names in sample information
@@ -77,7 +78,7 @@ gly_limma <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(group_col)
   if (length(covariate_cols) == 0) {
     covariate_cols <- NULL
@@ -99,8 +100,8 @@ gly_limma <- function(
   rlang::check_installed("limma")
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
-  sample_info <- glyexp::get_sample_info(exp)
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
 
   # Extract and validate groups (minimum 2 groups, no maximum limit)
   group_info <- .extract_and_validate_groups(
@@ -147,7 +148,7 @@ gly_limma <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

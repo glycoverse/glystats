@@ -4,7 +4,8 @@ test_that("gly_limma works with 2 groups", {
   # Use test_gp_exp and filter to 2 groups for limma
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
-    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) |>
+    as_test_se() # Use smaller subset for faster testing
 
   # Run DEA with limma
   result <- suppressMessages(gly_limma(exp_2group))

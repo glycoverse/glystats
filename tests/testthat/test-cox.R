@@ -27,7 +27,8 @@ test_that("gly_cox works with basic survival data", {
     sample_info = sample_info,
     var_info = var_info,
     exp_type = "others"
-  )
+  ) |>
+    as_test_se()
 
   # Test gly_cox function
   result <- suppressMessages(gly_cox(exp))
@@ -452,7 +453,7 @@ test_that("gly_cox works with test_gp_exp data", {
 
 test_that("gly_cox input validation works", {
   # Test with non-experiment object
-  expect_error(gly_cox("not_an_experiment"), "Assertion on 'exp' failed")
+  expect_error(gly_cox("not_an_experiment"), "SummarizedExperiment")
 
   # Test .analyze_cox with invalid inputs
   expr_mat <- matrix(rnorm(20), nrow = 4, ncol = 5)

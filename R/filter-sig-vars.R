@@ -5,7 +5,8 @@
 #' It supports results from all glystats DEA functions including
 #' [gly_anova()], [gly_ancova()], [gly_kruskal()], [gly_ttest()], [gly_wilcox()], and [gly_limma()].
 #'
-#' @param exp An [glyexp::experiment()]. Please use the same experiment used to generate the DEA result.
+#' @param exp A [glyexp::experiment()] or `SummarizedExperiment` object. Use the
+#'   same object used to generate the DEA result.
 #' @param res A glystats result object from a glystats DEA function.
 #' @param p_adj_cutoff The threshold for p-adjusted values. Default is 0.05.
 #' @param p_val_cutoff The threshold for p-values. We don't recommend using this. Default is NULL.
@@ -15,7 +16,7 @@
 #'   Default is `2` for glycoproteomics data and `NULL` for others.
 #' @param ... Additional arguments passed to methods. See the method-specific documentation for details.
 #'
-#' @returns An new [glyexp::experiment()] object.
+#' @returns A filtered object of the same class as `exp`.
 #'
 #' @examples
 #' library(glyexp)
@@ -226,7 +227,7 @@ filter_sig_vars.glystats_limma_res <- function(
   }
 
   sig_vars <- sig_df |> dplyr::pull("variable") |> unique()
-  glyexp::filter_var(exp, .data$variable %in% sig_vars)
+  .filter_variables(exp, sig_vars)
 }
 
 .filter_sig_vars_ttest <- function(
@@ -241,7 +242,7 @@ filter_sig_vars.glystats_limma_res <- function(
     .add_filters(p_adj_cutoff, p_val_cutoff, fc_cutoff) |>
     dplyr::pull("variable") |>
     unique()
-  glyexp::filter_var(exp, .data$variable %in% sig_vars)
+  .filter_variables(exp, sig_vars)
 }
 
 .filter_sig_vars_limma <- function(
@@ -258,7 +259,7 @@ filter_sig_vars.glystats_limma_res <- function(
   }
   df <- .add_filters(df, p_adj_cutoff, p_val_cutoff, fc_cutoff)
   sig_vars <- df |> dplyr::pull("variable") |> unique()
-  glyexp::filter_var(exp, .data$variable %in% sig_vars)
+  .filter_variables(exp, sig_vars)
 }
 
 .add_filters <- function(df, p_adj_cutoff, p_val_cutoff, fc_cutoff) {
@@ -291,7 +292,7 @@ filter_sig_vars.glystats_limma_res <- function(
   comparison
 ) {
   # Type checking
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_number(p_adj_cutoff, lower = 0, upper = 1, null.ok = TRUE)
   checkmate::assert_number(p_val_cutoff, lower = 0, upper = 1, null.ok = TRUE)
   checkmate::assert_number(fc_cutoff, lower = 1, null.ok = TRUE)
@@ -422,7 +423,7 @@ filter_sig_vars.glystats_limma_res <- function(
   if (!is.null(user_provided)) {
     return(user_provided)
   }
-  if (glyexp::get_exp_type(exp) == "glycoproteomics") {
+  if (identical(.get_exp_type(exp), "glycoproteomics")) {
     return(2)
   }
   NULL

@@ -2,7 +2,8 @@ test_that("gly_kmeans works with basic parameters", {
   # Use a subset of test data for faster testing
   exp_subset <- test_gp_exp |>
     glyexp::slice_sample_var(n = 10) |>
-    glyexp::slice_sample_obs(n = 8)
+    glyexp::slice_sample_obs(n = 8) |>
+    as_test_se()
 
   result <- suppressMessages(gly_kmeans(exp_subset))
 

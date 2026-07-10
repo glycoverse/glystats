@@ -4,7 +4,8 @@
 #' The function calculates correlation coefficients and p-values for all pairs,
 #' with optional multiple testing correction.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param on A character string specifying what to correlate. Either "variable" (default) to correlate
 #'   variables/features, or "sample" to correlate samples/observations.
 #' @param method A character string indicating which correlation coefficient is to be computed.
@@ -51,7 +52,7 @@ gly_cor <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_choice(on, c("variable", "sample"))
   checkmate::assert_choice(method, c("pearson", "spearman"))
   checkmate::assert_choice(
@@ -61,13 +62,13 @@ gly_cor <- function(
   )
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
+  expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
   result <- .analyze_cor(expr_mat, on, method, p_adj_method, ...)
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

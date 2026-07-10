@@ -7,7 +7,8 @@
 gly_cor(exp, on = "variable", method = "pearson", p_adj_method = "BH", ...)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
+\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
+an expression matrix and sample information.}
 
 \item{on}{A character string specifying what to correlate. Either "variable" (default) to correlate
 variables/features, or "sample" to correlate samples/observations.}

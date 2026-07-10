@@ -2,7 +2,8 @@ test_that("gly_ttest works with t-test method", {
   # Use test_gp_exp and filter to 2 groups for t-test
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("C", "H")) |>
-    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) |>
+    as_test_se() # Use smaller subset for faster testing
 
   # Run DEA with t-test
   result <- suppressMessages(gly_ttest(exp_2group))
@@ -49,7 +50,8 @@ test_that("gly_wilcox works with wilcoxon method", {
   # Use test_gp_exp and filter to 2 groups for wilcoxon test
   exp_2group <- test_gp_exp |>
     glyexp::filter_obs(group %in% c("M", "Y")) |>
-    glyexp::slice_sample_var(n = 10) # Use smaller subset for faster testing
+    glyexp::slice_sample_var(n = 10) |>
+    as_test_se() # Use smaller subset for faster testing
 
   # Run DEA with wilcoxon test
   result <- suppressMessages(suppressWarnings(gly_wilcox(exp_2group)))

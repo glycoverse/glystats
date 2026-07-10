@@ -4,7 +4,8 @@
 #' The function uses `stats::kmeans()` to perform clustering and provides
 #' tidy results with cluster assignments.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param on A character string specifying what to cluster. Either "variable" (default) to cluster
 #'   variables/features, or "sample" to cluster samples/observations.
 #' @param centers Either the number of clusters (integer) or a set of initial cluster centers.
@@ -47,7 +48,7 @@ gly_kmeans <- function(
   ...
 ) {
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_choice(on, c("variable", "sample"))
   checkmate::assert(
     checkmate::check_integerish(centers, lower = 1, len = 1),
@@ -57,7 +58,7 @@ gly_kmeans <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
+  expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
   result <- .analyze_kmeans(expr_mat, on, centers, scale, ...)
@@ -68,7 +69,7 @@ gly_kmeans <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

@@ -1,5 +1,9 @@
 # glystats (development version)
 
+## New features
+
+* All `gly_*()` analysis functions and `filter_sig_vars()` now accept `SummarizedExperiment` objects in addition to `glyexp::experiment()` objects.
+
 ## Breaking changes
 
 * All `gly_*_()` matrix and vector interfaces are removed. Pass a `glyexp::experiment()` to the corresponding `gly_*()` function instead. (#12)

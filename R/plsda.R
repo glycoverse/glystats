@@ -3,7 +3,8 @@
 #' Perform partial least squares discriminant analysis on the expression data.
 #' The function uses `ropls::opls()` to perform PLS-DA and returns tidy results.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param ncomp An integer indicating the number of components to include. Default is 2.
@@ -53,15 +54,15 @@ gly_plsda <- function(
   rlang::check_installed("ropls")
 
   # Validate inputs
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_string(group_col)
   checkmate::assert_int(ncomp, lower = 1)
   checkmate::assert_logical(scale, len = 1)
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
-  expr_mat <- glyexp::get_expr_mat(exp)
-  sample_info <- glyexp::get_sample_info(exp)
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
 
   # Extract and validate groups
   group_info <- .extract_and_validate_groups(
@@ -82,7 +83,7 @@ gly_plsda <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

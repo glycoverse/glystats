@@ -7,7 +7,8 @@
 gly_umap(exp, n_neighbors = 15, n_components = 2, add_info = TRUE, ...)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
+\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
+an expression matrix and sample information.}
 
 \item{n_neighbors}{Number of neighbors to consider for each point. Default is 15.}
 

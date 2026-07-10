@@ -3,7 +3,8 @@
 #' Perform t-SNE dimensionality reduction on the expression data.
 #' The function uses `Rtsne::Rtsne()` to perform t-SNE analysis.
 #'
-#' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
+#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
+#'   an expression matrix and sample information.
 #' @param dims Number of output dimensions. Default is 2.
 #' @param perplexity Perplexity parameter for t-SNE. Default is 30.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
@@ -24,10 +25,10 @@
 #' @seealso [Rtsne::Rtsne()]
 #' @export
 gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
-  checkmate::assert_class(exp, "glyexp_experiment")
+  .assert_data_container(exp)
   checkmate::assert_logical(add_info, len = 1)
 
-  expr_mat <- glyexp::get_expr_mat(exp)
+  expr_mat <- .get_expr_mat(exp)
   result <- .analyze_tsne(expr_mat, dims, perplexity, ...)
 
   result$tidy_result <- .process_results_add_info(
@@ -37,7 +38,7 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
   )
 
   # Add meta_data from experiment
-  result$meta_data <- glyexp::get_meta_data(exp)
+  result$meta_data <- .get_meta_data(exp)
 
   result
 }

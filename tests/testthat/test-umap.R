@@ -4,7 +4,7 @@ test_that("gly_umap works with default parameters", {
   skip_if_not_installed("uwot")
 
   # Use appropriate n_neighbors for small dataset
-  result <- gly_umap(test_gp_exp, n_neighbors = 3)
+  result <- gly_umap(test_gp_se, n_neighbors = 3)
 
   # Check basic structure
   expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
@@ -13,7 +13,7 @@ test_that("gly_umap works with default parameters", {
 
   # Check tidy_result structure
   expect_s3_class(result$tidy_result, "tbl_df")
-  expect_equal(nrow(result$tidy_result), nrow(test_gp_exp$sample_info))
+  expect_equal(nrow(result$tidy_result), ncol(test_gp_se))
   expect_true("umap1" %in% names(result$tidy_result))
   expect_true("umap2" %in% names(result$tidy_result))
   expect_true("sample" %in% names(result$tidy_result))
@@ -28,7 +28,7 @@ test_that("gly_umap works with default parameters", {
 
   # Check raw_result
   expect_true(is.matrix(result$raw_result))
-  expect_equal(nrow(result$raw_result), nrow(test_gp_exp$sample_info))
+  expect_equal(nrow(result$raw_result), ncol(test_gp_se))
   expect_equal(ncol(result$raw_result), 2)
 })
 
@@ -36,24 +36,24 @@ test_that("gly_umap works with custom parameters", {
   skip_if_not_installed("uwot")
 
   result <- gly_umap(
-    test_gp_exp,
+    test_gp_se,
     n_neighbors = 2,
     min_dist = 0.01,
     n_epochs = 50
   )
 
   expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
-  expect_equal(nrow(result$tidy_result), nrow(test_gp_exp$sample_info))
+  expect_equal(nrow(result$tidy_result), ncol(test_gp_se))
   expect_true(all(c("umap1", "umap2", "sample") %in% names(result$tidy_result)))
 })
 
 test_that("gly_umap works with more than 2 components", {
   skip_if_not_installed("uwot")
 
-  result <- gly_umap(test_gp_exp, n_neighbors = 3, n_components = 3)
+  result <- gly_umap(test_gp_se, n_neighbors = 3, n_components = 3)
 
   expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
-  expect_equal(nrow(result$tidy_result), nrow(test_gp_exp$sample_info))
+  expect_equal(nrow(result$tidy_result), ncol(test_gp_se))
   expect_true(all(
     c("umap1", "umap2", "umap3", "sample") %in% names(result$tidy_result)
   ))
@@ -70,12 +70,12 @@ test_that("gly_umap works with more than 2 components", {
 test_that("gly_umap has consistent sample names", {
   skip_if_not_installed("uwot")
 
-  result <- gly_umap(test_gp_exp, n_neighbors = 3)
+  result <- gly_umap(test_gp_se, n_neighbors = 3)
 
   # Should have same sample names as input expression matrix
   expect_equal(
     sort(result$tidy_result$sample),
-    sort(colnames(test_gp_exp$expr_mat))
+    sort(colnames(test_gp_se))
   )
 })
 
