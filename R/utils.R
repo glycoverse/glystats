@@ -37,10 +37,7 @@
 #' @noRd
 .get_sample_info <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(tibble::as_tibble(
-      SummarizedExperiment::colData(exp),
-      rownames = "sample"
-    ))
+    return(.as_info_tibble(SummarizedExperiment::colData(exp), "sample"))
   }
   glyexp::get_sample_info(exp)
 }
@@ -53,12 +50,25 @@
 #' @noRd
 .get_var_info <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(tibble::as_tibble(
-      SummarizedExperiment::rowData(exp),
-      rownames = "variable"
-    ))
+    return(.as_info_tibble(SummarizedExperiment::rowData(exp), "variable"))
   }
   glyexp::get_var_info(exp)
+}
+
+#' Convert row or column data to a tibble with an identifier
+#'
+#' @param info A `DataFrame` containing row or column metadata.
+#' @param id The identifier column name to use when `info` does not already
+#'   contain it.
+#'
+#' @returns A tibble that preserves an existing identifier column or adds row
+#'   names under `id`.
+#' @noRd
+.as_info_tibble <- function(info, id) {
+  if (id %in% colnames(info)) {
+    return(tibble::as_tibble(info))
+  }
+  tibble::as_tibble(info, rownames = id)
 }
 
 #' Extract metadata from a glystats data container
