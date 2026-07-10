@@ -156,7 +156,7 @@ test_that("gly_roc assigns NA for failed variables", {
   expect_true(all(is.na(coords_values)))
 })
 
-test_that("gly_roc_ works correctly", {
+test_that(".analyze_roc works correctly", {
   skip_if_not_installed("pROC")
 
   # Create test data
@@ -168,10 +168,10 @@ test_that("gly_roc_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_roc_(expr_mat, groups, pos_class = "B")
+    result <- .analyze_roc(expr_mat, groups, pos_class = "B")
   })
 
-  # Verify results - gly_roc_ returns only tidy_result and raw_result (no meta_data)
+  # Verify results - .analyze_roc returns only tidy_result and raw_result (no meta_data)
   expect_s3_class(result, "glystats_roc_res")
   expect_type(result, "list")
   expect_setequal(names(result), c("tidy_result", "raw_result"))

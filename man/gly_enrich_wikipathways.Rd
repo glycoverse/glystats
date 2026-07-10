@@ -2,7 +2,6 @@
 % Please edit documentation in R/enrich.R
 \name{gly_enrich_wikipathways}
 \alias{gly_enrich_wikipathways}
-\alias{gly_enrich_wikipathways_}
 \title{WikiPathways over-representation analysis (ORA)}
 \usage{
 gly_enrich_wikipathways(
@@ -15,23 +14,12 @@ gly_enrich_wikipathways(
   p_cutoff = 0.05,
   q_cutoff = 0.2
 )
-
-gly_enrich_wikipathways_(
-  proteins,
-  organism = "Homo sapiens",
-  orgdb = "org.Hs.eg.db",
-  universe = NULL,
-  p_adj_method = "BH",
-  p_cutoff = 0.05,
-  q_cutoff = 0.2
-)
 }
 \arguments{
-\item{exp}{(Only for \code{\link[=gly_enrich_wikipathways]{gly_enrich_wikipathways()}}) A \code{glyexp::experiment()} object.}
+\item{exp}{A \code{glyexp::experiment()} object.}
 
 \item{add_info}{A logical value. This parameter is included for API consistency but has no effect
-since enrichment results do not contain variable or sample columns.
-Only applicable to top-level APIs.}
+since enrichment results do not contain variable or sample columns.}
 
 \item{organism}{Passed to \code{organism} of \code{\link[clusterProfiler:enrichWP]{clusterProfiler::enrichWP()}}.
 Species name (e.g., "Homo sapiens", "Mus musculus", "Rattus norvegicus"). Defaults to "Homo sapiens".}
@@ -39,19 +27,13 @@ Species name (e.g., "Homo sapiens", "Mus musculus", "Rattus norvegicus"). Defaul
 \item{orgdb}{Passed to \code{OrgDb} of \code{\link[clusterProfiler:bitr]{clusterProfiler::bitr()}}.
 Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".}
 
-\item{universe}{Background genes. If a character vector, it is expected to contain UniProt accession IDs;
-these will be converted to Entrez Gene IDs and then passed to \code{universe} of \code{\link[clusterProfiler:enrichWP]{clusterProfiler::enrichWP()}}.
-You can also provide a \code{\link[glyexp:experiment]{glyexp::experiment()}} object with "glycoproteomics" type.
-In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
-and then passed to \code{universe} of \code{\link[clusterProfiler:enrichWP]{clusterProfiler::enrichWP()}}.}
+\item{universe}{A \code{glyexp::experiment()} defining the background proteins, or \code{NULL} to use the default background.}
 
 \item{p_adj_method}{Passed to \code{pAdjustMethod} of \code{\link[clusterProfiler:enrichWP]{clusterProfiler::enrichWP()}}.}
 
 \item{p_cutoff}{Passed to \code{pvalueCutoff} of \code{\link[clusterProfiler:enrichWP]{clusterProfiler::enrichWP()}}.}
 
 \item{q_cutoff}{Passed to \code{qvalueCutoff} of \code{\link[clusterProfiler:enrichWP]{clusterProfiler::enrichWP()}}.}
-
-\item{proteins}{(Only for \code{\link[=gly_enrich_wikipathways_]{gly_enrich_wikipathways_()}}) A character vector of UniProt accession IDs.}
 }
 \value{
 A list with three elements:
@@ -69,7 +51,7 @@ A list with three elements:
 \item \code{count}: Number of genes in the term
 }
 \item \code{raw_result}: The raw clusterProfiler enrichResult object
-\item \code{meta_data} (only for \code{\link[=gly_enrich_wikipathways]{gly_enrich_wikipathways()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_wikipathways_ora_res} and \code{glystats_res}.
 }
 }
@@ -83,7 +65,6 @@ Perform WikiPathways ORA for protein UniProt accessions using \code{\link[cluste
 \itemize{
 \item \code{gly_enrich_wikipathways()} accepts a \code{\link[glyexp:experiment]{glyexp::experiment()}} and extracts protein information
 from the "protein" column in the variable information tibble.
-\item \code{gly_enrich_wikipathways_()} accepts a character vector of UniProt IDs.
 }
 
 As \code{\link[clusterProfiler:enrichWP]{clusterProfiler::enrichWP()}} only accepts Entrez IDs,

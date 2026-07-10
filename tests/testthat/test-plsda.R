@@ -96,7 +96,7 @@ test_that("gly_plsda validates inputs", {
   )
 })
 
-test_that("gly_plsda_ works correctly", {
+test_that(".analyze_plsda works correctly", {
   skip_if_not_installed("ropls")
 
   # Create test data
@@ -110,7 +110,7 @@ test_that("gly_plsda_ works correctly", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        result <- gly_plsda_(expr_mat, groups)
+        result <- .analyze_plsda(expr_mat, groups)
       },
       type = "output"
     )

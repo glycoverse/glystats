@@ -6,28 +6,18 @@
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_anova_()]) A numeric matrix with variables as rows and samples as columns.
-#' @param groups (Only for [gly_anova_()]) A factor or character vector specifying group membership for each sample.
-#'   Must have at least 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col (Only for [gly_anova()]) A character string specifying the column name of the grouping variable
+#' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#'  Only applicable to `gly_anova()`.
 #' @param ... Additional arguments passed to `stats::aov()`.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
-#'
-#' `gly_anova()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_anova_()` is the underlying API that works with matrices and factor vectors directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' For any variable failed to fit a `stats::aov()` model,
 #' NAs will be assigned to the results in both main test and post-hoc test.
@@ -61,7 +51,7 @@
 #'     - `post_hoc_test`: A list of raw `TukeyHSD` objects. Post-hoc
 #'       comparison labels follow the package direction, i.e.
 #'       `test_group - ref_group`.
-#'   - `meta_data` (only for [gly_anova()]): A list containing metadata from the input experiment.
+#'   - `meta_data`: A list containing metadata from the input experiment.
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
 #' @export
@@ -96,8 +86,8 @@ gly_anova <- function(
   )
   groups <- group_info$groups
 
-  # Call the underlying API
-  result <- gly_anova_(expr_mat, groups, p_adj_method, ...)
+  # Run the internal computation
+  result <- .analyze_anova(expr_mat, groups, p_adj_method, ...)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -108,9 +98,12 @@ gly_anova <- function(
   result
 }
 
-#' @rdname gly_anova
-#' @export
-gly_anova_ <- function(
+#' Run the internal computation for `gly_anova()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_anova <- function(
   expr_mat,
   groups,
   p_adj_method = "BH",
@@ -118,7 +111,6 @@ gly_anova_ <- function(
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(
     p_adj_method,
@@ -192,32 +184,20 @@ gly_anova_ <- function(
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_ancova_()]) A numeric matrix with variables as rows and samples as columns.
-#' @param groups (Only for [gly_ancova_()]) A factor or character vector specifying group membership for each sample.
-#'   Must have at least 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col (Only for [gly_ancova()]) A character string specifying the column name of the grouping variable
+#' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
-#' @param covariate_cols (Only for [gly_ancova()]) A character vector specifying column names in sample information
+#' @param covariate_cols A character vector specifying column names in sample information
 #'  to include as covariates. At least one covariate must be provided.
-#' @param covariates (Only for [gly_ancova_()]) A data frame, matrix, or vector of sample-level covariates.
-#'   At least one covariate must be provided.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#'  Only applicable to `gly_ancova()`.
 #' @param ... Additional arguments passed to `stats::aov()`.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. At least 2 groups and at least 1 covariate are required.
-#'
-#' `gly_ancova()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_ancova_()` is the underlying API that works with matrices, factor vectors, and covariate
-#' data directly, providing more flexibility for users who don't use the glyexp package.
 #'
 #' For any variable failed to fit a `stats::aov()` model,
 #' NAs will be assigned to the results in both main test and post-hoc test.
@@ -301,8 +281,8 @@ gly_ancova <- function(
     cli::cli_abort("covariate_cols must be provided for ANCOVA.")
   }
 
-  # Call the underlying API
-  result <- gly_ancova_(expr_mat, groups, covariates, p_adj_method, ...)
+  # Run the internal computation
+  result <- .analyze_ancova(expr_mat, groups, covariates, p_adj_method, ...)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -311,9 +291,12 @@ gly_ancova <- function(
   result
 }
 
-#' @rdname gly_ancova
-#' @export
-gly_ancova_ <- function(
+#' Run the internal computation for `gly_ancova()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_ancova <- function(
   expr_mat,
   groups,
   covariates,
@@ -325,7 +308,6 @@ gly_ancova_ <- function(
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(
     p_adj_method,
@@ -427,17 +409,13 @@ gly_ancova_ <- function(
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_kruskal_()]) A numeric matrix with variables as rows and samples as columns.
-#' @param groups (Only for [gly_kruskal_()]) A factor or character vector specifying group membership for each sample.
-#'   Must have at least 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col (Only for [gly_kruskal()]) A character string specifying the column name of the grouping variable
+#' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#'  Only applicable to `gly_kruskal()`.
 #' @param ... Additional arguments passed to `stats::kruskal.test()`.
 #'
 #' @section Required packages:
@@ -446,12 +424,6 @@ gly_ancova_ <- function(
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
-#'
-#' `gly_kruskal()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_kruskal_()` is the underlying API that works with matrices and factor vectors directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' For any variable failed to fit a `stats::kruskal.test()` model,
 #' NAs will be assigned to the results in both main test and post-hoc test.
@@ -521,8 +493,8 @@ gly_kruskal <- function(
   )
   groups <- group_info$groups
 
-  # Call the underlying API
-  result <- gly_kruskal_(expr_mat, groups, p_adj_method, ...)
+  # Run the internal computation
+  result <- .analyze_kruskal(expr_mat, groups, p_adj_method, ...)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -533,9 +505,12 @@ gly_kruskal <- function(
   result
 }
 
-#' @rdname gly_kruskal
-#' @export
-gly_kruskal_ <- function(
+#' Run the internal computation for `gly_kruskal()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_kruskal <- function(
   expr_mat,
   groups,
   p_adj_method = "BH",
@@ -546,7 +521,6 @@ gly_kruskal_ <- function(
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(
     p_adj_method,

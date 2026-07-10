@@ -4,19 +4,15 @@
 #' and extract p-values and hazard ratios from it.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_cox_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param time_col A character string specifying the column name in sample information
 #'   that contains survival time. Default is "time".
 #' @param event_col A character string specifying the column name in sample information
 #'   that contains event indicator (1 for event, 0 for censoring). Default is "event".
-#' @param time A numeric vector specifying the survival time for each sample.
-#' @param event A numeric vector specifying the event indicator for each sample (1 for event, 0 for censoring).
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'   See `p.adjust.methods` for available methods. Default is "BH".
 #'   If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'   will be added to the result tibble. If FALSE, only the Cox model results are returned.
-#'   Only applicable to `gly_cox()`.
 #' @param ... Additional arguments passed to `survival::coxph()`.
 #'
 #' @details
@@ -38,7 +34,7 @@
 #'    - `hr`: Hazard ratio (exp(coefficient))
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: A list of raw `coxph` model objects.
-#'  - `meta_data` (only for [gly_cox()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #'
 #' @seealso [survival::coxph()], [survival::Surv()]
 #' @export
@@ -63,8 +59,8 @@ gly_cox <- function(
   time <- sample_info[[time_col]]
   event <- sample_info[[event_col]]
 
-  # Call the underlying API
-  result <- gly_cox_(expr_mat, time, event, p_adj_method, ...)
+  # Run the internal computation
+  result <- .analyze_cox(expr_mat, time, event, p_adj_method, ...)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -77,9 +73,12 @@ gly_cox <- function(
   result
 }
 
-#' @rdname gly_cox
-#' @export
-gly_cox_ <- function(
+#' Run the internal computation for `gly_cox()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_cox <- function(
   expr_mat,
   time,
   event,
@@ -123,7 +122,7 @@ gly_cox_ <- function(
   }
 
   # Extract results and convert to tibble
-  tidy_result <- .gly_cox_tibblify(cox_models, p_adj_method)
+  tidy_result <- .cox_tibblify(cox_models, p_adj_method)
 
   # Return list with both tidy and raw results
   structure(
@@ -135,7 +134,7 @@ gly_cox_ <- function(
   )
 }
 
-.gly_cox_tibblify <- function(cox_models, p_adj_method) {
+.cox_tibblify <- function(cox_models, p_adj_method) {
   # Extract results and convert to tibble
   result_df <- tibble::tibble(
     variable = names(cox_models),

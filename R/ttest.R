@@ -5,10 +5,7 @@
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_ttest_()]) A numeric matrix with variables as rows and samples as columns.
-#' @param groups (Only for [gly_ttest_()]) A factor or character vector specifying group membership for each sample.
-#'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col (Only for [gly_ttest()]) A character string specifying the column name of the grouping variable
+#' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
@@ -17,18 +14,11 @@
 #'  If NULL (default), the first level of the group factor is used as the reference.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#'  Only applicable to `gly_ttest()`.
 #' @param ... Additional arguments passed to `stats::t.test()`.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
-#'
-#' `gly_ttest()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_ttest_()` is the underlying API that works with matrices and factor vectors directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @returns A list with three elements:
 #' - `tidy_result`: A tibble with t-test results containing the following columns:
@@ -47,7 +37,7 @@
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #' - `raw_result`: A list of `t.test` model objects
-#' - `meta_data` (only for [gly_ttest()]): A list containing metadata from the input experiment
+#' - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_ttest_res` and `glystats_res`.
 #' @seealso [stats::t.test()]
 #' @export
@@ -84,8 +74,8 @@ gly_ttest <- function(
   groups <- group_info$groups
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
-  # Call the underlying API
-  result <- gly_ttest_(expr_mat, groups, p_adj_method, ref_group, ...)
+  # Run the internal computation
+  result <- .analyze_ttest(expr_mat, groups, p_adj_method, ref_group, ...)
 
   # Process results with add_info logic
   result$tidy_result <- .process_results_add_info(
@@ -100,9 +90,12 @@ gly_ttest <- function(
   result
 }
 
-#' @rdname gly_ttest
-#' @export
-gly_ttest_ <- function(
+#' Run the internal computation for `gly_ttest()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_ttest <- function(
   expr_mat,
   groups,
   p_adj_method = "BH",
@@ -111,7 +104,6 @@ gly_ttest_ <- function(
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(
     p_adj_method,
@@ -147,10 +139,7 @@ gly_ttest_ <- function(
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_wilcox_()]) A numeric matrix with variables as rows and samples as columns.
-#' @param groups (Only for [gly_wilcox_()]) A factor or character vector specifying group membership for each sample.
-#'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col (Only for [gly_wilcox()]) A character string specifying the column name of the grouping variable
+#' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
 #'  See `p.adjust.methods` for available methods. Default is "BH".
@@ -159,18 +148,11 @@ gly_ttest_ <- function(
 #'  If NULL (default), the first level of the group factor is used as the reference.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#'  Only applicable to `gly_wilcox()`.
 #' @param ... Additional arguments passed to `stats::wilcox.test()`.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
-#'
-#' `gly_wilcox()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_wilcox_()` is the underlying API that works with matrices and factor vectors directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @returns
 #' A list with three elements:
@@ -185,7 +167,7 @@ gly_ttest_ <- function(
 #'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #'   Additional columns from experiment metadata may be included if add_info = TRUE.
 #' - `raw_result`: A list of `wilcox.test` model objects
-#' - `meta_data` (only for [gly_wilcox()]): A list containing metadata from the input experiment
+#' - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_wilcox_res` and `glystats_res`.
 #'
 #' @seealso [stats::wilcox.test()]
@@ -228,8 +210,8 @@ gly_wilcox <- function(
   groups <- group_info$groups
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
-  # Call the underlying API
-  result <- gly_wilcox_(expr_mat, groups, p_adj_method, ref_group, ...)
+  # Run the internal computation
+  result <- .analyze_wilcox(expr_mat, groups, p_adj_method, ref_group, ...)
 
   # Process results with add_info logic
   result$tidy_result <- .process_results_add_info(
@@ -244,9 +226,12 @@ gly_wilcox <- function(
   result
 }
 
-#' @rdname gly_wilcox
-#' @export
-gly_wilcox_ <- function(
+#' Run the internal computation for `gly_wilcox()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_wilcox <- function(
   expr_mat,
   groups,
   p_adj_method = "BH",
@@ -255,7 +240,6 @@ gly_wilcox_ <- function(
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(
     p_adj_method,

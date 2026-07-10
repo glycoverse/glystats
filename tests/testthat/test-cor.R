@@ -155,7 +155,7 @@ test_that("gly_cor produces consistent results", {
   expect_equal(result1$tidy_result$p_adj, result2$tidy_result$p_adj)
 })
 
-test_that("gly_cor_ works correctly", {
+test_that(".analyze_cor works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -164,7 +164,7 @@ test_that("gly_cor_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_cor_(expr_mat)
+    result <- .analyze_cor(expr_mat)
   })
 
   # Verify results

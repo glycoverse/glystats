@@ -256,7 +256,7 @@ test_that("gly_hclust input validation works", {
   expect_error(gly_hclust(exp_subset, add_info = "yes"))
 })
 
-test_that("gly_hclust_ works correctly", {
+test_that(".analyze_hclust works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -265,7 +265,7 @@ test_that("gly_hclust_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_hclust_(expr_mat)
+    result <- .analyze_hclust(expr_mat)
   })
 
   # Verify results

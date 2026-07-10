@@ -2,17 +2,14 @@
 % Please edit documentation in R/roc.R
 \name{gly_roc}
 \alias{gly_roc}
-\alias{gly_roc_}
 \title{ROC Analysis for Glycomics and Glycoproteomics Data}
 \usage{
 gly_roc(exp, group_col = "group", pos_class = NULL, add_info = TRUE)
-
-gly_roc_(expr_mat, groups, pos_class = NULL)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{group_col}{(Only for \code{\link[=gly_roc]{gly_roc()}}) A character string specifying the column name of the grouping variable
+\item{group_col}{A character string specifying the column name of the grouping variable
 in the sample information. Default is \code{"group"}. The grouping variable must have
 exactly 2 levels for binary classification.}
 
@@ -21,13 +18,7 @@ the positive class. If \code{NULL} (default), the second level (alphabetically) 
 used as the positive class.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
-Only applicable to \code{gly_roc()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_roc_]{gly_roc_()}}) A numeric matrix with variables as rows and samples as columns.}
-
-\item{groups}{(Only for \code{\link[=gly_roc_]{gly_roc_()}}) A factor or character vector specifying group membership for each sample.
-Must have exactly 2 levels. Character vectors will be automatically converted to factors.}
+will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.}
 }
 \value{
 A list with three elements:
@@ -50,7 +41,7 @@ A list with three elements:
 }
 }
 \item \code{raw_result}: A list of \code{pROC} objects
-\item \code{meta_data} (only for \code{\link[=gly_roc]{gly_roc()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 The list has classes \code{glystats_roc_res} and \code{glystats_res}.
 }
 }
@@ -66,12 +57,6 @@ and the binary group labels as response.
 
 The function requires exactly 2 groups in the specified grouping variable. If more than
 2 groups are present, an error will be thrown.
-
-\code{gly_roc()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_roc_()} is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.
 
 \strong{Underlying Function:}
 \itemize{

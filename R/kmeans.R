@@ -5,7 +5,6 @@
 #' tidy results with cluster assignments.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_kmeans_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param on A character string specifying what to cluster. Either "variable" (default) to cluster
 #'   variables/features, or "sample" to cluster samples/observations.
 #' @param centers Either the number of clusters (integer) or a set of initial cluster centers.
@@ -13,7 +12,6 @@
 #' @param scale A logical indicating whether to scale the data before clustering. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
-#'   Only applicable to `gly_kmeans()`.
 #' @param ... Additional arguments passed to `stats::kmeans()`.
 #'
 #' @section Required packages:
@@ -24,12 +22,6 @@
 #' clustering. When `on = "variable"` (default), variables are clustered based on their
 #' expression patterns across samples. When `on = "sample"`, samples are clustered based
 #' on their expression profiles across variables.
-#'
-#' `gly_kmeans()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_kmeans_()` is the underlying API that works with matrices directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' **Data Preparation:**
 #' Data is log2-transformed and optionally scaled before clustering.
@@ -42,7 +34,7 @@
 #'    - `variable` or `sample`: Variable or sample name (depending on `on` parameter)
 #'    - `cluster`: Cluster assignment
 #'  - `raw_result`: The raw kmeans object from `stats::kmeans()`.
-#'  - `meta_data` (only for [gly_kmeans()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #'
 #' @seealso [stats::kmeans()]
 #' @export
@@ -67,8 +59,8 @@ gly_kmeans <- function(
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
 
-  # Call the underlying API
-  result <- gly_kmeans_(expr_mat, on, centers, scale, ...)
+  # Run the internal computation
+  result <- .analyze_kmeans(expr_mat, on, centers, scale, ...)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -81,9 +73,12 @@ gly_kmeans <- function(
   result
 }
 
-#' @rdname gly_kmeans
-#' @export
-gly_kmeans_ <- function(
+#' Run the internal computation for `gly_kmeans()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_kmeans <- function(
   expr_mat,
   on = "variable",
   centers = 3,

@@ -2,7 +2,6 @@
 % Please edit documentation in R/hclust.R
 \name{gly_hclust}
 \alias{gly_hclust}
-\alias{gly_hclust_}
 \title{Hierarchical Clustering for Glycomics and Glycoproteomics Data}
 \usage{
 gly_hclust(
@@ -11,14 +10,6 @@ gly_hclust(
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
   add_info = TRUE,
-  ...
-)
-
-gly_hclust_(
-  expr_mat,
-  on = "variable",
-  k_values = c(2, 3, 4, 5),
-  scale = TRUE,
   ...
 )
 }
@@ -34,14 +25,11 @@ Default is c(2, 3, 4, 5). If NULL, no cluster assignments are returned.}
 \item{scale}{A logical indicating whether to scale the data before clustering. Default is TRUE.}
 
 \item{add_info}{A logical value. If TRUE (default), sample information from the experiment
-will be added to the result tibbles. If FALSE, only the clustering results are returned.
-Only applicable to \code{gly_hclust()}.}
+will be added to the result tibbles. If FALSE, only the clustering results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::dist()} and \code{stats::hclust()}.
 Note: if both functions need a \code{method} parameter, use \code{dist.method} for distance
 and \code{hclust.method} for clustering method.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_hclust_]{gly_hclust_()}}) A numeric matrix with variables as rows and samples as columns.}
 }
 \value{
 A list containing:
@@ -70,7 +58,7 @@ A list containing:
 }
 }
 \item \code{raw_result}: The raw hclust object from \code{stats::hclust()}
-\item \code{meta_data} (only for \code{\link[=gly_hclust]{gly_hclust()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 }
 }
 \description{
@@ -84,12 +72,6 @@ The function performs log2 transformation on the expression data (log2(x + 1e-6)
 clustering. When \code{on = "variable"} (default), variables are clustered based on their
 expression patterns across samples. When \code{on = "sample"}, samples are clustered based
 on their expression profiles across variables.
-
-\code{gly_hclust()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_hclust_()} is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
 
 \strong{Distance Calculation:}
 Distance is calculated using \code{stats::dist()} with the specified method.

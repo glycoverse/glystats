@@ -283,7 +283,7 @@ test_that("gly_oplsda handles different scaling options", {
   ))
 })
 
-test_that("gly_oplsda_ works correctly", {
+test_that(".analyze_oplsda works correctly", {
   skip_if_not_installed("ropls")
 
   exp <- exp_topliss_valid()
@@ -294,7 +294,7 @@ test_that("gly_oplsda_ works correctly", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        result <- gly_oplsda_(expr_mat, groups)
+        result <- .analyze_oplsda(expr_mat, groups)
       },
       type = "output"
     )

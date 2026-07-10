@@ -2,7 +2,6 @@
 % Please edit documentation in R/limma.R
 \name{gly_limma}
 \alias{gly_limma}
-\alias{gly_limma_}
 \title{Linear Models for Differential Expression Analysis using limma}
 \usage{
 gly_limma(
@@ -16,28 +15,17 @@ gly_limma(
   add_info = TRUE,
   ...
 )
-
-gly_limma_(
-  expr_mat,
-  groups,
-  p_adj_method = "BH",
-  ref_group = NULL,
-  contrasts = NULL,
-  covariates = NULL,
-  subjects = NULL,
-  ...
-)
 }
 \arguments{
 \item{exp}{A \code{glyexp_experiment} object containing expression data and sample information.}
 
-\item{group_col}{(Only for \code{\link[=gly_limma]{gly_limma()}}) A character string specifying the column name in sample information
+\item{group_col}{A character string specifying the column name in sample information
 that contains group labels. Default is "group".}
 
-\item{covariate_cols}{(Only for \code{\link[=gly_limma]{gly_limma()}}) A character vector specifying column names in sample information
+\item{covariate_cols}{A character vector specifying column names in sample information
 to include as covariates in the limma model. Default is NULL.}
 
-\item{subject_col}{(Only for \code{\link[=gly_limma]{gly_limma()}}) A character string specifying the column name in sample information
+\item{subject_col}{A character string specifying the column name in sample information
 that contains subject identifiers for paired comparisons. Default is NULL.}
 
 \item{p_adj_method}{A character string specifying the method for multiple testing correction.
@@ -56,25 +44,9 @@ Use the second format if group names contain hyphens.
 "group1" will be used as the reference group.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.
-Only applicable to \code{gly_limma()}.}
+will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_limma_]{gly_limma_()}}) A numeric matrix with variables as rows and samples as columns.}
-
-\item{groups}{(Only for \code{\link[=gly_limma_]{gly_limma_()}}) A factor or character vector specifying group membership for each sample.
-Must have at least 2 levels. Character vectors will be automatically converted to factors.
-If \code{contrasts} is not provided,
-the levels coming first in the factor will be used as the reference group.}
-
-\item{covariates}{(Only for \code{\link[=gly_limma_]{gly_limma_()}}) A data frame, matrix, or vector of sample-level covariates.
-Must have the same number of rows as \code{expr_mat} has columns. If row names are provided and
-match \code{colnames(expr_mat)}, they will be aligned automatically. Default is NULL.}
-
-\item{subjects}{(Only for \code{\link[=gly_limma_]{gly_limma_()}}) A vector or factor of subject identifiers for paired comparisons.
-Must have length equal to \code{ncol(expr_mat)}. If names or row names are provided and match
-\code{colnames(expr_mat)}, they will be aligned automatically. Default is NULL.}
 }
 \value{
 A list with three elements:
@@ -92,7 +64,7 @@ A list with three elements:
 \item \code{test_group}: Test group
 }
 \item \code{raw_result}: The raw limma fit object(s).
-\item \code{meta_data} (only for \code{\link[=gly_limma]{gly_limma()}}): A list containing metadata from the input experiment.
+\item \code{meta_data}: A list containing metadata from the input experiment.
 }
 }
 \description{
@@ -103,12 +75,6 @@ moderation from the limma package. Supports both two-group and multi-group compa
 The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. The analysis uses linear models with empirical Bayes moderation
 to improve statistical power, especially for small sample sizes.
-
-\code{gly_limma()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_limma_()} is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.
 
 For two or more groups, all pairwise comparisons are automatically generated
 (one contrast for two groups) and performed using contrast matrices unless

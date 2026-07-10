@@ -6,23 +6,9 @@
 #' "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
 #'
 #' @param exp A `glyexp::experiment()` object.
-#' @param expr_mat (Only for [gly_fold_change_()]) A numeric matrix with variables as rows and samples as columns.
-#' @param groups (Only for [gly_fold_change_()]) A factor or character vector specifying group membership for each sample.
-#'   Character vectors will be automatically converted to factors.
-#'   If two groups, the first level is the reference group.
-#'   If more than two groups, pairwise comparisons will be performed,
-#'   with levels coming first as reference groups.
-#' @param group_col (Only for [gly_fold_change()]) The column name of the group information in the sample information.
+#' @param group_col The column name of the group information in the sample information.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the fold change results are returned.
-#'  Only applicable to `gly_fold_change()`.
-#'
-#' @details
-#' `gly_fold_change()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_fold_change_()` is the underlying API that works with matrices and factor vectors directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @returns A list with three elements:
 #'  - `tidy_result`: A tibble with fold change results containing the following columns:
@@ -30,7 +16,7 @@
 #'    - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #'    If more than two groups, two additional columns `ref_group` and `test_group` will be added.
 #'  - `raw_result`: The raw result (same as tidy_result for this function)
-#'  - `meta_data` (only for [gly_fold_change()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' @export
 gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   checkmate::assert_class(exp, "glyexp_experiment")
@@ -38,8 +24,9 @@ gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract and validate groups using helper function
+  sample_info <- glyexp::get_sample_info(exp)
   group_info <- .extract_and_validate_groups(
-    sample_info = exp$sample_info,
+    sample_info = sample_info,
     group_col = group_col,
     min_count = 2,
     method = "fold_change",
@@ -47,10 +34,10 @@ gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   )
   groups <- group_info$groups
 
-  expr_mat <- exp$expr_mat
+  expr_mat <- glyexp::get_expr_mat(exp)
 
-  # Call the underlying API
-  tidy_result <- gly_fold_change_(expr_mat, groups)
+  # Run the internal computation
+  tidy_result <- .analyze_fold_change(expr_mat, groups)
 
   # Process results with add_info logic
   tidy_result <- .process_results_add_info(tidy_result, exp, add_info)
@@ -66,12 +53,14 @@ gly_fold_change <- function(exp, group_col = "group", add_info = TRUE) {
   result
 }
 
-#' @rdname gly_fold_change
-#' @export
-gly_fold_change_ <- function(expr_mat, groups) {
+#' Run the internal computation for `gly_fold_change()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_fold_change <- function(expr_mat, groups) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
   # Calculate fold change

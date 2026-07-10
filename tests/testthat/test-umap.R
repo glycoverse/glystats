@@ -85,7 +85,7 @@ test_that("gly_umap requires uwot package", {
   expect_true(any(grepl("uwot", deparse(body(gly_umap)))))
 })
 
-test_that("gly_umap_ works correctly", {
+test_that(".analyze_umap works correctly", {
   skip_if_not_installed("uwot")
 
   # Create test data
@@ -96,7 +96,7 @@ test_that("gly_umap_ works correctly", {
 
   # Test function execution with appropriate n_neighbors
   suppressMessages({
-    result <- gly_umap_(expr_mat, n_neighbors = 3, n_components = 2)
+    result <- .analyze_umap(expr_mat, n_neighbors = 3, n_components = 2)
   })
 
   # Verify results

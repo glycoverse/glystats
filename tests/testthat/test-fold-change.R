@@ -132,7 +132,7 @@ test_that("gly_fold_change handles edge cases", {
   expect_no_error(suppressMessages(gly_fold_change(exp_large)))
 })
 
-test_that("gly_fold_change_ works correctly", {
+test_that(".analyze_fold_change works correctly", {
   # Create test data
   set.seed(123)
   expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
@@ -142,38 +142,13 @@ test_that("gly_fold_change_ works correctly", {
 
   # Test function execution
   suppressMessages({
-    result <- gly_fold_change_(expr_mat, groups)
+    result <- .analyze_fold_change(expr_mat, groups)
   })
 
-  # Verify results - gly_fold_change_ returns a tibble directly
+  # Verify results - .analyze_fold_change returns a tibble directly
   expect_s3_class(result, "glystats_fc_res")
   expect_true(tibble::is_tibble(result))
   expect_setequal(colnames(result), c("variable", "log2fc"))
   expect_type(result$log2fc, "double")
   expect_equal(nrow(result), 10)
-})
-
-test_that("gly_fold_change_ accepts character groups", {
-  # Create test data
-  set.seed(123)
-  expr_mat <- matrix(abs(rnorm(100)) + 1, nrow = 10, ncol = 10)
-  rownames(expr_mat) <- paste0("var", 1:10)
-  colnames(expr_mat) <- paste0("sample", 1:10)
-  groups_char <- rep(c("A", "B"), each = 5) # character vector
-  groups_factor <- factor(groups_char) # factor vector
-
-  # Test with character groups
-  suppressMessages({
-    result_char <- gly_fold_change_(expr_mat, groups_char)
-  })
-
-  # Test with factor groups
-  suppressMessages({
-    result_factor <- gly_fold_change_(expr_mat, groups_factor)
-  })
-
-  # Results should be identical (gly_fold_change_ returns tibble directly)
-  expect_equal(result_char, result_factor)
-  expect_s3_class(result_char, "glystats_fc_res")
-  expect_true(tibble::is_tibble(result_char))
 })

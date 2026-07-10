@@ -2,29 +2,17 @@
 % Please edit documentation in R/fold-change.R
 \name{gly_fold_change}
 \alias{gly_fold_change}
-\alias{gly_fold_change_}
 \title{Calculate fold change}
 \usage{
 gly_fold_change(exp, group_col = "group", add_info = TRUE)
-
-gly_fold_change_(expr_mat, groups)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object.}
 
-\item{group_col}{(Only for \code{\link[=gly_fold_change]{gly_fold_change()}}) The column name of the group information in the sample information.}
+\item{group_col}{The column name of the group information in the sample information.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the fold change results are returned.
-Only applicable to \code{gly_fold_change()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_fold_change_]{gly_fold_change_()}}) A numeric matrix with variables as rows and samples as columns.}
-
-\item{groups}{(Only for \code{\link[=gly_fold_change_]{gly_fold_change_()}}) A factor or character vector specifying group membership for each sample.
-Character vectors will be automatically converted to factors.
-If two groups, the first level is the reference group.
-If more than two groups, pairwise comparisons will be performed,
-with levels coming first as reference groups.}
+will be added to the result tibble. If FALSE, only the fold change results are returned.}
 }
 \value{
 A list with three elements:
@@ -36,7 +24,7 @@ A list with three elements:
 If more than two groups, two additional columns \code{ref_group} and \code{test_group} will be added.
 }
 \item \code{raw_result}: The raw result (same as tidy_result for this function)
-\item \code{meta_data} (only for \code{\link[=gly_fold_change]{gly_fold_change()}}): A list containing metadata from the input experiment
+\item \code{meta_data}: A list containing metadata from the input experiment
 }
 }
 \description{
@@ -44,11 +32,4 @@ Calculate fold change for a given expression matrix and group information.
 It could only be used for 2-group analysis.
 When you run this function, you will see message about "Ref Group" and "Test Group".
 "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
-}
-\details{
-\code{gly_fold_change()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_fold_change_()} is the underlying API that works with matrices and factor vectors directly,
-providing more flexibility for users who don't use the glyexp package.
 }

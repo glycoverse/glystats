@@ -9,20 +9,13 @@
 #' Perform GO ORA for protein UniProt accessions using [clusterProfiler::enrichGO()].
 #' - `gly_enrich_go()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_go_()` accepts a character vector of UniProt IDs.
 #'
-#' @param exp (Only for [gly_enrich_go()]) A `glyexp::experiment()` object.
-#' @param proteins (Only for [gly_enrich_go_()]) A character vector of UniProt accession IDs.
+#' @param exp A `glyexp::experiment()` object.
 #' @param add_info A logical value. This parameter is included for API consistency but has no effect
 #'  since enrichment results do not contain variable or sample columns.
-#'  Only applicable to top-level APIs.
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::enrichGO()].
-#' @param keytype Passed to `keyType` of [clusterProfiler::enrichGO()].
 #' @param ont Passed to `ont` of [clusterProfiler::enrichGO()]. "BP", "MF", "CC", or "ALL". Defaults to "MF".
-#' @param universe Background genes. If a character vector, directly passed to `universe` of [clusterProfiler::enrichGO()].
-#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted and passed to
-#'   `universe` of [clusterProfiler::enrichGO()].
+#' @param universe A `glyexp::experiment()` defining the background proteins, or `NULL` to use the default background.
 #' @param p_adj_method Passed to `pAdjustMethod` of [clusterProfiler::enrichGO()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [clusterProfiler::enrichGO()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [clusterProfiler::enrichGO()].
@@ -44,7 +37,7 @@
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
-#'  - `meta_data` (only for [gly_enrich_go()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_go_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichGO()]
 #' @keywords internal
@@ -67,7 +60,7 @@ gly_enrich_go <- function(
   rlang::check_installed("clusterProfiler")
   checkmate::assert_logical(add_info, len = 1)
   proteins <- .extract_uniprot_from_exp(exp)
-  result <- gly_enrich_go_(
+  result <- .analyze_enrich_go(
     proteins,
     orgdb = orgdb,
     ont = ont,
@@ -83,9 +76,12 @@ gly_enrich_go <- function(
   result
 }
 
-#' @rdname gly_enrich_go
-#' @export
-gly_enrich_go_ <- function(
+#' Run the internal computation for `gly_enrich_go()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_enrich_go <- function(
   proteins,
   orgdb = "org.Hs.eg.db",
   keytype = "UNIPROT",
@@ -130,21 +126,13 @@ gly_enrich_go_ <- function(
 #' Perform KEGG ORA for protein UniProt accessions using [clusterProfiler::enrichKEGG()].
 #' - `gly_enrich_kegg()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_kegg_()` accepts a character vector of UniProt IDs.
 #'
-#' @param exp (Only for [gly_enrich_kegg()]) A `glyexp::experiment()` object.
-#' @param proteins (Only for [gly_enrich_kegg_()]) A character vector of UniProt accession IDs.
+#' @param exp A `glyexp::experiment()` object.
 #' @param add_info A logical value. This parameter is included for API consistency but has no effect
 #'  since enrichment results do not contain variable or sample columns.
-#'  Only applicable to top-level APIs.
 #' @param organism Passed to `organism` of [clusterProfiler::enrichKEGG()].
 #'   KEGG organism code (e.g., "hsa" for human, "mmu" for mouse). Defaults to "hsa".
-#' @param keytype Passed to `keyType` of [clusterProfiler::enrichKEGG()].
-#'   Defaults to "uniprot".
-#' @param universe Background genes. If a character vector, directly passed to `universe` of [clusterProfiler::enrichKEGG()].
-#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted and passed to
-#'   `universe` of [clusterProfiler::enrichKEGG()].
+#' @param universe A `glyexp::experiment()` defining the background proteins, or `NULL` to use the default background.
 #' @param p_adj_method Passed to `pAdjustMethod` of [clusterProfiler::enrichKEGG()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [clusterProfiler::enrichKEGG()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [clusterProfiler::enrichKEGG()].
@@ -165,7 +153,7 @@ gly_enrich_go_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
-#'  - `meta_data` (only for [gly_enrich_kegg()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_kegg_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichKEGG()]
 #' @keywords internal
@@ -187,7 +175,7 @@ gly_enrich_kegg <- function(
   rlang::check_installed("clusterProfiler")
   checkmate::assert_logical(add_info, len = 1)
   proteins <- .extract_uniprot_from_exp(exp)
-  result <- gly_enrich_kegg_(
+  result <- .analyze_enrich_kegg(
     proteins,
     organism = organism,
     universe = universe,
@@ -202,9 +190,12 @@ gly_enrich_kegg <- function(
   result
 }
 
-#' @rdname gly_enrich_kegg
-#' @export
-gly_enrich_kegg_ <- function(
+#' Run the internal computation for `gly_enrich_kegg()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_enrich_kegg <- function(
   proteins,
   keytype = "uniprot",
   organism = "hsa",
@@ -245,24 +236,18 @@ gly_enrich_kegg_ <- function(
 #' Perform Reactome pathway ORA for protein UniProt accessions using [ReactomePA::enrichPathway()].
 #' - `gly_enrich_reactome()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_reactome_()` accepts a character vector of UniProt IDs.
 #'
 #' As [ReactomePA::enrichPathway()] only accepts Entrez IDs,
 #' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
 #'
-#' @param exp (Only for [gly_enrich_reactome()]) A `glyexp::experiment()` object.
-#' @param proteins (Only for [gly_enrich_reactome_()]) A character vector of UniProt accession IDs.
+#' @param exp A `glyexp::experiment()` object.
 #' @param add_info A logical value. This parameter is included for API consistency but has no effect
 #'  since enrichment results do not contain variable or sample columns.
-#'  Only applicable to top-level APIs.
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
 #'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
 #' @param organism Passed to `organism` of [ReactomePA::enrichPathway()].
 #'   Species name (e.g., "human", "mouse", "rat"). Defaults to "human".
-#' @param universe Background genes. If a character vector, directly passed to `universe` of [ReactomePA::enrichPathway()].
-#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted and passed to
-#'   `universe` of [ReactomePA::enrichPathway()].
+#' @param universe A `glyexp::experiment()` defining the background proteins, or `NULL` to use the default background.
 #' @param p_adj_method Passed to `pAdjustMethod` of [ReactomePA::enrichPathway()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [ReactomePA::enrichPathway()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [ReactomePA::enrichPathway()].
@@ -285,7 +270,7 @@ gly_enrich_kegg_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw ReactomePA enrichPathway result object
-#'  - `meta_data` (only for [gly_enrich_reactome()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_reactome_ora_res` and `glystats_res`.
 #' @seealso [ReactomePA::enrichPathway()]
 #' @keywords internal
@@ -310,7 +295,7 @@ gly_enrich_reactome <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  result <- gly_enrich_reactome_(
+  result <- .analyze_enrich_reactome(
     proteins,
     orgdb = orgdb,
     organism = organism,
@@ -326,9 +311,12 @@ gly_enrich_reactome <- function(
   result
 }
 
-#' @rdname gly_enrich_reactome
-#' @export
-gly_enrich_reactome_ <- function(
+#' Run the internal computation for `gly_enrich_reactome()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_enrich_reactome <- function(
   proteins,
   orgdb = "org.Hs.eg.db",
   organism = "human",
@@ -377,25 +365,18 @@ gly_enrich_reactome_ <- function(
 #' Perform WikiPathways ORA for protein UniProt accessions using [clusterProfiler::enrichWP()].
 #' - `gly_enrich_wikipathways()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_wikipathways_()` accepts a character vector of UniProt IDs.
 #'
 #' As [clusterProfiler::enrichWP()] only accepts Entrez IDs,
 #' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
 #'
-#' @param exp (Only for [gly_enrich_wikipathways()]) A `glyexp::experiment()` object.
-#' @param proteins (Only for [gly_enrich_wikipathways_()]) A character vector of UniProt accession IDs.
+#' @param exp A `glyexp::experiment()` object.
 #' @param add_info A logical value. This parameter is included for API consistency but has no effect
 #'  since enrichment results do not contain variable or sample columns.
-#'  Only applicable to top-level APIs.
 #' @param organism Passed to `organism` of [clusterProfiler::enrichWP()].
 #'   Species name (e.g., "Homo sapiens", "Mus musculus", "Rattus norvegicus"). Defaults to "Homo sapiens".
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
 #'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
-#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
-#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [clusterProfiler::enrichWP()].
-#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
-#'   and then passed to `universe` of [clusterProfiler::enrichWP()].
+#' @param universe A `glyexp::experiment()` defining the background proteins, or `NULL` to use the default background.
 #' @param p_adj_method Passed to `pAdjustMethod` of [clusterProfiler::enrichWP()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [clusterProfiler::enrichWP()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [clusterProfiler::enrichWP()].
@@ -417,7 +398,7 @@ gly_enrich_reactome_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw clusterProfiler enrichResult object
-#'  - `meta_data` (only for [gly_enrich_wikipathways()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_wikipathways_ora_res` and `glystats_res`.
 #' @seealso [clusterProfiler::enrichWP()]
 #' @keywords internal
@@ -441,7 +422,7 @@ gly_enrich_wikipathways <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  result <- gly_enrich_wikipathways_(
+  result <- .analyze_enrich_wikipathways(
     proteins,
     organism = organism,
     orgdb = orgdb,
@@ -457,9 +438,12 @@ gly_enrich_wikipathways <- function(
   result
 }
 
-#' @rdname gly_enrich_wikipathways
-#' @export
-gly_enrich_wikipathways_ <- function(
+#' Run the internal computation for `gly_enrich_wikipathways()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_enrich_wikipathways <- function(
   proteins,
   organism = "Homo sapiens",
   orgdb = "org.Hs.eg.db",
@@ -505,16 +489,13 @@ gly_enrich_wikipathways_ <- function(
 #' Perform Disease Ontology ORA for protein UniProt accessions using [DOSE::enrichDO()].
 #' - `gly_enrich_do()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_do_()` accepts a character vector of UniProt IDs.
 #'
 #' As [DOSE::enrichDO()] only accepts Entrez IDs,
 #' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
 #'
-#' @param exp (Only for [gly_enrich_do()]) A `glyexp::experiment()` object.
-#' @param proteins (Only for [gly_enrich_do_()]) A character vector of UniProt accession IDs.
+#' @param exp A `glyexp::experiment()` object.
 #' @param add_info A logical value. This parameter is included for API consistency but has no effect
 #'  since enrichment results do not contain variable or sample columns.
-#'  Only applicable to top-level APIs.
 #' @param ont Passed to `ont` of [DOSE::enrichDO()].
 #'   Disease Ontology type. Options: `"HDO"` (Human Disease Ontology), `"HPO"` (Human Phenotype Ontology),
 #'   `"MPO"` (Mammalian Phenotype Ontology). Defaults to `"HDO"`.
@@ -522,11 +503,7 @@ gly_enrich_wikipathways_ <- function(
 #'   Organism code. `"hsa"` for human (Homo sapiens), `"mmu"` for mouse (Mus musculus). Defaults to `"hsa"`.
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
 #'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
-#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
-#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [DOSE::enrichDO()].
-#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
-#'   and then passed to `universe` of [DOSE::enrichDO()].
+#' @param universe A `glyexp::experiment()` defining the background proteins, or `NULL` to use the default background.
 #' @param p_adj_method Passed to `pAdjustMethod` of [DOSE::enrichDO()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [DOSE::enrichDO()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [DOSE::enrichDO()].
@@ -549,7 +526,7 @@ gly_enrich_wikipathways_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw DOSE enrichResult object
-#'  - `meta_data` (only for [gly_enrich_do()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_do_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichDO()]
 #' @keywords internal
@@ -575,7 +552,7 @@ gly_enrich_do <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  result <- gly_enrich_do_(
+  result <- .analyze_enrich_do(
     proteins,
     ont = ont,
     organism = organism,
@@ -592,9 +569,12 @@ gly_enrich_do <- function(
   result
 }
 
-#' @rdname gly_enrich_do
-#' @export
-gly_enrich_do_ <- function(
+#' Run the internal computation for `gly_enrich_do()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_enrich_do <- function(
   proteins,
   ont = "HDO",
   organism = "hsa",
@@ -644,23 +624,16 @@ gly_enrich_do_ <- function(
 #' Perform NCG ORA for protein UniProt accessions using [DOSE::enrichNCG()].
 #' - `gly_enrich_ncg()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_ncg_()` accepts a character vector of UniProt IDs.
 #'
 #' As [DOSE::enrichNCG()] only accepts Entrez IDs,
 #' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
 #'
-#' @param exp (Only for [gly_enrich_ncg()]) A `glyexp::experiment()` object.
-#' @param proteins (Only for [gly_enrich_ncg_()]) A character vector of UniProt accession IDs.
+#' @param exp A `glyexp::experiment()` object.
 #' @param add_info A logical value. This parameter is included for API consistency but has no effect
 #'  since enrichment results do not contain variable or sample columns.
-#'  Only applicable to top-level APIs.
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
 #'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
-#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
-#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [DOSE::enrichNCG()].
-#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
-#'   and then passed to `universe` of [DOSE::enrichNCG()].
+#' @param universe A `glyexp::experiment()` defining the background proteins, or `NULL` to use the default background.
 #' @param p_adj_method Passed to `pAdjustMethod` of [DOSE::enrichNCG()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [DOSE::enrichNCG()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [DOSE::enrichNCG()].
@@ -683,7 +656,7 @@ gly_enrich_do_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw DOSE enrichResult object
-#'  - `meta_data` (only for [gly_enrich_ncg()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_ncg_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichNCG()]
 #' @keywords internal
@@ -707,7 +680,7 @@ gly_enrich_ncg <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  result <- gly_enrich_ncg_(
+  result <- .analyze_enrich_ncg(
     proteins,
     orgdb = orgdb,
     universe = universe,
@@ -722,9 +695,12 @@ gly_enrich_ncg <- function(
   result
 }
 
-#' @rdname gly_enrich_ncg
-#' @export
-gly_enrich_ncg_ <- function(
+#' Run the internal computation for `gly_enrich_ncg()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_enrich_ncg <- function(
   proteins,
   orgdb = "org.Hs.eg.db",
   universe = NULL,
@@ -770,23 +746,16 @@ gly_enrich_ncg_ <- function(
 #' Perform DisGeNET ORA for protein UniProt accessions using [DOSE::enrichDGN()].
 #' - `gly_enrich_dgn()` accepts a [glyexp::experiment()] and extracts protein information
 #' from the "protein" column in the variable information tibble.
-#' - `gly_enrich_dgn_()` accepts a character vector of UniProt IDs.
 #'
 #' As [DOSE::enrichDGN()] only accepts Entrez IDs,
 #' the UniProt IDs will be first transformed into Entrez IDs with [clusterProfiler::bitr()].
 #'
-#' @param exp (Only for [gly_enrich_dgn()]) A `glyexp::experiment()` object.
-#' @param proteins (Only for [gly_enrich_dgn_()]) A character vector of UniProt accession IDs.
+#' @param exp A `glyexp::experiment()` object.
 #' @param add_info A logical value. This parameter is included for API consistency but has no effect
 #'  since enrichment results do not contain variable or sample columns.
-#'  Only applicable to top-level APIs.
 #' @param orgdb Passed to `OrgDb` of [clusterProfiler::bitr()].
 #'   Organism database name (e.g., "org.Hs.eg.db" for human). Defaults to "org.Hs.eg.db".
-#' @param universe Background genes. If a character vector, it is expected to contain UniProt accession IDs;
-#'   these will be converted to Entrez Gene IDs and then passed to `universe` of [DOSE::enrichDGN()].
-#'   You can also provide a [glyexp::experiment()] object with "glycoproteomics" type.
-#'   In this case all detected proteins in this experiment will be extracted as UniProt IDs, converted to Entrez IDs,
-#'   and then passed to `universe` of [DOSE::enrichDGN()].
+#' @param universe A `glyexp::experiment()` defining the background proteins, or `NULL` to use the default background.
 #' @param p_adj_method Passed to `pAdjustMethod` of [DOSE::enrichDGN()].
 #' @param p_cutoff Passed to `pvalueCutoff` of [DOSE::enrichDGN()].
 #' @param q_cutoff Passed to `qvalueCutoff` of [DOSE::enrichDGN()].
@@ -809,7 +778,7 @@ gly_enrich_ncg_ <- function(
 #'    - `gene_id`: Gene IDs in the term (separated by "/")
 #'    - `count`: Number of genes in the term
 #'  - `raw_result`: The raw DOSE enrichResult object
-#'  - `meta_data` (only for [gly_enrich_dgn()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_dgn_ora_res` and `glystats_res`.
 #' @seealso [DOSE::enrichDGN()]
 #' @keywords internal
@@ -829,7 +798,7 @@ gly_enrich_dgn <- function(
   checkmate::assert_logical(add_info, len = 1)
 
   proteins <- .extract_uniprot_from_exp(exp)
-  result <- gly_enrich_dgn_(
+  result <- .analyze_enrich_dgn(
     proteins,
     orgdb = orgdb,
     universe = universe,
@@ -844,9 +813,12 @@ gly_enrich_dgn <- function(
   result
 }
 
-#' @rdname gly_enrich_dgn
-#' @export
-gly_enrich_dgn_ <- function(
+#' Run the internal computation for `gly_enrich_dgn()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_enrich_dgn <- function(
   proteins,
   orgdb = "org.Hs.eg.db",
   universe = NULL,
@@ -885,8 +857,10 @@ gly_enrich_dgn_ <- function(
 #' @returns A character vector of UniProt IDs.
 #' @noRd
 .extract_uniprot_from_exp <- function(exp) {
-  if ("protein" %in% colnames(exp$var_info)) {
-    uniprot <- exp$var_info$protein
+  checkmate::assert_class(exp, "glyexp_experiment")
+  var_info <- glyexp::get_var_info(exp)
+  if ("protein" %in% colnames(var_info)) {
+    uniprot <- var_info$protein
   } else {
     cli::cli_abort(
       "{.field protein} column not found in the variable information tibble."
@@ -952,26 +926,23 @@ gly_enrich_dgn_ <- function(
 
 #' Prepare universe for enrichment analysis (UniProt path)
 #'
-#' Extracts UniProt IDs from experiment if needed.
+#' Extracts UniProt IDs from an experiment.
 #'
-#' @param universe Background genes. Can be NULL, a character vector, or a glyexp experiment.
+#' @param universe A glyexp experiment or `NULL`.
 #' @returns Character vector of UniProt IDs or NULL.
 #' @noRd
 .prepare_universe_uniprot <- function(universe) {
   if (is.null(universe)) {
     return(NULL)
   }
-  if (glyexp::is_experiment(universe)) {
-    universe <- .extract_uniprot_from_exp(universe)
-  }
-  universe
+  .extract_uniprot_from_exp(universe)
 }
 
 #' Prepare universe for enrichment analysis (Entrez path)
 #'
-#' Extracts UniProt IDs from experiment if needed, then converts to Entrez IDs.
+#' Extracts UniProt IDs from an experiment, then converts them to Entrez IDs.
 #'
-#' @param universe Background genes. Can be NULL, a character vector of UniProt IDs, or a glyexp experiment.
+#' @param universe A glyexp experiment or `NULL`.
 #' @param orgdb An OrgDb object for ID conversion.
 #' @returns Character vector of Entrez IDs or NULL.
 #' @noRd
@@ -979,9 +950,7 @@ gly_enrich_dgn_ <- function(
   if (is.null(universe)) {
     return(NULL)
   }
-  if (glyexp::is_experiment(universe)) {
-    universe <- .extract_uniprot_from_exp(universe)
-  }
+  universe <- .extract_uniprot_from_exp(universe)
   cli::cli_alert_info("Converting background proteins to Entrez IDs")
   .uniprot_to_entrez(universe, orgdb)
 }

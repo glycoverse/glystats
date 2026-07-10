@@ -5,7 +5,6 @@
 #' with optional multiple testing correction.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_cor_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param on A character string specifying what to correlate. Either "variable" (default) to correlate
 #'   variables/features, or "sample" to correlate samples/observations.
 #' @param method A character string indicating which correlation coefficient is to be computed.
@@ -24,11 +23,6 @@
 #' variables across samples. When `on = "sample"`, correlations are calculated between
 #' samples across variables.
 #'
-#' `gly_cor()` is the top-level API that works with `glyexp::experiment()` objects。
-#'
-#' `gly_cor_()` is the underlying API that works with matrices directly,
-#' providing more flexibility for users who don't use the glyexp package.
-#'
 #' **Correlation Calculation:**
 #' Correlation coefficients and p-values are calculated using `Hmisc::rcorr()` which is
 #' more efficient than pairwise `stats::cor.test()` calls.
@@ -44,7 +38,7 @@
 #'    - `p_val`: Raw p-value from correlation test
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: The raw rcorr object from Hmisc::rcorr()
-#'  - `meta_data` (only for [gly_cor()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_cor_res` and `glystats_res`.
 #'
 #' @seealso [Hmisc::rcorr()], [stats::cor()]
@@ -69,8 +63,8 @@ gly_cor <- function(
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
 
-  # Call the underlying API
-  result <- gly_cor_(expr_mat, on, method, p_adj_method, ...)
+  # Run the internal computation
+  result <- .analyze_cor(expr_mat, on, method, p_adj_method, ...)
 
   # Add meta_data from experiment
   result$meta_data <- glyexp::get_meta_data(exp)
@@ -78,9 +72,12 @@ gly_cor <- function(
   result
 }
 
-#' @rdname gly_cor
-#' @export
-gly_cor_ <- function(
+#' Run the internal computation for `gly_cor()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_cor <- function(
   expr_mat,
   on = "variable",
   method = "pearson",

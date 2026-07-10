@@ -78,7 +78,7 @@ test_that("gly_tsne has consistent sample names", {
   )
 })
 
-test_that("gly_tsne_ works correctly", {
+test_that(".analyze_tsne works correctly", {
   skip_if_not_installed("Rtsne")
 
   # Create test data
@@ -89,7 +89,7 @@ test_that("gly_tsne_ works correctly", {
 
   # Test function execution with appropriate perplexity
   suppressMessages({
-    result <- gly_tsne_(expr_mat, perplexity = 3)
+    result <- .analyze_tsne(expr_mat, perplexity = 3)
   })
 
   # Verify results

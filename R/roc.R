@@ -6,10 +6,7 @@
 #' power between two groups.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_roc_()]) A numeric matrix with variables as rows and samples as columns.
-#' @param groups (Only for [gly_roc_()]) A factor or character vector specifying group membership for each sample.
-#'   Must have exactly 2 levels. Character vectors will be automatically converted to factors.
-#' @param group_col (Only for [gly_roc()]) A character string specifying the column name of the grouping variable
+#' @param group_col A character string specifying the column name of the grouping variable
 #'   in the sample information. Default is `"group"`. The grouping variable must have
 #'   exactly 2 levels for binary classification.
 #' @param pos_class A character string specifying which group level should be treated as
@@ -17,7 +14,6 @@
 #'   used as the positive class.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
-#'  Only applicable to `gly_roc()`.
 #'
 #' @details
 #' For each variable, a ROC curve is computed using the expression values as predictor
@@ -25,12 +21,6 @@
 #'
 #' The function requires exactly 2 groups in the specified grouping variable. If more than
 #' 2 groups are present, an error will be thrown.
-#'
-#' `gly_roc()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_roc_()` is the underlying API that works with matrices and factor vectors directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' **Underlying Function:**
 #' - ROC analysis is performed using `pROC::roc()`
@@ -53,7 +43,7 @@
 #'     - `specificity`: Specificity (True Negative Rate)
 #'     - `sensitivity`: Sensitivity (True Positive Rate)
 #' - `raw_result`: A list of `pROC` objects
-#' - `meta_data` (only for [gly_roc()]): A list containing metadata from the input experiment
+#' - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_roc_res` and `glystats_res`.
 #' @seealso [pROC::roc()], [pROC::coords()]
 #' @export
@@ -86,8 +76,8 @@ gly_roc <- function(
   )
   groups <- group_info$groups
 
-  # Call the underlying API
-  result <- gly_roc_(expr_mat, groups, pos_class)
+  # Run the internal computation
+  result <- .analyze_roc(expr_mat, groups, pos_class)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -100,14 +90,16 @@ gly_roc <- function(
   result
 }
 
-#' @rdname gly_roc
-#' @export
-gly_roc_ <- function(expr_mat, groups, pos_class = NULL) {
+#' Run the internal computation for `gly_roc()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_roc <- function(expr_mat, groups, pos_class = NULL) {
   rlang::check_installed("pROC")
 
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_string(pos_class, null.ok = TRUE)
 

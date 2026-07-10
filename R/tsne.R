@@ -4,23 +4,14 @@
 #' The function uses `Rtsne::Rtsne()` to perform t-SNE analysis.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_tsne_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param dims Number of output dimensions. Default is 2.
 #' @param perplexity Perplexity parameter for t-SNE. Default is 30.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'  will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.
-#'  Only applicable to `gly_tsne()`.
 #' @param ... Additional arguments passed to `Rtsne::Rtsne()`.
 #'
 #' @section Required packages:
 #' This function requires the `Rtsne` package to be installed for t-SNE analysis.
-#'
-#' @details
-#' `gly_tsne()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_tsne_()` is the underlying API that works with matrices directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @return A list with three elements:
 #' - `tidy_result`: A tibble with t-SNE coordinates containing the following columns:
@@ -28,7 +19,7 @@
 #'   - `tsne1`: First t-SNE dimension
 #'   - `tsne2`: Second t-SNE dimension
 #' - `raw_result`: The raw Rtsne object
-#' - `meta_data` (only for [gly_tsne()]): A list containing metadata from the input experiment
+#' - `meta_data`: A list containing metadata from the input experiment
 #' The list has classes `glystats_tsne_res` and `glystats_res`.
 #' @seealso [Rtsne::Rtsne()]
 #' @export
@@ -37,7 +28,7 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
   checkmate::assert_logical(add_info, len = 1)
 
   expr_mat <- glyexp::get_expr_mat(exp)
-  result <- gly_tsne_(expr_mat, dims, perplexity, ...)
+  result <- .analyze_tsne(expr_mat, dims, perplexity, ...)
 
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
@@ -51,9 +42,12 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
   result
 }
 
-#' @rdname gly_tsne
-#' @export
-gly_tsne_ <- function(expr_mat, dims = 2, perplexity = 30, ...) {
+#' Run the internal computation for `gly_tsne()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_tsne <- function(expr_mat, dims = 2, perplexity = 30, ...) {
   rlang::check_installed("Rtsne")
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")

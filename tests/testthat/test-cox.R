@@ -102,7 +102,7 @@ test_that("gly_cox assigns NA for failed variables", {
   expect_true(all(is.na(p_values)))
 })
 
-test_that("gly_cox_ works with matrix input", {
+test_that(".analyze_cox works with matrix input", {
   # Create test data
   set.seed(456)
   expr_mat <- matrix(rnorm(100), nrow = 10, ncol = 10)
@@ -113,7 +113,7 @@ test_that("gly_cox_ works with matrix input", {
   event <- rbinom(10, 1, 0.6)
 
   # Test function execution
-  result <- suppressMessages(gly_cox_(expr_mat, time, event))
+  result <- suppressMessages(.analyze_cox(expr_mat, time, event))
 
   # Verify results
   expect_s3_class(result, c("glystats_cox_res", "glystats_res"))
@@ -378,7 +378,7 @@ test_that("gly_cox error handling works", {
   )
 
   expect_error(
-    suppressMessages(gly_cox_(
+    suppressMessages(.analyze_cox(
       expr_mat,
       sample_info_with_surv$time,
       sample_info_with_surv$event,
@@ -454,24 +454,24 @@ test_that("gly_cox input validation works", {
   # Test with non-experiment object
   expect_error(gly_cox("not_an_experiment"), "Assertion on 'exp' failed")
 
-  # Test gly_cox_ with invalid inputs
+  # Test .analyze_cox with invalid inputs
   expr_mat <- matrix(rnorm(20), nrow = 4, ncol = 5)
   time <- rexp(5, rate = 0.1)
   event <- rbinom(5, 1, 0.7)
 
   # Test with mismatched dimensions
   expect_error(
-    gly_cox_(expr_mat, time[1:3], event),
+    .analyze_cox(expr_mat, time[1:3], event),
     "must match length of time vector"
   )
   expect_error(
-    gly_cox_(expr_mat, time, event[1:3]),
+    .analyze_cox(expr_mat, time, event[1:3]),
     "must match length of event vector"
   )
 
   # Test with empty matrix
   expect_error(
-    gly_cox_(matrix(nrow = 0, ncol = 0), numeric(0), numeric(0)),
+    .analyze_cox(matrix(nrow = 0, ncol = 0), numeric(0), numeric(0)),
     "Assertion on 'expr_mat' failed"
   )
 })
@@ -488,7 +488,7 @@ test_that("gly_cox handles edge cases", {
   event <- rbinom(20, 1, 0.7) # 70% event rate
 
   # This should work normally
-  result <- suppressMessages(gly_cox_(expr_mat, time, event))
+  result <- suppressMessages(.analyze_cox(expr_mat, time, event))
   expect_s3_class(result, c("glystats_cox_res", "glystats_res"))
   expect_type(result, "list")
   expect_true("tidy_result" %in% names(result))
@@ -498,7 +498,7 @@ test_that("gly_cox handles edge cases", {
 
   # Test with all events = 1 (no censoring) - also use larger sample
   event_all <- rep(1, 20)
-  result_all_events <- suppressMessages(gly_cox_(expr_mat, time, event_all))
+  result_all_events <- suppressMessages(.analyze_cox(expr_mat, time, event_all))
   expect_s3_class(result_all_events, c("glystats_cox_res", "glystats_res"))
   expect_equal(nrow(result_all_events$tidy_result), 4)
 })

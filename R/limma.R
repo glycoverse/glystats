@@ -4,23 +4,12 @@
 #' moderation from the limma package. Supports both two-group and multi-group comparisons.
 #'
 #' @param exp A `glyexp_experiment` object containing expression data and sample information.
-#' @param expr_mat (Only for [gly_limma_()]) A numeric matrix with variables as rows and samples as columns.
-#' @param groups (Only for [gly_limma_()]) A factor or character vector specifying group membership for each sample.
-#'   Must have at least 2 levels. Character vectors will be automatically converted to factors.
-#'   If `contrasts` is not provided,
-#'   the levels coming first in the factor will be used as the reference group.
-#' @param group_col (Only for [gly_limma()]) A character string specifying the column name in sample information
+#' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
-#' @param covariate_cols (Only for [gly_limma()]) A character vector specifying column names in sample information
+#' @param covariate_cols A character vector specifying column names in sample information
 #'   to include as covariates in the limma model. Default is NULL.
-#' @param subject_col (Only for [gly_limma()]) A character string specifying the column name in sample information
+#' @param subject_col A character string specifying the column name in sample information
 #'   that contains subject identifiers for paired comparisons. Default is NULL.
-#' @param covariates (Only for [gly_limma_()]) A data frame, matrix, or vector of sample-level covariates.
-#'   Must have the same number of rows as `expr_mat` has columns. If row names are provided and
-#'   match `colnames(expr_mat)`, they will be aligned automatically. Default is NULL.
-#' @param subjects (Only for [gly_limma_()]) A vector or factor of subject identifiers for paired comparisons.
-#'   Must have length equal to `ncol(expr_mat)`. If names or row names are provided and match
-#'   `colnames(expr_mat)`, they will be aligned automatically. Default is NULL.
 #' @param p_adj_method A character string specifying the method for multiple testing correction.
 #'   Must be one of the methods supported by `stats::p.adjust()`. Default is "BH" (Benjamini-Hochberg).
 #'   Set to NULL to skip p-value adjustment.
@@ -35,19 +24,12 @@
 #'   "group1" will be used as the reference group.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#'  Only applicable to `gly_limma()`.
 #' @param ... Additional arguments passed to `limma::lmFit()`.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. The analysis uses linear models with empirical Bayes moderation
 #' to improve statistical power, especially for small sample sizes.
-#'
-#' `gly_limma()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_limma_()` is the underlying API that works with matrices and factor vectors directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' For two or more groups, all pairwise comparisons are automatically generated
 #' (one contrast for two groups) and performed using contrast matrices unless
@@ -80,7 +62,7 @@
 #'    - `test_group`: Test group
 #'
 #'  - `raw_result`: The raw limma fit object(s).
-#'  - `meta_data` (only for [gly_limma()]): A list containing metadata from the input experiment.
+#'  - `meta_data`: A list containing metadata from the input experiment.
 #' @seealso [limma::lmFit()], [limma::eBayes()], [limma::makeContrasts()]
 #' @export
 gly_limma <- function(
@@ -145,8 +127,8 @@ gly_limma <- function(
   # Validate ref_group parameter
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
 
-  # Call the underlying API
-  result <- gly_limma_(
+  # Run the internal computation
+  result <- .analyze_limma(
     expr_mat,
     groups,
     p_adj_method,
@@ -170,9 +152,12 @@ gly_limma <- function(
   result
 }
 
-#' @rdname gly_limma
-#' @export
-gly_limma_ <- function(
+#' Run the internal computation for `gly_limma()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_limma <- function(
   expr_mat,
   groups,
   p_adj_method = "BH",
@@ -184,7 +169,6 @@ gly_limma_ <- function(
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
-  groups <- .convert_groups_to_factor(groups)
   checkmate::assert_factor(groups, len = ncol(expr_mat))
   checkmate::assert_choice(
     p_adj_method,
@@ -218,7 +202,7 @@ gly_limma_ <- function(
   }
 
   # Use the multi-group workflow for all cases
-  result <- .gly_limma_multigroups(
+  result <- .limma_multigroups(
     expr_mat,
     groups,
     p_adj_method,
@@ -316,7 +300,7 @@ gly_limma_ <- function(
   subjects
 }
 
-# Normalize covariates for gly_limma_
+# Normalize covariates for .analyze_limma
 .normalize_covariates <- function(covariates, n_samples, sample_names = NULL) {
   if (is.null(covariates)) {
     return(NULL)
@@ -375,7 +359,7 @@ gly_limma_ <- function(
   covariates
 }
 
-# Normalize subjects for gly_limma_
+# Normalize subjects for .analyze_limma
 .normalize_subjects <- function(subjects, n_samples, sample_names = NULL) {
   if (is.null(subjects)) {
     return(NULL)
@@ -431,7 +415,7 @@ gly_limma_ <- function(
 }
 
 # Limma-specific multi-group analysis function
-.gly_limma_multigroups <- function(
+.limma_multigroups <- function(
   expr_mat,
   groups,
   p_adj_method,
@@ -546,7 +530,7 @@ gly_limma_ <- function(
   )
 
   # Extract results and convert to tibble
-  tidy_result <- .gly_limma_multi_tibblify(fit2, p_adj_method, contrast_pairs)
+  tidy_result <- .limma_multi_tibblify(fit2, p_adj_method, contrast_pairs)
   if (length(missing_vars) > 0) {
     missing_tbl <- purrr::map_dfr(contrast_pairs, function(pair) {
       base_tbl <- tibble::tibble(
@@ -578,7 +562,7 @@ gly_limma_ <- function(
 }
 
 # Convert multi-group limma fit object to tibble
-.gly_limma_multi_tibblify <- function(fit, p_adj_method, contrast_pairs) {
+.limma_multi_tibblify <- function(fit, p_adj_method, contrast_pairs) {
   # Extract single contrast result as tibble
   .extract_contrast_result <- function(i) {
     # Extract results for this contrast using topTable

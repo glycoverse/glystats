@@ -5,12 +5,10 @@
 #' If `scale = TRUE`, constant variables (zero variance) will be removed before PCA.
 #'
 #' @param exp A `glyexp::experiment()` object containing expression matrix and sample information.
-#' @param expr_mat (Only for [gly_pca_()]) A numeric matrix with variables as rows and samples as columns.
 #' @param center A logical indicating whether to center the data. Default is TRUE.
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the PCA results are returned.
-#'  Only applicable to `gly_pca()`.
 #' @param ... Additional arguments passed to `prcomp()`.
 #'
 #' @section Required packages:
@@ -19,12 +17,6 @@
 #' @details
 #' The function performs log transformation on the expression data (log(x + 1)) before
 #' PCA analysis.
-#'
-#' `gly_pca()` is the top-level API that works with `glyexp::experiment()` objects and supports
-#' the `add_info` parameter for joining experiment metadata.
-#'
-#' `gly_pca_()` is the underlying API that works with matrices directly,
-#' providing more flexibility for users who don't use the glyexp package.
 #'
 #' @return A list containing:
 #'  - `tidy_result`: A list of tibbles with PCA results:
@@ -42,7 +34,7 @@
 #'      - `percent`: Percentage of variance explained
 #'      - `cumulative`: Cumulative percentage of variance explained
 #'  - `raw_result`: The raw prcomp object from `stats::prcomp()`
-#'  - `meta_data` (only for [gly_pca()]): A list containing metadata from the input experiment
+#'  - `meta_data`: A list containing metadata from the input experiment
 #' @seealso [stats::prcomp()]
 #' @export
 gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
@@ -52,8 +44,8 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
   # Extract data from experiment object
   expr_mat <- glyexp::get_expr_mat(exp)
 
-  # Call the underlying API
-  result <- gly_pca_(expr_mat, center, scale, ...)
+  # Run the internal computation
+  result <- .analyze_pca(expr_mat, center, scale, ...)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -66,9 +58,12 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
   result
 }
 
-#' @rdname gly_pca
-#' @export
-gly_pca_ <- function(expr_mat, center = TRUE, scale = TRUE, ...) {
+#' Run the internal computation for `gly_pca()`
+#'
+#' This helper receives components extracted from a validated experiment.
+#'
+#' @noRd
+.analyze_pca <- function(expr_mat, center = TRUE, scale = TRUE, ...) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_logical(center, len = 1)

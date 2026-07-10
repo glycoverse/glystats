@@ -2,7 +2,6 @@
 % Please edit documentation in R/anova.R
 \name{gly_ancova}
 \alias{gly_ancova}
-\alias{gly_ancova_}
 \title{Analysis of Covariance (ANCOVA) for Differential Expression Analysis}
 \usage{
 gly_ancova(
@@ -13,16 +12,14 @@ gly_ancova(
   add_info = TRUE,
   ...
 )
-
-gly_ancova_(expr_mat, groups, covariates, p_adj_method = "BH", ...)
 }
 \arguments{
 \item{exp}{A \code{glyexp::experiment()} object containing expression matrix and sample information.}
 
-\item{group_col}{(Only for \code{\link[=gly_ancova]{gly_ancova()}}) A character string specifying the column name of the grouping variable
+\item{group_col}{A character string specifying the column name of the grouping variable
 in the sample information. Default is \code{"group"}.}
 
-\item{covariate_cols}{(Only for \code{\link[=gly_ancova]{gly_ancova()}}) A character vector specifying column names in sample information
+\item{covariate_cols}{A character vector specifying column names in sample information
 to include as covariates. At least one covariate must be provided.}
 
 \item{p_adj_method}{A character string specifying the method to adjust p-values.
@@ -30,18 +27,9 @@ See \code{p.adjust.methods} for available methods. Default is "BH".
 If NULL, no adjustment is performed.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
-will be added to the result tibble. If FALSE, only the statistical results are returned.
-Only applicable to \code{gly_ancova()}.}
+will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::aov()}.}
-
-\item{expr_mat}{(Only for \code{\link[=gly_ancova_]{gly_ancova_()}}) A numeric matrix with variables as rows and samples as columns.}
-
-\item{groups}{(Only for \code{\link[=gly_ancova_]{gly_ancova_()}}) A factor or character vector specifying group membership for each sample.
-Must have at least 2 levels. Character vectors will be automatically converted to factors.}
-
-\item{covariates}{(Only for \code{\link[=gly_ancova_]{gly_ancova_()}}) A data frame, matrix, or vector of sample-level covariates.
-At least one covariate must be provided.}
 }
 \value{
 A list containing two elements:
@@ -85,12 +73,6 @@ P-values are adjusted for multiple testing using the method specified by \code{p
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. At least 2 groups and at least 1 covariate are required.
-
-\code{gly_ancova()} is the top-level API that works with \code{glyexp::experiment()} objects and supports
-the \code{add_info} parameter for joining experiment metadata.
-
-\code{gly_ancova_()} is the underlying API that works with matrices, factor vectors, and covariate
-data directly, providing more flexibility for users who don't use the glyexp package.
 
 For any variable failed to fit a \code{stats::aov()} model,
 NAs will be assigned to the results in both main test and post-hoc test.
