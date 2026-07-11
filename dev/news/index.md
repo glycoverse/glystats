@@ -2,6 +2,20 @@
 
 ## glystats (development version)
 
+## glystats 0.11.0
+
+### Breaking changes
+
+- All `gly_*_()` matrix and vector interfaces are removed. Use the
+  corresponding `gly_*()` function with a
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  or `SummarizedExperiment` object instead. (#12)
+- `gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`,
+  `gly_enrich_wikipathways()`, `gly_enrich_do()`, `gly_enrich_ncg()`,
+  and `gly_enrich_dgn()` are removed. These functions were deprecated in
+  0.10.0. Use the corresponding functions in the `glyfun` package
+  instead. (#13)
+
 ### New features
 
 - All `gly_*()` analysis functions and
@@ -9,17 +23,6 @@
   now accept `SummarizedExperiment` objects in addition to
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   objects. (#14)
-
-### Breaking changes
-
-- All `gly_*_()` matrix and vector interfaces are removed. Pass a
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  to the corresponding `gly_*()` function instead. (#12)
-- `gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`,
-  `gly_enrich_wikipathways()`, `gly_enrich_do()`, `gly_enrich_ncg()`,
-  and `gly_enrich_dgn()` are removed. These functions were deprecated in
-  0.10.0. Use the corresponding functions in the `glyfun` package
-  instead. (#13)
 
 ## glystats 0.10.1
 

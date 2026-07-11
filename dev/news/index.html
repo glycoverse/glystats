@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.10.1.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.11.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,15 +33,18 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glystats-development-version">glystats (development version)<a class="anchor" aria-label="anchor" href="#glystats-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.11.0" id="glystats-0110">glystats 0.11.0<a class="anchor" aria-label="anchor" href="#glystats-0110"></a></h2>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
-<ul><li>All <code>gly_*()</code> analysis functions and <code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> now accept <code>SummarizedExperiment</code> objects in addition to <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects. (#14)</li>
-</ul></div>
-<div class="section level3">
-<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
-<ul><li>All <code>gly_*_()</code> matrix and vector interfaces are removed. Pass a <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> to the corresponding <code>gly_*()</code> function instead. (#12)</li>
+<h3 id="breaking-changes-0-11-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-11-0"></a></h3>
+<ul><li>All <code>gly_*_()</code> matrix and vector interfaces are removed. Use the corresponding <code>gly_*()</code> function with a <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> or <code>SummarizedExperiment</code> object instead. (#12)</li>
 <li>
 <code>gly_enrich_go()</code>, <code>gly_enrich_kegg()</code>, <code>gly_enrich_reactome()</code>, <code>gly_enrich_wikipathways()</code>, <code>gly_enrich_do()</code>, <code>gly_enrich_ncg()</code>, and <code>gly_enrich_dgn()</code> are removed. These functions were deprecated in 0.10.0. Use the corresponding functions in the <code>glyfun</code> package instead. (#13)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-11-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-11-0"></a></h3>
+<ul><li>All <code>gly_*()</code> analysis functions and <code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> now accept <code>SummarizedExperiment</code> objects in addition to <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects. (#14)</li>
 </ul></div>
 </div>
     <div class="section level2">
