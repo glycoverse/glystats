@@ -7,10 +7,10 @@ modeling and visualization (PCA, t-SNE, UMAP), supervised learning
 (PLS-DA, OPLS-DA), clustering (k-means, hierarchical, consensus
 clustering), network analysis (weighted gene co-expression network
 analysis, WGCNA), survival modeling (Cox proportional hazards),
-enrichment analysis, correlation analysis, and ROC/AUC evaluation. All
-user-facing functions follow the gly\_\*() naming convention to
-facilitate auto-completion in RStudio. The package is designed to work
-seamlessly with 'glyexp' and tidy data workflows.
+correlation analysis, and ROC/AUC evaluation. All user-facing functions
+follow the gly\_\*() naming convention to facilitate auto-completion in
+RStudio. Analysis functions accept 'glyexp' experiment and
+'SummarizedExperiment' objects as their unified data interface.
 
 ## See also
 

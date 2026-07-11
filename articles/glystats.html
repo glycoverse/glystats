@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.10.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,23 +63,16 @@ exciting territories like differential expression analysis, PCA,
 survival analysis, and much more! 🧬 <code>glystats</code> brings all
 these powerful analyses together under one unified, user-friendly
 interface.</p>
-<p><strong>🎯 Key Feature:</strong> <code>glystats</code> offers two
-levels of interfaces to fit your workflow:</p>
-<ul>
-<li>
-<code>gly_xxx()</code>: seamlessly works with
-[glyexp::experiment()], the beating heart of the <code>glycoverse</code>
-ecosystem 💓</li>
-<li>
-<code>gly_xxx_()</code>: flexible enough to work with general inputs
-like matrices or data frames</li>
-</ul>
-<p>This vignette focuses on the <code>gly_xxx()</code> interface. New to
-[glyexp::experiment()]? No worries! Check out its <a href="https://glycoverse.github.io/glyexp/articles/glyexp.html" class="external-link">introduction</a>
+<p><strong>🎯 Key Feature:</strong> Every <code>glystats</code> analysis
+accepts a [glyexp::experiment()], the unified data interface at the
+heart of the <code>glycoverse</code> ecosystem 💓</p>
+<p>New to [glyexp::experiment()]? No worries! Check out its <a href="https://glycoverse.github.io/glyexp/articles/glyexp.html" class="external-link">introduction</a>
 first to get up to speed.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://glycoverse.github.io/glystats/">glystats</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://glycoverse.github.io/glyexp/" class="external-link">glyexp</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by</span></span>
+<span><span class="co">#&gt; 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://glycoverse.github.io/glyread/" class="external-link">glyread</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://glycoverse.github.io/glyclean/" class="external-link">glyclean</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -105,12 +98,12 @@ first to get up to speed.</p>
 <span><span class="va">exp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glycoverse.github.io/glyread/reference/read_pglyco3_pglycoquant.html" class="external-link">read_pglyco3_pglycoquant</a></span><span class="op">(</span><span class="st">"glycopeptides.list"</span>, sample_info <span class="op">=</span> <span class="st">"sample_info.csv"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://glycoverse.github.io/glyclean/reference/auto_clean.html" class="external-link">auto_clean</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading data</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Finding leader proteins</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Finding leader proteins <span style="color: #B2B2B2;">[84ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Finding leader proteins <span style="color: #B2B2B2;">[101ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading dataColumn <span style="color: #00BB00;">group</span> converted to <span style="color: #0000BB;">&lt;factor&gt;</span>.<span style="color: #00BBBB;">ℹ</span> Parsing glycan compositions and structures</span></span>
-<span><span class="co">#&gt; Column <span style="color: #00BB00;">group</span> converted to <span style="color: #0000BB;">&lt;factor&gt;</span>.<span style="color: #00BB00;">✔</span> Parsing glycan compositions and structures <span style="color: #B2B2B2;">[358ms]</span></span></span>
+<span><span class="co">#&gt; Column <span style="color: #00BB00;">group</span> converted to <span style="color: #0000BB;">&lt;factor&gt;</span>.<span style="color: #00BB00;">✔</span> Parsing glycan compositions and structures <span style="color: #B2B2B2;">[369ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading data<span style="color: #00BB00;">✔</span> Reading data <span style="color: #B2B2B2;">[845ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading data<span style="color: #00BB00;">✔</span> Reading data <span style="color: #B2B2B2;">[960ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Normalizing data</span> ──</span></span>
@@ -288,21 +281,6 @@ useful to be used in pipes:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   effect_size &lt;dbl&gt;, post_hoc &lt;chr&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="maximum-flexibility-mode">🔧 Maximum Flexibility Mode<a class="anchor" aria-label="anchor" href="#maximum-flexibility-mode"></a>
-</h2>
-<p>Feeling constrained by [glyexp::experiment()]? Fear not! 🦸‍♀️ Every
-<code>gly_xxx()</code> function comes with a flexible
-<code>gly_xxx_()</code> sibling that works with standard R objects. For
-instance, <code><a href="../reference/gly_anova.html">gly_anova_()</a></code> happily accepts plain matrices:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">expr_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glycoverse.github.io/glyexp/reference/get_expr_mat.html" class="external-link">get_expr_mat</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span>
-<span><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://glycoverse.github.io/glyexp/reference/get_sample_info.html" class="external-link">get_sample_info</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span><span class="op">$</span><span class="va">group</span><span class="op">)</span></span>
-<span><span class="va">anova_res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gly_anova.html">gly_anova_</a></span><span class="op">(</span><span class="va">expr_mat</span>, <span class="va">groups</span><span class="op">)</span></span></code></pre></div>
-<p>This adaptability makes <code>glystats</code> a perfect team player
-🤝 - it seamlessly integrates into existing analysis pipelines and
-workflows, no matter what data structures you’re already using!</p>
-</div>
-<div class="section level2">
 <h2 id="the-complete-analytical-arsenal">🎪 The Complete Analytical Arsenal<a class="anchor" aria-label="anchor" href="#the-complete-analytical-arsenal"></a>
 </h2>
 <p>Ready to explore the full power of <code>glystats</code>? Here’s your
@@ -362,29 +340,6 @@ analysis (PLS-DA)</li>
 </ul>
 </li>
 <li>
-<strong>🎯 Enrichment Analysis:</strong>
-<ul>
-<li>
-<code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>: Gene Ontology enrichment analysis</li>
-<li>
-<code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>: KEGG enrichment analysis</li>
-<li>
-<code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code>: Reactome enrichment
-analysis</li>
-<li>
-<code><a href="../reference/gly_enrich_wikipathways.html">gly_enrich_wikipathways()</a></code>: WikiPathways enrichment
-analysis</li>
-<li>
-<code><a href="../reference/gly_enrich_do.html">gly_enrich_do()</a></code>: Disease Ontology enrichment
-analysis</li>
-<li>
-<code><a href="../reference/gly_enrich_ncg.html">gly_enrich_ncg()</a></code>: Network of Cancer Genes enrichment
-analysis</li>
-<li>
-<code><a href="../reference/gly_enrich_dgn.html">gly_enrich_dgn()</a></code>: DisGeNET enrichment analysis</li>
-</ul>
-</li>
-<li>
 <strong>🔧 Additional Tools:</strong>
 <ul>
 <li>
@@ -427,7 +382,7 @@ visualizations</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

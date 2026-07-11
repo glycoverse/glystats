@@ -11,7 +11,7 @@ with optional multiple testing correction."><meta property="og:image" content="h
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.10.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,15 +44,7 @@ with optional multiple testing correction.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_cor</span><span class="op">(</span><span class="va">exp</span>, on <span class="op">=</span> <span class="st">"variable"</span>, method <span class="op">=</span> <span class="st">"pearson"</span>, p_adj_method <span class="op">=</span> <span class="st">"BH"</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">gly_cor_</span><span class="op">(</span></span>
-<span>  <span class="va">expr_mat</span>,</span>
-<span>  on <span class="op">=</span> <span class="st">"variable"</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"pearson"</span>,</span>
-<span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_cor</span><span class="op">(</span><span class="va">exp</span>, on <span class="op">=</span> <span class="st">"variable"</span>, method <span class="op">=</span> <span class="st">"pearson"</span>, p_adj_method <span class="op">=</span> <span class="st">"BH"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -60,7 +52,8 @@ with optional multiple testing correction.</p>
 
 
 <dl><dt id="arg-exp">exp<a class="anchor" aria-label="anchor" href="#arg-exp"></a></dt>
-<dd><p>A <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object containing expression matrix and sample information.</p></dd>
+<dd><p>A <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> or <code>SummarizedExperiment</code> object containing
+an expression matrix and sample information.</p></dd>
 
 
 <dt id="arg-on">on<a class="anchor" aria-label="anchor" href="#arg-on"></a></dt>
@@ -82,10 +75,6 @@ If NULL, no adjustment is performed.</p></dd>
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://rdrr.io/pkg/Hmisc/man/rcorr.html" class="external-link">Hmisc::rcorr()</a></code>.</p></dd>
 
-
-<dt id="arg-expr-mat">expr_mat<a class="anchor" aria-label="anchor" href="#arg-expr-mat"></a></dt>
-<dd><p>(Only for <code>gly_cor_()</code>) A numeric matrix with variables as rows and samples as columns.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -96,7 +85,7 @@ If NULL, no adjustment is performed.</p></dd>
 <li><p><code>p_adj</code>: Adjusted p-value (if p_adj_method is not NULL)</p></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw rcorr object from Hmisc::rcorr()</p></li>
-<li><p><code>meta_data</code> (only for <code>gly_cor()</code>): A list containing metadata from the input experiment
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment
 The list has classes <code>glystats_cor_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
     <div class="section level2">
@@ -105,9 +94,6 @@ The list has classes <code>glystats_cor_res</code> and <code>glystats_res</code>
 correlation analysis. When <code>on = "variable"</code> (default), correlations are calculated between
 variables across samples. When <code>on = "sample"</code>, correlations are calculated between
 samples across variables.</p>
-<p><code>gly_cor()</code> is the top-level API that works with <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects。</p>
-<p><code>gly_cor_()</code> is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.</p>
 <p><strong>Correlation Calculation:</strong>
 Correlation coefficients and p-values are calculated using <code><a href="https://rdrr.io/pkg/Hmisc/man/rcorr.html" class="external-link">Hmisc::rcorr()</a></code> which is
 more efficient than pairwise <code><a href="https://rdrr.io/r/stats/cor.test.html" class="external-link">stats::cor.test()</a></code> calls.</p>
@@ -134,7 +120,7 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -14,8 +14,6 @@ gly_cox(
   add_info = TRUE,
   ...
 )
-
-gly_cox_(expr_mat, time, event, p_adj_method = "BH", ...)
 ```
 
 ## Arguments
@@ -24,7 +22,8 @@ gly_cox_(expr_mat, time, event, p_adj_method = "BH", ...)
 
   A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object containing expression matrix and sample information.
+  or `SummarizedExperiment` object containing an expression matrix and
+  sample information.
 
 - time_col:
 
@@ -47,26 +46,12 @@ gly_cox_(expr_mat, time, event, p_adj_method = "BH", ...)
 
   A logical value. If TRUE (default), variable information from the
   experiment will be added to the result tibble. If FALSE, only the Cox
-  model results are returned. Only applicable to `gly_cox()`.
+  model results are returned.
 
 - ...:
 
   Additional arguments passed to
   [`survival::coxph()`](https://rdrr.io/pkg/survival/man/coxph.html).
-
-- expr_mat:
-
-  (Only for `gly_cox_()`) A numeric matrix with variables as rows and
-  samples as columns.
-
-- time:
-
-  A numeric vector specifying the survival time for each sample.
-
-- event:
-
-  A numeric vector specifying the event indicator for each sample (1 for
-  event, 0 for censoring).
 
 ## Value
 
@@ -91,8 +76,7 @@ A list with three elements:
 
 - `raw_result`: A list of raw `coxph` model objects.
 
-- `meta_data` (only for `gly_cox()`): A list containing metadata from
-  the input experiment
+- `meta_data`: A list containing metadata from the input experiment
 
 ## Details
 

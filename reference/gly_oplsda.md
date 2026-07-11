@@ -17,8 +17,6 @@ gly_oplsda(
   add_info = TRUE,
   ...
 )
-
-gly_oplsda_(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, ...)
 ```
 
 ## Arguments
@@ -27,13 +25,13 @@ gly_oplsda_(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, ...)
 
   A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object containing expression matrix and sample information.
+  or `SummarizedExperiment` object containing an expression matrix and
+  sample information.
 
 - group_col:
 
-  (Only for `gly_oplsda()`) A character string specifying the column
-  name in sample information that contains group labels. Default is
-  "group".
+  A character string specifying the column name in sample information
+  that contains group labels. Default is "group".
 
 - pred_i:
 
@@ -53,24 +51,12 @@ gly_oplsda_(expr_mat, groups, pred_i = 1, ortho_i = NA, scale = TRUE, ...)
 
   A logical value. If TRUE (default), sample and variable information
   from the experiment will be added to the result tibbles. If FALSE,
-  only the OPLS-DA results are returned. Only applicable to
-  `gly_oplsda()`.
+  only the OPLS-DA results are returned.
 
 - ...:
 
   Additional arguments passed to
   [`ropls::opls()`](https://rdrr.io/pkg/ropls/man/opls.html).
-
-- expr_mat:
-
-  (Only for `gly_oplsda_()`) A numeric matrix with variables as rows and
-  samples as columns.
-
-- groups:
-
-  (Only for `gly_oplsda_()`) A factor or character vector specifying
-  group membership for each sample. Must have exactly 2 levels.
-  Character vectors will be automatically converted to factors.
 
 ## Value
 
@@ -133,19 +119,7 @@ A list containing:
 - `raw_result`: The raw ropls opls object from
   [`ropls::opls()`](https://rdrr.io/pkg/ropls/man/opls.html)
 
-- `meta_data` (only for `gly_oplsda()`): A list containing metadata from
-  the input experiment
-
-## Details
-
-`gly_oplsda()` is the top-level API that works with
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-objects and supports the `add_info` parameter for joining experiment
-metadata.
-
-`gly_oplsda_()` is the underlying API that works with matrices and
-factor vectors directly, providing more flexibility for users who don't
-use the glyexp package.
+- `meta_data`: A list containing metadata from the input experiment
 
 ## Required packages
 

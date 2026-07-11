@@ -9,8 +9,6 @@ variable to assess their discriminatory power between two groups.
 
 ``` r
 gly_roc(exp, group_col = "group", pos_class = NULL, add_info = TRUE)
-
-gly_roc_(expr_mat, groups, pos_class = NULL)
 ```
 
 ## Arguments
@@ -19,14 +17,14 @@ gly_roc_(expr_mat, groups, pos_class = NULL)
 
   A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object containing expression matrix and sample information.
+  or `SummarizedExperiment` object containing an expression matrix and
+  sample information.
 
 - group_col:
 
-  (Only for `gly_roc()`) A character string specifying the column name
-  of the grouping variable in the sample information. Default is
-  `"group"`. The grouping variable must have exactly 2 levels for binary
-  classification.
+  A character string specifying the column name of the grouping variable
+  in the sample information. Default is `"group"`. The grouping variable
+  must have exactly 2 levels for binary classification.
 
 - pos_class:
 
@@ -38,18 +36,7 @@ gly_roc_(expr_mat, groups, pos_class = NULL)
 
   A logical value. If TRUE (default), variable information from the
   experiment will be added to the result tibbles. If FALSE, only the ROC
-  analysis results are returned. Only applicable to `gly_roc()`.
-
-- expr_mat:
-
-  (Only for `gly_roc_()`) A numeric matrix with variables as rows and
-  samples as columns.
-
-- groups:
-
-  (Only for `gly_roc_()`) A factor or character vector specifying group
-  membership for each sample. Must have exactly 2 levels. Character
-  vectors will be automatically converted to factors.
+  analysis results are returned.
 
 ## Value
 
@@ -81,9 +68,8 @@ A list with three elements:
 
 - `raw_result`: A list of `pROC` objects
 
-- `meta_data` (only for `gly_roc()`): A list containing metadata from
-  the input experiment The list has classes `glystats_roc_res` and
-  `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_roc_res` and `glystats_res`.
 
 ## Details
 
@@ -92,15 +78,6 @@ as predictor and the binary group labels as response.
 
 The function requires exactly 2 groups in the specified grouping
 variable. If more than 2 groups are present, an error will be thrown.
-
-`gly_roc()` is the top-level API that works with
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-objects and supports the `add_info` parameter for joining experiment
-metadata.
-
-`gly_roc_()` is the underlying API that works with matrices and factor
-vectors directly, providing more flexibility for users who don't use the
-glyexp package.
 
 **Underlying Function:**
 

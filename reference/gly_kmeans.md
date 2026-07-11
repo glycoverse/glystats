@@ -15,8 +15,6 @@ gly_kmeans(
   add_info = TRUE,
   ...
 )
-
-gly_kmeans_(expr_mat, on = "variable", centers = 3, scale = TRUE, ...)
 ```
 
 ## Arguments
@@ -25,7 +23,8 @@ gly_kmeans_(expr_mat, on = "variable", centers = 3, scale = TRUE, ...)
 
   A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object containing expression matrix and sample information.
+  or `SummarizedExperiment` object containing an expression matrix and
+  sample information.
 
 - on:
 
@@ -47,17 +46,12 @@ gly_kmeans_(expr_mat, on = "variable", centers = 3, scale = TRUE, ...)
 
   A logical value. If TRUE (default), sample information from the
   experiment will be added to the result tibbles. If FALSE, only the
-  clustering results are returned. Only applicable to `gly_kmeans()`.
+  clustering results are returned.
 
 - ...:
 
   Additional arguments passed to
   [`stats::kmeans()`](https://rdrr.io/r/stats/kmeans.html).
-
-- expr_mat:
-
-  (Only for `gly_kmeans_()`) A numeric matrix with variables as rows and
-  samples as columns.
 
 ## Value
 
@@ -74,8 +68,7 @@ A list with three elements:
 - `raw_result`: The raw kmeans object from
   [`stats::kmeans()`](https://rdrr.io/r/stats/kmeans.html).
 
-- `meta_data` (only for `gly_kmeans()`): A list containing metadata from
-  the input experiment
+- `meta_data`: A list containing metadata from the input experiment
 
 ## Details
 
@@ -84,14 +77,6 @@ The function performs log2 transformation on the expression data
 variables are clustered based on their expression patterns across
 samples. When `on = "sample"`, samples are clustered based on their
 expression profiles across variables.
-
-`gly_kmeans()` is the top-level API that works with
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-objects and supports the `add_info` parameter for joining experiment
-metadata.
-
-`gly_kmeans_()` is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
 
 **Data Preparation:** Data is log2-transformed and optionally scaled
 before clustering.

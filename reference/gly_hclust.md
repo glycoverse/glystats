@@ -16,14 +16,6 @@ gly_hclust(
   add_info = TRUE,
   ...
 )
-
-gly_hclust_(
-  expr_mat,
-  on = "variable",
-  k_values = c(2, 3, 4, 5),
-  scale = TRUE,
-  ...
-)
 ```
 
 ## Arguments
@@ -32,7 +24,8 @@ gly_hclust_(
 
   A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object containing expression matrix and sample information.
+  or `SummarizedExperiment` object containing an expression matrix and
+  sample information.
 
 - on:
 
@@ -55,7 +48,7 @@ gly_hclust_(
 
   A logical value. If TRUE (default), sample information from the
   experiment will be added to the result tibbles. If FALSE, only the
-  clustering results are returned. Only applicable to `gly_hclust()`.
+  clustering results are returned.
 
 - ...:
 
@@ -64,11 +57,6 @@ gly_hclust_(
   [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html). Note: if
   both functions need a `method` parameter, use `dist.method` for
   distance and `hclust.method` for clustering method.
-
-- expr_mat:
-
-  (Only for `gly_hclust_()`) A numeric matrix with variables as rows and
-  samples as columns.
 
 ## Value
 
@@ -107,8 +95,7 @@ A list containing:
 - `raw_result`: The raw hclust object from
   [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html)
 
-- `meta_data` (only for `gly_hclust()`): A list containing metadata from
-  the input experiment
+- `meta_data`: A list containing metadata from the input experiment
 
 ## Details
 
@@ -117,14 +104,6 @@ The function performs log2 transformation on the expression data
 variables are clustered based on their expression patterns across
 samples. When `on = "sample"`, samples are clustered based on their
 expression profiles across variables.
-
-`gly_hclust()` is the top-level API that works with
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-objects and supports the `add_info` parameter for joining experiment
-metadata.
-
-`gly_hclust_()` is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
 
 **Distance Calculation:** Distance is calculated using
 [`stats::dist()`](https://rdrr.io/r/stats/dist.html) with the specified

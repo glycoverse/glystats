@@ -1,5 +1,27 @@
 # Changelog
 
+## glystats 0.11.0
+
+### Breaking changes
+
+- All `gly_*_()` matrix and vector interfaces are removed. Use the
+  corresponding `gly_*()` function with a
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  or `SummarizedExperiment` object instead. (#12)
+- `gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`,
+  `gly_enrich_wikipathways()`, `gly_enrich_do()`, `gly_enrich_ncg()`,
+  and `gly_enrich_dgn()` are removed. These functions were deprecated in
+  0.10.0. Use the corresponding functions in the `glyfun` package
+  instead. (#13)
+
+### New features
+
+- All `gly_*()` analysis functions and
+  [`filter_sig_vars()`](https://glycoverse.github.io/glystats/reference/filter_sig_vars.md)
+  now accept `SummarizedExperiment` objects in addition to
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  objects. (#14)
+
 ## glystats 0.10.1
 
 ### Minor improvements and bug fixes
@@ -19,16 +41,10 @@
 ### Deprecations
 
 - All enrichment analysis functions are now deprecated and will be
-  removed in a future version:
-  [`gly_enrich_go()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md),
-  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_kegg.md),
-  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_reactome.md),
-  [`gly_enrich_wikipathways()`](https://glycoverse.github.io/glystats/reference/gly_enrich_wikipathways.md),
-  [`gly_enrich_do()`](https://glycoverse.github.io/glystats/reference/gly_enrich_do.md),
-  [`gly_enrich_ncg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_ncg.md),
-  and
-  [`gly_enrich_dgn()`](https://glycoverse.github.io/glystats/reference/gly_enrich_dgn.md).
-  Use the corresponding functions in the `glyfun` package instead.
+  removed in a future version: `gly_enrich_go()`, `gly_enrich_kegg()`,
+  `gly_enrich_reactome()`, `gly_enrich_wikipathways()`,
+  `gly_enrich_do()`, `gly_enrich_ncg()`, and `gly_enrich_dgn()`. Use the
+  corresponding functions in the `glyfun` package instead.
 
 ## glystats 0.9.0
 
@@ -79,13 +95,10 @@
 
 ### Breaking changes
 
-- Refactored enrichment API
-  ([`gly_enrich_go()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md),
-  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_kegg.md),
-  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_reactome.md)).
-  These functions now use explicit parameters instead of `...`. Users
-  must update their code to use new parameters (e.g., `p_cutoff` instead
-  of `pvalueCutoff`).
+- Refactored enrichment API (`gly_enrich_go()`, `gly_enrich_kegg()`,
+  `gly_enrich_reactome()`). These functions now use explicit parameters
+  instead of `...`. Users must update their code to use new parameters
+  (e.g., `p_cutoff` instead of `pvalueCutoff`).
 - `gly_wgcna()`, `gly_wgcna_()`, `gly_consensus_clustering()`, and
   `gly_consensus_clustering_()` are deprecated and will be removed in a
   future version. These functions are too interactive and complex for a
@@ -93,26 +106,14 @@
 
 ### New features
 
-- Add
-  [`gly_enrich_wikipathways()`](https://glycoverse.github.io/glystats/reference/gly_enrich_wikipathways.md)
-  and
-  [`gly_enrich_wikipathways_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_wikipathways.md)
-  for WikiPathways enrichment analysis.
-- Add
-  [`gly_enrich_do()`](https://glycoverse.github.io/glystats/reference/gly_enrich_do.md)
-  and
-  [`gly_enrich_do_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_do.md)
-  for Disease Ontology enrichment analysis.
-- Add
-  [`gly_enrich_ncg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_ncg.md)
-  and
-  [`gly_enrich_ncg_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_ncg.md)
-  for Network of Cancer Genes enrichment analysis.
-- Add
-  [`gly_enrich_dgn()`](https://glycoverse.github.io/glystats/reference/gly_enrich_dgn.md)
-  and
-  [`gly_enrich_dgn_()`](https://glycoverse.github.io/glystats/reference/gly_enrich_dgn.md)
-  for DisGeNET enrichment analysis.
+- Add `gly_enrich_wikipathways()` and `gly_enrich_wikipathways_()` for
+  WikiPathways enrichment analysis.
+- Add `gly_enrich_do()` and `gly_enrich_do_()` for Disease Ontology
+  enrichment analysis.
+- Add `gly_enrich_ncg()` and `gly_enrich_ncg_()` for Network of Cancer
+  Genes enrichment analysis.
+- Add `gly_enrich_dgn()` and `gly_enrich_dgn_()` for DisGeNET enrichment
+  analysis.
 
 ## glystats 0.6.5
 
@@ -161,9 +162,8 @@
   for Analysis of Covariance (ANCOVA).
 - Add covariate support to
   [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
-  and
-  [`gly_limma_()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
-  through the `covariate_cols` and the `covariates` arguments.
+  and `gly_limma_()` through the `covariate_cols` and the `covariates`
+  arguments.
 
 ### Minor improvements and bug fixes
 
@@ -204,12 +204,8 @@
 
 ### Minor improvements and bug fixes
 
-- The `universe` argument of
-  [`gly_enrich_go()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md),
-  [`gly_enrich_kegg()`](https://glycoverse.github.io/glystats/reference/gly_enrich_kegg.md),
-  and
-  [`gly_enrich_reactome()`](https://glycoverse.github.io/glystats/reference/gly_enrich_reactome.md)
-  accepts a
+- The `universe` argument of `gly_enrich_go()`, `gly_enrich_kegg()`, and
+  `gly_enrich_reactome()` accepts a
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object now.
 - Optimize message output of
@@ -386,9 +382,7 @@ DEA functions. Now you can ensure these properties for all DEA results:
   where the column for the first orthogonal component score (`o1`) could
   be missing from the result.
 - Suppressed messages from dependency packages and extra blank lines
-  when running
-  [`gly_enrich_go()`](https://glycoverse.github.io/glystats/reference/gly_enrich_go.md)
-  for a cleaner console output.
+  when running `gly_enrich_go()` for a cleaner console output.
 - Removed redundant `glystats` S3 classes from the tibbles in the
   `tidy_result`, simplifying the output object structure.
 
@@ -424,15 +418,12 @@ makes `glystats` easier to use. And more importantly, it allows the
 
 - Make the parameters of
   [`gly_umap()`](https://glycoverse.github.io/glystats/reference/gly_umap.md)
-  and
-  [`gly_umap_()`](https://glycoverse.github.io/glystats/reference/gly_umap.md)
-  consistent.
+  and `gly_umap_()` consistent.
 - Fix a bug that some functions returned values with duplicated S3
   classes.
 - Fix inconsistent behaviours between
   [`gly_tsne()`](https://glycoverse.github.io/glystats/reference/gly_tsne.md)
-  and
-  [`gly_tsne_()`](https://glycoverse.github.io/glystats/reference/gly_tsne.md).
+  and `gly_tsne_()`.
 
 ## glystats 0.2.2
 
@@ -475,22 +466,18 @@ makes `glystats` easier to use. And more importantly, it allows the
   providing more flexibility for users who don’t use the glyexp package.
 - Add
   [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
-  and
-  [`gly_limma_()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
-  to perform differential analysis using the limma package.
+  and `gly_limma_()` to perform differential analysis using the limma
+  package.
 - Add
   [`gly_kmeans()`](https://glycoverse.github.io/glystats/reference/gly_kmeans.md)
-  and
-  [`gly_kmeans_()`](https://glycoverse.github.io/glystats/reference/gly_kmeans.md)
-  to perform K-means clustering.
+  and `gly_kmeans_()` to perform K-means clustering.
 - Add `gly_wgcna()` and `gly_wgcna_()` to perform WGCNA analysis.
 - Add `gly_consensus_clustering()` and `gly_consensus_clustering_()` to
   perform consensus clustering.
 - Add
   [`gly_cox()`](https://glycoverse.github.io/glystats/reference/gly_cox.md)
-  and
-  [`gly_cox_()`](https://glycoverse.github.io/glystats/reference/gly_cox.md)
-  to fit Cox proportional hazards model for survival analysis.
+  and `gly_cox_()` to fit Cox proportional hazards model for survival
+  analysis.
 - Add `ref_group` parameter to `gly_ttext()` and
   [`gly_wilcox()`](https://glycoverse.github.io/glystats/reference/gly_wilcox.md).
 

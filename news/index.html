@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.10.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,19 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.11.0" id="glystats-0110">glystats 0.11.0<a class="anchor" aria-label="anchor" href="#glystats-0110"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-11-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-11-0"></a></h3>
+<ul><li>All <code>gly_*_()</code> matrix and vector interfaces are removed. Use the corresponding <code>gly_*()</code> function with a <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> or <code>SummarizedExperiment</code> object instead. (#12)</li>
+<li>
+<code>gly_enrich_go()</code>, <code>gly_enrich_kegg()</code>, <code>gly_enrich_reactome()</code>, <code>gly_enrich_wikipathways()</code>, <code>gly_enrich_do()</code>, <code>gly_enrich_ncg()</code>, and <code>gly_enrich_dgn()</code> are removed. These functions were deprecated in 0.10.0. Use the corresponding functions in the <code>glyfun</code> package instead. (#13)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-11-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-11-0"></a></h3>
+<ul><li>All <code>gly_*()</code> analysis functions and <code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> now accept <code>SummarizedExperiment</code> objects in addition to <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects. (#14)</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.10.1" id="glystats-0101">glystats 0.10.1<a class="anchor" aria-label="anchor" href="#glystats-0101"></a></h2>
 <div class="section level3">
 <h3 id="minor-improvements-and-bug-fixes-0-10-1">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-10-1"></a></h3>
@@ -47,7 +60,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="deprecations-0-10-0">Deprecations<a class="anchor" aria-label="anchor" href="#deprecations-0-10-0"></a></h3>
-<ul><li>All enrichment analysis functions are now deprecated and will be removed in a future version: <code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>, <code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code>, <code><a href="../reference/gly_enrich_wikipathways.html">gly_enrich_wikipathways()</a></code>, <code><a href="../reference/gly_enrich_do.html">gly_enrich_do()</a></code>, <code><a href="../reference/gly_enrich_ncg.html">gly_enrich_ncg()</a></code>, and <code><a href="../reference/gly_enrich_dgn.html">gly_enrich_dgn()</a></code>. Use the corresponding functions in the <code>glyfun</code> package instead.</li>
+<ul><li>All enrichment analysis functions are now deprecated and will be removed in a future version: <code>gly_enrich_go()</code>, <code>gly_enrich_kegg()</code>, <code>gly_enrich_reactome()</code>, <code>gly_enrich_wikipathways()</code>, <code>gly_enrich_do()</code>, <code>gly_enrich_ncg()</code>, and <code>gly_enrich_dgn()</code>. Use the corresponding functions in the <code>glyfun</code> package instead.</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -83,16 +96,16 @@
 <h2 class="pkg-version" data-toc-text="0.7.0" id="glystats-070">glystats 0.7.0<a class="anchor" aria-label="anchor" href="#glystats-070"></a></h2>
 <div class="section level3">
 <h3 id="breaking-changes-0-7-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-7-0"></a></h3>
-<ul><li>Refactored enrichment API (<code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>, <code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code>). These functions now use explicit parameters instead of <code>...</code>. Users must update their code to use new parameters (e.g., <code>p_cutoff</code> instead of <code>pvalueCutoff</code>).</li>
+<ul><li>Refactored enrichment API (<code>gly_enrich_go()</code>, <code>gly_enrich_kegg()</code>, <code>gly_enrich_reactome()</code>). These functions now use explicit parameters instead of <code>...</code>. Users must update their code to use new parameters (e.g., <code>p_cutoff</code> instead of <code>pvalueCutoff</code>).</li>
 <li>
 <code>gly_wgcna()</code>, <code>gly_wgcna_()</code>, <code>gly_consensus_clustering()</code>, and <code>gly_consensus_clustering_()</code> are deprecated and will be removed in a future version. These functions are too interactive and complex for a pipeline-friendly package.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-0-7-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-0"></a></h3>
-<ul><li>Add <code><a href="../reference/gly_enrich_wikipathways.html">gly_enrich_wikipathways()</a></code> and <code><a href="../reference/gly_enrich_wikipathways.html">gly_enrich_wikipathways_()</a></code> for WikiPathways enrichment analysis.</li>
-<li>Add <code><a href="../reference/gly_enrich_do.html">gly_enrich_do()</a></code> and <code><a href="../reference/gly_enrich_do.html">gly_enrich_do_()</a></code> for Disease Ontology enrichment analysis.</li>
-<li>Add <code><a href="../reference/gly_enrich_ncg.html">gly_enrich_ncg()</a></code> and <code><a href="../reference/gly_enrich_ncg.html">gly_enrich_ncg_()</a></code> for Network of Cancer Genes enrichment analysis.</li>
-<li>Add <code><a href="../reference/gly_enrich_dgn.html">gly_enrich_dgn()</a></code> and <code><a href="../reference/gly_enrich_dgn.html">gly_enrich_dgn_()</a></code> for DisGeNET enrichment analysis.</li>
+<ul><li>Add <code>gly_enrich_wikipathways()</code> and <code>gly_enrich_wikipathways_()</code> for WikiPathways enrichment analysis.</li>
+<li>Add <code>gly_enrich_do()</code> and <code>gly_enrich_do_()</code> for Disease Ontology enrichment analysis.</li>
+<li>Add <code>gly_enrich_ncg()</code> and <code>gly_enrich_ncg_()</code> for Network of Cancer Genes enrichment analysis.</li>
+<li>Add <code>gly_enrich_dgn()</code> and <code>gly_enrich_dgn_()</code> for DisGeNET enrichment analysis.</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -135,7 +148,7 @@
 <div class="section level3">
 <h3 id="new-features-0-6-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-6-0"></a></h3>
 <ul><li>Add <code><a href="../reference/gly_ancova.html">gly_ancova()</a></code> for Analysis of Covariance (ANCOVA).</li>
-<li>Add covariate support to <code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code><a href="../reference/gly_limma.html">gly_limma_()</a></code> through the <code>covariate_cols</code> and the <code>covariates</code> arguments.</li>
+<li>Add covariate support to <code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code>gly_limma_()</code> through the <code>covariate_cols</code> and the <code>covariates</code> arguments.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="minor-improvements-and-bug-fixes-0-6-0">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-6-0"></a></h3>
@@ -170,7 +183,7 @@
 <h2 class="pkg-version" data-toc-text="0.5.5" id="glystats-055">glystats 0.5.5<a class="anchor" aria-label="anchor" href="#glystats-055"></a></h2>
 <div class="section level3">
 <h3 id="minor-improvements-and-bug-fixes-0-5-5">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-5-5"></a></h3>
-<ul><li>The <code>universe</code> argument of <code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code>, <code><a href="../reference/gly_enrich_kegg.html">gly_enrich_kegg()</a></code>, and <code><a href="../reference/gly_enrich_reactome.html">gly_enrich_reactome()</a></code> accepts a <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object now.</li>
+<ul><li>The <code>universe</code> argument of <code>gly_enrich_go()</code>, <code>gly_enrich_kegg()</code>, and <code>gly_enrich_reactome()</code> accepts a <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object now.</li>
 <li>Optimize message output of <code><a href="../reference/gly_limma.html">gly_limma()</a></code>.</li>
 <li>The columns from sample information or variable information are joined right after the <code>sample</code> or <code>variable</code> column in the results now, not appending to the end as previously.</li>
 <li>Update documentation of <code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> to inform about using the same experiment used for DEA.</li>
@@ -269,7 +282,7 @@
 <li>Improved the error message when a specified grouping column is not found in the sample information.</li>
 <li>Fixed a bug in <code><a href="../reference/gly_limma.html">gly_limma()</a></code> that could cause duplicated messages to be printed.</li>
 <li>Fixed a bug in <code><a href="../reference/gly_oplsda.html">gly_oplsda()</a></code> where the column for the first orthogonal component score (<code>o1</code>) could be missing from the result.</li>
-<li>Suppressed messages from dependency packages and extra blank lines when running <code><a href="../reference/gly_enrich_go.html">gly_enrich_go()</a></code> for a cleaner console output.</li>
+<li>Suppressed messages from dependency packages and extra blank lines when running <code>gly_enrich_go()</code> for a cleaner console output.</li>
 <li>Removed redundant <code>glystats</code> S3 classes from the tibbles in the <code>tidy_result</code>, simplifying the output object structure.</li>
 </ul></div>
 </div>
@@ -292,9 +305,9 @@
 <h2 class="pkg-version" data-toc-text="0.2.3" id="glystats-023">glystats 0.2.3<a class="anchor" aria-label="anchor" href="#glystats-023"></a></h2>
 <div class="section level3">
 <h3 id="minor-improvements-and-bug-fixes-0-2-3">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-2-3"></a></h3>
-<ul><li>Make the parameters of <code><a href="../reference/gly_umap.html">gly_umap()</a></code> and <code><a href="../reference/gly_umap.html">gly_umap_()</a></code> consistent.</li>
+<ul><li>Make the parameters of <code><a href="../reference/gly_umap.html">gly_umap()</a></code> and <code>gly_umap_()</code> consistent.</li>
 <li>Fix a bug that some functions returned values with duplicated S3 classes.</li>
-<li>Fix inconsistent behaviours between <code><a href="../reference/gly_tsne.html">gly_tsne()</a></code> and <code><a href="../reference/gly_tsne.html">gly_tsne_()</a></code>.</li>
+<li>Fix inconsistent behaviours between <code><a href="../reference/gly_tsne.html">gly_tsne()</a></code> and <code>gly_tsne_()</code>.</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -324,11 +337,11 @@
 <div class="section level3">
 <h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
 <ul><li>Add a new set of API functions: all <code>gly_xxx()</code> functions now have a lower API counterpart <code>gly_xxx_()</code> that works with matrices directly, providing more flexibility for users who don’t use the glyexp package.</li>
-<li>Add <code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code><a href="../reference/gly_limma.html">gly_limma_()</a></code> to perform differential analysis using the limma package.</li>
-<li>Add <code><a href="../reference/gly_kmeans.html">gly_kmeans()</a></code> and <code><a href="../reference/gly_kmeans.html">gly_kmeans_()</a></code> to perform K-means clustering.</li>
+<li>Add <code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code>gly_limma_()</code> to perform differential analysis using the limma package.</li>
+<li>Add <code><a href="../reference/gly_kmeans.html">gly_kmeans()</a></code> and <code>gly_kmeans_()</code> to perform K-means clustering.</li>
 <li>Add <code>gly_wgcna()</code> and <code>gly_wgcna_()</code> to perform WGCNA analysis.</li>
 <li>Add <code>gly_consensus_clustering()</code> and <code>gly_consensus_clustering_()</code> to perform consensus clustering.</li>
-<li>Add <code><a href="../reference/gly_cox.html">gly_cox()</a></code> and <code><a href="../reference/gly_cox.html">gly_cox_()</a></code> to fit Cox proportional hazards model for survival analysis.</li>
+<li>Add <code><a href="../reference/gly_cox.html">gly_cox()</a></code> and <code>gly_cox_()</code> to fit Cox proportional hazards model for survival analysis.</li>
 <li>Add <code>ref_group</code> parameter to <code>gly_ttext()</code> and <code><a href="../reference/gly_wilcox.html">gly_wilcox()</a></code>.</li>
 </ul></div>
 <div class="section level3">
@@ -347,7 +360,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

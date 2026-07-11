@@ -95,9 +95,10 @@ filter_sig_vars(
 
 - exp:
 
-  An
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html).
-  Please use the same experiment used to generate the DEA result.
+  A
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  or `SummarizedExperiment` object. Use the same object used to generate
+  the DEA result.
 
 - res:
 
@@ -156,9 +157,7 @@ filter_sig_vars(
 
 ## Value
 
-An new
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-object.
+A filtered object of the same class as `exp`.
 
 ## Examples
 

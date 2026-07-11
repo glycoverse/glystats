@@ -8,14 +8,6 @@ p-values for all pairs, with optional multiple testing correction.
 
 ``` r
 gly_cor(exp, on = "variable", method = "pearson", p_adj_method = "BH", ...)
-
-gly_cor_(
-  expr_mat,
-  on = "variable",
-  method = "pearson",
-  p_adj_method = "BH",
-  ...
-)
 ```
 
 ## Arguments
@@ -24,7 +16,8 @@ gly_cor_(
 
   A
   [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  object containing expression matrix and sample information.
+  or `SummarizedExperiment` object containing an expression matrix and
+  sample information.
 
 - on:
 
@@ -49,11 +42,6 @@ gly_cor_(
   Additional arguments passed to
   [`Hmisc::rcorr()`](https://rdrr.io/pkg/Hmisc/man/rcorr.html).
 
-- expr_mat:
-
-  (Only for `gly_cor_()`) A numeric matrix with variables as rows and
-  samples as columns.
-
 ## Value
 
 A list with three elements:
@@ -75,9 +63,8 @@ A list with three elements:
 
 - `raw_result`: The raw rcorr object from Hmisc::rcorr()
 
-- `meta_data` (only for `gly_cor()`): A list containing metadata from
-  the input experiment The list has classes `glystats_cor_res` and
-  `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment The
+  list has classes `glystats_cor_res` and `glystats_res`.
 
 ## Details
 
@@ -86,13 +73,6 @@ The function performs log2 transformation on the expression data
 (default), correlations are calculated between variables across samples.
 When `on = "sample"`, correlations are calculated between samples across
 variables.
-
-`gly_cor()` is the top-level API that works with
-[`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-objects。
-
-`gly_cor_()` is the underlying API that works with matrices directly,
-providing more flexibility for users who don't use the glyexp package.
 
 **Correlation Calculation:** Correlation coefficients and p-values are
 calculated using
