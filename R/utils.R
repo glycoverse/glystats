@@ -7,7 +7,10 @@
 #' @returns `NULL` invisibly, or an error if `exp` is unsupported.
 #' @noRd
 .assert_data_container <- function(exp) {
-  if (glyexp::is_experiment(exp) || methods::is(exp, "SummarizedExperiment")) {
+  if (
+    inherits(exp, "glyexp_experiment") ||
+      methods::is(exp, "SummarizedExperiment")
+  ) {
     return(invisible(NULL))
   }
 

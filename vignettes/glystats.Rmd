@@ -30,6 +30,7 @@ to get up to speed.
 ```{r setup}
 library(glystats)
 library(glyexp)
+library(SummarizedExperiment)
 library(glyread)
 library(glyclean)
 library(dplyr)
@@ -49,7 +50,11 @@ Look at that! 🎉 We've got a [glyexp::experiment()] packed with 12 samples and
 That's plenty of data to work with!
 
 ```{r}
-get_var_info(exp)
+if (inherits(exp, "glyexp_experiment")) {
+  get_var_info(exp)
+} else {
+  tibble::as_tibble(rowData(exp), rownames = "variable")
+}
 ```
 
 The variable information tibble is like a detailed ID card for each glycoform 🆔 -
@@ -57,7 +62,11 @@ it contains everything you need to know: the protein,
 glycosylation site, and glycan structures.
 
 ```{r}
-get_sample_info(exp)
+if (inherits(exp, "glyexp_experiment")) {
+  get_sample_info(exp)
+} else {
+  tibble::as_tibble(colData(exp), rownames = "sample")
+}
 ```
 
 Our sample information tibble features a crucial "group" column 🏷️.
