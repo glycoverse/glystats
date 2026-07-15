@@ -19,16 +19,116 @@ library(glystats)
 library(glyexp)
 #> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
 #> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
+library(SummarizedExperiment)
+#> Loading required package: MatrixGenerics
+#> Loading required package: matrixStats
+#> 
+#> Attaching package: 'MatrixGenerics'
+#> The following objects are masked from 'package:matrixStats':
+#> 
+#>     colAlls, colAnyNAs, colAnys, colAvgsPerRowSet, colCollapse,
+#>     colCounts, colCummaxs, colCummins, colCumprods, colCumsums,
+#>     colDiffs, colIQRDiffs, colIQRs, colLogSumExps, colMadDiffs,
+#>     colMads, colMaxs, colMeans2, colMedians, colMins, colOrderStats,
+#>     colProds, colQuantiles, colRanges, colRanks, colSdDiffs, colSds,
+#>     colSums2, colTabulates, colVarDiffs, colVars, colWeightedMads,
+#>     colWeightedMeans, colWeightedMedians, colWeightedSds,
+#>     colWeightedVars, rowAlls, rowAnyNAs, rowAnys, rowAvgsPerColSet,
+#>     rowCollapse, rowCounts, rowCummaxs, rowCummins, rowCumprods,
+#>     rowCumsums, rowDiffs, rowIQRDiffs, rowIQRs, rowLogSumExps,
+#>     rowMadDiffs, rowMads, rowMaxs, rowMeans2, rowMedians, rowMins,
+#>     rowOrderStats, rowProds, rowQuantiles, rowRanges, rowRanks,
+#>     rowSdDiffs, rowSds, rowSums2, rowTabulates, rowVarDiffs, rowVars,
+#>     rowWeightedMads, rowWeightedMeans, rowWeightedMedians,
+#>     rowWeightedSds, rowWeightedVars
+#> Loading required package: GenomicRanges
+#> Loading required package: stats4
+#> Loading required package: BiocGenerics
+#> Loading required package: generics
+#> 
+#> Attaching package: 'generics'
+#> The following objects are masked from 'package:base':
+#> 
+#>     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,
+#>     setequal, union
+#> 
+#> Attaching package: 'BiocGenerics'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     IQR, mad, sd, var, xtabs
+#> The following objects are masked from 'package:base':
+#> 
+#>     anyDuplicated, aperm, append, as.data.frame, basename, cbind,
+#>     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
+#>     get, grep, grepl, is.unsorted, lapply, Map, mapply, match, mget,
+#>     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+#>     rbind, Reduce, rownames, sapply, saveRDS, table, tapply, unique,
+#>     unsplit, which.max, which.min
+#> Loading required package: S4Vectors
+#> 
+#> Attaching package: 'S4Vectors'
+#> The following object is masked from 'package:utils':
+#> 
+#>     findMatches
+#> The following objects are masked from 'package:base':
+#> 
+#>     expand.grid, I, unname
+#> Loading required package: IRanges
+#> Loading required package: Seqinfo
+#> Loading required package: Biobase
+#> Welcome to Bioconductor
+#> 
+#>     Vignettes contain introductory material; view with
+#>     'browseVignettes()'. To cite Bioconductor, see
+#>     'citation("Biobase")', and for packages 'citation("pkgname")'.
+#> 
+#> Attaching package: 'Biobase'
+#> The following object is masked from 'package:MatrixGenerics':
+#> 
+#>     rowMedians
+#> The following objects are masked from 'package:matrixStats':
+#> 
+#>     anyMissing, rowMedians
+#> The following object is masked from 'package:glyexp':
+#> 
+#>     samples
 library(glyread)
 library(glyclean)
 #> 
 #> Attaching package: 'glyclean'
+#> The following object is masked from 'package:S4Vectors':
+#> 
+#>     aggregate
 #> The following object is masked from 'package:stats':
 #> 
 #>     aggregate
 library(dplyr)
 #> 
 #> Attaching package: 'dplyr'
+#> The following object is masked from 'package:Biobase':
+#> 
+#>     combine
+#> The following objects are masked from 'package:GenomicRanges':
+#> 
+#>     intersect, setdiff, union
+#> The following object is masked from 'package:Seqinfo':
+#> 
+#>     intersect
+#> The following objects are masked from 'package:IRanges':
+#> 
+#>     collapse, desc, intersect, setdiff, slice, union
+#> The following objects are masked from 'package:S4Vectors':
+#> 
+#>     first, intersect, rename, setdiff, setequal, union
+#> The following objects are masked from 'package:BiocGenerics':
+#> 
+#>     combine, intersect, setdiff, setequal, union
+#> The following object is masked from 'package:generics':
+#> 
+#>     explain
+#> The following object is masked from 'package:matrixStats':
+#> 
+#>     count
 #> The following objects are masked from 'package:stats':
 #> 
 #>     filter, lag
@@ -49,23 +149,23 @@ exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info
 #> ℹ Finding leader proteins
 #> ✔ Finding leader proteins [96ms]
 #> 
-#> ℹ Reading dataColumn group converted to <factor>.ℹ Parsing glycan compositions and structures
-#> Column group converted to <factor>.✔ Parsing glycan compositions and structures [363ms]
+#> ℹ Reading dataℹ Parsing glycan compositions and structures
+#> ✔ Parsing glycan compositions and structures [413ms]
 #> 
-#> ℹ Reading data✔ Reading data [927ms]
+#> ℹ Reading data✔ Reading data [936ms]
 #> 
-#> 
-#> ── Normalizing data ──
-#> 
-#> ℹ Normalization method: `normalize_median()`
-#> ℹ Reason: default for "glycoproteomics".
-#> ✔ Normalization completed.
 #> 
 #> ── Removing variables with too many missing values ──
 #> 
 #> ℹ Applying preset "discovery"...
 #> ℹ Total removed: 2 (0.67%) variables.
 #> ✔ Variable removal completed.
+#> 
+#> ── Normalizing data ──
+#> 
+#> ℹ Normalization method: `normalize_median()`
+#> ℹ Reason: default for "glycoproteomics".
+#> ✔ Normalization completed.
 #> 
 #> ── Imputing missing values ──
 #> 
@@ -90,10 +190,12 @@ exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info
 #> ✔ Batch correction completed.
 exp
 #> 
-#> ── Glycoproteomics Experiment ──────────────────────────────────────────────────
-#> ℹ Expression matrix: 12 samples, 225 variables
-#> ℹ Sample information fields: group <fct>
-#> ℹ Variable information fields: protein <chr>, glycan_composition <comp>, protein_site <int>, gene <chr>
+#> ── GlycoproteomicSE ────────────────────────────────────────────────────────────
+#> ℹ Abundance assay: 12 samples, 225 variables
+#> ℹ Glycan type: N
+#> ℹ Row data fields: protein <chr>, glycan_composition <comp>, protein_site <int>, gene <chr>
+#> ℹ Column data fields: group <fct>
+#> ℹ Metadata fields: exp_type <chr>, glycan_type <chr>, quant_method <chr>
 ```
 
 Look at that! 🎉 We’ve got a \[glyexp::experiment()\] packed with 12
@@ -101,10 +203,14 @@ samples and 263 glycoforms. That’s plenty of data to work with!
 
 ``` r
 
-get_var_info(exp)
+if (inherits(exp, "glyexp_experiment")) {
+  get_var_info(exp)
+} else {
+  tibble::as_tibble(rowData(exp), rownames = "variable")
+}
 #> # A tibble: 225 × 5
 #>    variable                        protein glycan_composition protein_site gene 
-#>    <glue>                          <chr>   <comp>                    <int> <chr>
+#>    <chr>                           <chr>   <comp>                    <int> <chr>
 #>  1 P08185-176-Hex(5)HexNAc(4)NeuA… P08185  Hex(5)HexNAc(4)Ne…          176 SERP…
 #>  2 P04196-344-Hex(5)HexNAc(4)NeuA… P04196  Hex(5)HexNAc(4)Ne…          344 HRG  
 #>  3 P04196-344-Hex(5)HexNAc(4)      P04196  Hex(5)HexNAc(4)             344 HRG  
@@ -124,7 +230,11 @@ glycosylation site, and glycan structures.
 
 ``` r
 
-get_sample_info(exp)
+if (inherits(exp, "glyexp_experiment")) {
+  get_sample_info(exp)
+} else {
+  tibble::as_tibble(colData(exp), rownames = "sample")
+}
 #> # A tibble: 12 × 2
 #>    sample                  group
 #>    <chr>                   <fct>
@@ -199,7 +309,7 @@ to get the tidy result tibble:
 get_tidy_result(anova_res, "main_test")
 #> # A tibble: 225 × 14
 #>    variable     protein glycan_composition protein_site gene  term     df  sumsq
-#>    <glue>       <chr>   <comp>                    <int> <chr> <chr> <dbl>  <dbl>
+#>    <chr>        <chr>   <comp>                    <int> <chr> <chr> <dbl>  <dbl>
 #>  1 P08185-176-… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… group     3  55.7 
 #>  2 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 158.  
 #>  3 P04196-344-… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 138.  
@@ -246,7 +356,7 @@ exp |>
 #> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
 #> # A tibble: 54 × 14
 #>    variable      protein glycan_composition protein_site gene  term     df sumsq
-#>    <glue>        <chr>   <comp>                    <int> <chr> <chr> <dbl> <dbl>
+#>    <chr>         <chr>   <comp>                    <int> <chr> <chr> <dbl> <dbl>
 #>  1 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 158. 
 #>  2 P04196-344-H… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 138. 
 #>  3 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 496. 
