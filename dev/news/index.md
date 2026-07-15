@@ -2,6 +2,13 @@
 
 ## glystats (development version)
 
+## glystats 0.11.1
+
+- Statistical analysis functions now recognize legacy
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  and current `SummarizedExperiment` containers consistently across
+  supported `glyexp` versions.
+
 ## glystats 0.11.0
 
 ### Breaking changes
