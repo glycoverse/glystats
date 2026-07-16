@@ -15,9 +15,11 @@ gly_cor(exp, on = "variable", method = "pearson", p_adj_method = "BH", ...)
 - exp:
 
   A
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  or `SummarizedExperiment` object containing an expression matrix and
-  sample information.
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
+  or
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
+  object, or another `SummarizedExperiment` containing an expression
+  matrix and sample information.
 
 - on:
 

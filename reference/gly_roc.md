@@ -16,9 +16,11 @@ gly_roc(exp, group_col = "group", pos_class = NULL, add_info = TRUE)
 - exp:
 
   A
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  or `SummarizedExperiment` object containing an expression matrix and
-  sample information.
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
+  or
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
+  object, or another `SummarizedExperiment` containing an expression
+  matrix and sample information.
 
 - group_col:
 

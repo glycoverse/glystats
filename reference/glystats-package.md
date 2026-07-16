@@ -9,8 +9,9 @@ clustering), network analysis (weighted gene co-expression network
 analysis, WGCNA), survival modeling (Cox proportional hazards),
 correlation analysis, and ROC/AUC evaluation. All user-facing functions
 follow the gly\_\*() naming convention to facilitate auto-completion in
-RStudio. Analysis functions accept 'glyexp' experiment and
-'SummarizedExperiment' objects as their unified data interface.
+RStudio. Analysis functions accept 'glyexp' 'GlycomicSE',
+'GlycoproteomicSE', and 'SummarizedExperiment' objects as their unified
+data interface.
 
 ## See also
 

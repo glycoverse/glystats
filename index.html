@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Statistical Analysis of Glycoproteomics and Glycomics Data">
-<meta name="description" content="Provides a unified toolbox for bioinformatics analyses of glycomics and glycoproteomics data. Implemented methods include differential testing (t-test, Wilcoxon rank-sum test, ANOVA, Kruskal–Wallis), multivariate modeling and visualization (PCA, t-SNE, UMAP), supervised learning (PLS-DA, OPLS-DA), clustering (k-means, hierarchical, consensus clustering), network analysis (weighted gene co-expression network analysis, WGCNA), survival modeling (Cox proportional hazards), correlation analysis, and ROC/AUC evaluation. All user-facing functions follow the gly_*() naming convention to facilitate auto-completion in RStudio. Analysis functions accept glyexp experiment and SummarizedExperiment objects as their unified data interface.">
-<meta property="og:description" content="Provides a unified toolbox for bioinformatics analyses of glycomics and glycoproteomics data. Implemented methods include differential testing (t-test, Wilcoxon rank-sum test, ANOVA, Kruskal–Wallis), multivariate modeling and visualization (PCA, t-SNE, UMAP), supervised learning (PLS-DA, OPLS-DA), clustering (k-means, hierarchical, consensus clustering), network analysis (weighted gene co-expression network analysis, WGCNA), survival modeling (Cox proportional hazards), correlation analysis, and ROC/AUC evaluation. All user-facing functions follow the gly_*() naming convention to facilitate auto-completion in RStudio. Analysis functions accept glyexp experiment and SummarizedExperiment objects as their unified data interface.">
+<meta name="description" content="Provides a unified toolbox for bioinformatics analyses of glycomics and glycoproteomics data. Implemented methods include differential testing (t-test, Wilcoxon rank-sum test, ANOVA, Kruskal–Wallis), multivariate modeling and visualization (PCA, t-SNE, UMAP), supervised learning (PLS-DA, OPLS-DA), clustering (k-means, hierarchical, consensus clustering), network analysis (weighted gene co-expression network analysis, WGCNA), survival modeling (Cox proportional hazards), correlation analysis, and ROC/AUC evaluation. All user-facing functions follow the gly_*() naming convention to facilitate auto-completion in RStudio. Analysis functions accept glyexp GlycomicSE, GlycoproteomicSE, and SummarizedExperiment objects as their unified data interface.">
+<meta property="og:description" content="Provides a unified toolbox for bioinformatics analyses of glycomics and glycoproteomics data. Implemented methods include differential testing (t-test, Wilcoxon rank-sum test, ANOVA, Kruskal–Wallis), multivariate modeling and visualization (PCA, t-SNE, UMAP), supervised learning (PLS-DA, OPLS-DA), clustering (k-means, hierarchical, consensus clustering), network analysis (weighted gene co-expression network analysis, WGCNA), survival modeling (Cox proportional hazards), correlation analysis, and ROC/AUC evaluation. All user-facing functions follow the gly_*() naming convention to facilitate auto-completion in RStudio. Analysis functions accept glyexp GlycomicSE, GlycoproteomicSE, and SummarizedExperiment objects as their unified data interface.">
 <meta property="og:image" content="https://glycoverse.github.io/glystats/logo.png">
 </head>
 <body>
@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.11.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,12 +96,12 @@
 <h2 id="role-in-glycoverse">Role in <code>glycoverse</code>
 <a class="anchor" aria-label="anchor" href="#role-in-glycoverse"></a>
 </h2>
-<p><code>glystats</code> is the downstream analysis package in the <code>glycoverse</code> ecosystem. It provides statistical analysis functions for <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> objects. A common workflow is to use <a href="https://github.com/glycoverse/glyread" class="external-link">glyread</a> to import data, <a href="https://github.com/glycoverse/glyclean" class="external-link">glyclean</a> to preprocess data, and then <code>glystats</code> to perform statistical analysis.</p>
+<p><code>glystats</code> is the downstream analysis package in the <code>glycoverse</code> ecosystem. It provides statistical analysis functions for <code><a href="https://glycoverse.github.io/glyexp/reference/GlycomicSE.html" class="external-link">glyexp::GlycomicSE</a></code> and <code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE</a></code> objects. A common workflow is to use <a href="https://github.com/glycoverse/glyread" class="external-link">glyread</a> to import data, <a href="https://github.com/glycoverse/glyclean" class="external-link">glyclean</a> to preprocess data, and then <code>glystats</code> to perform statistical analysis.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>Say we already have a preprocessed experiment object called <code>exp</code>:</p>
+<p>Say we already have a preprocessed glycomics or glycoproteomics container called <code>exp</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Two-sample t-test</span></span>
 <span><span class="va">ttest_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gly_ttest.html">gly_ttest</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span>
@@ -111,7 +111,7 @@
 <span></span>
 <span><span class="co"># ROC analysis</span></span>
 <span><span class="va">roc_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gly_roc.html">gly_roc</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span></code></pre></div>
-<p>That’s it! These functions use <code>glycoverse</code> column conventions to load needed data and perform analysis. All functions start with <code>gly_</code> to leverage the auto-completion in RStudio. They accept an <code><a href="https://glycoverse.github.io/glyexp/reference/experiment.html" class="external-link">glyexp::experiment()</a></code> object, and return analysis result as a tibble or a list of tibbles. See documentation for each function for more details.</p>
+<p>That’s it! These functions use <code>glycoverse</code> column conventions to load needed data and perform analysis. All functions start with <code>gly_</code> to leverage the auto-completion in RStudio. They accept a <code><a href="https://glycoverse.github.io/glyexp/reference/GlycomicSE.html" class="external-link">glyexp::GlycomicSE</a></code> or <code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE</a></code> object, and return analysis result as a tibble or a list of tibbles. See documentation for each function for more details.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">

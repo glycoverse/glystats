@@ -96,9 +96,11 @@ filter_sig_vars(
 - exp:
 
   A
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  or `SummarizedExperiment` object. Use the same object used to generate
-  the DEA result.
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
+  or
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
+  object, or another `SummarizedExperiment`. Use the same object used to
+  generate the DEA result.
 
 - res:
 
@@ -171,7 +173,7 @@ library(glyclean)
 #>     aggregate
 
 exp <- auto_clean(real_experiment) |>
-  glyexp::slice_head_var(n = 10)
+  glyexp::slice_head_row(n = 10)
 #> 
 #> ── Removing variables with too many missing values ──
 #> 
