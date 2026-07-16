@@ -151,9 +151,9 @@ exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info
 #> ✔ Finding leader proteins [96ms]
 #> 
 #> ℹ Reading dataℹ Parsing glycan compositions and structures
-#> ✔ Parsing glycan compositions and structures [390ms]
+#> ✔ Parsing glycan compositions and structures [383ms]
 #> 
-#> ℹ Reading data✔ Reading data [925ms]
+#> ℹ Reading data✔ Reading data [907ms]
 #> 
 #> 
 #> ── Removing variables with too many missing values ──
