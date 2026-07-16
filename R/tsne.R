@@ -3,8 +3,9 @@
 #' Perform t-SNE dimensionality reduction on the expression data.
 #' The function uses `Rtsne::Rtsne()` to perform t-SNE analysis.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   an expression matrix and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing an expression matrix and
+#'   sample information.
 #' @param dims Number of output dimensions. Default is 2.
 #' @param perplexity Perplexity parameter for t-SNE. Default is 30.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment

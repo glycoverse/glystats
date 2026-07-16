@@ -3,8 +3,9 @@
 #' Perform UMAP dimensionality reduction on the expression data.
 #' The function uses `uwot::umap()` to perform UMAP analysis.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   an expression matrix and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing an expression matrix and
+#'   sample information.
 #' @param n_neighbors Number of neighbors to consider for each point. Default is 15.
 #' @param n_components Number of output dimensions. Default is 2.
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment

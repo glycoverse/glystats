@@ -4,8 +4,9 @@
 #' The function supports Student's t-test for comparing two groups.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   an expression matrix and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing an expression matrix and
+#'   sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -139,8 +140,9 @@ gly_ttest <- function(
 #' The function supports non-parametric comparison of two groups.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   an expression matrix and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing an expression matrix and
+#'   sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.

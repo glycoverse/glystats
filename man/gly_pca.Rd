@@ -7,8 +7,9 @@
 gly_pca(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
-an expression matrix and sample information.}
+\item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
+or another \code{SummarizedExperiment} containing an expression matrix and
+sample information.}
 
 \item{center}{A logical indicating whether to center the data. Default is TRUE.}
 

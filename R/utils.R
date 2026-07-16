@@ -2,7 +2,8 @@
 
 #' Check a glystats data-container input
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object.
+#' @param exp A `glyexp::GlycomicSE`, `glyexp::GlycoproteomicSE`, or another
+#'   `SummarizedExperiment` object.
 #'
 #' @returns `NULL` invisibly, or an error if `exp` is unsupported.
 #' @noRd

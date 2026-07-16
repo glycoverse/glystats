@@ -20,11 +20,12 @@ PCA, survival analysis, and much more! 🧬
 `glystats` brings all these powerful analyses together under one unified,
 user-friendly interface.
 
-**🎯 Key Feature:** Every `glystats` analysis accepts a [glyexp::experiment()],
-the unified data interface at the heart of the `glycoverse` ecosystem 💓
+**🎯 Key Feature:** Every `glystats` analysis accepts
+[glyexp::GlycomicSE()] and [glyexp::GlycoproteomicSE()] containers,
+the unified data interfaces at the heart of the `glycoverse` ecosystem 💓
 
-New to [glyexp::experiment()]?
-No worries! Check out its [introduction](https://glycoverse.github.io/glyexp/articles/glyexp.html) first
+New to these containers?
+No worries! Check out the [glyexp introduction](https://glycoverse.github.io/glyexp/articles/glyexp.html) first
 to get up to speed.
 
 ```{r setup}
@@ -46,15 +47,12 @@ exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info
 exp
 ```
 
-Look at that! 🎉 We've got a [glyexp::experiment()] packed with 12 samples and 263 glycoforms.
+Look at that! 🎉 We've got a [glyexp::GlycoproteomicSE()] packed with 12
+samples and 263 glycoforms.
 That's plenty of data to work with!
 
 ```{r}
-if (inherits(exp, "glyexp_experiment")) {
-  get_var_info(exp)
-} else {
-  tibble::as_tibble(rowData(exp), rownames = "variable")
-}
+tibble::as_tibble(rowData(exp), rownames = "variable")
 ```
 
 The variable information tibble is like a detailed ID card for each glycoform 🆔 -
@@ -62,11 +60,7 @@ it contains everything you need to know: the protein,
 glycosylation site, and glycan structures.
 
 ```{r}
-if (inherits(exp, "glyexp_experiment")) {
-  get_sample_info(exp)
-} else {
-  tibble::as_tibble(colData(exp), rownames = "sample")
-}
+tibble::as_tibble(colData(exp), rownames = "sample")
 ```
 
 Our sample information tibble features a crucial "group" column 🏷️.
@@ -165,7 +159,8 @@ Here's your complete toolkit for glycomics and glycoproteomics data analysis:
 Ready to dive deeper into the `glycoverse`? Here's your roadmap to success:
 
 1. **📥 Data Import:** Start with [glyread](https://glycoverse.github.io/glyread/articles/glyread.html)
-   to seamlessly import your data into `glyexp::experiment()` objects
+   to import your data into `glyexp::GlycomicSE` or
+   `glyexp::GlycoproteomicSE` objects
 
 2. **🧹 Data Preprocessing:** Use [glyclean](https://glycoverse.github.io/glyclean/articles/glyclean.html)
    to polish and prepare your data for analysis

@@ -3,8 +3,9 @@
 #' Fit a Cox proportional hazards model for each variable in the expression data,
 #' and extract p-values and hazard ratios from it.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   an expression matrix and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing an expression matrix and
+#'   sample information.
 #' @param time_col A character string specifying the column name in sample information
 #'   that contains survival time. Default is "time".
 #' @param event_col A character string specifying the column name in sample information

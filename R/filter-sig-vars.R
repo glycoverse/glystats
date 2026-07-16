@@ -5,8 +5,9 @@
 #' It supports results from all glystats DEA functions including
 #' [gly_anova()], [gly_ancova()], [gly_kruskal()], [gly_ttest()], [gly_wilcox()], and [gly_limma()].
 #'
-#' @param exp A [glyexp::experiment()] or `SummarizedExperiment` object. Use the
-#'   same object used to generate the DEA result.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment`. Use the same object used to generate the
+#'   DEA result.
 #' @param res A glystats result object from a glystats DEA function.
 #' @param p_adj_cutoff The threshold for p-adjusted values. Default is 0.05.
 #' @param p_val_cutoff The threshold for p-values. We don't recommend using this. Default is NULL.
@@ -23,7 +24,7 @@
 #' library(glyclean)
 #'
 #' exp <- auto_clean(real_experiment) |>
-#'   glyexp::slice_head_var(n = 10)
+#'   glyexp::slice_head_row(n = 10)
 #' res <- gly_anova(exp)
 #' sig_exp <- filter_sig_vars(exp, res)
 #'

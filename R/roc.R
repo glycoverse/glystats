@@ -5,8 +5,9 @@
 #' Area Under the Curve (AUC) values for each variable to assess their discriminatory
 #' power between two groups.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   an expression matrix and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing an expression matrix and
+#'   sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'   in the sample information. Default is `"group"`. The grouping variable must have
 #'   exactly 2 levels for binary classification.

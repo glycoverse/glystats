@@ -14,8 +14,9 @@ gly_cox(
 )
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
-an expression matrix and sample information.}
+\item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
+or another \code{SummarizedExperiment} containing an expression matrix and
+sample information.}
 
 \item{time_col}{A character string specifying the column name in sample information
 that contains survival time. Default is "time".}

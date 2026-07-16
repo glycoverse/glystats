@@ -1,5 +1,7 @@
 # glystats (development version)
 
+* Documentation and vignettes now recommend `GlycomicSE` and `GlycoproteomicSE` containers with `SummarizedExperiment` accessors for Stage II of glycoverse/glyexp#15. (#15)
+
 # glystats 0.11.1
 
 * Statistical analysis functions now recognize legacy `glyexp::experiment()` and current `SummarizedExperiment` containers consistently across supported `glyexp` versions.

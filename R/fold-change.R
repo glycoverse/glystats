@@ -5,7 +5,8 @@
 #' When you run this function, you will see message about "Ref Group" and "Test Group".
 #' "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment`.
 #' @param group_col The column name of the group information in the sample information.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the fold change results are returned.

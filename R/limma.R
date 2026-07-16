@@ -3,8 +3,9 @@
 #' Perform differential expression analysis using linear models with empirical Bayes
 #' moderation from the limma package. Supports both two-group and multi-group comparisons.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   expression data and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing expression data and sample
+#'   information.
 #' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param covariate_cols A character vector specifying column names in sample information

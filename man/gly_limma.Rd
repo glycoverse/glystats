@@ -17,8 +17,9 @@ gly_limma(
 )
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
-expression data and sample information.}
+\item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
+or another \code{SummarizedExperiment} containing expression data and sample
+information.}
 
 \item{group_col}{A character string specifying the column name in sample information
 that contains group labels. Default is "group".}
