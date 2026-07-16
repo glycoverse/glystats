@@ -69,14 +69,15 @@ glycoverse](https://github.com/glycoverse/glycoverse#installation).
 
 `glystats` is the downstream analysis package in the `glycoverse`
 ecosystem. It provides statistical analysis functions for
-`glyexp::experiment()` objects. A common workflow is to use
-[glyread](https://github.com/glycoverse/glyread) to import data,
-[glyclean](https://github.com/glycoverse/glyclean) to preprocess data,
-and then `glystats` to perform statistical analysis.
+`glyexp::GlycomicSE` and `glyexp::GlycoproteomicSE` objects. A common
+workflow is to use [glyread](https://github.com/glycoverse/glyread) to
+import data, [glyclean](https://github.com/glycoverse/glyclean) to
+preprocess data, and then `glystats` to perform statistical analysis.
 
 ## Example
 
-Say we already have a preprocessed experiment object called `exp`:
+Say we already have a preprocessed glycomics or glycoproteomics
+container called `exp`:
 
 ``` r
 # Two-sample t-test
@@ -91,6 +92,7 @@ roc_res <- gly_roc(exp)
 
 That’s it! These functions use `glycoverse` column conventions to load
 needed data and perform analysis. All functions start with `gly_` to
-leverage the auto-completion in RStudio. They accept an
-`glyexp::experiment()` object, and return analysis result as a tibble or
-a list of tibbles. See documentation for each function for more details.
+leverage the auto-completion in RStudio. They accept a
+`glyexp::GlycomicSE` or `glyexp::GlycoproteomicSE` object, and return
+analysis result as a tibble or a list of tibbles. See documentation for
+each function for more details.

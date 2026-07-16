@@ -7,8 +7,9 @@
 gly_tsne(exp, dims = 2, perplexity = 30, add_info = TRUE, ...)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
-an expression matrix and sample information.}
+\item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
+or another \code{SummarizedExperiment} containing an expression matrix and
+sample information.}
 
 \item{dims}{Number of output dimensions. Default is 2.}
 

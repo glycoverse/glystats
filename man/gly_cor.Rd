@@ -7,8 +7,9 @@
 gly_cor(exp, on = "variable", method = "pearson", p_adj_method = "BH", ...)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
-an expression matrix and sample information.}
+\item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
+or another \code{SummarizedExperiment} containing an expression matrix and
+sample information.}
 
 \item{on}{A character string specifying what to correlate. Either "variable" (default) to correlate
 variables/features, or "sample" to correlate samples/observations.}

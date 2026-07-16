@@ -13,8 +13,8 @@ Description: Provides a unified toolbox for bioinformatics analyses of glycomics
     (Cox proportional hazards), correlation analysis, and ROC/AUC evaluation.
     All user-facing functions follow the gly_*() naming
     convention to facilitate auto-completion in RStudio. Analysis functions
-    accept 'glyexp' experiment and 'SummarizedExperiment' objects as their
-    unified data interface.
+    accept 'glyexp' 'GlycomicSE', 'GlycoproteomicSE', and
+    'SummarizedExperiment' objects as their unified data interface.
 License: MIT + file LICENSE
 Suggests:
     testthat (>= 3.0.0),
@@ -40,7 +40,7 @@ RoxygenNote: 7.3.3
 URL: https://glycoverse.github.io/glystats/
 Imports:
     tibble,
-    glyexp (>= 0.15.0),
+    glyexp (>= 0.16.0),
     rlang,
     tidyr,
     dplyr,

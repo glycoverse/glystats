@@ -7,7 +7,8 @@
 gly_fold_change(exp, group_col = "group", add_info = TRUE)
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object.}
+\item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
+or another \code{SummarizedExperiment}.}
 
 \item{group_col}{The column name of the group information in the sample information.}
 

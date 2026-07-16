@@ -14,8 +14,9 @@ gly_ttest(
 )
 }
 \arguments{
-\item{exp}{A \code{glyexp::experiment()} or \code{SummarizedExperiment} object containing
-an expression matrix and sample information.}
+\item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
+or another \code{SummarizedExperiment} containing an expression matrix and
+sample information.}
 
 \item{group_col}{A character string specifying the column name of the grouping variable
 in the sample information. Default is \code{"group"}.}

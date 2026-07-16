@@ -81,8 +81,9 @@ filter_sig_vars(
 )
 }
 \arguments{
-\item{exp}{A \code{\link[glyexp:experiment]{glyexp::experiment()}} or \code{SummarizedExperiment} object. Use the
-same object used to generate the DEA result.}
+\item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
+or another \code{SummarizedExperiment}. Use the same object used to generate the
+DEA result.}
 
 \item{res}{A glystats result object from a glystats DEA function.}
 
@@ -121,7 +122,7 @@ library(glyexp)
 library(glyclean)
 
 exp <- auto_clean(real_experiment) |>
-  glyexp::slice_head_var(n = 10)
+  glyexp::slice_head_row(n = 10)
 res <- gly_anova(exp)
 sig_exp <- filter_sig_vars(exp, res)
 

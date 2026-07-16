@@ -5,8 +5,9 @@
 #' For significant results, Tukey's HSD post-hoc test is automatically performed.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   an expression matrix and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing an expression matrix and
+#'   sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
@@ -184,8 +185,9 @@ gly_anova <- function(
 #' For significant results, emmeans post-hoc comparisons (Tukey adjustment) are automatically performed.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   an expression matrix and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing an expression matrix and
+#'   sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param covariate_cols A character vector specifying column names in sample information
@@ -410,8 +412,9 @@ gly_ancova <- function(
 #' For significant results, Dunn's post-hoc test is automatically performed.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @param exp A `glyexp::experiment()` or `SummarizedExperiment` object containing
-#'   an expression matrix and sample information.
+#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
+#'   or another `SummarizedExperiment` containing an expression matrix and
+#'   sample information.
 #' @param group_col A character string specifying the column name of the grouping variable
 #'  in the sample information. Default is `"group"`.
 #' @param p_adj_method A character string specifying the method to adjust p-values.
