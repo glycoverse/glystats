@@ -46,7 +46,7 @@ library(dplyr)
 #>     intersect, setdiff, setequal, union
 
 exp <- auto_clean(real_experiment) |>
-  glyexp::slice_head_var(n = 10)
+  glyexp::slice_head_row(n = 10)
 #> 
 #> ── Removing variables with too many missing values ──
 #> 

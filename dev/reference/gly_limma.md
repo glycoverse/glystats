@@ -25,9 +25,11 @@ gly_limma(
 - exp:
 
   A
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
-  or `SummarizedExperiment` object containing expression data and sample
-  information.
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
+  or
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
+  object, or another `SummarizedExperiment` containing expression data
+  and sample information.
 
 - group_col:
 

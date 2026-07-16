@@ -5,12 +5,13 @@ exciting territories like differential expression analysis, PCA,
 survival analysis, and much more! 🧬 `glystats` brings all these
 powerful analyses together under one unified, user-friendly interface.
 
-**🎯 Key Feature:** Every `glystats` analysis accepts a
-\[glyexp::experiment()\], the unified data interface at the heart of the
-`glycoverse` ecosystem 💓
+**🎯 Key Feature:** Every `glystats` analysis accepts
+\[glyexp::GlycomicSE()\] and \[glyexp::GlycoproteomicSE()\] containers,
+the unified data interfaces at the heart of the `glycoverse` ecosystem
+💓
 
-New to \[glyexp::experiment()\]? No worries! Check out its
-[introduction](https://glycoverse.github.io/glyexp/articles/glyexp.html)
+New to these containers? No worries! Check out the [glyexp
+introduction](https://glycoverse.github.io/glyexp/articles/glyexp.html)
 first to get up to speed.
 
 ``` r
@@ -147,12 +148,12 @@ Let’s start by exploring our demo dataset:
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [88ms]
+#> ✔ Finding leader proteins [96ms]
 #> 
 #> ℹ Reading dataℹ Parsing glycan compositions and structures
-#> ✔ Parsing glycan compositions and structures [347ms]
+#> ✔ Parsing glycan compositions and structures [390ms]
 #> 
-#> ℹ Reading data✔ Reading data [830ms]
+#> ℹ Reading data✔ Reading data [925ms]
 #> 
 #> 
 #> ── Removing variables with too many missing values ──
@@ -198,16 +199,12 @@ exp
 #> ℹ Metadata fields: exp_type <chr>, glycan_type <chr>, quant_method <chr>
 ```
 
-Look at that! 🎉 We’ve got a \[glyexp::experiment()\] packed with 12
-samples and 263 glycoforms. That’s plenty of data to work with!
+Look at that! 🎉 We’ve got a \[glyexp::GlycoproteomicSE()\] packed with
+12 samples and 263 glycoforms. That’s plenty of data to work with!
 
 ``` r
 
-if (inherits(exp, "glyexp_experiment")) {
-  get_var_info(exp)
-} else {
-  tibble::as_tibble(rowData(exp), rownames = "variable")
-}
+tibble::as_tibble(rowData(exp), rownames = "variable")
 #> # A tibble: 225 × 5
 #>    variable                        protein glycan_composition protein_site gene 
 #>    <chr>                           <chr>   <comp>                    <int> <chr>
@@ -230,11 +227,7 @@ glycosylation site, and glycan structures.
 
 ``` r
 
-if (inherits(exp, "glyexp_experiment")) {
-  get_sample_info(exp)
-} else {
-  tibble::as_tibble(colData(exp), rownames = "sample")
-}
+tibble::as_tibble(colData(exp), rownames = "sample")
 #> # A tibble: 12 × 2
 #>    sample                  group
 #>    <chr>                   <fct>
@@ -422,8 +415,10 @@ success:
 
 1.  **📥 Data Import:** Start with
     [glyread](https://glycoverse.github.io/glyread/articles/glyread.html)
-    to seamlessly import your data into
-    [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+    to import your data into
+    [`glyexp::GlycomicSE`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
+    or
+    [`glyexp::GlycoproteomicSE`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
     objects
 
 2.  **🧹 Data Preprocessing:** Use
