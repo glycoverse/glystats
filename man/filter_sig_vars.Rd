@@ -8,6 +8,7 @@
 \alias{filter_sig_vars.glystats_ttest_res}
 \alias{filter_sig_vars.glystats_wilcox_res}
 \alias{filter_sig_vars.glystats_limma_res}
+\alias{filter_sig_vars.glystats_linear_model_res}
 \title{Filter Significant Variables}
 \usage{
 filter_sig_vars(
@@ -79,6 +80,16 @@ filter_sig_vars(
   comparison = NULL,
   ...
 )
+
+\method{filter_sig_vars}{glystats_linear_model_res}(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  term = NULL,
+  ...
+)
 }
 \arguments{
 \item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
@@ -107,6 +118,10 @@ Specifies which comparison to filter on. A string with the format "group1_vs_gro
 For \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}} results, \code{comparison} is only used when \code{on} is "post_hoc_test".
 If not provided, filtering will be performed on the main test results for \code{\link[=gly_anova]{gly_anova()}} and \code{\link[=gly_kruskal]{gly_kruskal()}},
 and variables will be kept if they are significant in any comparison for \code{\link[=gly_limma]{gly_limma()}}.}
+
+\item{term}{(For \code{\link[=gly_linear_model]{gly_linear_model()}} results only) A coefficient or contrast
+name to filter on. If \code{NULL}, variables significant for any reported term
+are retained.}
 }
 \value{
 A filtered object of the same class as \code{exp}.
@@ -115,7 +130,8 @@ A filtered object of the same class as \code{exp}.
 Filtering the experiment to keep only significant variables is a common task.
 This function provides a convenient way to do this.
 It supports results from all glystats DEA functions including
-\code{\link[=gly_anova]{gly_anova()}}, \code{\link[=gly_ancova]{gly_ancova()}}, \code{\link[=gly_kruskal]{gly_kruskal()}}, \code{\link[=gly_ttest]{gly_ttest()}}, \code{\link[=gly_wilcox]{gly_wilcox()}}, and \code{\link[=gly_limma]{gly_limma()}}.
+\code{\link[=gly_anova]{gly_anova()}}, \code{\link[=gly_ancova]{gly_ancova()}}, \code{\link[=gly_kruskal]{gly_kruskal()}}, \code{\link[=gly_ttest]{gly_ttest()}},
+\code{\link[=gly_wilcox]{gly_wilcox()}}, \code{\link[=gly_limma]{gly_limma()}}, and \code{\link[=gly_linear_model]{gly_linear_model()}}.
 }
 \examples{
 library(glyexp)

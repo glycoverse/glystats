@@ -3,7 +3,8 @@
 #' Filtering the experiment to keep only significant variables is a common task.
 #' This function provides a convenient way to do this.
 #' It supports results from all glystats DEA functions including
-#' [gly_anova()], [gly_ancova()], [gly_kruskal()], [gly_ttest()], [gly_wilcox()], and [gly_limma()].
+#' [gly_anova()], [gly_ancova()], [gly_kruskal()], [gly_ttest()],
+#' [gly_wilcox()], [gly_limma()], and [gly_linear_model()].
 #'
 #' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
 #'   or another `SummarizedExperiment`. Use the same object used to generate the
@@ -49,6 +50,9 @@ filter_sig_vars <- function(
 #'   For [gly_anova()] and [gly_kruskal()] results, `comparison` is only used when `on` is "post_hoc_test".
 #'   If not provided, filtering will be performed on the main test results for [gly_anova()] and [gly_kruskal()],
 #'   and variables will be kept if they are significant in any comparison for [gly_limma()].
+#' @param term (For [gly_linear_model()] results only) A coefficient or contrast
+#'   name to filter on. If `NULL`, variables significant for any reported term
+#'   are retained.
 #' @export
 filter_sig_vars.glystats_anova_res <- function(
   exp,
@@ -204,6 +208,56 @@ filter_sig_vars.glystats_limma_res <- function(
     fc_cutoff,
     comparison
   )
+}
+
+#' @rdname filter_sig_vars
+#' @export
+filter_sig_vars.glystats_linear_model_res <- function(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  term = NULL,
+  ...
+) {
+  .check_filter_sig_vars_args(
+    exp,
+    p_adj_cutoff,
+    p_val_cutoff,
+    fc_cutoff,
+    NULL
+  )
+  checkmate::assert_string(term, null.ok = TRUE)
+  if (!is.null(fc_cutoff)) {
+    cli::cli_abort(
+      "{.arg fc_cutoff} cannot be used with {.fn gly_linear_model} results because model estimates are not necessarily fold changes."
+    )
+  }
+  if (!is.null(p_adj_cutoff) && !"p_adj" %in% colnames(res$tidy_result)) {
+    cli::cli_abort(c(
+      "{.arg p_adj_cutoff} cannot be used because this result has no adjusted p-values.",
+      "i" = "Set {.arg p_adj_cutoff} to NULL and provide {.arg p_val_cutoff}."
+    ))
+  }
+
+  available_terms <- unique(res$tidy_result$term)
+  if (!is.null(term) && !term %in% available_terms) {
+    cli::cli_abort(c(
+      "Can't find term: {.val {term}}.",
+      "i" = "Available terms: {.val {available_terms}}."
+    ))
+  }
+
+  result <- res$tidy_result
+  if (!is.null(term)) {
+    result <- dplyr::filter(result, .data$term == .env$term)
+  }
+  variables <- result |>
+    .add_filters(p_adj_cutoff, p_val_cutoff, NULL) |>
+    dplyr::pull("variable") |>
+    unique()
+  .filter_variables(exp, variables)
 }
 
 .filter_sig_vars_anova <- function(
