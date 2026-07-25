@@ -18,8 +18,6 @@ first to get up to speed.
 
 library(glystats)
 library(glyexp)
-#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
-#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(SummarizedExperiment)
 #> Loading required package: MatrixGenerics
 #> Loading required package: matrixStats
@@ -148,12 +146,12 @@ Let’s start by exploring our demo dataset:
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [96ms]
+#> ✔ Finding leader proteins [106ms]
 #> 
 #> ℹ Reading dataℹ Parsing glycan compositions and structures
-#> ✔ Parsing glycan compositions and structures [383ms]
+#> ✔ Parsing glycan compositions and structures [440ms]
 #> 
-#> ℹ Reading data✔ Reading data [907ms]
+#> ℹ Reading data✔ Reading data [1s]
 #> 
 #> 
 #> ── Removing variables with too many missing values ──
@@ -381,8 +379,26 @@ toolkit for glycomics and glycoproteomics data analysis:
     Kruskal-Wallis rank sum test
   - [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md):
     Linear models for microarray data (limma)
+  - [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md):
+    Formula-based moderated linear models
   - [`gly_fold_change()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md):
     Calculate fold change
+
+For multifactor experiments, use a one-sided formula to describe the
+design. Named contrasts can combine model coefficients; wrap interaction
+coefficient names in backticks:
+
+``` r
+
+model_res <- gly_linear_model(
+  exp,
+  ~ treatment * time + batch,
+  contrasts = c(
+    treatment_at_late = "treatmentB + `treatmentB:timelate`"
+  )
+)
+```
+
 - **📐 Dimensionality Reduction:**
   - [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md):
     Principal component analysis

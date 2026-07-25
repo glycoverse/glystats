@@ -25,6 +25,8 @@
   : Kruskal-Wallis test for Differential Expression Analysis
 - [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
   : Linear Models for Differential Expression Analysis using limma
+- [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md)
+  : Formula-based Linear Models
 - [`gly_oplsda()`](https://glycoverse.github.io/glystats/dev/reference/gly_oplsda.md)
   : Orthogonal Partial Least Squares Discriminant Analysis (OPLS-DA)
 - [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md)

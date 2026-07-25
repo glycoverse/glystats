@@ -8,8 +8,9 @@ results from all glystats DEA functions including
 [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md),
 [`gly_ttest()`](https://glycoverse.github.io/glystats/dev/reference/gly_ttest.md),
 [`gly_wilcox()`](https://glycoverse.github.io/glystats/dev/reference/gly_wilcox.md),
+[`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md),
 and
-[`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md).
+[`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md).
 
 ## Usage
 
@@ -89,6 +90,17 @@ filter_sig_vars(
   comparison = NULL,
   ...
 )
+
+# S3 method for class 'glystats_linear_model_res'
+filter_sig_vars(
+  exp,
+  res,
+  p_adj_cutoff = 0.05,
+  p_val_cutoff = NULL,
+  fc_cutoff = NULL,
+  term = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -156,6 +168,13 @@ filter_sig_vars(
   and variables will be kept if they are significant in any comparison
   for
   [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md).
+
+- term:
+
+  (For
+  [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md)
+  results only) A coefficient or contrast name to filter on. If `NULL`,
+  variables significant for any reported term are retained.
 
 ## Value
 

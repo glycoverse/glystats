@@ -2,6 +2,10 @@
 
 ## glystats (development version)
 
+- [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md)
+  now fits formula-based, limma-moderated models with interactions,
+  adjustment variables, and named custom contrasts. (#16)
+
 ## glystats 0.11.2
 
 - Documentation and vignettes now recommend `GlycomicSE` and
