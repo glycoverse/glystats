@@ -195,6 +195,35 @@ test_that("gly_linear_model preserves all-NA variables", {
   expect_true(all(is.na(failed$p_val)))
 })
 
+test_that("gly_linear_model aligns weights after removing all-NA variables", {
+  exp <- make_linear_model_exp()
+  SummarizedExperiment::assay(exp)["V1", ] <- NA_real_
+  weights <- matrix(
+    seq_len(length(SummarizedExperiment::assay(exp))),
+    nrow = nrow(exp),
+    dimnames = dimnames(exp)
+  )
+
+  matrix_result <- gly_linear_model(
+    exp,
+    ~ treatment + age,
+    weights = weights,
+    add_info = FALSE
+  )
+  gene_result <- gly_linear_model(
+    exp,
+    ~ treatment + age,
+    weights = seq_len(nrow(exp)),
+    add_info = FALSE
+  )
+
+  expect_identical(rownames(matrix_result$raw_result$fit), rownames(exp)[-1])
+  expect_identical(rownames(gene_result$raw_result$fit), rownames(exp)[-1])
+  expect_true(all(is.na(matrix_result$tidy_result$estimate[
+    matrix_result$tidy_result$variable == "V1"
+  ])))
+})
+
 test_that("gly_linear_model supports legacy experiments", {
   se <- make_linear_model_exp()
   exp <- suppressWarnings(glyexp::experiment(
@@ -273,6 +302,33 @@ test_that("gly_linear_model validates contrasts", {
       ~ treatment * time,
       contrasts = c(test = "treatmentB + treatmentB:timeT2")
     )
+  )
+})
+
+test_that("gly_linear_model matches complete backticked contrast tokens", {
+  exp <- make_linear_model_exp()
+  SummarizedExperiment::colData(exp)$site <- factor(rep(
+    c("S1", "S2"),
+    each = 4,
+    times = 4
+  ))
+
+  result <- gly_linear_model(
+    exp,
+    ~ treatment * time * site,
+    contrasts = c(
+      three_way = "`treatmentB:timeT2:siteS2`"
+    ),
+    add_info = FALSE
+  )
+
+  expect_identical(unique(result$tidy_result$term), "three_way")
+  expect_identical(
+    unname(result$raw_result$contrast_matrix[
+      "treatmentB.timeT2.siteS2",
+      "three_way"
+    ]),
+    1
   )
 })
 

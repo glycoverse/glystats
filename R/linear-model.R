@@ -184,6 +184,11 @@ gly_linear_model <- function(
     )
   }
   model_expr_mat <- log_expr_mat[row_has_data, , drop = FALSE]
+  dots <- .subset_linear_model_weights(
+    dots,
+    row_has_data = row_has_data,
+    expression_dim = dim(log_expr_mat)
+  )
 
   fit <- rlang::exec(
     limma::lmFit,
@@ -297,15 +302,18 @@ gly_linear_model <- function(
 .translate_linear_model_contrasts <- function(contrasts, mapping) {
   translated_contrasts <- contrasts
   for (contrast_index in seq_along(contrasts)) {
-    translated <- contrasts[[contrast_index]]
+    original_contrast <- contrasts[[contrast_index]]
+    translated <- original_contrast
     for (i in seq_len(nrow(mapping))) {
       original <- mapping$original[[i]]
       internal <- mapping$internal[[i]]
       if (!identical(original, internal)) {
         backticked <- paste0("`", original, "`")
         if (
-          grepl(original, translated, fixed = TRUE) &&
-            !grepl(backticked, translated, fixed = TRUE)
+          .has_unquoted_linear_model_coefficient(
+            original_contrast,
+            original
+          )
         ) {
           cli::cli_abort(
             "Non-syntactic coefficient {.val {original}} must be wrapped in backticks in {.arg contrasts}."
@@ -322,6 +330,69 @@ gly_linear_model <- function(
     translated_contrasts[[contrast_index]] <- translated
   }
   translated_contrasts
+}
+
+.has_unquoted_linear_model_coefficient <- function(expression, coefficient) {
+  unquoted_expression <- gsub(
+    "`[^`]*`",
+    "",
+    expression,
+    perl = TRUE
+  )
+  positions <- gregexpr(
+    coefficient,
+    unquoted_expression,
+    fixed = TRUE
+  )[[1]]
+  if (identical(positions[[1]], -1L)) {
+    return(FALSE)
+  }
+
+  coefficient_length <- nchar(coefficient)
+  expression_length <- nchar(unquoted_expression)
+  any(vapply(
+    positions,
+    function(position) {
+      before <- if (position > 1L) {
+        substr(unquoted_expression, position - 1L, position - 1L)
+      } else {
+        ""
+      }
+      after_position <- position + coefficient_length
+      after <- if (after_position <= expression_length) {
+        substr(unquoted_expression, after_position, after_position)
+      } else {
+        ""
+      }
+      !grepl("[[:alnum:]_.:]", before) &&
+        !grepl("[[:alnum:]_.:]", after)
+    },
+    logical(1)
+  ))
+}
+
+.subset_linear_model_weights <- function(
+  dots,
+  row_has_data,
+  expression_dim
+) {
+  weights <- dots$weights
+  if (is.null(weights)) {
+    return(dots)
+  }
+
+  if (is.matrix(weights)) {
+    if (
+      nrow(weights) == expression_dim[[1]] &&
+        ncol(weights) %in% c(1L, expression_dim[[2]])
+    ) {
+      dots$weights <- weights[row_has_data, , drop = FALSE]
+    }
+  } else if (is.numeric(weights) && length(weights) == expression_dim[[1]]) {
+    dots$weights <- weights[row_has_data]
+  }
+
+  dots
 }
 
 .moderate_linear_model_fit <- function(fit) {
