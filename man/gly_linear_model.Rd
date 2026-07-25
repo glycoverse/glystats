@@ -50,6 +50,13 @@ Fit a linear model to every variable in a glycomics or glycoproteomics
 experiment using limma's empirical Bayes moderation.
 }
 \details{
+\code{gly_linear_model()} and \code{\link[=gly_limma]{gly_limma()}} both use limma under the hood, but
+serve complementary use cases. \code{gly_linear_model()} provides a general
+formula interface for specifying a wide range of analysis designs and custom
+contrasts. \code{\link[=gly_limma]{gly_limma()}} is a dedicated wrapper for common differential
+expression analysis tasks, with convenient group, covariate, subject, and
+pairwise-comparison arguments.
+
 Expression values are transformed using \code{log2(x + 1e-6)} before modeling.
 When \code{contrasts} is \code{NULL}, all non-intercept coefficients are tested. When
 contrasts are supplied, only the named contrasts are returned.

@@ -19,6 +19,13 @@
 #' @param ... Additional arguments passed to [limma::lmFit()].
 #'
 #' @details
+#' `gly_linear_model()` and [gly_limma()] both use limma under the hood, but
+#' serve complementary use cases. `gly_linear_model()` provides a general
+#' formula interface for specifying a wide range of analysis designs and custom
+#' contrasts. [gly_limma()] is a dedicated wrapper for common differential
+#' expression analysis tasks, with convenient group, covariate, subject, and
+#' pairwise-comparison arguments.
+#'
 #' Expression values are transformed using `log2(x + 1e-6)` before modeling.
 #' When `contrasts` is `NULL`, all non-intercept coefficients are tested. When
 #' contrasts are supplied, only the named contrasts are returned.
