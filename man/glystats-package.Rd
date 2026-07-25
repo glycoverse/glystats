@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Provides a unified toolbox for bioinformatics analyses of glycomics and glycoproteomics data. Implemented methods include differential testing (t-test, Wilcoxon rank-sum test, ANOVA, Kruskal–Wallis), multivariate modeling and visualization (PCA, t-SNE, UMAP), supervised learning (PLS-DA, OPLS-DA), clustering (k-means, hierarchical, consensus clustering), network analysis (weighted gene co-expression network analysis, WGCNA), survival modeling (Cox proportional hazards), correlation analysis, and ROC/AUC evaluation. All user-facing functions follow the gly_*() naming convention to facilitate auto-completion in RStudio. Analysis functions accept 'glyexp' 'GlycomicSE', 'GlycoproteomicSE', and 'SummarizedExperiment' objects as their unified data interface.
+Provides a unified toolbox for bioinformatics analyses of glycomics and glycoproteomics data. Implemented methods include differential testing (t-test, Wilcoxon rank-sum test, ANOVA, Kruskal–Wallis), formula-based moderated linear models, multivariate modeling and visualization (PCA, t-SNE, UMAP), supervised learning (PLS-DA, OPLS-DA), clustering (k-means, hierarchical), survival modeling (Cox proportional hazards), correlation analysis, and ROC/AUC evaluation. All user-facing functions follow the gly_*() naming convention to facilitate auto-completion in RStudio. Analysis functions accept 'glyexp' 'GlycomicSE', 'GlycoproteomicSE', and 'SummarizedExperiment' objects as their unified data interface.
 }
 \seealso{
 Useful links:

@@ -134,7 +134,22 @@ Here's your complete toolkit for glycomics and glycoproteomics data analysis:
   - `gly_anova()`: One-way ANOVA
   - `gly_kruskal()`: Kruskal-Wallis rank sum test
   - `gly_limma()`: Linear models for microarray data (limma)
+  - `gly_linear_model()`: Formula-based moderated linear models
   - `gly_fold_change()`: Calculate fold change
+
+For multifactor experiments, use a one-sided formula to describe the design.
+Named contrasts can combine model coefficients; wrap interaction coefficient
+names in backticks:
+
+```r
+model_res <- gly_linear_model(
+  exp,
+  ~ treatment * time + batch,
+  contrasts = c(
+    treatment_at_late = "treatmentB + `treatmentB:timelate`"
+  )
+)
+```
 
 - **📐 Dimensionality Reduction:**
   - `gly_pca()`: Principal component analysis
