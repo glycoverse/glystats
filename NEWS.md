@@ -1,6 +1,6 @@
 # glystats (development version)
 
-* `gly_linear_model()` now fits formula-based, limma-moderated models with interactions, adjustment variables, and named custom contrasts.
+* `gly_linear_model()` now fits formula-based, limma-moderated models with interactions, adjustment variables, and named custom contrasts. (#16)
 
 # glystats 0.11.2
 
