@@ -2,6 +2,10 @@
 
 ## glystats (development version)
 
+- Analysis functions now accept experiments containing all-`NA`
+  variables without errors, returning `NA` feature-level statistics,
+  loadings, or clusters and `NULL` raw models when no variables can be
+  fitted. (#17)
 - [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md)
   now fits formula-based, limma-moderated models with interactions,
   adjustment variables, and named custom contrasts. (#16)
