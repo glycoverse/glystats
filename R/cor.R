@@ -119,7 +119,30 @@ gly_cor <- function(
   mat <- .log_transform_expr_mat(mat)
 
   # Calculate correlation using Hmisc::rcorr
-  rcorr_result <- Hmisc::rcorr(mat, type = method, ...)
+  if (all(rowSums(!is.na(expr_mat)) == 0)) {
+    items <- if (on == "sample") colnames(expr_mat) else rownames(expr_mat)
+    empty_matrix <- matrix(
+      NA_real_,
+      nrow = length(items),
+      ncol = length(items),
+      dimnames = list(items, items)
+    )
+    rcorr_result <- structure(
+      list(
+        r = empty_matrix,
+        n = matrix(
+          0L,
+          nrow = length(items),
+          ncol = length(items),
+          dimnames = list(items, items)
+        ),
+        P = empty_matrix
+      ),
+      class = "rcorr"
+    )
+  } else {
+    rcorr_result <- Hmisc::rcorr(mat, type = method, ...)
+  }
 
   # Extract correlation and p-value matrices from rcorr result
   cor_matrix <- rcorr_result$r

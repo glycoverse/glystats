@@ -67,6 +67,19 @@ gly_umap <- function(
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
 
+  sample_order <- colnames(expr_mat)
+  expr_mat <- .remove_all_na_variables(expr_mat)
+  if (nrow(expr_mat) == 0) {
+    tidy_result <- tibble::tibble(sample = sample_order)
+    for (i in seq_len(n_components)) {
+      tidy_result[[paste0("umap", i)]] <- NA_real_
+    }
+    return(structure(
+      list(tidy_result = tidy_result, raw_result = NULL),
+      class = c("glystats_umap_res", "glystats_res")
+    ))
+  }
+
   # Prepare data (samples as rows, variables as columns)
   mat <- t(expr_mat)
 

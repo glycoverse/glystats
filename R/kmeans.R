@@ -96,6 +96,41 @@ gly_kmeans <- function(
   )
   checkmate::assert_logical(scale, len = 1)
 
+  variable_order <- rownames(expr_mat)
+  sample_order <- colnames(expr_mat)
+  missing_variables <- .all_na_variables(expr_mat)
+  keep_variables <- !variable_order %in% missing_variables
+  expr_mat <- .remove_all_na_variables(expr_mat)
+
+  if (
+    nrow(expr_mat) == 0 ||
+      (on == "variable" &&
+        length(missing_variables) > 0 &&
+        is.numeric(centers) &&
+        length(centers) == 1 &&
+        centers > nrow(expr_mat))
+  ) {
+    cluster_type <- on
+    cluster_names <- if (on == "variable") variable_order else sample_order
+    result_tbl <- tibble::tibble(
+      x = cluster_names,
+      cluster = NA_integer_
+    )
+    colnames(result_tbl)[1] <- cluster_type
+    return(structure(
+      list(tidy_result = result_tbl, raw_result = NULL),
+      class = c("glystats_kmeans_res", "glystats_res")
+    ))
+  }
+
+  if (
+    on == "sample" &&
+      is.matrix(centers) &&
+      ncol(centers) == length(keep_variables)
+  ) {
+    centers <- centers[, keep_variables, drop = FALSE]
+  }
+
   # Prepare data for clustering based on 'on' parameter
   if (on == "sample") {
     # Cluster samples: samples as rows, variables as columns
@@ -129,6 +164,13 @@ gly_kmeans <- function(
 
   # Set the appropriate column name based on clustering type
   colnames(result_tbl)[1] <- cluster_type
+  if (cluster_type == "variable") {
+    result_tbl <- .restore_all_na_variable_rows(
+      result_tbl,
+      missing_variables,
+      variable_order
+    )
+  }
 
   # Return list with both tidy and raw results
   structure(

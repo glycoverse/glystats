@@ -113,6 +113,47 @@ gly_hclust <- function(
   }
   checkmate::assert_logical(scale, len = 1)
 
+  variable_order <- rownames(expr_mat)
+  sample_order <- colnames(expr_mat)
+  missing_variables <- .all_na_variables(expr_mat)
+  expr_mat <- .remove_all_na_variables(expr_mat)
+
+  cannot_fit <- nrow(expr_mat) == 0 ||
+    (on == "variable" && nrow(expr_mat) < 2)
+  if (cannot_fit) {
+    cluster_type <- on
+    cluster_names <- if (on == "variable") variable_order else sample_order
+    tidy_result <- list()
+    if (!is.null(k_values)) {
+      clusters_tbl <- tibble::tibble(x = cluster_names)
+      for (k in k_values) {
+        clusters_tbl[[paste0("cluster_k", k)]] <- NA_integer_
+      }
+      colnames(clusters_tbl)[1] <- cluster_type
+      tidy_result$clusters <- clusters_tbl
+    }
+    tidy_result$heights <- tibble::tibble(
+      merge_step = integer(),
+      height = double(),
+      n_clusters = integer()
+    )
+    tidy_result$dendrogram <- tibble::tibble(
+      x = double(),
+      y = double(),
+      xend = double(),
+      yend = double()
+    )
+    tidy_result$labels <- tibble::tibble(
+      label = cluster_names,
+      x = NA_real_,
+      y = NA_real_
+    )
+    return(structure(
+      list(tidy_result = tidy_result, raw_result = NULL),
+      class = c("glystats_hclust_res", "glystats_res")
+    ))
+  }
+
   # Prepare data for clustering based on 'on' parameter
   if (on == "sample") {
     # Cluster samples: samples as rows, variables as columns
@@ -164,7 +205,11 @@ gly_hclust <- function(
   # 1. Cluster assignments for different k values
   if (!is.null(k_values)) {
     cluster_assignments <- purrr::map_dfc(k_values, function(k) {
-      clusters <- stats::cutree(hclust_res, k = k)
+      clusters <- if (k > length(hclust_res$labels)) {
+        rep(NA_integer_, length(hclust_res$labels))
+      } else {
+        stats::cutree(hclust_res, k = k)
+      }
       col_name <- paste0("cluster_k", k)
       result_tbl <- tibble::tibble(x = clusters)
       colnames(result_tbl) <- col_name
@@ -177,6 +222,13 @@ gly_hclust <- function(
 
     # Set the appropriate column name based on clustering type
     colnames(clusters_tbl)[1] <- cluster_type
+    if (cluster_type == "variable") {
+      clusters_tbl <- .restore_all_na_variable_rows(
+        clusters_tbl,
+        missing_variables,
+        variable_order
+      )
+    }
     tidy_result$clusters <- clusters_tbl
   }
 

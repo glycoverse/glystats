@@ -115,6 +115,25 @@ gly_oplsda <- function(
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
+  variable_order <- rownames(expr_mat)
+  missing_variables <- .all_na_variables(expr_mat)
+  expr_mat <- .remove_all_na_variables(expr_mat)
+
+  if (nrow(expr_mat) == 0) {
+    return(structure(
+      list(
+        tidy_result = .empty_oplsda_tidy_result(
+          variable_order,
+          colnames(expr_mat),
+          pred_i = pred_i,
+          ortho_i = if (is.na(ortho_i)) 0 else ortho_i
+        ),
+        raw_result = NULL
+      ),
+      class = c("glystats_oplsda_res", "glystats_res")
+    ))
+  }
+
   # Prepare data matrix (samples as rows, variables as columns)
   mat <- log(t(expr_mat) + 1)
 
@@ -170,6 +189,16 @@ gly_oplsda <- function(
 
   # Extract and format results
   tidy_result <- .format_oplsda_results(oplsda_res, groups, NULL, FALSE)
+  tidy_result$variables <- .restore_all_na_variable_rows(
+    tidy_result$variables,
+    missing_variables,
+    variable_order
+  )
+  tidy_result$vip <- .restore_all_na_variable_rows(
+    tidy_result$vip,
+    missing_variables,
+    variable_order
+  )
 
   # Return list with both tidy and raw results
   structure(
@@ -178,6 +207,40 @@ gly_oplsda <- function(
       raw_result = oplsda_res
     ),
     class = c("glystats_oplsda_res", "glystats_res")
+  )
+}
+
+.empty_oplsda_tidy_result <- function(
+  variables,
+  samples,
+  pred_i,
+  ortho_i = 0
+) {
+  samples_tbl <- tibble::tibble(sample = samples)
+  variables_tbl <- tibble::tibble(variable = variables)
+
+  for (i in seq_len(pred_i)) {
+    samples_tbl[[paste0("p", i)]] <- NA_real_
+    variables_tbl[[paste0("p", i)]] <- NA_real_
+    variables_tbl[[paste0("pcorr", i)]] <- NA_real_
+  }
+  if (ortho_i > 0) {
+    for (i in seq_len(ortho_i)) {
+      samples_tbl[[paste0("o", i)]] <- NA_real_
+      variables_tbl[[paste0("o", i)]] <- NA_real_
+    }
+  }
+
+  list(
+    samples = samples_tbl,
+    variables = variables_tbl,
+    variance = tibble::tibble(
+      component = character(),
+      prop_var_explained = double(),
+      cumulative_prop_var = double()
+    ),
+    vip = tibble::tibble(variable = variables, vip = NA_real_),
+    perm_test = tibble::tibble(model = character(), perm_id = integer())
   )
 }
 

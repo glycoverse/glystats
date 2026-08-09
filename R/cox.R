@@ -138,28 +138,39 @@ gly_cox <- function(
 
 .cox_tibblify <- function(cox_models, p_adj_method) {
   # Extract results and convert to tibble
-  result_df <- tibble::tibble(
-    variable = names(cox_models),
-    model = cox_models
-  ) %>%
-    dplyr::rowwise() %>%
-    dplyr::mutate(
-      params = list(
-        if (rlang::is_na(.data$model)) NULL else broom::tidy(.data$model)
-      )
+  if (all(purrr::map_lgl(cox_models, rlang::is_na))) {
+    result_df <- tibble::tibble(
+      variable = names(cox_models),
+      coefficient = NA_real_,
+      std.error = NA_real_,
+      statistic = NA_real_,
+      p_val = NA_real_,
+      hr = NA_real_
+    )
+  } else {
+    result_df <- tibble::tibble(
+      variable = names(cox_models),
+      model = cox_models
     ) %>%
-    dplyr::select(-all_of("model")) %>%
-    tidyr::unnest(all_of("params")) %>%
-    dplyr::ungroup() %>%
-    # Rename columns to match expected names
-    dplyr::rename(all_of(c(
-      "coefficient" = "estimate",
-      "p_val" = "p.value"
-    ))) %>%
-    # Calculate hazard ratio
-    dplyr::mutate(hr = exp(.data$coefficient)) %>%
-    # Remove the term column as it's redundant with variable
-    dplyr::select(-all_of("term"))
+      dplyr::rowwise() %>%
+      dplyr::mutate(
+        params = list(
+          if (rlang::is_na(.data$model)) NULL else broom::tidy(.data$model)
+        )
+      ) %>%
+      dplyr::select(-all_of("model")) %>%
+      tidyr::unnest(all_of("params"), keep_empty = TRUE) %>%
+      dplyr::ungroup() %>%
+      # Rename columns to match expected names
+      dplyr::rename(all_of(c(
+        "coefficient" = "estimate",
+        "p_val" = "p.value"
+      ))) %>%
+      # Calculate hazard ratio
+      dplyr::mutate(hr = exp(.data$coefficient)) %>%
+      # Remove the term column as it's redundant with variable
+      dplyr::select(-all_of("term"))
+  }
 
   if (!is.null(p_adj_method)) {
     result_df <- dplyr::mutate(

@@ -101,6 +101,25 @@ gly_plsda <- function(
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
+  variable_order <- rownames(expr_mat)
+  missing_variables <- .all_na_variables(expr_mat)
+  expr_mat <- .remove_all_na_variables(expr_mat)
+
+  if (nrow(expr_mat) == 0) {
+    return(structure(
+      list(
+        tidy_result = .empty_oplsda_tidy_result(
+          variable_order,
+          colnames(expr_mat),
+          pred_i = ncomp,
+          ortho_i = 0
+        ),
+        raw_result = NULL
+      ),
+      class = c("glystats_plsda_res", "glystats_res")
+    ))
+  }
+
   # Prepare data matrix (samples as rows, variables as columns)
   mat <- log(t(expr_mat) + 1)
 
@@ -157,6 +176,16 @@ gly_plsda <- function(
 
   # Extract and format results
   tidy_result <- .format_oplsda_results(plsda_res, groups, NULL, FALSE)
+  tidy_result$variables <- .restore_all_na_variable_rows(
+    tidy_result$variables,
+    missing_variables,
+    variable_order
+  )
+  tidy_result$vip <- .restore_all_na_variable_rows(
+    tidy_result$vip,
+    missing_variables,
+    variable_order
+  )
 
   # Return list with both tidy and raw results
   structure(
