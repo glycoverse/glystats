@@ -54,6 +54,22 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
 
+  sample_order <- colnames(expr_mat)
+  expr_mat <- .remove_all_na_variables(expr_mat)
+  if (nrow(expr_mat) == 0) {
+    return(structure(
+      list(
+        tidy_result = tibble::tibble(
+          sample = sample_order,
+          tsne1 = NA_real_,
+          tsne2 = NA_real_
+        ),
+        raw_result = NULL
+      ),
+      class = c("glystats_tsne_res", "glystats_res")
+    ))
+  }
+
   mat <- t(expr_mat) # Samples as rows, variables as columns
 
   # Check if perplexity is appropriate for the number of samples

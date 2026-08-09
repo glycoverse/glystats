@@ -112,6 +112,63 @@
   glyexp::filter_var(exp, .data$variable %in% .env$variables)
 }
 
+# Identify variables without any observed expression values
+.all_na_variables <- function(expr_mat) {
+  rownames(expr_mat)[rowSums(!is.na(expr_mat)) == 0]
+}
+
+# Remove variables without any observed expression values
+.remove_all_na_variables <- function(expr_mat) {
+  expr_mat[rowSums(!is.na(expr_mat)) > 0, , drop = FALSE]
+}
+
+# Restore one-row-per-variable results for variables omitted while fitting
+.restore_all_na_variable_rows <- function(
+  tbl,
+  missing_variables,
+  variable_order
+) {
+  if (length(missing_variables) == 0) {
+    return(tbl)
+  }
+
+  missing_tbl <- tbl[
+    rep(NA_integer_, length(missing_variables)),
+    ,
+    drop = FALSE
+  ]
+  missing_tbl$variable <- missing_variables
+
+  dplyr::bind_rows(tbl, missing_tbl) |>
+    dplyr::arrange(match(.data$variable, variable_order))
+}
+
+# Restore long-format component results for variables omitted while fitting
+.restore_all_na_variable_components <- function(
+  tbl,
+  missing_variables,
+  variable_order,
+  component_col
+) {
+  if (length(missing_variables) == 0) {
+    return(tbl)
+  }
+
+  components <- unique(tbl[[component_col]])
+  missing_tbl <- tidyr::expand_grid(
+    variable = missing_variables,
+    component = components
+  )
+  colnames(missing_tbl)[2] <- component_col
+  missing_tbl$value <- NA_real_
+
+  dplyr::bind_rows(tbl, missing_tbl) |>
+    dplyr::arrange(
+      match(.data$variable, variable_order),
+      match(.data[[component_col]], components)
+    )
+}
+
 # Group extraction, validation, and conversion helper functions ---------------
 
 # Check if group column exists in sample information

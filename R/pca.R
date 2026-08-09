@@ -71,6 +71,37 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
   checkmate::assert_logical(center, len = 1)
   checkmate::assert_logical(scale, len = 1)
 
+  variable_order <- rownames(expr_mat)
+  missing_variables <- .all_na_variables(expr_mat)
+  expr_mat <- .remove_all_na_variables(expr_mat)
+
+  if (nrow(expr_mat) == 0) {
+    return(structure(
+      list(
+        tidy_result = list(
+          samples = tibble::tibble(
+            sample = colnames(expr_mat),
+            PC = NA_integer_,
+            value = NA_real_
+          ),
+          variables = tibble::tibble(
+            variable = variable_order,
+            PC = NA_integer_,
+            value = NA_real_
+          ),
+          eigenvalues = tibble::tibble(
+            PC = integer(),
+            std.dev = double(),
+            percent = double(),
+            cumulative = double()
+          )
+        ),
+        raw_result = NULL
+      ),
+      class = c("glystats_pca_res", "glystats_res")
+    ))
+  }
+
   # Prepare data for PCA (samples as rows, variables as columns)
   mat <- log(t(expr_mat) + 1)
 
@@ -111,6 +142,12 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
   if ("column" %in% colnames(variables_tbl)) {
     variables_tbl <- dplyr::rename(variables_tbl, c(variable = "column"))
   }
+  variables_tbl <- .restore_all_na_variable_components(
+    variables_tbl,
+    missing_variables,
+    variable_order,
+    "PC"
+  )
 
   # Create tidy result list
   tidy_result <- list(

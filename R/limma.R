@@ -437,11 +437,6 @@ gly_limma <- function(
     missing_vars <- rownames(log_expr_mat)[!row_has_data]
     log_expr_mat <- log_expr_mat[row_has_data, , drop = FALSE]
   }
-  if (nrow(log_expr_mat) == 0) {
-    cli::cli_abort(
-      "No finite expression values remain after log2 transformation."
-    )
-  }
 
   # Create design matrix without intercept (means model)
   if (is.null(covariates) && is.null(subjects)) {
@@ -503,6 +498,33 @@ gly_limma <- function(
     c(as.list(contrast_strings), list(levels = colnames(design)))
   )
 
+  missing_tbl <- purrr::map_dfr(contrast_pairs, function(pair) {
+    base_tbl <- tibble::tibble(
+      variable = missing_vars,
+      log2fc = NA_real_,
+      AveExpr = NA_real_,
+      t = NA_real_,
+      p_val = NA_real_,
+      b = NA_real_,
+      ref_group = pair[2],
+      test_group = pair[1]
+    )
+    if (!is.null(p_adj_method)) {
+      base_tbl$p_adj <- NA_real_
+    }
+    base_tbl
+  })
+
+  if (nrow(log_expr_mat) == 0) {
+    return(structure(
+      list(
+        tidy_result = missing_tbl,
+        raw_result = NULL
+      ),
+      class = c("glystats_limma_res", "glystats_res")
+    ))
+  }
+
   # Fit linear model
   fit <- limma::lmFit(log_expr_mat, design, ...)
   if (is.null(rownames(fit$coefficients)) && !is.null(rownames(log_expr_mat))) {
@@ -534,22 +556,6 @@ gly_limma <- function(
   # Extract results and convert to tibble
   tidy_result <- .limma_multi_tibblify(fit2, p_adj_method, contrast_pairs)
   if (length(missing_vars) > 0) {
-    missing_tbl <- purrr::map_dfr(contrast_pairs, function(pair) {
-      base_tbl <- tibble::tibble(
-        variable = missing_vars,
-        log2fc = NA_real_,
-        AveExpr = NA_real_,
-        t = NA_real_,
-        p_val = NA_real_,
-        b = NA_real_,
-        ref_group = pair[2],
-        test_group = pair[1]
-      )
-      if (!is.null(p_adj_method)) {
-        base_tbl$p_adj <- NA_real_
-      }
-      base_tbl
-    })
     tidy_result <- dplyr::bind_rows(tidy_result, missing_tbl)
   }
 

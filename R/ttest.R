@@ -361,27 +361,52 @@ gly_wilcox <- function(
 ) {
   # Create a tibble from the model list
   var_names <- names(mod_list)
+  all_failed <- all(purrr::map_lgl(mod_list, rlang::is_na))
 
-  result_tbl <- tibble::tibble(
-    variable = var_names,
-    test_result = mod_list
-  ) %>%
-    dplyr::mutate(
-      params = purrr::map(
-        .data$test_result,
-        ~ {
-          if (rlang::is_na(.x)) NULL else broom::tidy(.x)
-        }
-      ),
+  if (all_failed && identical(.f, stats::t.test)) {
+    result_tbl <- tibble::tibble(
+      variable = var_names,
+      estimate = NA_real_,
+      estimate1 = NA_real_,
+      estimate2 = NA_real_,
+      statistic = NA_real_,
+      p_val = NA_real_,
+      parameter = NA_real_,
+      conf_low = NA_real_,
+      conf_high = NA_real_,
+      method = NA_character_,
+      alternative = NA_character_
+    )
+  } else if (all_failed && identical(.f, stats::wilcox.test)) {
+    result_tbl <- tibble::tibble(
+      variable = var_names,
+      statistic = NA_real_,
+      p_val = NA_real_,
+      method = NA_character_,
+      alternative = NA_character_
+    )
+  } else {
+    result_tbl <- tibble::tibble(
+      variable = var_names,
+      test_result = mod_list
     ) %>%
-    dplyr::select(all_of(c("variable", "params"))) %>%
-    tidyr::unnest(all_of("params")) %>%
-    dplyr::ungroup() %>%
-    janitor::clean_names()
+      dplyr::mutate(
+        params = purrr::map(
+          .data$test_result,
+          ~ {
+            if (rlang::is_na(.x)) NULL else broom::tidy(.x)
+          }
+        ),
+      ) %>%
+      dplyr::select(all_of(c("variable", "params"))) %>%
+      tidyr::unnest(all_of("params"), keep_empty = TRUE) %>%
+      dplyr::ungroup() %>%
+      janitor::clean_names()
 
-  # Rename p_value to p_val for consistency
-  if ("p_value" %in% colnames(result_tbl)) {
-    result_tbl <- dplyr::rename(result_tbl, p_val = "p_value")
+    # Rename p_value to p_val for consistency
+    if ("p_value" %in% colnames(result_tbl)) {
+      result_tbl <- dplyr::rename(result_tbl, p_val = "p_value")
+    }
   }
 
   if (!is.null(p_adj_method)) {
@@ -415,9 +440,15 @@ gly_wilcox <- function(
     # Get expression values for this variable
     var_expr <- expr_mat[var_name, ]
 
+    group1_values <- var_expr[group1_indices]
+    group2_values <- var_expr[group2_indices]
+    if (all(is.na(group1_values)) || all(is.na(group2_values))) {
+      return(NA_real_)
+    }
+
     # Calculate mean expression for each group
-    group1_mean <- mean(var_expr[group1_indices], na.rm = TRUE)
-    group2_mean <- mean(var_expr[group2_indices], na.rm = TRUE)
+    group1_mean <- mean(group1_values, na.rm = TRUE)
+    group2_mean <- mean(group2_values, na.rm = TRUE)
 
     # Calculate log2 fold change (group2 vs group1)
     log2(group2_mean / group1_mean)

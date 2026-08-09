@@ -179,9 +179,34 @@ gly_linear_model <- function(
   log_expr_mat <- .log_transform_expr_mat(expr_mat)
   row_has_data <- rowSums(is.finite(log_expr_mat)) > 0
   if (!any(row_has_data)) {
-    cli::cli_abort(
-      "No finite expression values remain after log2 transformation."
-    )
+    tidy_result <- purrr::map_dfr(report_original, function(term) {
+      result <- tibble::tibble(
+        variable = rownames(expr_mat),
+        term = term,
+        estimate = NA_real_,
+        AveExpr = NA_real_,
+        t = NA_real_,
+        p_val = NA_real_
+      )
+      if (!is.null(p_adj_method)) {
+        result$p_adj <- NA_real_
+      }
+      result$b <- NA_real_
+      result
+    })
+
+    return(structure(
+      list(
+        tidy_result = tidy_result,
+        raw_result = list(
+          fit = NULL,
+          design = design,
+          contrast_matrix = contrast_matrix,
+          coefficient_mapping = coefficient_mapping
+        )
+      ),
+      class = c("glystats_linear_model_res", "glystats_res")
+    ))
   }
   model_expr_mat <- log_expr_mat[row_has_data, , drop = FALSE]
   dots <- .subset_linear_model_weights(

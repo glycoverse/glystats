@@ -788,33 +788,55 @@ gly_kruskal <- function(
   groups = NULL
 ) {
   var_names <- names(main_test_raw)
-  result_tbl <- tibble::tibble(
-    variable = var_names,
-    test_result = main_test_raw
-  ) %>%
-    dplyr::mutate(
-      params = purrr::map(
-        .data$test_result,
-        ~ {
-          if (rlang::is_na(.x)) NULL else broom::tidy(.x)
-        }
-      )
+  all_failed <- all(purrr::map_lgl(main_test_raw, rlang::is_na))
+
+  if (all_failed && identical(.f, stats::aov)) {
+    result_tbl <- tibble::tibble(
+      variable = var_names,
+      term = NA_character_,
+      df = NA_real_,
+      sumsq = NA_real_,
+      meansq = NA_real_,
+      statistic = NA_real_,
+      p_val = NA_real_
+    )
+  } else if (all_failed && identical(.f, stats::kruskal.test)) {
+    result_tbl <- tibble::tibble(
+      variable = var_names,
+      statistic = NA_real_,
+      p_val = NA_real_,
+      parameter = NA_integer_,
+      method = NA_character_
+    )
+  } else {
+    result_tbl <- tibble::tibble(
+      variable = var_names,
+      test_result = main_test_raw
     ) %>%
-    dplyr::select(all_of(c("variable", "params"))) %>%
-    tidyr::unnest(all_of("params"), keep_empty = TRUE) %>%
-    dplyr::ungroup() %>%
-    janitor::clean_names()
+      dplyr::mutate(
+        params = purrr::map(
+          .data$test_result,
+          ~ {
+            if (rlang::is_na(.x)) NULL else broom::tidy(.x)
+          }
+        )
+      ) %>%
+      dplyr::select(all_of(c("variable", "params"))) %>%
+      tidyr::unnest(all_of("params"), keep_empty = TRUE) %>%
+      dplyr::ungroup() %>%
+      janitor::clean_names()
+
+    # Rename p_value to p_val for consistency
+    if ("p_value" %in% colnames(result_tbl)) {
+      result_tbl <- dplyr::rename(result_tbl, p_val = "p_value")
+    }
+  }
 
   # For ANOVA, filter to keep only group effects (not residuals)
   # For Kruskal-Wallis, keep all results (there's only one row per variable anyway)
   if (identical(.f, stats::aov)) {
     result_tbl <- result_tbl %>%
-      dplyr::filter(.data$term == "group")
-  }
-
-  # Rename p_value to p_val for consistency
-  if ("p_value" %in% colnames(result_tbl)) {
-    result_tbl <- dplyr::rename(result_tbl, p_val = "p_value")
+      dplyr::filter(is.na(.data$term) | .data$term == "group")
   }
 
   if (!is.null(p_adj_method)) {
