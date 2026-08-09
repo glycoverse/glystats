@@ -145,7 +145,10 @@ gly_kmeans <- function(
   # Apply log transformation
   mat <- .log_transform_expr_mat(mat)
   # Scale data if requested
-  if (scale) {
+  # Scaling columns requires at least two observations. When clustering a
+  # single retained variable, the unscaled row still has a valid one-cluster
+  # solution, whereas scale() would replace every value with NaN.
+  if (scale && !(on == "variable" && nrow(mat) == 1L)) {
     mat <- scale(mat)
   }
 

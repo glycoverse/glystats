@@ -181,6 +181,19 @@ test_that("unsupervised analyses omit all-NA variables only while fitting", {
   expect_no_error(gly_hclust(exp, on = "sample", k_values = 2))
 })
 
+test_that("variable k-means handles one retained variable with scaling", {
+  exp <- all_na_row_experiment(all_rows = TRUE)
+  SummarizedExperiment::assay(exp)["V1", ] <- seq_len(ncol(exp))
+
+  result <- expect_no_error(
+    gly_kmeans(exp, on = "variable", centers = 1)
+  )
+
+  expect_s3_class(result$raw_result, "kmeans")
+  expect_identical(result$tidy_result$cluster[[1]], 1L)
+  expect_equal(unname(result$tidy_result$cluster[-1]), rep(NA_integer_, 7))
+})
+
 test_that("embeddings ignore all-NA variables while fitting", {
   exp <- all_na_row_experiment()
 
