@@ -13,6 +13,8 @@
   : One-way ANOVA for Differential Expression Analysis
 - [`gly_cor()`](https://glycoverse.github.io/glystats/dev/reference/gly_cor.md)
   : Correlation Analysis for Glycomics and Glycoproteomics Data
+- [`gly_correlated_sets()`](https://glycoverse.github.io/glystats/dev/reference/gly_correlated_sets.md)
+  : Construct Correlated Variable Sets
 - [`gly_cox()`](https://glycoverse.github.io/glystats/dev/reference/gly_cox.md)
   : Cox Proportional Hazards Model for Survival Analysis
 - [`gly_fold_change()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md)
@@ -35,6 +37,8 @@
   : Partial Least Squares Discriminant Analysis (PLS-DA)
 - [`gly_roc()`](https://glycoverse.github.io/glystats/dev/reference/gly_roc.md)
   : ROC Analysis for Glycomics and Glycoproteomics Data
+- [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
+  : Test Correlated Variable Sets
 - [`gly_tsne()`](https://glycoverse.github.io/glystats/dev/reference/gly_tsne.md)
   : t-Distributed Stochastic Neighbor Embedding (t-SNE)
 - [`gly_ttest()`](https://glycoverse.github.io/glystats/dev/reference/gly_ttest.md)

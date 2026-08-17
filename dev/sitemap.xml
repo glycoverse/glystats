@@ -14,6 +14,7 @@
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_ancova.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_anova.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_cor.html</loc></url>
+<url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_correlated_sets.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_cox.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_hclust.html</loc></url>
@@ -25,6 +26,7 @@
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_pca.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_plsda.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_roc.html</loc></url>
+<url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_set_test.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_tsne.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_ttest.html</loc></url>
 <url><loc>https://glycoverse.github.io/glystats/dev/reference/gly_umap.html</loc></url>
