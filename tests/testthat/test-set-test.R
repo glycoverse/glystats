@@ -286,6 +286,55 @@ test_that("gly_set_test collapses aliases without hiding members", {
   expect_false("p_adj" %in% colnames(result$tidy_result$sets))
 })
 
+test_that("gly_set_test collapses aliases after complete-case selection", {
+  for (paired in c(FALSE, TRUE)) {
+    exp <- make_hotelling_exp(paired = paired)
+    expression <- SummarizedExperiment::assay(exp)
+    partial_alias <- expression["A", ]
+    partial_alias[[1]] <- NA_real_
+    expression <- rbind(expression, A_partial = partial_alias)
+    exp <- SummarizedExperiment::SummarizedExperiment(
+      assays = list(expression = expression),
+      colData = SummarizedExperiment::colData(exp),
+      metadata = S4Vectors::metadata(exp)
+    )
+
+    result <- gly_set_test(
+      exp,
+      list(signal = c("A", "A_partial", "B")),
+      subject_col = if (paired) "subject" else NULL
+    )
+
+    expect_identical(result$tidy_result$sets$status, "ok")
+    expect_identical(result$tidy_result$sets$test_dimension, 2L)
+    expect_identical(
+      result$raw_result$tests$signal$representatives,
+      c("A", "B")
+    )
+    expect_identical(
+      result$raw_result$tests$signal$aliases$A,
+      "A_partial"
+    )
+  }
+
+  exp <- make_correlated_set_exp()
+  expression <- SummarizedExperiment::assay(exp)
+  partial_alias <- expression["A", ]
+  partial_alias[[1]] <- NA_real_
+  expression <- rbind(expression, A_partial = partial_alias)
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = SummarizedExperiment::colData(exp),
+    metadata = S4Vectors::metadata(exp)
+  )
+  sets <- gly_correlated_sets(exp, threshold = 0.85)
+  result <- gly_set_test(exp, sets)
+
+  expect_contains(sets$sets$set_1, "A_partial")
+  expect_identical(result$tidy_result$sets$status, "ok")
+  expect_identical(result$tidy_result$sets$test_dimension, 2L)
+})
+
 test_that("gly_set_test reports unfit sets without dropping them", {
   exp <- make_hotelling_exp()
   result <- gly_set_test(

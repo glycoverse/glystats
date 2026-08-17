@@ -755,9 +755,7 @@ gly_set_test <- function(
 
 .test_one_set <- function(log_expr_mat, members, design, set_id) {
   member_matrix <- log_expr_mat[members, , drop = FALSE]
-  collapsed <- .collapse_equivalent_profiles(member_matrix)
-  representatives <- collapsed$representatives
-  test_matrix <- t(member_matrix[representatives, , drop = FALSE])
+  test_matrix <- t(member_matrix)
 
   if (design$paired) {
     ref <- test_matrix[design$ref_indices, , drop = FALSE]
@@ -766,6 +764,11 @@ gly_set_test <- function(
     ref <- ref[complete, , drop = FALSE]
     test <- test[complete, , drop = FALSE]
     differences <- test - ref
+    collapsed <- .collapse_equivalent_profiles(t(differences))
+    representatives <- collapsed$representatives
+    ref <- ref[, representatives, drop = FALSE]
+    test <- test[, representatives, drop = FALSE]
+    differences <- differences[, representatives, drop = FALSE]
     hotelling <- .hotelling_one_sample(differences)
     included_subjects <- design$subjects[complete]
   } else {
@@ -773,6 +776,10 @@ gly_set_test <- function(
     test <- test_matrix[design$test_indices, , drop = FALSE]
     ref <- ref[stats::complete.cases(ref), , drop = FALSE]
     test <- test[stats::complete.cases(test), , drop = FALSE]
+    collapsed <- .collapse_equivalent_profiles(t(rbind(ref, test)))
+    representatives <- collapsed$representatives
+    ref <- ref[, representatives, drop = FALSE]
+    test <- test[, representatives, drop = FALSE]
     hotelling <- .hotelling_two_sample(ref, test)
     included_subjects <- NULL
   }
