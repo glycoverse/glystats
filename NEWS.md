@@ -1,5 +1,6 @@
 # glystats (development version)
 
+* New `gly_correlated_sets()` constructs complete-linkage or connected correlated variable sets, and new `gly_set_test()` jointly tests independent or paired two-group shifts with Hotelling's T2 statistic.
 * Analysis functions now accept experiments containing all-`NA` variables without errors, returning `NA` feature-level statistics, loadings, or clusters and `NULL` raw models when no variables can be fitted. (#17)
 * `gly_linear_model()` now fits formula-based, limma-moderated models with interactions, adjustment variables, and named custom contrasts. (#16)
 
