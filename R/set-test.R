@@ -27,8 +27,8 @@
 #' @param correlation Correlation coefficient used when `sets` is `NULL`.
 #'   Either `"pearson"` (default) or `"spearman"`.
 #' @param clustering How correlated variables are grouped when `sets` is
-#'   `NULL`. `"complete"` (default) requires every pair in a set to exceed
-#'   `threshold`; `"connected"` allows transitive chaining.
+#'   `NULL`. `"connected"` (default) allows transitive chaining; `"complete"`
+#'   requires every pair in a set to exceed `threshold`.
 #' @param min_size Minimum number of distinct profiles in an automatically
 #'   constructed set. Default is 2.
 #' @param within Optional variable-information columns defining strata within
@@ -88,7 +88,7 @@ gly_set_test <- function(
   p_adj_method = "BH",
   threshold = 0.9,
   correlation = "pearson",
-  clustering = "complete",
+  clustering = "connected",
   min_size = 2L,
   within = NULL
 ) {

@@ -13,7 +13,7 @@ gly_set_test(
   p_adj_method = "BH",
   threshold = 0.9,
   correlation = "pearson",
-  clustering = "complete",
+  clustering = "connected",
   min_size = 2L,
   within = NULL
 )
@@ -51,8 +51,8 @@ strictly greater than this value. Default is \code{0.9}.}
 Either \code{"pearson"} (default) or \code{"spearman"}.}
 
 \item{clustering}{How correlated variables are grouped when \code{sets} is
-\code{NULL}. \code{"complete"} (default) requires every pair in a set to exceed
-\code{threshold}; \code{"connected"} allows transitive chaining.}
+\code{NULL}. \code{"connected"} (default) allows transitive chaining; \code{"complete"}
+requires every pair in a set to exceed \code{threshold}.}
 
 \item{min_size}{Minimum number of distinct profiles in an automatically
 constructed set. Default is 2.}

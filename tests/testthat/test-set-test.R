@@ -316,7 +316,11 @@ test_that("gly_set_test collapses aliases after complete-case selection", {
     colData = SummarizedExperiment::colData(exp),
     metadata = S4Vectors::metadata(exp)
   )
-  result <- gly_set_test(exp, threshold = 0.85)
+  result <- gly_set_test(
+    exp,
+    threshold = 0.85,
+    clustering = "complete"
+  )
 
   expect_contains(
     result$raw_result$set_construction$sets$set_1,
