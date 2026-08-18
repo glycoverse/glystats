@@ -111,47 +111,33 @@ make_hotelling_exp <- function(paired = FALSE) {
   )
 }
 
-test_that("gly_correlated_sets distinguishes complete and connected sets", {
+test_that("gly_set_test constructs complete and connected sets", {
   exp <- make_correlated_set_exp()
 
-  complete <- gly_correlated_sets(
+  complete <- gly_set_test(
     exp,
     threshold = 0.85,
-    clustering = "complete"
+    clustering = "complete",
+    p_adj_method = NULL
   )
-  connected <- gly_correlated_sets(
+  connected <- gly_set_test(
     exp,
     threshold = 0.85,
-    clustering = "connected"
+    p_adj_method = NULL
   )
 
-  expect_s3_class(complete, "glystats_correlated_sets")
-  expect_named(
-    complete,
-    c(
-      "sets",
-      "membership",
-      "representatives",
-      "correlation_matrix",
-      "excluded_variables",
-      "aliases",
-      "threshold",
-      "correlation",
-      "clustering",
-      "min_size",
-      "within",
-      "meta_data"
-    )
-  )
-  expect_identical(complete$sets$set_1, c("A", "B", "A_alias"))
-  expect_identical(complete$representatives$set_1, c("A", "B"))
-  expect_identical(connected$sets$set_1, c("A", "B", "C", "A_alias"))
-  expect_identical(connected$representatives$set_1, c("A", "B", "C"))
-  expect_identical(complete$aliases$A, "A_alias")
+  complete_sets <- complete$raw_result$set_construction
+  connected_sets <- connected$raw_result$set_construction
+  expect_s3_class(complete, c("glystats_set_test_res", "glystats_res"))
+  expect_identical(complete_sets$sets$set_1, c("A", "B", "A_alias"))
+  expect_identical(complete_sets$representatives$set_1, c("A", "B"))
+  expect_identical(connected_sets$sets$set_1, c("A", "B", "C", "A_alias"))
+  expect_identical(connected_sets$representatives$set_1, c("A", "B", "C"))
+  expect_identical(complete_sets$aliases$A, "A_alias")
   expect_equal(complete$meta_data, S4Vectors::metadata(exp))
 })
 
-test_that("gly_correlated_sets records exclusions and honors within strata", {
+test_that("gly_set_test records exclusions and honors within strata", {
   exp <- make_correlated_set_exp()
   SummarizedExperiment::rowData(exp)$site <- c(
     "one",
@@ -162,24 +148,26 @@ test_that("gly_correlated_sets records exclusions and honors within strata", {
     "one"
   )
 
-  result <- gly_correlated_sets(
+  result <- gly_set_test(
     exp,
     threshold = 0.85,
     clustering = "connected",
-    within = "site"
+    within = "site",
+    p_adj_method = NULL
   )
+  construction <- result$raw_result$set_construction
 
-  expect_identical(result$sets$set_1, c("A", "B", "A_alias"))
-  expect_true(is.na(result$correlation_matrix["A", "C"]))
+  expect_identical(construction$sets$set_1, c("A", "B", "A_alias"))
+  expect_true(is.na(construction$correlation_matrix["A", "C"]))
   expect_equal(
-    result$excluded_variables,
+    construction$excluded_variables,
     tibble::tibble(
       variable = c("constant", "missing"),
       reason = c("zero_variance", "all_missing")
     )
   )
   expect_identical(
-    result$membership$is_alias,
+    construction$membership$is_alias,
     c(FALSE, FALSE, TRUE)
   )
 })
@@ -327,10 +315,16 @@ test_that("gly_set_test collapses aliases after complete-case selection", {
     colData = SummarizedExperiment::colData(exp),
     metadata = S4Vectors::metadata(exp)
   )
-  sets <- gly_correlated_sets(exp, threshold = 0.85)
-  result <- gly_set_test(exp, sets)
+  result <- gly_set_test(
+    exp,
+    threshold = 0.85,
+    clustering = "complete"
+  )
 
-  expect_contains(sets$sets$set_1, "A_partial")
+  expect_contains(
+    result$raw_result$set_construction$sets$set_1,
+    "A_partial"
+  )
   expect_identical(result$tidy_result$sets$status, "ok")
   expect_identical(result$tidy_result$sets$test_dimension, 2L)
 })
@@ -353,8 +347,7 @@ test_that("gly_set_test reports unfit sets without dropping them", {
 
 test_that("gly_set_test accepts an empty correlated-set result", {
   exp <- make_correlated_set_exp()
-  sets <- gly_correlated_sets(exp, threshold = 1)
-  result <- gly_set_test(exp, sets)
+  result <- gly_set_test(exp, threshold = 1)
 
   expect_equal(nrow(result$tidy_result$sets), 0)
   expect_equal(nrow(result$tidy_result$members), 0)
@@ -366,7 +359,7 @@ test_that("set construction and testing validate metadata contracts", {
 
   expect_snapshot(
     error = TRUE,
-    gly_correlated_sets(exp, within = "unknown")
+    gly_set_test(exp, within = "unknown")
   )
   expect_snapshot(
     error = TRUE,

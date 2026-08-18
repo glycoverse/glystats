@@ -2,15 +2,20 @@
 % Please edit documentation in R/set-test.R
 \name{gly_set_test}
 \alias{gly_set_test}
-\title{Test Correlated Variable Sets}
+\title{Construct and Test Correlated Variable Sets}
 \usage{
 gly_set_test(
   exp,
-  sets,
+  sets = NULL,
   group_col = "group",
   subject_col = NULL,
   method = "hotelling",
-  p_adj_method = "BH"
+  p_adj_method = "BH",
+  threshold = 0.9,
+  correlation = "pearson",
+  clustering = "connected",
+  min_size = 2L,
+  within = NULL
 )
 }
 \arguments{
@@ -18,8 +23,10 @@ gly_set_test(
 or another \code{SummarizedExperiment} containing expression data and sample
 information.}
 
-\item{sets}{A \code{glystats_correlated_sets} object returned by
-\code{\link[=gly_correlated_sets]{gly_correlated_sets()}}, or a uniquely named list of character vectors.}
+\item{sets}{A uniquely named list of character vectors defining custom sets.
+When \code{NULL} (the default), correlated sets are constructed automatically
+from \code{exp} using \code{threshold}, \code{correlation}, \code{clustering}, \code{min_size}, and
+\code{within}.}
 
 \item{group_col}{A character string naming the two-level grouping column in
 sample information. Default is \code{"group"}.}
@@ -35,6 +42,23 @@ supported.}
 \item{p_adj_method}{A character string specifying the method used to adjust
 set-level p-values. See \code{\link[stats:p.adjust]{stats::p.adjust()}}. Default is \code{"BH"}. If \code{NULL},
 no adjustment is performed.}
+
+\item{threshold}{A numeric correlation threshold between 0 and 1 used when
+\code{sets} is \code{NULL}. Variables are linked only when their correlation is
+strictly greater than this value. Default is \code{0.9}.}
+
+\item{correlation}{Correlation coefficient used when \code{sets} is \code{NULL}.
+Either \code{"pearson"} (default) or \code{"spearman"}.}
+
+\item{clustering}{How correlated variables are grouped when \code{sets} is
+\code{NULL}. \code{"connected"} (default) allows transitive chaining; \code{"complete"}
+requires every pair in a set to exceed \code{threshold}.}
+
+\item{min_size}{Minimum number of distinct profiles in an automatically
+constructed set. Default is 2.}
+
+\item{within}{Optional variable-information columns defining strata within
+which automatic sets are constructed, such as \code{c("protein", "protein_site")}.}
 }
 \value{
 A list with classes \code{glystats_set_test_res} and \code{glystats_res}
@@ -45,13 +69,15 @@ statistic, degrees of freedom, Mahalanobis effect size, p-value, adjusted
 p-value, and fit status.
 \item \code{tidy_result$members}: One row per set member with its marginal estimate
 and mean within-set correlation.
-\item \code{raw_result}: Set definitions, their correlation matrix, and individual
-Hotelling test objects.
+\item \code{raw_result}: Set definitions, their correlation matrix, individual
+Hotelling test objects, and automatic set-construction details (when
+\code{sets} is \code{NULL}).
 \item \code{meta_data}: Metadata copied from \code{exp}.
 }
 }
 \description{
-Jointly test correlated variable sets with Hotelling's \eqn{T^2} statistic.
+Construct and jointly test correlated variable sets with Hotelling's
+\eqn{T^2} statistic.
 }
 \details{
 Expression values are transformed using \code{log2(x + 1e-6)}. The first factor
@@ -79,11 +105,10 @@ exp <- SummarizedExperiment::SummarizedExperiment(
     )
   )
 )
-sets <- gly_correlated_sets(exp, threshold = 0.8)
-result <- gly_set_test(exp, sets)
+result <- gly_set_test(exp, threshold = 0.8)
 result$tidy_result$sets
 
 }
 \seealso{
-\code{\link[=gly_correlated_sets]{gly_correlated_sets()}}, \code{\link[stats:p.adjust]{stats::p.adjust()}}
+\code{\link[stats:cor]{stats::cor()}}, \code{\link[stats:hclust]{stats::hclust()}}, \code{\link[stats:p.adjust]{stats::p.adjust()}}
 }
