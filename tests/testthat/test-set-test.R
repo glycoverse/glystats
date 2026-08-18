@@ -123,7 +123,6 @@ test_that("gly_set_test constructs complete and connected sets", {
   connected <- gly_set_test(
     exp,
     threshold = 0.85,
-    clustering = "connected",
     p_adj_method = NULL
   )
 
