@@ -1,7 +1,7 @@
 # set construction and testing validate metadata contracts
 
     Code
-      gly_correlated_sets(exp, within = "unknown")
+      gly_set_test(exp, within = "unknown")
     Condition
       Error in `.set_strata()`:
       ! Columns in `within` were not found in variable information.

@@ -1,109 +1,15 @@
-#' Construct Correlated Variable Sets
+#' Construct and Test Correlated Variable Sets
 #'
-#' Group highly correlated variables into sets for covariance-aware differential
-#' testing with [gly_set_test()].
-#'
-#' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
-#'   or another `SummarizedExperiment` containing expression data and variable
-#'   information.
-#' @param threshold A numeric correlation threshold between 0 and 1. Variables
-#'   are linked only when their correlation is strictly greater than this
-#'   value. Default is `0.9`.
-#' @param correlation Correlation coefficient to use. Either `"pearson"`
-#'   (default) or `"spearman"`.
-#' @param clustering How correlated variables are grouped. `"complete"`
-#'   (default) uses complete-linkage clustering so every pair in a set exceeds
-#'   `threshold`. `"connected"` uses connected components and therefore allows
-#'   transitive chaining.
-#' @param min_size Minimum number of distinct profiles in a set. Default is 2.
-#' @param within Optional variable-information columns defining strata within
-#'   which sets are constructed, such as `c("protein", "protein_site")`.
-#'
-#' @details
-#' Correlations are calculated on `log2(x + 1e-6)` values, matching the scale
-#' used by [gly_set_test()] and other differential-testing functions in this
-#' package. All-missing, insufficiently observed, and zero-variance variables
-#' are excluded. Numerically equivalent profiles are represented once during
-#' clustering and testing, while their aliases remain in the returned set
-#' membership.
-#'
-#' `clustering = "connected"` reproduces the transitive set-construction rule
-#' used by glycowork. `clustering = "complete"` avoids chaining by requiring
-#' all within-set correlations to exceed `threshold`.
-#'
-#' @returns An object of class `glystats_correlated_sets` containing:
-#' - `sets`: A named list mapping set identifiers to all member variables.
-#' - `membership`: A tibble containing set, variable, representative, and alias
-#'   information.
-#' - `representatives`: The distinct profiles used to define each set.
-#' - `correlation_matrix`: The pooled-sample correlation matrix. Correlations
-#'   across different `within` strata are `NA`.
-#' - `excluded_variables`: A tibble of excluded variables and reasons.
-#' - `aliases`: A named list mapping representative variables to aliases.
-#' - Construction settings and metadata copied from `exp`.
-#'
-#' @examples
-#' set.seed(1)
-#' expression <- matrix(
-#'   stats::rexp(36),
-#'   nrow = 3,
-#'   dimnames = list(c("A", "B", "C"), paste0("S", 1:12))
-#' )
-#' expression["B", ] <- expression["A", ] * exp(stats::rnorm(12, sd = 0.01))
-#' exp <- SummarizedExperiment::SummarizedExperiment(
-#'   assays = list(expression = expression),
-#'   colData = S4Vectors::DataFrame(
-#'     group = factor(rep(c("control", "case"), each = 6))
-#'   )
-#' )
-#' sets <- gly_correlated_sets(exp, threshold = 0.8)
-#' sets$membership
-#'
-#' @seealso [gly_set_test()], [stats::cor()], [stats::hclust()]
-#' @export
-gly_correlated_sets <- function(
-  exp,
-  threshold = 0.9,
-  correlation = "pearson",
-  clustering = "complete",
-  min_size = 2L,
-  within = NULL
-) {
-  .assert_data_container(exp)
-  checkmate::assert_number(threshold, lower = 0, upper = 1)
-  checkmate::assert_choice(correlation, c("pearson", "spearman"))
-  checkmate::assert_choice(clustering, c("complete", "connected"))
-  checkmate::assert_int(min_size, lower = 2)
-  checkmate::assert_character(within, unique = TRUE, null.ok = TRUE)
-
-  expr_mat <- .get_expr_mat(exp)
-  var_info <- .get_var_info(exp)
-  .validate_set_variable_names(expr_mat)
-  strata <- .set_strata(var_info, within)
-
-  result <- .construct_correlated_sets(
-    expr_mat = expr_mat,
-    strata = strata,
-    threshold = threshold,
-    correlation = correlation,
-    clustering = clustering,
-    min_size = min_size
-  )
-  result["within"] <- list(within)
-  result$meta_data <- .get_meta_data(exp)
-  class(result) <- "glystats_correlated_sets"
-  result
-}
-
-#' Test Correlated Variable Sets
-#'
-#' Jointly test correlated variable sets with Hotelling's \eqn{T^2} statistic.
+#' Construct and jointly test correlated variable sets with Hotelling's
+#' \eqn{T^2} statistic.
 #'
 #' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
 #'   or another `SummarizedExperiment` containing expression data and sample
 #'   information.
-#' @param sets A `glystats_correlated_sets` object returned by
-#'   [gly_correlated_sets()], or a uniquely named list of character vectors.
+#' @param sets A uniquely named list of character vectors defining custom sets.
+#'   When `NULL` (the default), correlated sets are constructed automatically
+#'   from `exp` using `threshold`, `correlation`, `clustering`, `min_size`, and
+#'   `within`.
 #' @param group_col A character string naming the two-level grouping column in
 #'   sample information. Default is `"group"`.
 #' @param subject_col An optional character string naming subject identifiers.
@@ -115,6 +21,19 @@ gly_correlated_sets <- function(
 #' @param p_adj_method A character string specifying the method used to adjust
 #'   set-level p-values. See [stats::p.adjust()]. Default is `"BH"`. If `NULL`,
 #'   no adjustment is performed.
+#' @param threshold A numeric correlation threshold between 0 and 1 used when
+#'   `sets` is `NULL`. Variables are linked only when their correlation is
+#'   strictly greater than this value. Default is `0.9`.
+#' @param correlation Correlation coefficient used when `sets` is `NULL`.
+#'   Either `"pearson"` (default) or `"spearman"`.
+#' @param clustering How correlated variables are grouped when `sets` is
+#'   `NULL`. `"complete"` (default) requires every pair in a set to exceed
+#'   `threshold`; `"connected"` allows transitive chaining.
+#' @param min_size Minimum number of distinct profiles in an automatically
+#'   constructed set. Default is 2.
+#' @param within Optional variable-information columns defining strata within
+#'   which automatic sets are constructed, such as `c("protein",
+#'   "protein_site")`.
 #'
 #' @details
 #' Expression values are transformed using `log2(x + 1e-6)`. The first factor
@@ -133,8 +52,9 @@ gly_correlated_sets <- function(
 #'   p-value, and fit status.
 #' - `tidy_result$members`: One row per set member with its marginal estimate
 #'   and mean within-set correlation.
-#' - `raw_result`: Set definitions, their correlation matrix, and individual
-#'   Hotelling test objects.
+#' - `raw_result`: Set definitions, their correlation matrix, individual
+#'   Hotelling test objects, and automatic set-construction details (when
+#'   `sets` is `NULL`).
 #' - `meta_data`: Metadata copied from `exp`.
 #'
 #' @examples
@@ -154,19 +74,23 @@ gly_correlated_sets <- function(
 #'     )
 #'   )
 #' )
-#' sets <- gly_correlated_sets(exp, threshold = 0.8)
-#' result <- gly_set_test(exp, sets)
+#' result <- gly_set_test(exp, threshold = 0.8)
 #' result$tidy_result$sets
 #'
-#' @seealso [gly_correlated_sets()], [stats::p.adjust()]
+#' @seealso [stats::cor()], [stats::hclust()], [stats::p.adjust()]
 #' @export
 gly_set_test <- function(
   exp,
-  sets,
+  sets = NULL,
   group_col = "group",
   subject_col = NULL,
   method = "hotelling",
-  p_adj_method = "BH"
+  p_adj_method = "BH",
+  threshold = 0.9,
+  correlation = "pearson",
+  clustering = "complete",
+  min_size = 2L,
+  within = NULL
 ) {
   .assert_data_container(exp)
   checkmate::assert_string(group_col)
@@ -177,11 +101,34 @@ gly_set_test <- function(
     stats::p.adjust.methods,
     null.ok = TRUE
   )
+  checkmate::assert_number(threshold, lower = 0, upper = 1)
+  checkmate::assert_choice(correlation, c("pearson", "spearman"))
+  checkmate::assert_choice(clustering, c("complete", "connected"))
+  checkmate::assert_int(min_size, lower = 2)
+  checkmate::assert_character(within, unique = TRUE, null.ok = TRUE)
 
   expr_mat <- .get_expr_mat(exp)
   sample_info <- .get_sample_info(exp)
+  var_info <- .get_var_info(exp)
   .validate_set_variable_names(expr_mat)
-  set_info <- .normalize_set_definitions(sets, rownames(expr_mat))
+  if (is.null(sets)) {
+    set_construction <- .construct_correlated_sets(
+      expr_mat = expr_mat,
+      strata = .set_strata(var_info, within),
+      threshold = threshold,
+      correlation = correlation,
+      clustering = clustering,
+      min_size = min_size
+    )
+    set_construction$within <- within
+    set_info <- list(
+      sets = set_construction$sets,
+      correlation_matrix = set_construction$correlation_matrix
+    )
+  } else {
+    set_construction <- NULL
+    set_info <- .normalize_set_definitions(sets, rownames(expr_mat))
+  }
 
   group_info <- .extract_and_validate_groups(
     sample_info = sample_info,
@@ -205,6 +152,7 @@ gly_set_test <- function(
     correlation_matrix = set_info$correlation_matrix
   )
   result$raw_result$definitions <- set_info$sets
+  result$raw_result$set_construction <- set_construction
   result$meta_data <- .get_meta_data(exp)
   result
 }
@@ -543,7 +491,7 @@ gly_set_test <- function(
     correlation_matrix <- NULL
   } else {
     cli::cli_abort(
-      "{.arg sets} must be returned by {.fn gly_correlated_sets} or be a named list."
+      "{.arg sets} must be a named list of character vectors."
     )
   }
 
