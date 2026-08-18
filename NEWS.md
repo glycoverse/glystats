@@ -2,7 +2,7 @@
 
 * `gly_set_test()` now constructs correlated variable sets and performs the
   Hotelling's T2 test in one call. Custom sets remain available through the
-  optional `sets` argument. (#18)
+  optional `sets` argument. (#19)
 * Analysis functions now accept experiments containing all-`NA` variables without errors, returning `NA` feature-level statistics, loadings, or clusters and `NULL` raw models when no variables can be fitted. (#17)
 * `gly_linear_model()` now fits formula-based, limma-moderated models with interactions, adjustment variables, and named custom contrasts. (#16)
 
