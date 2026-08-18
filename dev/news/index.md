@@ -2,13 +2,10 @@
 
 ## glystats (development version)
 
-- New
-  [`gly_correlated_sets()`](https://glycoverse.github.io/glystats/dev/reference/gly_correlated_sets.md)
-  constructs complete-linkage or connected correlated variable sets, and
-  new
-  [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
-  jointly tests independent or paired two-group shifts with Hotelling’s
-  T2 statistic. (#18)
+- [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
+  now constructs correlated variable sets and performs the Hotelling’s
+  T2 test in one call. Custom sets remain available through the optional
+  `sets` argument. (#19)
 - Analysis functions now accept experiments containing all-`NA`
   variables without errors, returning `NA` feature-level statistics,
   loadings, or clusters and `NULL` raw models when no variables can be

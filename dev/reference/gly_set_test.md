@@ -1,18 +1,23 @@
-# Test Correlated Variable Sets
+# Construct and Test Correlated Variable Sets
 
-Jointly test correlated variable sets with Hotelling's \\T^2\\
-statistic.
+Construct and jointly test correlated variable sets with Hotelling's
+\\T^2\\ statistic.
 
 ## Usage
 
 ``` r
 gly_set_test(
   exp,
-  sets,
+  sets = NULL,
   group_col = "group",
   subject_col = NULL,
   method = "hotelling",
-  p_adj_method = "BH"
+  p_adj_method = "BH",
+  threshold = 0.9,
+  correlation = "pearson",
+  clustering = "connected",
+  min_size = 2L,
+  within = NULL
 )
 ```
 
@@ -29,9 +34,10 @@ gly_set_test(
 
 - sets:
 
-  A `glystats_correlated_sets` object returned by
-  [`gly_correlated_sets()`](https://glycoverse.github.io/glystats/dev/reference/gly_correlated_sets.md),
-  or a uniquely named list of character vectors.
+  A uniquely named list of character vectors defining custom sets. When
+  `NULL` (the default), correlated sets are constructed automatically
+  from `exp` using `threshold`, `correlation`, `clustering`, `min_size`,
+  and `within`.
 
 - group_col:
 
@@ -56,6 +62,34 @@ gly_set_test(
   [`stats::p.adjust()`](https://rdrr.io/r/stats/p.adjust.html). Default
   is `"BH"`. If `NULL`, no adjustment is performed.
 
+- threshold:
+
+  A numeric correlation threshold between 0 and 1 used when `sets` is
+  `NULL`. Variables are linked only when their correlation is strictly
+  greater than this value. Default is `0.9`.
+
+- correlation:
+
+  Correlation coefficient used when `sets` is `NULL`. Either `"pearson"`
+  (default) or `"spearman"`.
+
+- clustering:
+
+  How correlated variables are grouped when `sets` is `NULL`.
+  `"connected"` (default) allows transitive chaining; `"complete"`
+  requires every pair in a set to exceed `threshold`.
+
+- min_size:
+
+  Minimum number of distinct profiles in an automatically constructed
+  set. Default is 2.
+
+- within:
+
+  Optional variable-information columns defining strata within which
+  automatic sets are constructed, such as
+  `c("protein", "protein_site")`.
+
 ## Value
 
 A list with classes `glystats_set_test_res` and `glystats_res`
@@ -68,8 +102,9 @@ containing:
 - `tidy_result$members`: One row per set member with its marginal
   estimate and mean within-set correlation.
 
-- `raw_result`: Set definitions, their correlation matrix, and
-  individual Hotelling test objects.
+- `raw_result`: Set definitions, their correlation matrix, individual
+  Hotelling test objects, and automatic set-construction details (when
+  `sets` is `NULL`).
 
 - `meta_data`: Metadata copied from `exp`.
 
@@ -87,7 +122,8 @@ with `status = "failed"`, `NA` statistics, and an explicit
 
 ## See also
 
-[`gly_correlated_sets()`](https://glycoverse.github.io/glystats/dev/reference/gly_correlated_sets.md),
+[`stats::cor()`](https://rdrr.io/r/stats/cor.html),
+[`stats::hclust()`](https://rdrr.io/r/stats/hclust.html),
 [`stats::p.adjust()`](https://rdrr.io/r/stats/p.adjust.html)
 
 ## Examples
@@ -109,8 +145,7 @@ exp <- SummarizedExperiment::SummarizedExperiment(
     )
   )
 )
-sets <- gly_correlated_sets(exp, threshold = 0.8)
-result <- gly_set_test(exp, sets)
+result <- gly_set_test(exp, threshold = 0.8)
 #> ℹ Ref Group: "control"
 #> ℹ Test Group: "case"
 result$tidy_result$sets
