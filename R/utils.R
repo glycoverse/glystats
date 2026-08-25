@@ -188,7 +188,7 @@
   if (!is.factor(groups)) {
     groups <- factor(groups)
   }
-  groups
+  droplevels(groups)
 }
 
 # Helper function to generate validation error message

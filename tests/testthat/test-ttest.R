@@ -580,6 +580,40 @@ test_that("gly_wilcox uses signed ranks and paired effect sizes", {
   )
 })
 
+test_that("paired two-group tests ignore unused group levels", {
+  subjects <- rep(paste0("S", seq_len(6)), times = 2)
+  groups <- factor(
+    rep(c("A", "B"), each = 6),
+    levels = c("A", "B", "unused")
+  )
+  baseline <- 10:15
+  expression <- rbind(
+    V1 = c(baseline, baseline + c(1, 2, 1, 3, 2, 4))
+  )
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  ttest_result <- suppressMessages(gly_ttest(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE
+  ))
+  wilcox_result <- suppressMessages(suppressWarnings(gly_wilcox(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    exact = FALSE
+  )))
+
+  expect_match(ttest_result$tidy_result$method, "Paired t-test")
+  expect_match(wilcox_result$tidy_result$method, "signed rank")
+  expect_true(is.finite(ttest_result$tidy_result$p_val))
+  expect_true(is.finite(wilcox_result$tidy_result$p_val))
+})
+
 test_that("paired analyses reject ambiguous subject layouts", {
   expression <- matrix(
     seq_len(6),
