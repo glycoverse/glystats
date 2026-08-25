@@ -203,7 +203,12 @@ gly_anova <- function(
   )
   main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
-  post_hoc_test <- .add_fold_change(post_hoc_test, expr_mat, groups)
+  post_hoc_test <- .add_fold_change(
+    post_hoc_test,
+    expr_mat,
+    groups,
+    paired_data = if (design$paired) data else NULL
+  )
 
   # Assemble tidy results
   tidy_result <- list(
@@ -674,7 +679,12 @@ gly_kruskal <- function(
     raw_post_hoc_test,
     stats::kruskal.test
   )
-  post_hoc_test <- .add_fold_change(post_hoc_test, expr_mat, groups)
+  post_hoc_test <- .add_fold_change(
+    post_hoc_test,
+    expr_mat,
+    groups,
+    paired_data = if (design$paired) data else NULL
+  )
 
   # Assemble tidy results
   tidy_result <- list(
@@ -1270,7 +1280,8 @@ gly_kruskal <- function(
       }
     } else {
       dunn_df <- raw_result$res
-      sig_pairs <- dunn_df$Comparison[dunn_df$P.adj < 0.05]
+      significant <- !is.na(dunn_df$P.adj) & dunn_df$P.adj < 0.05
+      sig_pairs <- dunn_df$Comparison[significant]
       # Raw Dunn results are standardized to "test - ref". Convert them back to
       # the package-facing "ref_vs_test" label used elsewhere.
       sig_pairs <- purrr::map_chr(sig_pairs, function(x) {
@@ -1380,7 +1391,50 @@ gly_kruskal <- function(
   dplyr::bind_rows(result_list)
 }
 
-.add_fold_change <- function(post_hoc_test, expr_mat, groups) {
+.add_fold_change <- function(
+  post_hoc_test,
+  expr_mat,
+  groups,
+  paired_data = NULL
+) {
+  if (!is.null(paired_data)) {
+    if (nrow(post_hoc_test) == 0) {
+      post_hoc_test$log2fc <- numeric(0)
+      return(post_hoc_test)
+    }
+
+    fc_res <- purrr::map_dfr(
+      unique(post_hoc_test$variable),
+      function(variable) {
+        variable_data <- paired_data[
+          paired_data$variable == variable,
+          ,
+          drop = FALSE
+        ]
+        complete_data <- .complete_paired_variable_data(variable_data)
+        sample_idx <- match(complete_data$sample, colnames(expr_mat))
+        variable_expr <- expr_mat[variable, sample_idx, drop = FALSE]
+        variable_groups <- factor(
+          complete_data$group,
+          levels = levels(groups)
+        )
+
+        if (length(levels(groups)) == 2) {
+          .fc_2groups(variable_expr, variable_groups)
+        } else {
+          .fc_multi_groups(variable_expr, variable_groups)
+        }
+      }
+    )
+
+    join_by <- if (length(levels(groups)) == 2) {
+      "variable"
+    } else {
+      c("ref_group", "test_group", "variable")
+    }
+    return(dplyr::left_join(post_hoc_test, fc_res, by = join_by))
+  }
+
   if (length(levels(groups)) == 2) {
     fc_res <- .fc_2groups(expr_mat, groups)
     return(dplyr::left_join(post_hoc_test, fc_res, by = "variable"))

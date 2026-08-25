@@ -671,6 +671,76 @@ test_that("paired multi-group tests ignore unused group levels", {
   expect_match(friedman_result$tidy_result$main_test$method, "Friedman")
 })
 
+test_that("paired multi-group fold changes use complete subject blocks", {
+  subjects <- rep(paste0("S", seq_len(7)), each = 3)
+  groups <- factor(rep(c("A", "B", "C"), times = 7))
+  complete_a <- 10:15
+  expression <- rbind(
+    V1 = c(rbind(complete_a, 2 * complete_a, 4 * complete_a), 1000, 10, NA)
+  )
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  results <- list(
+    suppressMessages(gly_anova(
+      exp,
+      subject_col = "subject",
+      add_info = FALSE,
+      p_adj_method = NULL
+    )),
+    suppressMessages(suppressWarnings(gly_kruskal(
+      exp,
+      subject_col = "subject",
+      add_info = FALSE,
+      p_adj_method = NULL
+    )))
+  )
+
+  purrr::walk(results, function(result) {
+    post_hoc <- result$tidy_result$post_hoc_test
+    expected <- c(A_vs_B = 1, A_vs_C = 2, B_vs_C = 1)
+    comparison <- paste(
+      post_hoc$ref_group,
+      post_hoc$test_group,
+      sep = "_vs_"
+    )
+
+    expect_equal(unname(post_hoc$log2fc), unname(expected[comparison]))
+  })
+})
+
+test_that("paired Wilcoxon post-hoc keeps undefined comparisons unavailable", {
+  subjects <- rep(paste0("S", seq_len(8)), each = 3)
+  groups <- factor(rep(c("A", "B", "C"), times = 8))
+  baseline <- 10:17
+  expression <- rbind(
+    V1 = c(rbind(baseline, baseline, 4 * baseline))
+  )
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  result <- expect_no_error(suppressMessages(suppressWarnings(gly_kruskal(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  ))))
+  post_hoc <- result$tidy_result$post_hoc_test
+  ab <- post_hoc$ref_group == "A" & post_hoc$test_group == "B"
+
+  expect_true(is.na(post_hoc$p_val[ab]))
+  expect_true(is.na(post_hoc$p_adj[ab]))
+  expect_false(grepl("A_vs_B", result$tidy_result$main_test$post_hoc))
+  expect_match(result$tidy_result$main_test$post_hoc, "A_vs_C")
+  expect_match(result$tidy_result$main_test$post_hoc, "B_vs_C")
+})
+
 test_that("gly_kruskal performs Friedman tests for paired designs", {
   subjects <- rep(paste0("S", seq_len(6)), each = 3)
   groups <- factor(rep(c("A", "B", "C"), times = 6))
