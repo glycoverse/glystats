@@ -18,6 +18,8 @@ first to get up to speed.
 
 library(glystats)
 library(glyexp)
+#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
+#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(SummarizedExperiment)
 #> Loading required package: MatrixGenerics
 #> Loading required package: matrixStats
@@ -146,12 +148,12 @@ Let’s start by exploring our demo dataset:
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [97ms]
+#> ✔ Finding leader proteins [80ms]
 #> 
 #> ℹ Reading dataℹ Parsing glycan compositions and structures
-#> ✔ Parsing glycan compositions and structures [413ms]
+#> ✔ Parsing glycan compositions and structures [325ms]
 #> 
-#> ℹ Reading data✔ Reading data [932ms]
+#> ℹ Reading data✔ Reading data [758ms]
 #> 
 #> 
 #> ── Removing variables with too many missing values ──

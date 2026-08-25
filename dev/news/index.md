@@ -3,9 +3,12 @@
 ## glystats (development version)
 
 - [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
-  now constructs correlated variable sets and performs the Hotelling’s
-  T2 test in one call. Custom sets remain available through the optional
-  `sets` argument. (#19)
+  now constructs and tests correlated variable sets in one call, retains
+  isolated variables as singleton sets, and tests structurally
+  rank-deficient sets in their nonredundant subspace when the observed
+  contrast is estimable and classical sample-size requirements are met,
+  without distinguishing identical profiles; custom sets remain
+  available through `sets`. (#20)
 - Analysis functions now accept experiments containing all-`NA`
   variables without errors, returning `NA` feature-level statistics,
   loadings, or clusters and `NULL` raw models when no variables can be

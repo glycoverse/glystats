@@ -16,7 +16,6 @@ gly_set_test(
   threshold = 0.9,
   correlation = "pearson",
   clustering = "connected",
-  min_size = 2L,
   within = NULL
 )
 ```
@@ -36,8 +35,8 @@ gly_set_test(
 
   A uniquely named list of character vectors defining custom sets. When
   `NULL` (the default), correlated sets are constructed automatically
-  from `exp` using `threshold`, `correlation`, `clustering`, `min_size`,
-  and `within`.
+  from `exp` using `threshold`, `correlation`, `clustering`, and
+  `within`.
 
 - group_col:
 
@@ -79,11 +78,6 @@ gly_set_test(
   `"connected"` (default) allows transitive chaining; `"complete"`
   requires every pair in a set to exceed `threshold`.
 
-- min_size:
-
-  Minimum number of distinct profiles in an automatically constructed
-  set. Default is 2.
-
 - within:
 
   Optional variable-information columns defining strata within which
@@ -95,9 +89,11 @@ gly_set_test(
 A list with classes `glystats_set_test_res` and `glystats_res`
 containing:
 
-- `tidy_result$sets`: One row per set with its estimate vector,
-  Hotelling statistic, degrees of freedom, Mahalanobis effect size,
-  p-value, adjusted p-value, and fit status.
+- `tidy_result$sets`: One row per set with estimates for every member,
+  the effective covariance rank in `test_dimension` (`NA` when rejected
+  before covariance estimation), Hotelling statistic, degrees of
+  freedom, Mahalanobis effect size, p-value, adjusted p-value, and fit
+  status.
 
 - `tidy_result$members`: One row per set member with its marginal
   estimate and mean within-set correlation.
@@ -114,11 +110,14 @@ Expression values are transformed using `log2(x + 1e-6)`. The first
 factor level of `group_col` is the reference group and the second is the
 test group. The estimate is therefore `test - reference`.
 
-Equivalent profiles are included in member-level output but represented
-once in the covariance matrix. Sets that are too large for their
-residual sample size or have a singular covariance matrix are retained
-with `status = "failed"`, `NA` statistics, and an explicit
-`failure_reason`.
+Every usable variable is assigned to a set, including a one-variable set
+when it is not correlated above `threshold` with another variable.
+Structurally rank-deficient covariance matrices are standardized to unit
+member variance and tested in their nonredundant subspace using a
+Moore-Penrose inverse when the original set dimension satisfies the
+classical sample-size requirement and the observed mean contrast lies in
+the estimable subspace. Other ineligible sets are retained with
+`status = "failed"`, `NA` statistics, and an explicit `failure_reason`.
 
 ## See also
 
@@ -149,10 +148,11 @@ result <- gly_set_test(exp, threshold = 0.8)
 #> ℹ Ref Group: "control"
 #> ℹ Test Group: "case"
 result$tidy_result$sets
-#> # A tibble: 1 × 18
+#> # A tibble: 2 × 18
 #>   set_id n_variables test_dimension variables estimate  statistic   df1   df2
 #>   <chr>        <int>          <int> <list>    <list>        <dbl> <int> <dbl>
-#> 1 set_1            2              2 <chr [2]> <dbl [2]>      6.25     2     9
+#> 1 set_1            2              2 <chr [2]> <dbl [2]>   6.25        2     9
+#> 2 set_2            1              1 <chr [1]> <dbl [1]>   0.00412     1    10
 #> # ℹ 10 more variables: effect_size <dbl>, p_val <dbl>, n_ref <int>,
 #> #   n_test <int>, ref_group <chr>, test_group <chr>, paired <lgl>,
 #> #   status <chr>, failure_reason <chr>, p_adj <dbl>
