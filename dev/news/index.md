@@ -2,6 +2,14 @@
 
 ## glystats (development version)
 
+- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md),
+  [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md),
+  [`gly_ttest()`](https://glycoverse.github.io/glystats/dev/reference/gly_ttest.md),
+  and
+  [`gly_wilcox()`](https://glycoverse.github.io/glystats/dev/reference/gly_wilcox.md)
+  gain a `subject_col` argument for subject-matched paired analyses,
+  including repeated-measures ANOVA, Friedman tests, paired post-hoc
+  comparisons, and paired effect sizes. (#21)
 - [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
   now constructs and tests correlated variable sets in one call, retains
   isolated variables as singleton sets, and tests structurally

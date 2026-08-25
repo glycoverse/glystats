@@ -1,15 +1,21 @@
-# One-way ANOVA for Differential Expression Analysis
+# One-way or Repeated-Measures ANOVA for Differential Expression Analysis
 
-Perform one-way ANOVA for glycomics or glycoproteomics data. The
-function supports parametric comparison of multiple groups. For
-significant results, Tukey's HSD post-hoc test is automatically
-performed. P-values are adjusted for multiple testing using the method
-specified by `p_adj_method`.
+Perform one-way or repeated-measures ANOVA for glycomics or
+glycoproteomics data. For significant results, Tukey's HSD post-hoc test
+is automatically performed. P-values are adjusted for multiple testing
+using the method specified by `p_adj_method`.
 
 ## Usage
 
 ``` r
-gly_anova(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, ...)
+gly_anova(
+  exp,
+  group_col = "group",
+  p_adj_method = "BH",
+  add_info = TRUE,
+  ...,
+  subject_col = NULL
+)
 ```
 
 ## Arguments
@@ -45,6 +51,12 @@ gly_anova(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, ...)
   Additional arguments passed to
   [`stats::aov()`](https://rdrr.io/r/stats/aov.html).
 
+- subject_col:
+
+  An optional character string naming the subject identifier column in
+  sample information. When supplied, a subject-blocked repeated-measures
+  ANOVA is performed.
+
 ## Value
 
 A list containing three elements:
@@ -68,7 +80,8 @@ A list containing three elements:
 
     - `p_val`: Raw p-value from ANOVA
 
-    - `effect_size`: Eta-squared
+    - `effect_size`: Eta-squared, or partial eta-squared for paired
+      analyses
 
     - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 
@@ -84,17 +97,16 @@ A list containing three elements:
 
     - `test_group`: Test/treatment/case group
 
-    - `p_val`: Raw p-value from Tukey's HSD test
+    - `p_val`: Raw post-hoc p-value
 
-    - `p_adj`: Adjusted p-value from Tukey's HSD test
+    - `p_adj`: Adjusted post-hoc p-value
 
 - `raw_result`: A list containing:
 
   - `main_test`: A list of raw `aov` model objects.
 
-  - `post_hoc_test`: A list of raw `TukeyHSD` objects. Post-hoc
-    comparison labels follow the package direction, i.e.
-    `test_group - ref_group`.
+  - `post_hoc_test`: A list of raw `TukeyHSD` objects or paired t-test
+    summaries.
 
 - `meta_data`: A list containing metadata from the input experiment.
 
@@ -102,7 +114,10 @@ A list containing three elements:
 
 The function performs log2 transformation on the expression data
 (log2(x + 1e-6)) before statistical testing. At least 2 groups are
-required in the grouping variable.
+required in the grouping variable. In paired analyses, only subjects
+observed in every group are used, with at most one sample per subject
+and group. The reported effect size is partial eta-squared for the group
+term.
 
 For any variable failed to fit a
 [`stats::aov()`](https://rdrr.io/r/stats/aov.html) model, NAs will be
@@ -111,6 +126,7 @@ assigned to the results in both main test and post-hoc test.
 **Post-hoc Test:** Tukey's HSD test for pairwise comparisons
 ([`stats::TukeyHSD()`](https://rdrr.io/r/stats/TukeyHSD.html)) is
 performed for variables with significant main effects (p_adj \< 0.05).
+Paired analyses instead use paired t-tests with Holm correction.
 
 ## See also
 

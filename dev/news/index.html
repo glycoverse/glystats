@@ -34,6 +34,8 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glystats-development-version">glystats (development version)<a class="anchor" aria-label="anchor" href="#glystats-development-version"></a></h2>
 <ul><li>
+<code><a href="../reference/gly_anova.html">gly_anova()</a></code>, <code><a href="../reference/gly_kruskal.html">gly_kruskal()</a></code>, <code><a href="../reference/gly_ttest.html">gly_ttest()</a></code>, and <code><a href="../reference/gly_wilcox.html">gly_wilcox()</a></code> gain a <code>subject_col</code> argument for subject-matched paired analyses, including repeated-measures ANOVA, Friedman tests, paired post-hoc comparisons, and paired effect sizes. (#21)</li>
+<li>
 <code><a href="../reference/gly_set_test.html">gly_set_test()</a></code> now constructs and tests correlated variable sets in one call, retains isolated variables as singleton sets, and tests structurally rank-deficient sets in their nonredundant subspace when the observed contrast is estimable and classical sample-size requirements are met, without distinguishing identical profiles; custom sets remain available through <code>sets</code>. (#20)</li>
 <li>Analysis functions now accept experiments containing all-<code>NA</code> variables without errors, returning <code>NA</code> feature-level statistics, loadings, or clusters and <code>NULL</code> raw models when no variables can be fitted. (#17)</li>
 <li>

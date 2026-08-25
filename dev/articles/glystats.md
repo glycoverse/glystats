@@ -148,12 +148,12 @@ Let’s start by exploring our demo dataset:
 exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
 #> ℹ Reading data
 #> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [80ms]
+#> ✔ Finding leader proteins [98ms]
 #> 
 #> ℹ Reading dataℹ Parsing glycan compositions and structures
-#> ✔ Parsing glycan compositions and structures [325ms]
+#> ✔ Parsing glycan compositions and structures [430ms]
 #> 
-#> ℹ Reading data✔ Reading data [758ms]
+#> ℹ Reading data✔ Reading data [966ms]
 #> 
 #> 
 #> ── Removing variables with too many missing values ──
@@ -399,6 +399,23 @@ model_res <- gly_linear_model(
     treatment_at_late = "treatmentB + `treatmentB:timelate`"
   )
 )
+```
+
+For matched or repeated-measures experiments, identify subjects with
+`subject_col`.
+[`gly_ttest()`](https://glycoverse.github.io/glystats/dev/reference/gly_ttest.md)
+and
+[`gly_wilcox()`](https://glycoverse.github.io/glystats/dev/reference/gly_wilcox.md)
+then match the two groups by subject, while
+[`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
+and
+[`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md)
+use repeated-measures ANOVA and the Friedman test, respectively:
+
+``` r
+
+gly_ttest(exp, subject_col = "subject")
+gly_anova(exp, subject_col = "subject")
 ```
 
 - **📐 Dimensionality Reduction:**

@@ -1,10 +1,9 @@
-# Kruskal-Wallis test for Differential Expression Analysis
+# Kruskal-Wallis or Friedman Test for Differential Expression Analysis
 
-Perform Kruskal-Wallis test for glycomics or glycoproteomics data. The
-function supports non-parametric comparison of multiple groups. For
-significant results, Dunn's post-hoc test is automatically performed.
-P-values are adjusted for multiple testing using the method specified by
-`p_adj_method`.
+Perform Kruskal-Wallis or Friedman tests for glycomics or
+glycoproteomics data. For significant results, Dunn's post-hoc test is
+automatically performed. P-values are adjusted for multiple testing
+using the method specified by `p_adj_method`.
 
 ## Usage
 
@@ -14,7 +13,8 @@ gly_kruskal(
   group_col = "group",
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  subject_col = NULL
 )
 ```
 
@@ -49,7 +49,14 @@ gly_kruskal(
 - ...:
 
   Additional arguments passed to
-  [`stats::kruskal.test()`](https://rdrr.io/r/stats/kruskal.test.html).
+  [`stats::kruskal.test()`](https://rdrr.io/r/stats/kruskal.test.html)
+  or, for paired analyses,
+  [`stats::friedman.test()`](https://rdrr.io/r/stats/friedman.test.html).
+
+- subject_col:
+
+  An optional character string naming the subject identifier column in
+  sample information. When supplied, a Friedman test is performed.
 
 ## Value
 
@@ -57,8 +64,8 @@ A list containing three elements:
 
 - `tidy_result`: A list containing:
 
-  - `main_test`: A tibble with Kruskal-Wallis test results containing
-    the following columns:
+  - `main_test`: A tibble with Kruskal-Wallis or Friedman test results
+    containing the following columns:
 
     - `variable`: Variable name
 
@@ -70,7 +77,7 @@ A list containing three elements:
 
     - `method`: Statistical method used
 
-    - `effect_size`: Epsilon-squared
+    - `effect_size`: Epsilon-squared, or Kendall's W for paired analyses
 
     - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 
@@ -86,17 +93,16 @@ A list containing three elements:
 
     - `test_group`: Test/treatment/case group
 
-    - `p_val`: Raw p-value from Dunn's test
+    - `p_val`: Raw post-hoc p-value
 
-    - `p_adj`: Adjusted p-value from Dunn's test
+    - `p_adj`: Holm-adjusted post-hoc p-value
 
 - `raw_result`: A list containing:
 
-  - `main_test`: A list of raw `kruskal.test` objects.
+  - `main_test`: A list of raw `kruskal.test` or `friedman.test`
+    objects.
 
-  - `post_hoc_test`: A list of raw `dunnTest` objects. Post-hoc
-    comparison labels and direction-sensitive statistics follow the
-    package direction, i.e. `test_group - ref_group`.
+  - `post_hoc_test`: A list of raw Dunn or paired Wilcoxon summaries.
 
 - `meta_data`: A list containing metadata from the input experiment.
 
@@ -104,10 +110,13 @@ A list containing three elements:
 
 The function performs log2 transformation on the expression data
 (log2(x + 1e-6)) before statistical testing. At least 2 groups are
-required in the grouping variable.
+required in the grouping variable. In paired analyses, only subjects
+observed in every group are used, with at most one sample per subject
+and group. The reported effect size is Kendall's \\W\\.
 
 For any variable failed to fit a
-[`stats::kruskal.test()`](https://rdrr.io/r/stats/kruskal.test.html)
+[`stats::kruskal.test()`](https://rdrr.io/r/stats/kruskal.test.html) or
+[`stats::friedman.test()`](https://rdrr.io/r/stats/friedman.test.html)
 model, NAs will be assigned to the results in both main test and
 post-hoc test.
 
@@ -115,13 +124,15 @@ post-hoc test.
 comparisons
 ([`FSA::dunnTest()`](https://fishr-core-team.github.io/FSA/reference/dunnTest.html))
 is performed for variables with significant main effects (p_adj \<
-0.05).
+0.05). Paired analyses instead use paired Wilcoxon signed-rank tests
+with Holm correction.
 
 ## Required packages
 
-This function requires the `FSA` package for Dunn's post-hoc test.
+Unpaired analyses require the `FSA` package for Dunn's post-hoc test.
 
 ## See also
 
 [`stats::kruskal.test()`](https://rdrr.io/r/stats/kruskal.test.html),
+[`stats::friedman.test()`](https://rdrr.io/r/stats/friedman.test.html),
 [`FSA::dunnTest()`](https://fishr-core-team.github.io/FSA/reference/dunnTest.html)
