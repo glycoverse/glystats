@@ -169,7 +169,8 @@ gly_anova <- function(
     data,
     stats::aov,
     formula = anova_formula,
-    ...
+    ...,
+    paired = design$paired
   )
   raw_post_hoc_test <- .generate_raw_posthoc_results(
     raw_main_test,
@@ -177,7 +178,8 @@ gly_anova <- function(
     stats::aov,
     p_adj_method,
     formula = anova_formula,
-    posthoc_method = if (design$paired) "paired_t" else "tukey"
+    posthoc_method = if (design$paired) "paired_t" else "tukey",
+    paired = design$paired
   )
 
   # Tibblify results
@@ -375,7 +377,8 @@ gly_ancova <- function(
   covariates <- .normalize_covariates(
     covariates,
     ncol(expr_mat),
-    colnames(expr_mat)
+    colnames(expr_mat),
+    allow_subject = TRUE
   )
   if (is.null(covariates) || ncol(covariates) == 0) {
     cli::cli_abort("covariates must be provided for ANCOVA.")
@@ -634,7 +637,8 @@ gly_kruskal <- function(
     data,
     test_function,
     formula = test_formula,
-    ...
+    ...,
+    paired = design$paired
   )
   raw_post_hoc_test <- .generate_raw_posthoc_results(
     raw_main_test,
@@ -642,7 +646,8 @@ gly_kruskal <- function(
     test_function,
     p_adj_method,
     formula = test_formula,
-    posthoc_method = if (design$paired) "paired_wilcox" else "dunn"
+    posthoc_method = if (design$paired) "paired_wilcox" else "dunn",
+    paired = design$paired
   )
 
   # Tibblify results
@@ -700,9 +705,12 @@ gly_kruskal <- function(
   data_nested,
   .f,
   formula = NULL,
-  posthoc_method = "tukey"
+  posthoc_method = "tukey",
+  paired = FALSE
 ) {
-  data_nested <- .complete_paired_variable_data(data_nested)
+  if (paired) {
+    data_nested <- .complete_paired_variable_data(data_nested)
+  }
   if (identical(posthoc_method, "paired_t")) {
     return(.paired_posthoc_test(data_nested, method = "t"))
   }
@@ -779,7 +787,13 @@ gly_kruskal <- function(
 }
 
 # Helper function to generate raw main test results
-.generate_raw_main_results <- function(data, .f, formula = NULL, ...) {
+.generate_raw_main_results <- function(
+  data,
+  .f,
+  formula = NULL,
+  ...,
+  paired = FALSE
+) {
   dots <- rlang::list2(...)
   disallowed_args <- intersect(names(dots), c("formula", "data"))
   if (length(disallowed_args) > 0) {
@@ -796,7 +810,11 @@ gly_kruskal <- function(
     dplyr::mutate(
       test_result = list(safe_f(
         formula,
-        data = .complete_paired_variable_data(.data$data),
+        data = if (paired) {
+          .complete_paired_variable_data(.data$data)
+        } else {
+          .data$data
+        },
         !!!dots
       ))
     )
@@ -815,7 +833,8 @@ gly_kruskal <- function(
   .f,
   p_adj_method,
   formula = NULL,
-  posthoc_method = "tukey"
+  posthoc_method = "tukey",
+  paired = FALSE
 ) {
   p_fn <- if (identical(.f, stats::aov)) {
     function(x) {
@@ -840,7 +859,8 @@ gly_kruskal <- function(
           .data$data,
           .f,
           formula = formula,
-          posthoc_method = posthoc_method
+          posthoc_method = posthoc_method,
+          paired = paired
         ))
       ) %>%
       dplyr::select(all_of(c("variable", "posthoc_raw")))

@@ -620,6 +620,57 @@ test_that("paired ANOVA post-hoc results tolerate constant differences and hyphe
   expect_false(anyNA(post_hoc$log2fc))
 })
 
+test_that("paired multi-group tests ignore unused group levels", {
+  subjects <- rep(paste0("S", seq_len(6)), each = 3)
+  groups <- factor(
+    rep(c("A", "B", "C"), times = 6),
+    levels = c("A", "B", "C", "unused")
+  )
+  baselines <- rep(seq(10, 60, by = 10), each = 3)
+  changes <- c(
+    0,
+    1,
+    4,
+    0,
+    2,
+    6,
+    0,
+    1,
+    5,
+    0,
+    3,
+    7,
+    0,
+    2,
+    8,
+    0,
+    4,
+    9
+  )
+  expression <- rbind(V1 = baselines + changes)
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  anova_result <- suppressMessages(gly_anova(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  ))
+  friedman_result <- suppressMessages(suppressWarnings(gly_kruskal(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  )))
+
+  expect_s3_class(anova_result$raw_result$main_test$V1, "aov")
+  expect_match(friedman_result$tidy_result$main_test$method, "Friedman")
+})
+
 test_that("gly_kruskal performs Friedman tests for paired designs", {
   subjects <- rep(paste0("S", seq_len(6)), each = 3)
   groups <- factor(rep(c("A", "B", "C"), times = 6))

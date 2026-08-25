@@ -460,6 +460,8 @@
     )
   }
 
+  groups <- droplevels(groups)
+
   subject_group <- paste(subjects, groups, sep = "\r")
   if (anyDuplicated(subject_group) > 0) {
     cli::cli_abort(
