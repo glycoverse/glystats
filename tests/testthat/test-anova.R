@@ -584,6 +584,42 @@ test_that("gly_anova performs subject-blocked repeated-measures analysis", {
   )
 })
 
+test_that("paired ANOVA post-hoc results tolerate constant differences and hyphens", {
+  subjects <- rep(paste0("S", seq_len(6)), times = 3)
+  groups <- factor(
+    rep(c("pre-dose", "post-dose", "follow-up"), each = 6),
+    levels = c("pre-dose", "post-dose", "follow-up")
+  )
+  log_expression <- c(seq_len(6), seq_len(6) + 1, seq_len(6) + 2)
+  expression <- rbind(V1 = 2^log_expression - 1e-6)
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  result <- suppressMessages(gly_anova(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  ))
+  post_hoc <- result$tidy_result$post_hoc_test
+
+  expect_s3_class(result$raw_result$main_test$V1, "aov")
+  expect_setequal(
+    paste(post_hoc$ref_group, post_hoc$test_group, sep = "_vs_"),
+    c(
+      "pre-dose_vs_post-dose",
+      "pre-dose_vs_follow-up",
+      "post-dose_vs_follow-up"
+    )
+  )
+  expect_true(all(is.na(post_hoc$p_val)))
+  expect_true(all(is.na(post_hoc$p_adj)))
+  expect_false(anyNA(post_hoc$log2fc))
+})
+
 test_that("gly_kruskal performs Friedman tests for paired designs", {
   subjects <- rep(paste0("S", seq_len(6)), each = 3)
   groups <- factor(rep(c("A", "B", "C"), times = 6))

@@ -934,7 +934,10 @@ gly_kruskal <- function(
     test <- data$log_value[data$group == comparison[1]]
     ref <- data$log_value[data$group == comparison[2]]
     if (identical(method, "t")) {
-      stats::t.test(test, ref, paired = TRUE)$p.value
+      tryCatch(
+        stats::t.test(test, ref, paired = TRUE)$p.value,
+        error = function(cnd) NA_real_
+      )
     } else {
       suppressWarnings(
         stats::wilcox.test(test, ref, paired = TRUE, exact = FALSE)$p.value
@@ -942,13 +945,14 @@ gly_kruskal <- function(
     }
   })
   adjusted <- stats::p.adjust(p_values, method = "holm")
+  ref_groups <- purrr::map_chr(comparisons, ~ .x[2])
+  test_groups <- purrr::map_chr(comparisons, ~ .x[1])
 
   if (identical(method, "t")) {
     return(data.frame(
-      contrast = purrr::map_chr(
-        comparisons,
-        ~ paste(.x[2], "-", .x[1])
-      ),
+      contrast = paste(ref_groups, "-", test_groups),
+      ref_group = ref_groups,
+      test_group = test_groups,
       p.unadj = p_values,
       p.value = adjusted,
       stringsAsFactors = FALSE
@@ -1211,7 +1215,20 @@ gly_kruskal <- function(
   }
   posthoc_map <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
     if (identical(.f, stats::aov)) {
-      if (is.data.frame(raw_result) && "contrast" %in% colnames(raw_result)) {
+      if (
+        is.data.frame(raw_result) &&
+          all(c("ref_group", "test_group") %in% colnames(raw_result))
+      ) {
+        significant <- !is.na(raw_result$p.value) & raw_result$p.value < 0.05
+        sig_pairs <- stringr::str_c(
+          raw_result$ref_group[significant],
+          "_vs_",
+          raw_result$test_group[significant]
+        )
+      } else if (
+        is.data.frame(raw_result) &&
+          "contrast" %in% colnames(raw_result)
+      ) {
         sig_pairs <- raw_result$contrast[raw_result$p.value < 0.05]
         sig_pairs <- purrr::map_chr(sig_pairs, function(x) {
           parts <- stringr::str_split(x, "\\s*-\\s*", simplify = TRUE)
@@ -1267,7 +1284,21 @@ gly_kruskal <- function(
   # Convert each post-hoc result to tibble and combine
   result_list <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
     if (identical(.f, stats::aov)) {
-      if (is.data.frame(raw_result) && "contrast" %in% colnames(raw_result)) {
+      if (
+        is.data.frame(raw_result) &&
+          all(c("ref_group", "test_group") %in% colnames(raw_result))
+      ) {
+        tibble::tibble(
+          variable = var_name,
+          ref_group = raw_result$ref_group,
+          test_group = raw_result$test_group,
+          p_val = raw_result$p.unadj,
+          p_adj = raw_result$p.value
+        )
+      } else if (
+        is.data.frame(raw_result) &&
+          "contrast" %in% colnames(raw_result)
+      ) {
         comparison_parts <- stringr::str_split(
           raw_result$contrast,
           "\\s*-\\s*",
