@@ -151,6 +151,16 @@ model_res <- gly_linear_model(
 )
 ```
 
+For matched or repeated-measures experiments, identify subjects with
+`subject_col`. `gly_ttest()` and `gly_wilcox()` then match the two groups by
+subject, while `gly_anova()` and `gly_kruskal()` use repeated-measures ANOVA and
+the Friedman test, respectively:
+
+```r
+gly_ttest(exp, subject_col = "subject")
+gly_anova(exp, subject_col = "subject")
+```
+
 - **📐 Dimensionality Reduction:**
   - `gly_pca()`: Principal component analysis
   - `gly_tsne()`: t-distributed stochastic neighbor embedding (t-SNE)

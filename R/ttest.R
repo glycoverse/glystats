@@ -1,7 +1,6 @@
-#' Two-sample t-test for Differential Expression Analysis
+#' T-test for Differential Expression Analysis
 #'
-#' Perform two-sample t-test for glycomics or glycoproteomics data.
-#' The function supports Student's t-test for comparing two groups.
+#' Perform independent or paired t-tests for glycomics or glycoproteomics data.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
@@ -17,10 +16,15 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param ... Additional arguments passed to `stats::t.test()`.
+#' @param subject_col An optional character string naming the subject identifier
+#'   column in sample information. When supplied, samples are matched by subject
+#'   and a paired t-test is performed.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
+#' In paired analyses, only subjects observed in both groups are used and
+#' `effect_size` is Cohen's \eqn{d_z} based on within-subject differences.
 #'
 #' @returns A list with three elements:
 #' - `tidy_result`: A tibble with t-test results containing the following columns:
@@ -33,7 +37,7 @@
 #'   - `parameter`: Degrees of freedom
 #'   - `conf_low`: Lower bound of 95% confidence interval
 #'   - `conf_high`: Upper bound of 95% confidence interval
-#'   - `effect_size`: Cohen's d
+#'   - `effect_size`: Cohen's d, or Cohen's dz for paired analyses
 #'   - `method`: Statistical method used
 #'   - `alternative`: Alternative hypothesis
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
@@ -49,7 +53,8 @@ gly_ttest <- function(
   p_adj_method = "BH",
   ref_group = NULL,
   add_info = TRUE,
-  ...
+  ...,
+  subject_col = NULL
 ) {
   # Validate inputs
   .assert_data_container(exp)
@@ -60,6 +65,7 @@ gly_ttest <- function(
     null.ok = TRUE
   )
   checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_string(subject_col, null.ok = TRUE)
 
   # Extract data from experiment object
   expr_mat <- .get_expr_mat(exp)
@@ -75,9 +81,17 @@ gly_ttest <- function(
   )
   groups <- group_info$groups
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
+  subjects <- .extract_paired_subjects(sample_info, subject_col, group_col)
 
   # Run the internal computation
-  result <- .analyze_ttest(expr_mat, groups, p_adj_method, ref_group, ...)
+  result <- .analyze_ttest(
+    expr_mat,
+    groups,
+    p_adj_method,
+    ref_group,
+    ...,
+    subjects = subjects
+  )
 
   # Process results with add_info logic
   result$tidy_result <- .process_results_add_info(
@@ -102,7 +116,8 @@ gly_ttest <- function(
   groups,
   p_adj_method = "BH",
   ref_group = NULL,
-  ...
+  ...,
+  subjects = NULL
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
@@ -127,17 +142,18 @@ gly_ttest <- function(
     stats::t.test,
     p_adj_method,
     ref_group,
-    ...
+    ...,
+    subjects = subjects
   )
 
   # Add S3 class
   structure(result, class = c("glystats_ttest_res", "glystats_res"))
 }
 
-#' Wilcoxon rank-sum test for Differential Expression Analysis
+#' Wilcoxon Test for Differential Expression Analysis
 #'
-#' Perform Wilcoxon rank-sum test (Mann-Whitney U test) for glycomics or glycoproteomics data.
-#' The function supports non-parametric comparison of two groups.
+#' Perform Wilcoxon rank-sum or signed-rank tests for glycomics or
+#' glycoproteomics data.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
 #' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
@@ -153,10 +169,15 @@ gly_ttest <- function(
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param ... Additional arguments passed to `stats::wilcox.test()`.
+#' @param subject_col An optional character string naming the subject identifier
+#'   column in sample information. When supplied, samples are matched by subject
+#'   and a paired Wilcoxon signed-rank test is performed.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. Exactly 2 groups are required in the grouping variable.
+#' In paired analyses, only subjects observed in both groups are used and
+#' `effect_size` is the matched-pairs rank-biserial correlation.
 #'
 #' @returns
 #' A list with three elements:
@@ -164,7 +185,8 @@ gly_ttest <- function(
 #'   - `variable`: Variable name
 #'   - `statistic`: Wilcoxon test statistic
 #'   - `p_val`: Raw p-value from Wilcoxon test
-#'   - `effect_size`: Rank-biserial correlation
+#'   - `effect_size`: Rank-biserial correlation, using matched pairs in paired
+#'     analyses
 #'   - `method`: Statistical method used
 #'   - `alternative`: Alternative hypothesis
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
@@ -187,7 +209,8 @@ gly_wilcox <- function(
   p_adj_method = "BH",
   ref_group = NULL,
   add_info = TRUE,
-  ...
+  ...,
+  subject_col = NULL
 ) {
   # Validate inputs
   .assert_data_container(exp)
@@ -198,6 +221,7 @@ gly_wilcox <- function(
     null.ok = TRUE
   )
   checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_string(subject_col, null.ok = TRUE)
 
   # Extract data from experiment object
   expr_mat <- .get_expr_mat(exp)
@@ -213,9 +237,17 @@ gly_wilcox <- function(
   )
   groups <- group_info$groups
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
+  subjects <- .extract_paired_subjects(sample_info, subject_col, group_col)
 
   # Run the internal computation
-  result <- .analyze_wilcox(expr_mat, groups, p_adj_method, ref_group, ...)
+  result <- .analyze_wilcox(
+    expr_mat,
+    groups,
+    p_adj_method,
+    ref_group,
+    ...,
+    subjects = subjects
+  )
 
   # Process results with add_info logic
   result$tidy_result <- .process_results_add_info(
@@ -240,7 +272,8 @@ gly_wilcox <- function(
   groups,
   p_adj_method = "BH",
   ref_group = NULL,
-  ...
+  ...,
+  subjects = NULL
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
@@ -265,7 +298,8 @@ gly_wilcox <- function(
     stats::wilcox.test,
     p_adj_method,
     ref_group,
-    ...
+    ...,
+    subjects = subjects
   )
 
   # Add S3 class
@@ -280,23 +314,40 @@ gly_wilcox <- function(
   .f,
   p_adj_method,
   ref_group,
-  ...
+  ...,
+  subjects = NULL
 ) {
   # Reorder groups if ref_group is specified
   if (!is.null(ref_group)) {
     groups <- .reorder_groups_for_ref(groups, ref_group)
   }
 
+  design <- .match_paired_samples(
+    expr_mat,
+    groups,
+    subjects,
+    method = if (identical(.f, stats::t.test)) "t-test" else "Wilcoxon test"
+  )
+  expr_mat <- design$expr_mat
+  groups <- design$groups
+
   log_expr_mat <- .log_transform_expr_mat(expr_mat)
 
-  mod_list <- .gly_dea_2groups_raw(log_expr_mat, groups, .f, ...)
+  mod_list <- .gly_dea_2groups_raw(
+    log_expr_mat,
+    groups,
+    .f,
+    ...,
+    paired = design$paired
+  )
   tidy_result <- .gly_dea_2groups_tibblify(
     mod_list,
     .f,
     p_adj_method,
     expr_mat,
     groups,
-    log_expr_mat
+    log_expr_mat,
+    paired = design$paired
   )
 
   # Return list with both tidy and raw results
@@ -307,7 +358,13 @@ gly_wilcox <- function(
 }
 
 # Generate raw model list for 2-group analysis
-.gly_dea_2groups_raw <- function(log_expr_mat, groups, .f, ...) {
+.gly_dea_2groups_raw <- function(
+  log_expr_mat,
+  groups,
+  .f,
+  ...,
+  paired = FALSE
+) {
   data <- log_expr_mat %>%
     t() %>%
     as.data.frame() %>%
@@ -327,6 +384,14 @@ gly_wilcox <- function(
     cli::cli_abort(
       "Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; they are controlled internally."
     )
+  }
+  if (paired && "paired" %in% names(dots)) {
+    cli::cli_abort(
+      "{.arg paired} is controlled by {.arg subject_col} in a paired analysis."
+    )
+  }
+  if (paired) {
+    dots$paired <- TRUE
   }
   safe_f <- purrr::possibly(function(...) rlang::exec(.f, ...), otherwise = NA)
   group_levels <- levels(groups)
@@ -357,7 +422,8 @@ gly_wilcox <- function(
   p_adj_method,
   expr_mat,
   groups,
-  log_expr_mat
+  log_expr_mat,
+  paired = FALSE
 ) {
   # Create a tibble from the model list
   var_names <- names(mod_list)
@@ -416,20 +482,46 @@ gly_wilcox <- function(
     )
   }
 
+  if (paired && identical(.f, stats::t.test)) {
+    paired_estimates <- purrr::map(
+      result_tbl$variable,
+      ~ .paired_variable_values(log_expr_mat, groups, .x)
+    )
+    result_tbl$estimate1 <- purrr::map_dbl(
+      paired_estimates,
+      ~ if (length(.x$test) == 0) NA_real_ else mean(.x$test)
+    )
+    result_tbl$estimate2 <- purrr::map_dbl(
+      paired_estimates,
+      ~ if (length(.x$ref) == 0) NA_real_ else mean(.x$ref)
+    )
+  }
+
   # Calculate log2 fold change
-  result_tbl <- .add_log2fc_to_result(result_tbl, expr_mat, groups)
+  result_tbl <- .add_log2fc_to_result(
+    result_tbl,
+    expr_mat,
+    groups,
+    paired = paired
+  )
   result_tbl <- .add_effect_size_to_2group_result(
     result_tbl,
     log_expr_mat,
     groups,
-    .f
+    .f,
+    paired = paired
   )
 
   result_tbl
 }
 
 # Helper function to add log2 fold change to DEA results
-.add_log2fc_to_result <- function(result_tbl, expr_mat, groups) {
+.add_log2fc_to_result <- function(
+  result_tbl,
+  expr_mat,
+  groups,
+  paired = FALSE
+) {
   # Calculate mean expression for each group for each variable
   group_levels <- levels(groups)
   group1_indices <- which(groups == group_levels[1])
@@ -438,10 +530,15 @@ gly_wilcox <- function(
   # Calculate log2 fold change for each variable
   log2fc_values <- purrr::map_dbl(result_tbl$variable, function(var_name) {
     # Get expression values for this variable
-    var_expr <- expr_mat[var_name, ]
-
-    group1_values <- var_expr[group1_indices]
-    group2_values <- var_expr[group2_indices]
+    if (paired) {
+      pair_values <- .paired_variable_values(expr_mat, groups, var_name)
+      group1_values <- pair_values$ref
+      group2_values <- pair_values$test
+    } else {
+      var_expr <- expr_mat[var_name, ]
+      group1_values <- var_expr[group1_indices]
+      group2_values <- var_expr[group2_indices]
+    }
     if (all(is.na(group1_values)) || all(is.na(group2_values))) {
       return(NA_real_)
     }
@@ -473,10 +570,15 @@ gly_wilcox <- function(
   result_tbl,
   expr_mat,
   groups,
-  .f
+  .f,
+  paired = FALSE
 ) {
   effect_size_values <- purrr::map_dbl(result_tbl$variable, function(var_name) {
-    if (identical(.f, stats::t.test)) {
+    if (paired && identical(.f, stats::t.test)) {
+      .calculate_cohens_dz(expr_mat, groups, var_name)
+    } else if (paired && identical(.f, stats::wilcox.test)) {
+      .calculate_matched_rank_biserial(expr_mat, groups, var_name)
+    } else if (identical(.f, stats::t.test)) {
       .calculate_cohens_d(expr_mat, groups, var_name)
     } else if (identical(.f, stats::wilcox.test)) {
       .calculate_rank_biserial(expr_mat, groups, var_name)
@@ -487,6 +589,39 @@ gly_wilcox <- function(
 
   result_tbl$effect_size <- effect_size_values
   result_tbl
+}
+
+# Calculate Cohen's dz for a paired two-group comparison
+.calculate_cohens_dz <- function(expr_mat, groups, var_name) {
+  values <- .paired_variable_values(expr_mat, groups, var_name)
+  differences <- values$test - values$ref
+  if (length(differences) < 2) {
+    return(NA_real_)
+  }
+
+  difference_sd <- stats::sd(differences)
+  if (!is.finite(difference_sd) || difference_sd == 0) {
+    return(NA_real_)
+  }
+  mean(differences) / difference_sd
+}
+
+# Calculate matched-pairs rank-biserial correlation
+.calculate_matched_rank_biserial <- function(expr_mat, groups, var_name) {
+  values <- .paired_variable_values(expr_mat, groups, var_name)
+  if (length(values$ref) == 0) {
+    return(NA_real_)
+  }
+  differences <- values$test - values$ref
+  differences <- differences[differences != 0]
+  if (length(differences) == 0) {
+    return(0)
+  }
+
+  difference_ranks <- rank(abs(differences))
+  positive <- sum(difference_ranks[differences > 0])
+  negative <- sum(difference_ranks[differences < 0])
+  (positive - negative) / (positive + negative)
 }
 
 #' Calculate Cohen's d for a two-group comparison
