@@ -111,6 +111,31 @@ make_hotelling_exp <- function(paired = FALSE) {
   )
 }
 
+make_matrix_set_exp <- function(ref, test, paired = FALSE) {
+  stopifnot(identical(colnames(ref), colnames(test)))
+  n_ref <- nrow(ref)
+  n_test <- nrow(test)
+  log_expression <- t(rbind(ref, test))
+  expression <- 2^log_expression - 1e-6
+  colnames(expression) <- paste0("S", seq_len(ncol(expression)))
+  sample_info <- S4Vectors::DataFrame(
+    group = factor(
+      rep(c("control", "case"), c(n_ref, n_test)),
+      levels = c("control", "case")
+    ),
+    row.names = colnames(expression)
+  )
+  if (paired) {
+    stopifnot(n_ref == n_test)
+    sample_info$subject <- rep(paste0("P", seq_len(n_ref)), 2)
+  }
+
+  SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = sample_info
+  )
+}
+
 test_that("gly_set_test constructs complete and connected sets", {
   exp <- make_correlated_set_exp()
 
@@ -378,6 +403,121 @@ test_that("gly_set_test tests general linear dependencies by effective rank", {
     dependent$tidy_result$sets$statistic,
     nonredundant$tidy_result$sets$statistic
   )
+})
+
+test_that("gly_set_test rejects contrasts outside the covariance subspace", {
+  basis <- matrix(c(1, 1) / sqrt(2), ncol = 1)
+  expect_true(.estimate_in_covariance_subspace(c(1e-12, 1e-12), basis))
+  expect_false(.estimate_in_covariance_subspace(c(0, 1e-12), basis))
+
+  profile <- seq(-2.5, 2.5)
+
+  for (paired in c(FALSE, TRUE)) {
+    if (paired) {
+      ref <- cbind(A = profile, B = -profile)
+      test <- ref + cbind(A = profile, B = profile + 1)
+    } else {
+      ref <- cbind(A = profile, B = profile)
+      test <- cbind(A = profile, B = profile + 1)
+    }
+    exp <- make_matrix_set_exp(ref, test, paired)
+    result <- gly_set_test(
+      exp,
+      list(signal = c("A", "B")),
+      subject_col = if (paired) "subject" else NULL
+    )
+    sets <- result$tidy_result$sets
+
+    expect_identical(sets$status, "failed")
+    expect_identical(sets$test_dimension, 1L)
+    expect_identical(sets$statistic, NA_real_)
+    expect_identical(sets$p_val, NA_real_)
+    expect_equal(unname(sets$estimate[[1]]), c(0, 1), tolerance = 1e-12)
+    expect_identical(
+      sets$failure_reason,
+      "The mean difference lies outside the estimable covariance subspace."
+    )
+  }
+})
+
+test_that("gly_set_test rejects sample-limited covariance rank", {
+  set.seed(20260825)
+  independent <- make_matrix_set_exp(
+    matrix(stats::rnorm(15), nrow = 3, dimnames = list(NULL, LETTERS[1:5])),
+    matrix(stats::rnorm(15), nrow = 3, dimnames = list(NULL, LETTERS[1:5]))
+  )
+  independent_result <- gly_set_test(
+    independent,
+    list(signal = LETTERS[1:5])
+  )
+
+  ref <- matrix(
+    stats::rnorm(16),
+    nrow = 4,
+    dimnames = list(NULL, LETTERS[1:4])
+  )
+  differences <- matrix(
+    stats::rnorm(16),
+    nrow = 4,
+    dimnames = list(NULL, LETTERS[1:4])
+  )
+  paired <- make_matrix_set_exp(ref, ref + differences, paired = TRUE)
+  paired_result <- gly_set_test(
+    paired,
+    list(signal = LETTERS[1:4]),
+    subject_col = "subject"
+  )
+
+  expect_identical(independent_result$tidy_result$sets$status, "failed")
+  expect_identical(independent_result$tidy_result$sets$test_dimension, 4L)
+  expect_identical(independent_result$tidy_result$sets$df2, 0)
+  expect_identical(
+    independent_result$tidy_result$sets$failure_reason,
+    "The number of variables is too large for the complete group sample sizes."
+  )
+  expect_identical(paired_result$tidy_result$sets$status, "failed")
+  expect_identical(paired_result$tidy_result$sets$test_dimension, 3L)
+  expect_identical(paired_result$tidy_result$sets$df2, 0)
+  expect_identical(
+    paired_result$tidy_result$sets$failure_reason,
+    "The number of variables must be smaller than the number of complete pairs."
+  )
+})
+
+test_that("gly_set_test retains the classical sample-size boundary", {
+  set.seed(20260826)
+  independent <- make_matrix_set_exp(
+    matrix(stats::rnorm(12), nrow = 3, dimnames = list(NULL, LETTERS[1:4])),
+    matrix(stats::rnorm(12), nrow = 3, dimnames = list(NULL, LETTERS[1:4]))
+  )
+  independent_result <- gly_set_test(
+    independent,
+    list(signal = LETTERS[1:4])
+  )
+
+  ref <- matrix(
+    stats::rnorm(20),
+    nrow = 5,
+    dimnames = list(NULL, LETTERS[1:4])
+  )
+  differences <- matrix(
+    stats::rnorm(20),
+    nrow = 5,
+    dimnames = list(NULL, LETTERS[1:4])
+  )
+  paired <- make_matrix_set_exp(ref, ref + differences, paired = TRUE)
+  paired_result <- gly_set_test(
+    paired,
+    list(signal = LETTERS[1:4]),
+    subject_col = "subject"
+  )
+
+  expect_identical(independent_result$tidy_result$sets$status, "ok")
+  expect_identical(independent_result$tidy_result$sets$test_dimension, 4L)
+  expect_identical(independent_result$tidy_result$sets$df2, 1)
+  expect_identical(paired_result$tidy_result$sets$status, "ok")
+  expect_identical(paired_result$tidy_result$sets$test_dimension, 4L)
+  expect_identical(paired_result$tidy_result$sets$df2, 1L)
 })
 
 test_that("gly_set_test supports automatic and custom singleton sets", {

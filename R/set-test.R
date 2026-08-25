@@ -38,11 +38,12 @@
 #' The estimate is therefore `test - reference`.
 #'
 #' Every usable variable is assigned to a set, including a one-variable set when
-#' it is not correlated above `threshold` with another variable. Rank-deficient
-#' covariance matrices are tested in their nonredundant subspace using a
-#' Moore-Penrose inverse. Sets without an estimable covariance subspace or with
-#' insufficient complete samples are retained with `status = "failed"`, `NA`
-#' statistics, and an explicit `failure_reason`.
+#' it is not correlated above `threshold` with another variable. Structurally
+#' rank-deficient covariance matrices are tested in their nonredundant subspace
+#' using a Moore-Penrose inverse when the original set dimension satisfies the
+#' classical sample-size requirement and the observed mean contrast lies in the
+#' estimable subspace. Other ineligible sets are retained with
+#' `status = "failed"`, `NA` statistics, and an explicit `failure_reason`.
 #'
 #' @returns A list with classes `glystats_set_test_res` and `glystats_res`
 #' containing:
@@ -694,15 +695,22 @@ gly_set_test <- function(
     ))
   }
   rank <- subspace$rank
-  if (n <= rank) {
+  if (n <= p) {
     return(.failed_hotelling(
       rank,
-      n - rank,
-      "The set dimension must be smaller than the number of complete pairs."
+      n - p,
+      "The number of variables must be smaller than the number of complete pairs."
     ))
   }
 
   estimate <- colMeans(differences)
+  if (!.estimate_in_covariance_subspace(estimate, subspace$basis)) {
+    return(.failed_hotelling(
+      rank,
+      n - rank,
+      "The mean difference lies outside the estimable covariance subspace."
+    ))
+  }
   distance_squared <- as.numeric(
     t(estimate) %*% subspace$inverse %*% estimate
   )
@@ -752,16 +760,25 @@ gly_set_test <- function(
     ))
   }
   rank <- subspace$rank
-  df2 <- n_ref + n_test - rank - 1
-  if (df2 <= 0) {
+  sample_size_df2 <- n_ref + n_test - p - 1
+  if (sample_size_df2 <= 0) {
     return(.failed_hotelling(
       rank,
-      df2,
-      "The set dimension is too large for the complete group sample sizes."
+      sample_size_df2,
+      "The number of variables is too large for the complete group sample sizes."
     ))
   }
 
+  df2 <- n_ref + n_test - rank - 1
   estimate <- colMeans(test) - colMeans(ref)
+  if (!.estimate_in_covariance_subspace(estimate, subspace$basis)) {
+    return(.failed_hotelling(
+      rank,
+      df2,
+      "The mean difference lies outside the estimable covariance subspace."
+    ))
+  }
+
   distance_squared <- as.numeric(
     t(estimate) %*% subspace$inverse %*% estimate
   )
@@ -808,6 +825,7 @@ gly_set_test <- function(
     return(list(
       covariance = covariance,
       inverse = NULL,
+      basis = NULL,
       rank = NA_integer_,
       failure_reason = "contains non-finite values."
     ))
@@ -822,6 +840,7 @@ gly_set_test <- function(
     return(list(
       covariance = covariance,
       inverse = NULL,
+      basis = NULL,
       rank = NA_integer_,
       failure_reason = "is not positive semidefinite."
     ))
@@ -833,6 +852,7 @@ gly_set_test <- function(
     return(list(
       covariance = covariance,
       inverse = NULL,
+      basis = NULL,
       rank = 0L,
       failure_reason = "has no estimable dimensions."
     ))
@@ -850,9 +870,20 @@ gly_set_test <- function(
   list(
     covariance = covariance,
     inverse = inverse,
+    basis = vectors,
     rank = as.integer(rank),
     failure_reason = NULL
   )
+}
+
+.estimate_in_covariance_subspace <- function(estimate, basis) {
+  projected <- as.vector(basis %*% crossprod(basis, estimate))
+  residual_norm <- sqrt(sum((estimate - projected)^2))
+  estimate_norm <- sqrt(sum(estimate^2))
+  if (estimate_norm == 0) {
+    return(TRUE)
+  }
+  residual_norm <= sqrt(.Machine$double.eps) * estimate_norm
 }
 
 .set_member_correlation <- function(
