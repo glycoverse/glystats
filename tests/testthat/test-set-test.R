@@ -111,6 +111,31 @@ make_hotelling_exp <- function(paired = FALSE) {
   )
 }
 
+make_matrix_set_exp <- function(ref, test, paired = FALSE) {
+  stopifnot(identical(colnames(ref), colnames(test)))
+  n_ref <- nrow(ref)
+  n_test <- nrow(test)
+  log_expression <- t(rbind(ref, test))
+  expression <- 2^log_expression - 1e-6
+  colnames(expression) <- paste0("S", seq_len(ncol(expression)))
+  sample_info <- S4Vectors::DataFrame(
+    group = factor(
+      rep(c("control", "case"), c(n_ref, n_test)),
+      levels = c("control", "case")
+    ),
+    row.names = colnames(expression)
+  )
+  if (paired) {
+    stopifnot(n_ref == n_test)
+    sample_info$subject <- rep(paste0("P", seq_len(n_ref)), 2)
+  }
+
+  SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = sample_info
+  )
+}
+
 test_that("gly_set_test constructs complete and connected sets", {
   exp <- make_correlated_set_exp()
 
@@ -130,10 +155,21 @@ test_that("gly_set_test constructs complete and connected sets", {
   connected_sets <- connected$raw_result$set_construction
   expect_s3_class(complete, c("glystats_set_test_res", "glystats_res"))
   expect_identical(complete_sets$sets$set_1, c("A", "B", "A_alias"))
-  expect_identical(complete_sets$representatives$set_1, c("A", "B"))
+  expect_identical(complete_sets$sets$set_2, "C")
   expect_identical(connected_sets$sets$set_1, c("A", "B", "C", "A_alias"))
-  expect_identical(connected_sets$representatives$set_1, c("A", "B", "C"))
-  expect_identical(complete_sets$aliases$A, "A_alias")
+  expect_named(
+    complete_sets,
+    c(
+      "sets",
+      "membership",
+      "correlation_matrix",
+      "excluded_variables",
+      "threshold",
+      "correlation",
+      "clustering",
+      "within"
+    )
+  )
   expect_equal(complete$meta_data, S4Vectors::metadata(exp))
 })
 
@@ -158,7 +194,11 @@ test_that("gly_set_test records exclusions and honors within strata", {
   construction <- result$raw_result$set_construction
 
   expect_identical(construction$sets$set_1, c("A", "B", "A_alias"))
-  expect_true(is.na(construction$correlation_matrix["A", "C"]))
+  expect_identical(construction$sets$set_2, "C")
+  expect_identical(
+    is.na(construction$correlation_matrix["A", "C"]),
+    TRUE
+  )
   expect_equal(
     construction$excluded_variables,
     tibble::tibble(
@@ -167,8 +207,11 @@ test_that("gly_set_test records exclusions and honors within strata", {
     )
   )
   expect_identical(
-    construction$membership$is_alias,
-    c(FALSE, FALSE, TRUE)
+    construction$membership,
+    tibble::tibble(
+      set_id = c("set_1", "set_1", "set_1", "set_2"),
+      variable = c("A", "B", "A_alias", "C")
+    )
   )
 })
 
@@ -252,29 +295,45 @@ test_that("gly_set_test matches a paired Hotelling calculation", {
   )
 })
 
-test_that("gly_set_test collapses aliases without hiding members", {
+test_that("gly_set_test tests identical profiles in their effective subspace", {
   exp <- make_hotelling_exp()
-  result <- gly_set_test(
+  redundant <- gly_set_test(
     exp,
     list(signal = c("A", "A_alias", "B")),
     p_adj_method = NULL
   )
-
-  expect_identical(result$tidy_result$sets$n_variables, 3L)
-  expect_identical(result$tidy_result$sets$test_dimension, 2L)
-  expect_identical(
-    result$raw_result$tests$signal$representatives,
-    c("A", "B")
+  nonredundant <- gly_set_test(
+    exp,
+    list(signal = c("A", "B")),
+    p_adj_method = NULL
   )
-  expect_identical(result$raw_result$tests$signal$aliases$A, "A_alias")
-  expect_setequal(
-    result$tidy_result$members$variable,
+
+  expect_identical(redundant$tidy_result$sets$n_variables, 3L)
+  expect_identical(redundant$tidy_result$sets$test_dimension, 2L)
+  expect_equal(
+    redundant$tidy_result$sets$statistic,
+    nonredundant$tidy_result$sets$statistic
+  )
+  expect_identical(
+    names(redundant$tidy_result$sets$estimate[[1]]),
     c("A", "A_alias", "B")
   )
-  expect_false("p_adj" %in% colnames(result$tidy_result$sets))
+  expect_equal(
+    unname(redundant$tidy_result$sets$estimate[[1]][c("A", "A_alias")]),
+    rep(redundant$tidy_result$sets$estimate[[1]][["A"]], 2)
+  )
+  expect_setequal(
+    redundant$tidy_result$members$variable,
+    c("A", "A_alias", "B")
+  )
+  expect_disjoint(
+    names(redundant$raw_result$tests$signal),
+    c("representatives", "aliases")
+  )
+  expect_disjoint(colnames(redundant$tidy_result$sets), "p_adj")
 })
 
-test_that("gly_set_test collapses aliases after complete-case selection", {
+test_that("gly_set_test determines effective rank after complete-case selection", {
   for (paired in c(FALSE, TRUE)) {
     exp <- make_hotelling_exp(paired = paired)
     expression <- SummarizedExperiment::assay(exp)
@@ -296,12 +355,8 @@ test_that("gly_set_test collapses aliases after complete-case selection", {
     expect_identical(result$tidy_result$sets$status, "ok")
     expect_identical(result$tidy_result$sets$test_dimension, 2L)
     expect_identical(
-      result$raw_result$tests$signal$representatives,
-      c("A", "B")
-    )
-    expect_identical(
-      result$raw_result$tests$signal$aliases$A,
-      "A_partial"
+      names(result$tidy_result$sets$estimate[[1]]),
+      c("A", "A_partial", "B")
     )
   }
 
@@ -325,38 +380,297 @@ test_that("gly_set_test collapses aliases after complete-case selection", {
     result$raw_result$set_construction$sets$set_1,
     "A_partial"
   )
-  expect_identical(result$tidy_result$sets$status, "ok")
-  expect_identical(result$tidy_result$sets$test_dimension, 2L)
+  expect_identical(result$tidy_result$sets$status[[1]], "ok")
+  expect_identical(result$tidy_result$sets$test_dimension[[1]], 2L)
 })
 
-test_that("gly_set_test reports unfit sets without dropping them", {
+test_that("gly_set_test tests general linear dependencies by effective rank", {
   exp <- make_hotelling_exp()
-  result <- gly_set_test(
+  dependent <- gly_set_test(
     exp,
-    list(
-      all_missing = c("missing1", "missing2"),
-      singular = c("A", "B", "sum_ab")
-    )
+    list(signal = c("A", "B", "sum_ab")),
+    p_adj_method = NULL
+  )
+  nonredundant <- gly_set_test(
+    exp,
+    list(signal = c("A", "B")),
+    p_adj_method = NULL
   )
 
-  expect_identical(result$tidy_result$sets$status, c("failed", "failed"))
-  expect_true(all(is.na(result$tidy_result$sets$statistic)))
-  expect_true(all(is.na(result$tidy_result$sets$p_adj)))
-  expect_true(all(is.na(result$tidy_result$members$marginal_estimate[1:2])))
+  expect_identical(dependent$tidy_result$sets$status, "ok")
+  expect_identical(dependent$tidy_result$sets$test_dimension, 2L)
+  expect_equal(
+    dependent$tidy_result$sets$statistic,
+    nonredundant$tidy_result$sets$statistic
+  )
 })
 
-test_that("gly_set_test accepts an empty correlated-set result", {
-  exp <- make_correlated_set_exp()
-  result <- gly_set_test(exp, threshold = 1)
+test_that("gly_set_test rejects contrasts outside the covariance subspace", {
+  basis <- matrix(c(1, 1) / sqrt(2), ncol = 1)
+  subspace <- list(basis = basis, scales = c(1, 1), active = c(TRUE, TRUE))
+  expect_identical(
+    .estimate_in_covariance_subspace(c(1e-12, 1e-12), subspace),
+    TRUE
+  )
+  expect_identical(
+    .estimate_in_covariance_subspace(c(0, 1e-12), subspace),
+    FALSE
+  )
 
-  expect_equal(nrow(result$tidy_result$sets), 0)
-  expect_equal(nrow(result$tidy_result$members), 0)
-  expect_length(result$raw_result$tests, 0)
+  profile <- seq(-2.5, 2.5)
+
+  for (paired in c(FALSE, TRUE)) {
+    if (paired) {
+      ref <- cbind(A = profile, B = -profile)
+      test <- ref + cbind(A = profile, B = profile + 1)
+    } else {
+      ref <- cbind(A = profile, B = profile)
+      test <- cbind(A = profile, B = profile + 1)
+    }
+    exp <- make_matrix_set_exp(ref, test, paired)
+    result <- gly_set_test(
+      exp,
+      list(signal = c("A", "B")),
+      subject_col = if (paired) "subject" else NULL
+    )
+    sets <- result$tidy_result$sets
+
+    expect_identical(sets$status, "failed")
+    expect_identical(sets$test_dimension, 1L)
+    expect_identical(sets$statistic, NA_real_)
+    expect_identical(sets$p_val, NA_real_)
+    expect_equal(unname(sets$estimate[[1]]), c(0, 1), tolerance = 1e-12)
+    expect_identical(
+      sets$failure_reason,
+      "The mean difference lies outside the estimable covariance subspace."
+    )
+  }
+})
+
+test_that("Hotelling rank and statistic are invariant to variable scale", {
+  covariance_subspace <- .set_covariance_subspace(diag(c(1, 1e-10)), 2)
+  expect_identical(covariance_subspace$rank, 2L)
+  zero_variance_subspace <- .set_covariance_subspace(diag(c(1, 0)), 2)
+  expect_identical(zero_variance_subspace$rank, 1L)
+  expect_identical(
+    .estimate_in_covariance_subspace(c(1, 0), zero_variance_subspace),
+    TRUE
+  )
+  expect_identical(
+    .estimate_in_covariance_subspace(c(1, 1e-12), zero_variance_subspace),
+    FALSE
+  )
+
+  set.seed(20260827)
+  differences <- cbind(
+    A = stats::rnorm(12, 0.4),
+    B = stats::rnorm(12, -0.2)
+  )
+  ref <- cbind(A = stats::rnorm(12), B = stats::rnorm(12))
+  test <- cbind(A = stats::rnorm(12, 0.3), B = stats::rnorm(12, -0.1))
+  scale_factors <- c(1, 1e-5)
+
+  paired <- .hotelling_one_sample(differences)
+  paired_scaled <- .hotelling_one_sample(
+    sweep(differences, 2, scale_factors, `*`)
+  )
+  independent <- .hotelling_two_sample(ref, test)
+  independent_scaled <- .hotelling_two_sample(
+    sweep(ref, 2, scale_factors, `*`),
+    sweep(test, 2, scale_factors, `*`)
+  )
+
+  expect_identical(paired_scaled$status, "ok")
+  expect_identical(paired_scaled$df1, 2L)
+  expect_equal(paired_scaled$statistic, paired$statistic)
+  expect_equal(paired_scaled$p_val, paired$p_val)
+  expect_identical(independent_scaled$status, "ok")
+  expect_identical(independent_scaled$df1, 2L)
+  expect_equal(independent_scaled$statistic, independent$statistic)
+  expect_equal(independent_scaled$p_val, independent$p_val)
+
+  profile <- seq(-2.5, 2.5)
+  redundant <- cbind(A = profile + 1, B = profile + 1)
+  redundant_scaled <- sweep(redundant, 2, scale_factors, `*`)
+  redundant_result <- .hotelling_one_sample(redundant)
+  redundant_scaled_result <- .hotelling_one_sample(redundant_scaled)
+  outside_scaled <- .hotelling_one_sample(
+    cbind(A = profile, B = 1e-5 * (profile + 1))
+  )
+
+  expect_identical(redundant_scaled_result$status, "ok")
+  expect_identical(redundant_scaled_result$df1, 1L)
+  expect_equal(redundant_scaled_result$statistic, redundant_result$statistic)
+  expect_identical(outside_scaled$status, "failed")
+  expect_match(outside_scaled$failure_reason, "outside the estimable")
+})
+
+test_that("gly_set_test rejects sample-limited rank before covariance", {
+  set.seed(20260825)
+  independent <- make_matrix_set_exp(
+    matrix(stats::rnorm(15), nrow = 3, dimnames = list(NULL, LETTERS[1:5])),
+    matrix(stats::rnorm(15), nrow = 3, dimnames = list(NULL, LETTERS[1:5]))
+  )
+  independent_result <- gly_set_test(
+    independent,
+    list(signal = LETTERS[1:5])
+  )
+
+  ref <- matrix(
+    stats::rnorm(16),
+    nrow = 4,
+    dimnames = list(NULL, LETTERS[1:4])
+  )
+  differences <- matrix(
+    stats::rnorm(16),
+    nrow = 4,
+    dimnames = list(NULL, LETTERS[1:4])
+  )
+  paired <- make_matrix_set_exp(ref, ref + differences, paired = TRUE)
+  paired_result <- gly_set_test(
+    paired,
+    list(signal = LETTERS[1:4]),
+    subject_col = "subject"
+  )
+
+  expect_identical(independent_result$tidy_result$sets$status, "failed")
+  expect_identical(
+    independent_result$tidy_result$sets$test_dimension,
+    NA_integer_
+  )
+  expect_identical(independent_result$tidy_result$sets$df2, 0)
+  expect_identical(
+    independent_result$tidy_result$sets$failure_reason,
+    "The number of variables is too large for the complete group sample sizes."
+  )
+  expect_identical(paired_result$tidy_result$sets$status, "failed")
+  expect_identical(paired_result$tidy_result$sets$test_dimension, NA_integer_)
+  expect_identical(paired_result$tidy_result$sets$df2, 0)
+  expect_identical(
+    paired_result$tidy_result$sets$failure_reason,
+    "The number of variables must be smaller than the number of complete pairs."
+  )
+
+  independent_nonfinite <- .hotelling_two_sample(
+    matrix(Inf, nrow = 3, ncol = 5),
+    matrix(Inf, nrow = 3, ncol = 5)
+  )
+  paired_nonfinite <- .hotelling_one_sample(matrix(Inf, nrow = 4, ncol = 4))
+  expect_identical(
+    independent_nonfinite$failure_reason,
+    "The number of variables is too large for the complete group sample sizes."
+  )
+  expect_identical(
+    paired_nonfinite$failure_reason,
+    "The number of variables must be smaller than the number of complete pairs."
+  )
+})
+
+test_that("gly_set_test retains the classical sample-size boundary", {
+  set.seed(20260826)
+  independent <- make_matrix_set_exp(
+    matrix(stats::rnorm(12), nrow = 3, dimnames = list(NULL, LETTERS[1:4])),
+    matrix(stats::rnorm(12), nrow = 3, dimnames = list(NULL, LETTERS[1:4]))
+  )
+  independent_result <- gly_set_test(
+    independent,
+    list(signal = LETTERS[1:4])
+  )
+
+  ref <- matrix(
+    stats::rnorm(20),
+    nrow = 5,
+    dimnames = list(NULL, LETTERS[1:4])
+  )
+  differences <- matrix(
+    stats::rnorm(20),
+    nrow = 5,
+    dimnames = list(NULL, LETTERS[1:4])
+  )
+  paired <- make_matrix_set_exp(ref, ref + differences, paired = TRUE)
+  paired_result <- gly_set_test(
+    paired,
+    list(signal = LETTERS[1:4]),
+    subject_col = "subject"
+  )
+
+  expect_identical(independent_result$tidy_result$sets$status, "ok")
+  expect_identical(independent_result$tidy_result$sets$test_dimension, 4L)
+  expect_identical(independent_result$tidy_result$sets$df2, 1)
+  expect_identical(paired_result$tidy_result$sets$status, "ok")
+  expect_identical(paired_result$tidy_result$sets$test_dimension, 4L)
+  expect_identical(paired_result$tidy_result$sets$df2, 1L)
+})
+
+test_that("gly_set_test supports automatic and custom singleton sets", {
+  exp <- make_correlated_set_exp()
+  automatic <- gly_set_test(exp, threshold = 1)
+  custom <- gly_set_test(exp, list(singleton = "A"))
+
+  expect_identical(
+    unname(lengths(automatic$raw_result$definitions)),
+    rep(1L, 4)
+  )
+  expect_identical(automatic$tidy_result$sets$test_dimension, rep(1L, 4))
+  expect_identical(
+    automatic$tidy_result$members$correlation_summary,
+    rep(NA_real_, 4)
+  )
+  expect_identical(custom$tidy_result$sets$status, "ok")
+  expect_identical(custom$tidy_result$sets$test_dimension, 1L)
+  expect_identical(custom$tidy_result$members$correlation_summary, NA_real_)
+})
+
+test_that("gly_set_test retains failed sets and accepts no usable variables", {
+  exp <- make_hotelling_exp()
+  failed <- gly_set_test(exp, list(all_missing = c("missing1", "missing2")))
+
+  paired <- make_hotelling_exp(paired = TRUE)
+  expression <- SummarizedExperiment::assay(paired)
+  n_pairs <- ncol(expression) / 2
+  expression <- rbind(
+    expression,
+    zero_difference = rep(expression["A", seq_len(n_pairs)], 2)
+  )
+  paired <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = SummarizedExperiment::colData(paired)
+  )
+  rank_zero <- gly_set_test(
+    paired,
+    list(rank_zero = "zero_difference"),
+    subject_col = "subject"
+  )
+
+  unusable <- make_correlated_set_exp()[c("constant", "missing"), ]
+  empty <- gly_set_test(unusable)
+
+  expect_identical(failed$tidy_result$sets$status, "failed")
+  expect_identical(failed$tidy_result$sets$statistic, NA_real_)
+  expect_identical(failed$tidy_result$sets$p_adj, NA_real_)
+  expect_identical(
+    failed$tidy_result$members$marginal_estimate,
+    rep(NA_real_, 2)
+  )
+  expect_identical(rank_zero$tidy_result$sets$status, "failed")
+  expect_identical(rank_zero$tidy_result$sets$test_dimension, 0L)
+  expect_match(
+    rank_zero$tidy_result$sets$failure_reason,
+    "no estimable dimensions",
+    fixed = TRUE
+  )
+  expect_equal(nrow(empty$tidy_result$sets), 0)
+  expect_equal(nrow(empty$tidy_result$members), 0)
+  expect_length(empty$raw_result$tests, 0)
 })
 
 test_that("set construction and testing validate metadata contracts", {
   exp <- make_correlated_set_exp()
 
+  expect_snapshot(
+    error = TRUE,
+    gly_set_test(exp, list(empty = character()))
+  )
   expect_snapshot(
     error = TRUE,
     gly_set_test(exp, within = "unknown")
