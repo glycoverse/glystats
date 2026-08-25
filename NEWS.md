@@ -1,6 +1,6 @@
 # glystats (development version)
 
-* `gly_set_test()` now constructs and tests correlated variable sets in one call, retains isolated variables as singleton sets, and handles rank-deficient sets without distinguishing identical profiles; custom sets remain available through `sets`. (#19)
+* `gly_set_test()` now constructs and tests correlated variable sets in one call, retains isolated variables as singleton sets, and handles rank-deficient sets without distinguishing identical profiles; custom sets remain available through `sets`. (#20)
 * Analysis functions now accept experiments containing all-`NA` variables without errors, returning `NA` feature-level statistics, loadings, or clusters and `NULL` raw models when no variables can be fitted. (#17)
 * `gly_linear_model()` now fits formula-based, limma-moderated models with interactions, adjustment variables, and named custom contrasts. (#16)
 
