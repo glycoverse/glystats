@@ -407,8 +407,15 @@ test_that("gly_set_test tests general linear dependencies by effective rank", {
 
 test_that("gly_set_test rejects contrasts outside the covariance subspace", {
   basis <- matrix(c(1, 1) / sqrt(2), ncol = 1)
-  expect_true(.estimate_in_covariance_subspace(c(1e-12, 1e-12), basis))
-  expect_false(.estimate_in_covariance_subspace(c(0, 1e-12), basis))
+  subspace <- list(basis = basis, scales = c(1, 1), active = c(TRUE, TRUE))
+  expect_identical(
+    .estimate_in_covariance_subspace(c(1e-12, 1e-12), subspace),
+    TRUE
+  )
+  expect_identical(
+    .estimate_in_covariance_subspace(c(0, 1e-12), subspace),
+    FALSE
+  )
 
   profile <- seq(-2.5, 2.5)
 
@@ -438,6 +445,64 @@ test_that("gly_set_test rejects contrasts outside the covariance subspace", {
       "The mean difference lies outside the estimable covariance subspace."
     )
   }
+})
+
+test_that("Hotelling rank and statistic are invariant to variable scale", {
+  covariance_subspace <- .set_covariance_subspace(diag(c(1, 1e-10)), 2)
+  expect_identical(covariance_subspace$rank, 2L)
+  zero_variance_subspace <- .set_covariance_subspace(diag(c(1, 0)), 2)
+  expect_identical(zero_variance_subspace$rank, 1L)
+  expect_identical(
+    .estimate_in_covariance_subspace(c(1, 0), zero_variance_subspace),
+    TRUE
+  )
+  expect_identical(
+    .estimate_in_covariance_subspace(c(1, 1e-12), zero_variance_subspace),
+    FALSE
+  )
+
+  set.seed(20260827)
+  differences <- cbind(
+    A = stats::rnorm(12, 0.4),
+    B = stats::rnorm(12, -0.2)
+  )
+  ref <- cbind(A = stats::rnorm(12), B = stats::rnorm(12))
+  test <- cbind(A = stats::rnorm(12, 0.3), B = stats::rnorm(12, -0.1))
+  scale_factors <- c(1, 1e-5)
+
+  paired <- .hotelling_one_sample(differences)
+  paired_scaled <- .hotelling_one_sample(
+    sweep(differences, 2, scale_factors, `*`)
+  )
+  independent <- .hotelling_two_sample(ref, test)
+  independent_scaled <- .hotelling_two_sample(
+    sweep(ref, 2, scale_factors, `*`),
+    sweep(test, 2, scale_factors, `*`)
+  )
+
+  expect_identical(paired_scaled$status, "ok")
+  expect_identical(paired_scaled$df1, 2L)
+  expect_equal(paired_scaled$statistic, paired$statistic)
+  expect_equal(paired_scaled$p_val, paired$p_val)
+  expect_identical(independent_scaled$status, "ok")
+  expect_identical(independent_scaled$df1, 2L)
+  expect_equal(independent_scaled$statistic, independent$statistic)
+  expect_equal(independent_scaled$p_val, independent$p_val)
+
+  profile <- seq(-2.5, 2.5)
+  redundant <- cbind(A = profile + 1, B = profile + 1)
+  redundant_scaled <- sweep(redundant, 2, scale_factors, `*`)
+  redundant_result <- .hotelling_one_sample(redundant)
+  redundant_scaled_result <- .hotelling_one_sample(redundant_scaled)
+  outside_scaled <- .hotelling_one_sample(
+    cbind(A = profile, B = 1e-5 * (profile + 1))
+  )
+
+  expect_identical(redundant_scaled_result$status, "ok")
+  expect_identical(redundant_scaled_result$df1, 1L)
+  expect_equal(redundant_scaled_result$statistic, redundant_result$statistic)
+  expect_identical(outside_scaled$status, "failed")
+  expect_match(outside_scaled$failure_reason, "outside the estimable")
 })
 
 test_that("gly_set_test rejects sample-limited rank before covariance", {

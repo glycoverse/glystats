@@ -39,10 +39,11 @@
 #'
 #' Every usable variable is assigned to a set, including a one-variable set when
 #' it is not correlated above `threshold` with another variable. Structurally
-#' rank-deficient covariance matrices are tested in their nonredundant subspace
-#' using a Moore-Penrose inverse when the original set dimension satisfies the
-#' classical sample-size requirement and the observed mean contrast lies in the
-#' estimable subspace. Other ineligible sets are retained with
+#' rank-deficient covariance matrices are standardized to unit member variance
+#' and tested in their nonredundant subspace using a Moore-Penrose inverse when
+#' the original set dimension satisfies the classical sample-size requirement
+#' and the observed mean contrast lies in the estimable subspace. Other
+#' ineligible sets are retained with
 #' `status = "failed"`, `NA` statistics, and an explicit `failure_reason`.
 #'
 #' @returns A list with classes `glystats_set_test_res` and `glystats_res`
@@ -703,16 +704,14 @@ gly_set_test <- function(
   }
   rank <- subspace$rank
   estimate <- colMeans(differences)
-  if (!.estimate_in_covariance_subspace(estimate, subspace$basis)) {
+  if (!.estimate_in_covariance_subspace(estimate, subspace)) {
     return(.failed_hotelling(
       rank,
       n - rank,
       "The mean difference lies outside the estimable covariance subspace."
     ))
   }
-  distance_squared <- as.numeric(
-    t(estimate) %*% subspace$inverse %*% estimate
-  )
+  distance_squared <- .set_covariance_distance(estimate, subspace)
   statistic <- n * distance_squared
   f_statistic <- (n - rank) * statistic / (rank * (n - 1))
 
@@ -769,7 +768,7 @@ gly_set_test <- function(
   rank <- subspace$rank
   df2 <- n_ref + n_test - rank - 1
   estimate <- colMeans(test) - colMeans(ref)
-  if (!.estimate_in_covariance_subspace(estimate, subspace$basis)) {
+  if (!.estimate_in_covariance_subspace(estimate, subspace)) {
     return(.failed_hotelling(
       rank,
       df2,
@@ -777,9 +776,7 @@ gly_set_test <- function(
     ))
   }
 
-  distance_squared <- as.numeric(
-    t(estimate) %*% subspace$inverse %*% estimate
-  )
+  distance_squared <- .set_covariance_distance(estimate, subspace)
   statistic <- n_ref * n_test / (n_ref + n_test) * distance_squared
   f_statistic <- df2 * statistic / ((n_ref + n_test - 2) * rank)
 
@@ -824,13 +821,50 @@ gly_set_test <- function(
       covariance = covariance,
       inverse = NULL,
       basis = NULL,
+      scales = NULL,
+      active = NULL,
       rank = NA_integer_,
       failure_reason = "contains non-finite values."
     ))
   }
 
   covariance <- (covariance + t(covariance)) / 2
-  decomposition <- eigen(covariance, symmetric = TRUE)
+  variances <- diag(covariance)
+  active <- variances > 0
+  if (
+    any(variances < 0) ||
+      (any(!active) && any(covariance[!active, , drop = FALSE] != 0))
+  ) {
+    return(list(
+      covariance = covariance,
+      inverse = NULL,
+      basis = NULL,
+      scales = NULL,
+      active = NULL,
+      rank = NA_integer_,
+      failure_reason = "is not positive semidefinite."
+    ))
+  }
+  if (!any(active)) {
+    return(list(
+      covariance = covariance,
+      inverse = NULL,
+      basis = NULL,
+      scales = NULL,
+      active = NULL,
+      rank = 0L,
+      failure_reason = "has no estimable dimensions."
+    ))
+  }
+
+  scales <- sqrt(variances)
+  active_scales <- scales[active]
+  standardized_covariance <- covariance[active, active, drop = FALSE] /
+    outer(active_scales, active_scales)
+  standardized_covariance <- (standardized_covariance +
+    t(standardized_covariance)) /
+    2
+  decomposition <- eigen(standardized_covariance, symmetric = TRUE)
   eigenvalues <- decomposition$values
   max_eigenvalue <- max(abs(eigenvalues))
   tolerance <- sqrt(.Machine$double.eps) * max_eigenvalue
@@ -839,6 +873,8 @@ gly_set_test <- function(
       covariance = covariance,
       inverse = NULL,
       basis = NULL,
+      scales = NULL,
+      active = NULL,
       rank = NA_integer_,
       failure_reason = "is not positive semidefinite."
     ))
@@ -851,6 +887,8 @@ gly_set_test <- function(
       covariance = covariance,
       inverse = NULL,
       basis = NULL,
+      scales = scales,
+      active = active,
       rank = 0L,
       failure_reason = "has no estimable dimensions."
     ))
@@ -864,24 +902,44 @@ gly_set_test <- function(
     FUN = "/"
   ) %*%
     t(vectors)
-  dimnames(inverse) <- dimnames(covariance)
   list(
     covariance = covariance,
     inverse = inverse,
     basis = vectors,
+    scales = scales,
+    active = active,
     rank = as.integer(rank),
     failure_reason = NULL
   )
 }
 
-.estimate_in_covariance_subspace <- function(estimate, basis) {
-  projected <- as.vector(basis %*% crossprod(basis, estimate))
-  residual_norm <- sqrt(sum((estimate - projected)^2))
-  estimate_norm <- sqrt(sum(estimate^2))
+.standardize_set_estimate <- function(estimate, subspace) {
+  estimate[subspace$active] / subspace$scales[subspace$active]
+}
+
+.estimate_in_covariance_subspace <- function(estimate, subspace) {
+  if (any(estimate[!subspace$active] != 0)) {
+    return(FALSE)
+  }
+  standardized_estimate <- .standardize_set_estimate(estimate, subspace)
+  projected <- as.vector(
+    subspace$basis %*% crossprod(subspace$basis, standardized_estimate)
+  )
+  residual_norm <- sqrt(sum((standardized_estimate - projected)^2))
+  estimate_norm <- sqrt(sum(standardized_estimate^2))
   if (estimate_norm == 0) {
     return(TRUE)
   }
   residual_norm <= sqrt(.Machine$double.eps) * estimate_norm
+}
+
+.set_covariance_distance <- function(estimate, subspace) {
+  standardized_estimate <- .standardize_set_estimate(estimate, subspace)
+  as.numeric(
+    t(standardized_estimate) %*%
+      subspace$inverse %*%
+      standardized_estimate
+  )
 }
 
 .set_member_correlation <- function(

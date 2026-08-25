@@ -82,10 +82,11 @@ The estimate is therefore \code{test - reference}.
 
 Every usable variable is assigned to a set, including a one-variable set when
 it is not correlated above \code{threshold} with another variable. Structurally
-rank-deficient covariance matrices are tested in their nonredundant subspace
-using a Moore-Penrose inverse when the original set dimension satisfies the
-classical sample-size requirement and the observed mean contrast lies in the
-estimable subspace. Other ineligible sets are retained with
+rank-deficient covariance matrices are standardized to unit member variance
+and tested in their nonredundant subspace using a Moore-Penrose inverse when
+the original set dimension satisfies the classical sample-size requirement
+and the observed mean contrast lies in the estimable subspace. Other
+ineligible sets are retained with
 \code{status = "failed"}, \code{NA} statistics, and an explicit \code{failure_reason}.
 }
 \examples{
