@@ -48,9 +48,9 @@
 #' @returns A list with classes `glystats_set_test_res` and `glystats_res`
 #' containing:
 #' - `tidy_result$sets`: One row per set with estimates for every member, the
-#'   effective covariance rank in `test_dimension`, Hotelling statistic,
-#'   degrees of freedom, Mahalanobis effect size, p-value, adjusted p-value, and
-#'   fit status.
+#'   effective covariance rank in `test_dimension` (`NA` when rejected before
+#'   covariance estimation), Hotelling statistic, degrees of freedom,
+#'   Mahalanobis effect size, p-value, adjusted p-value, and fit status.
 #' - `tidy_result$members`: One row per set member with its marginal estimate
 #'   and mean within-set correlation.
 #' - `raw_result`: Set definitions, their correlation matrix, individual
@@ -684,6 +684,13 @@ gly_set_test <- function(
       "At least 2 complete pairs are required."
     ))
   }
+  if (n <= p) {
+    return(.failed_hotelling(
+      NA_real_,
+      n - p,
+      "The number of variables must be smaller than the number of complete pairs."
+    ))
+  }
 
   covariance <- stats::cov(differences)
   subspace <- .set_covariance_subspace(covariance, p)
@@ -695,14 +702,6 @@ gly_set_test <- function(
     ))
   }
   rank <- subspace$rank
-  if (n <= p) {
-    return(.failed_hotelling(
-      rank,
-      n - p,
-      "The number of variables must be smaller than the number of complete pairs."
-    ))
-  }
-
   estimate <- colMeans(differences)
   if (!.estimate_in_covariance_subspace(estimate, subspace$basis)) {
     return(.failed_hotelling(
@@ -742,6 +741,14 @@ gly_set_test <- function(
       "At least 2 complete samples are required in each group."
     ))
   }
+  sample_size_df2 <- n_ref + n_test - p - 1
+  if (sample_size_df2 <= 0) {
+    return(.failed_hotelling(
+      NA_real_,
+      sample_size_df2,
+      "The number of variables is too large for the complete group sample sizes."
+    ))
+  }
 
   covariance <- ((n_ref - 1) *
     stats::cov(ref) +
@@ -760,15 +767,6 @@ gly_set_test <- function(
     ))
   }
   rank <- subspace$rank
-  sample_size_df2 <- n_ref + n_test - p - 1
-  if (sample_size_df2 <= 0) {
-    return(.failed_hotelling(
-      rank,
-      sample_size_df2,
-      "The number of variables is too large for the complete group sample sizes."
-    ))
-  }
-
   df2 <- n_ref + n_test - rank - 1
   estimate <- colMeans(test) - colMeans(ref)
   if (!.estimate_in_covariance_subspace(estimate, subspace$basis)) {

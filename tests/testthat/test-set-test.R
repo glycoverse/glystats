@@ -440,7 +440,7 @@ test_that("gly_set_test rejects contrasts outside the covariance subspace", {
   }
 })
 
-test_that("gly_set_test rejects sample-limited covariance rank", {
+test_that("gly_set_test rejects sample-limited rank before covariance", {
   set.seed(20260825)
   independent <- make_matrix_set_exp(
     matrix(stats::rnorm(15), nrow = 3, dimnames = list(NULL, LETTERS[1:5])),
@@ -469,17 +469,34 @@ test_that("gly_set_test rejects sample-limited covariance rank", {
   )
 
   expect_identical(independent_result$tidy_result$sets$status, "failed")
-  expect_identical(independent_result$tidy_result$sets$test_dimension, 4L)
+  expect_identical(
+    independent_result$tidy_result$sets$test_dimension,
+    NA_integer_
+  )
   expect_identical(independent_result$tidy_result$sets$df2, 0)
   expect_identical(
     independent_result$tidy_result$sets$failure_reason,
     "The number of variables is too large for the complete group sample sizes."
   )
   expect_identical(paired_result$tidy_result$sets$status, "failed")
-  expect_identical(paired_result$tidy_result$sets$test_dimension, 3L)
+  expect_identical(paired_result$tidy_result$sets$test_dimension, NA_integer_)
   expect_identical(paired_result$tidy_result$sets$df2, 0)
   expect_identical(
     paired_result$tidy_result$sets$failure_reason,
+    "The number of variables must be smaller than the number of complete pairs."
+  )
+
+  independent_nonfinite <- .hotelling_two_sample(
+    matrix(Inf, nrow = 3, ncol = 5),
+    matrix(Inf, nrow = 3, ncol = 5)
+  )
+  paired_nonfinite <- .hotelling_one_sample(matrix(Inf, nrow = 4, ncol = 4))
+  expect_identical(
+    independent_nonfinite$failure_reason,
+    "The number of variables is too large for the complete group sample sizes."
+  )
+  expect_identical(
+    paired_nonfinite$failure_reason,
     "The number of variables must be smaller than the number of complete pairs."
   )
 })

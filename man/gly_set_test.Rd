@@ -60,9 +60,9 @@ A list with classes \code{glystats_set_test_res} and \code{glystats_res}
 containing:
 \itemize{
 \item \code{tidy_result$sets}: One row per set with estimates for every member, the
-effective covariance rank in \code{test_dimension}, Hotelling statistic,
-degrees of freedom, Mahalanobis effect size, p-value, adjusted p-value, and
-fit status.
+effective covariance rank in \code{test_dimension} (\code{NA} when rejected before
+covariance estimation), Hotelling statistic, degrees of freedom,
+Mahalanobis effect size, p-value, adjusted p-value, and fit status.
 \item \code{tidy_result$members}: One row per set member with its marginal estimate
 and mean within-set correlation.
 \item \code{raw_result}: Set definitions, their correlation matrix, individual
