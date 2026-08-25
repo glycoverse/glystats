@@ -14,7 +14,6 @@ gly_set_test(
   threshold = 0.9,
   correlation = "pearson",
   clustering = "connected",
-  min_size = 2L,
   within = NULL
 )
 }
@@ -25,8 +24,7 @@ information.}
 
 \item{sets}{A uniquely named list of character vectors defining custom sets.
 When \code{NULL} (the default), correlated sets are constructed automatically
-from \code{exp} using \code{threshold}, \code{correlation}, \code{clustering}, \code{min_size}, and
-\code{within}.}
+from \code{exp} using \code{threshold}, \code{correlation}, \code{clustering}, and \code{within}.}
 
 \item{group_col}{A character string naming the two-level grouping column in
 sample information. Default is \code{"group"}.}
@@ -54,9 +52,6 @@ Either \code{"pearson"} (default) or \code{"spearman"}.}
 \code{NULL}. \code{"connected"} (default) allows transitive chaining; \code{"complete"}
 requires every pair in a set to exceed \code{threshold}.}
 
-\item{min_size}{Minimum number of distinct profiles in an automatically
-constructed set. Default is 2.}
-
 \item{within}{Optional variable-information columns defining strata within
 which automatic sets are constructed, such as \code{c("protein", "protein_site")}.}
 }
@@ -64,9 +59,10 @@ which automatic sets are constructed, such as \code{c("protein", "protein_site")
 A list with classes \code{glystats_set_test_res} and \code{glystats_res}
 containing:
 \itemize{
-\item \code{tidy_result$sets}: One row per set with its estimate vector, Hotelling
-statistic, degrees of freedom, Mahalanobis effect size, p-value, adjusted
-p-value, and fit status.
+\item \code{tidy_result$sets}: One row per set with estimates for every member, the
+effective covariance rank in \code{test_dimension}, Hotelling statistic,
+degrees of freedom, Mahalanobis effect size, p-value, adjusted p-value, and
+fit status.
 \item \code{tidy_result$members}: One row per set member with its marginal estimate
 and mean within-set correlation.
 \item \code{raw_result}: Set definitions, their correlation matrix, individual
@@ -84,9 +80,12 @@ Expression values are transformed using \code{log2(x + 1e-6)}. The first factor
 level of \code{group_col} is the reference group and the second is the test group.
 The estimate is therefore \code{test - reference}.
 
-Equivalent profiles are included in member-level output but represented once
-in the covariance matrix. Sets that are too large for their residual sample
-size or have a singular covariance matrix are retained with \code{status = "failed"}, \code{NA} statistics, and an explicit \code{failure_reason}.
+Every usable variable is assigned to a set, including a one-variable set when
+it is not correlated above \code{threshold} with another variable. Rank-deficient
+covariance matrices are tested in their nonredundant subspace using a
+Moore-Penrose inverse. Sets without an estimable covariance subspace or with
+insufficient complete samples are retained with \code{status = "failed"}, \code{NA}
+statistics, and an explicit \code{failure_reason}.
 }
 \examples{
 set.seed(1)

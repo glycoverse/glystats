@@ -1,6 +1,14 @@
 # set construction and testing validate metadata contracts
 
     Code
+      gly_set_test(exp, list(empty = character()))
+    Condition
+      Error in `.normalize_set_definitions()`:
+      ! Every element of `sets` must contain at least 1 variable.
+
+---
+
+    Code
       gly_set_test(exp, within = "unknown")
     Condition
       Error in `.set_strata()`:

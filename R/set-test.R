@@ -8,8 +8,7 @@
 #'   information.
 #' @param sets A uniquely named list of character vectors defining custom sets.
 #'   When `NULL` (the default), correlated sets are constructed automatically
-#'   from `exp` using `threshold`, `correlation`, `clustering`, `min_size`, and
-#'   `within`.
+#'   from `exp` using `threshold`, `correlation`, `clustering`, and `within`.
 #' @param group_col A character string naming the two-level grouping column in
 #'   sample information. Default is `"group"`.
 #' @param subject_col An optional character string naming subject identifiers.
@@ -29,8 +28,6 @@
 #' @param clustering How correlated variables are grouped when `sets` is
 #'   `NULL`. `"connected"` (default) allows transitive chaining; `"complete"`
 #'   requires every pair in a set to exceed `threshold`.
-#' @param min_size Minimum number of distinct profiles in an automatically
-#'   constructed set. Default is 2.
 #' @param within Optional variable-information columns defining strata within
 #'   which automatic sets are constructed, such as `c("protein",
 #'   "protein_site")`.
@@ -40,16 +37,19 @@
 #' level of `group_col` is the reference group and the second is the test group.
 #' The estimate is therefore `test - reference`.
 #'
-#' Equivalent profiles are included in member-level output but represented once
-#' in the covariance matrix. Sets that are too large for their residual sample
-#' size or have a singular covariance matrix are retained with `status =
-#' "failed"`, `NA` statistics, and an explicit `failure_reason`.
+#' Every usable variable is assigned to a set, including a one-variable set when
+#' it is not correlated above `threshold` with another variable. Rank-deficient
+#' covariance matrices are tested in their nonredundant subspace using a
+#' Moore-Penrose inverse. Sets without an estimable covariance subspace or with
+#' insufficient complete samples are retained with `status = "failed"`, `NA`
+#' statistics, and an explicit `failure_reason`.
 #'
 #' @returns A list with classes `glystats_set_test_res` and `glystats_res`
 #' containing:
-#' - `tidy_result$sets`: One row per set with its estimate vector, Hotelling
-#'   statistic, degrees of freedom, Mahalanobis effect size, p-value, adjusted
-#'   p-value, and fit status.
+#' - `tidy_result$sets`: One row per set with estimates for every member, the
+#'   effective covariance rank in `test_dimension`, Hotelling statistic,
+#'   degrees of freedom, Mahalanobis effect size, p-value, adjusted p-value, and
+#'   fit status.
 #' - `tidy_result$members`: One row per set member with its marginal estimate
 #'   and mean within-set correlation.
 #' - `raw_result`: Set definitions, their correlation matrix, individual
@@ -89,7 +89,6 @@ gly_set_test <- function(
   threshold = 0.9,
   correlation = "pearson",
   clustering = "connected",
-  min_size = 2L,
   within = NULL
 ) {
   .assert_data_container(exp)
@@ -104,7 +103,6 @@ gly_set_test <- function(
   checkmate::assert_number(threshold, lower = 0, upper = 1)
   checkmate::assert_choice(correlation, c("pearson", "spearman"))
   checkmate::assert_choice(clustering, c("complete", "connected"))
-  checkmate::assert_int(min_size, lower = 2)
   checkmate::assert_character(within, unique = TRUE, null.ok = TRUE)
 
   expr_mat <- .get_expr_mat(exp)
@@ -117,10 +115,9 @@ gly_set_test <- function(
       strata = .set_strata(var_info, within),
       threshold = threshold,
       correlation = correlation,
-      clustering = clustering,
-      min_size = min_size
+      clustering = clustering
     )
-    set_construction$within <- within
+    set_construction["within"] <- list(within)
     set_info <- list(
       sets = set_construction$sets,
       correlation_matrix = set_construction$correlation_matrix
@@ -204,8 +201,7 @@ gly_set_test <- function(
   strata,
   threshold,
   correlation,
-  clustering,
-  min_size
+  clustering
 ) {
   log_expr_mat <- suppressWarnings(.log_transform_expr_mat(expr_mat))
   usable <- .classify_set_profiles(log_expr_mat)
@@ -218,8 +214,7 @@ gly_set_test <- function(
     ncol = length(usable_names),
     dimnames = list(usable_names, usable_names)
   )
-  aliases <- list()
-  representative_groups <- list()
+  set_groups <- list()
 
   for (stratum in unique(strata)) {
     stratum_variables <- intersect(
@@ -237,75 +232,42 @@ gly_set_test <- function(
       stratum_variables
     ] <- stratum_correlation
 
-    collapsed <- .collapse_equivalent_profiles(stratum_matrix)
-    aliases <- c(aliases, collapsed$aliases)
-    representatives <- collapsed$representatives
-    representative_correlation <- stratum_correlation[
-      representatives,
-      representatives,
-      drop = FALSE
-    ]
-
     clusters <- .cluster_correlated_profiles(
-      representative_correlation,
+      stratum_correlation,
       threshold,
       clustering
     )
-    clusters <- clusters[lengths(clusters) >= min_size]
-    representative_groups <- c(representative_groups, clusters)
+    set_groups <- c(set_groups, clusters)
   }
 
-  representative_groups <- representative_groups[
+  set_groups <- set_groups[
     order(vapply(
-      representative_groups,
+      set_groups,
       function(x) min(match(x, rownames(expr_mat))),
       numeric(1)
     ))
   ]
-  if (length(representative_groups) > 0) {
-    names(representative_groups) <- paste0(
+  if (length(set_groups) > 0) {
+    names(set_groups) <- paste0(
       "set_",
-      seq_along(representative_groups)
+      seq_along(set_groups)
     )
   }
 
-  sets <- lapply(representative_groups, function(representatives) {
-    members <- unlist(
-      lapply(representatives, function(representative) {
-        c(representative, aliases[[representative]])
-      }),
-      use.names = FALSE
-    )
+  sets <- lapply(set_groups, function(members) {
     rownames(expr_mat)[rownames(expr_mat) %in% members]
   })
 
   if (length(sets) == 0) {
     membership <- tibble::tibble(
       set_id = character(),
-      variable = character(),
-      representative = character(),
-      is_alias = logical()
+      variable = character()
     )
   } else {
     membership <- purrr::imap_dfr(sets, function(members, set_id) {
-      representatives <- representative_groups[[set_id]]
-      representative <- vapply(
-        members,
-        function(member) {
-          matching <- representatives[vapply(
-            representatives,
-            function(x) member == x || member %in% aliases[[x]],
-            logical(1)
-          )]
-          matching[[1]]
-        },
-        character(1)
-      )
       tibble::tibble(
         set_id = set_id,
-        variable = members,
-        representative = representative,
-        is_alias = unname(members != representative)
+        variable = members
       )
     })
   }
@@ -313,14 +275,11 @@ gly_set_test <- function(
   list(
     sets = sets,
     membership = membership,
-    representatives = representative_groups,
     correlation_matrix = correlation_matrix,
     excluded_variables = exclusions,
-    aliases = aliases,
     threshold = threshold,
     correlation = correlation,
-    clustering = clustering,
-    min_size = min_size
+    clustering = clustering
   )
 }
 
@@ -361,74 +320,6 @@ gly_set_test <- function(
     use = "pairwise.complete.obs",
     method = method
   )
-}
-
-.collapse_equivalent_profiles <- function(profile_matrix) {
-  representatives <- character()
-  aliases <- list()
-  signatures <- .profile_signatures(profile_matrix)
-
-  for (signature in unique(signatures)) {
-    candidates <- names(signatures)[signatures == signature]
-    signature_representatives <- character()
-    for (variable in candidates) {
-      representative <- signature_representatives[vapply(
-        signature_representatives,
-        function(x) {
-          .profiles_equivalent(
-            profile_matrix[variable, ],
-            profile_matrix[x, ]
-          )
-        },
-        logical(1)
-      )]
-
-      if (length(representative) == 0) {
-        representatives <- c(representatives, variable)
-        signature_representatives <- c(signature_representatives, variable)
-        aliases[[variable]] <- character()
-      } else {
-        aliases[[representative[[1]]]] <- c(
-          aliases[[representative[[1]]]],
-          variable
-        )
-      }
-    }
-  }
-
-  representatives <- rownames(profile_matrix)[
-    rownames(profile_matrix) %in% representatives
-  ]
-  aliases <- aliases[representatives]
-
-  list(representatives = representatives, aliases = aliases)
-}
-
-.profile_signatures <- function(profile_matrix) {
-  signatures <- apply(profile_matrix, 1, function(values) {
-    values <- ifelse(
-      is.finite(values),
-      format(signif(values, 6), scientific = TRUE, trim = TRUE),
-      "<missing>"
-    )
-    paste(values, collapse = "\r")
-  })
-  stats::setNames(signatures, rownames(profile_matrix))
-}
-
-.profiles_equivalent <- function(x, y) {
-  finite_x <- is.finite(x)
-  finite_y <- is.finite(y)
-  if (!identical(finite_x, finite_y)) {
-    return(FALSE)
-  }
-  if (!any(finite_x)) {
-    return(TRUE)
-  }
-
-  difference <- max(abs(x[finite_x] - y[finite_y]))
-  scale <- max(1, abs(x[finite_x]), abs(y[finite_y]))
-  difference <= sqrt(.Machine$double.eps) * scale
 }
 
 .cluster_correlated_profiles <- function(
@@ -510,9 +401,9 @@ gly_set_test <- function(
   if (!all(vapply(definitions, is.character, logical(1)))) {
     cli::cli_abort("Every element of {.arg sets} must be a character vector.")
   }
-  if (any(lengths(definitions) < 2)) {
+  if (any(lengths(definitions) < 1)) {
     cli::cli_abort(
-      "Every element of {.arg sets} must contain at least 2 variables."
+      "Every element of {.arg sets} must contain at least 1 variable."
     )
   }
   duplicated_members <- vapply(
@@ -712,11 +603,6 @@ gly_set_test <- function(
     ref <- ref[complete, , drop = FALSE]
     test <- test[complete, , drop = FALSE]
     differences <- test - ref
-    collapsed <- .collapse_equivalent_profiles(t(differences))
-    representatives <- collapsed$representatives
-    ref <- ref[, representatives, drop = FALSE]
-    test <- test[, representatives, drop = FALSE]
-    differences <- differences[, representatives, drop = FALSE]
     hotelling <- .hotelling_one_sample(differences)
     included_subjects <- design$subjects[complete]
   } else {
@@ -724,29 +610,25 @@ gly_set_test <- function(
     test <- test_matrix[design$test_indices, , drop = FALSE]
     ref <- ref[stats::complete.cases(ref), , drop = FALSE]
     test <- test[stats::complete.cases(test), , drop = FALSE]
-    collapsed <- .collapse_equivalent_profiles(t(rbind(ref, test)))
-    representatives <- collapsed$representatives
-    ref <- ref[, representatives, drop = FALSE]
-    test <- test[, representatives, drop = FALSE]
     hotelling <- .hotelling_two_sample(ref, test)
     included_subjects <- NULL
   }
 
   member_estimates <- .set_member_estimates(member_matrix, design)
   if (is.null(hotelling$estimate)) {
-    representative_estimates <- member_estimates[representatives]
+    set_estimates <- member_estimates[members]
   } else {
-    representative_estimates <- stats::setNames(
+    set_estimates <- stats::setNames(
       as.numeric(hotelling$estimate),
-      representatives
+      members
     )
   }
   tidy <- tibble::tibble(
     set_id = set_id,
     n_variables = length(members),
-    test_dimension = length(representatives),
+    test_dimension = as.integer(hotelling$df1),
     variables = list(members),
-    estimate = list(representative_estimates),
+    estimate = list(set_estimates),
     statistic = hotelling$statistic,
     df1 = hotelling$df1,
     df2 = hotelling$df2,
@@ -767,8 +649,6 @@ gly_set_test <- function(
     raw = c(
       hotelling,
       list(
-        representatives = representatives,
-        aliases = collapsed$aliases,
         included_subjects = included_subjects
       )
     )
@@ -796,39 +676,49 @@ gly_set_test <- function(
 .hotelling_one_sample <- function(differences) {
   n <- nrow(differences)
   p <- ncol(differences)
-  if (n <= p) {
+  if (n < 2) {
     return(.failed_hotelling(
-      p,
-      n - p,
-      "The set dimension must be smaller than the number of complete pairs."
+      NA_real_,
+      NA_real_,
+      "At least 2 complete pairs are required."
     ))
   }
 
   covariance <- stats::cov(differences)
-  inverse <- .invert_set_covariance(covariance, p)
-  if (is.null(inverse)) {
+  subspace <- .set_covariance_subspace(covariance, p)
+  if (!is.null(subspace$failure_reason)) {
     return(.failed_hotelling(
-      p,
-      n - p,
-      "The paired covariance matrix is singular."
+      subspace$rank,
+      if (is.na(subspace$rank)) NA_real_ else n - subspace$rank,
+      paste("The paired covariance matrix", subspace$failure_reason)
+    ))
+  }
+  rank <- subspace$rank
+  if (n <= rank) {
+    return(.failed_hotelling(
+      rank,
+      n - rank,
+      "The set dimension must be smaller than the number of complete pairs."
     ))
   }
 
   estimate <- colMeans(differences)
-  distance_squared <- as.numeric(t(estimate) %*% inverse %*% estimate)
+  distance_squared <- as.numeric(
+    t(estimate) %*% subspace$inverse %*% estimate
+  )
   statistic <- n * distance_squared
-  f_statistic <- (n - p) * statistic / (p * (n - 1))
+  f_statistic <- (n - rank) * statistic / (rank * (n - 1))
 
   list(
     statistic = statistic,
     f_statistic = f_statistic,
-    df1 = p,
-    df2 = n - p,
+    df1 = rank,
+    df2 = n - rank,
     effect_size = sqrt(max(distance_squared, 0)),
-    p_val = stats::pf(f_statistic, p, n - p, lower.tail = FALSE),
+    p_val = stats::pf(f_statistic, rank, n - rank, lower.tail = FALSE),
     status = "ok",
     failure_reason = NA_character_,
-    covariance = covariance,
+    covariance = subspace$covariance,
     estimate = estimate
   )
 }
@@ -837,12 +727,11 @@ gly_set_test <- function(
   n_ref <- nrow(ref)
   n_test <- nrow(test)
   p <- ncol(ref)
-  df2 <- n_ref + n_test - p - 1
-  if (n_ref < 2 || n_test < 2 || df2 <= 0) {
+  if (n_ref < 2 || n_test < 2) {
     return(.failed_hotelling(
-      p,
-      df2,
-      "The set dimension is too large for the complete group sample sizes."
+      NA_real_,
+      NA_real_,
+      "At least 2 complete samples are required in each group."
     ))
   }
 
@@ -850,30 +739,45 @@ gly_set_test <- function(
     stats::cov(ref) +
     (n_test - 1) * stats::cov(test)) /
     (n_ref + n_test - 2)
-  inverse <- .invert_set_covariance(covariance, p)
-  if (is.null(inverse)) {
+  subspace <- .set_covariance_subspace(covariance, p)
+  if (!is.null(subspace$failure_reason)) {
     return(.failed_hotelling(
-      p,
+      subspace$rank,
+      if (is.na(subspace$rank)) {
+        NA_real_
+      } else {
+        n_ref + n_test - subspace$rank - 1
+      },
+      paste("The pooled covariance matrix", subspace$failure_reason)
+    ))
+  }
+  rank <- subspace$rank
+  df2 <- n_ref + n_test - rank - 1
+  if (df2 <= 0) {
+    return(.failed_hotelling(
+      rank,
       df2,
-      "The pooled covariance matrix is singular."
+      "The set dimension is too large for the complete group sample sizes."
     ))
   }
 
   estimate <- colMeans(test) - colMeans(ref)
-  distance_squared <- as.numeric(t(estimate) %*% inverse %*% estimate)
+  distance_squared <- as.numeric(
+    t(estimate) %*% subspace$inverse %*% estimate
+  )
   statistic <- n_ref * n_test / (n_ref + n_test) * distance_squared
-  f_statistic <- df2 * statistic / ((n_ref + n_test - 2) * p)
+  f_statistic <- df2 * statistic / ((n_ref + n_test - 2) * rank)
 
   list(
     statistic = statistic,
     f_statistic = f_statistic,
-    df1 = p,
+    df1 = rank,
     df2 = df2,
     effect_size = sqrt(max(distance_squared, 0)),
-    p_val = stats::pf(f_statistic, p, df2, lower.tail = FALSE),
+    p_val = stats::pf(f_statistic, rank, df2, lower.tail = FALSE),
     status = "ok",
     failure_reason = NA_character_,
-    covariance = covariance,
+    covariance = subspace$covariance,
     estimate = estimate
   )
 }
@@ -893,15 +797,62 @@ gly_set_test <- function(
   )
 }
 
-.invert_set_covariance <- function(covariance, dimension) {
-  covariance <- matrix(covariance, nrow = dimension, ncol = dimension)
-  if (
-    any(!is.finite(covariance)) ||
-      qr(covariance, tol = sqrt(.Machine$double.eps))$rank < dimension
-  ) {
-    return(NULL)
+.set_covariance_subspace <- function(covariance, dimension) {
+  covariance <- matrix(
+    covariance,
+    nrow = dimension,
+    ncol = dimension,
+    dimnames = dimnames(covariance)
+  )
+  if (any(!is.finite(covariance))) {
+    return(list(
+      covariance = covariance,
+      inverse = NULL,
+      rank = NA_integer_,
+      failure_reason = "contains non-finite values."
+    ))
   }
-  tryCatch(solve(covariance), error = function(...) NULL)
+
+  covariance <- (covariance + t(covariance)) / 2
+  decomposition <- eigen(covariance, symmetric = TRUE)
+  eigenvalues <- decomposition$values
+  max_eigenvalue <- max(abs(eigenvalues))
+  tolerance <- sqrt(.Machine$double.eps) * max_eigenvalue
+  if (any(eigenvalues < -tolerance)) {
+    return(list(
+      covariance = covariance,
+      inverse = NULL,
+      rank = NA_integer_,
+      failure_reason = "is not positive semidefinite."
+    ))
+  }
+
+  retained <- eigenvalues > tolerance
+  rank <- sum(retained)
+  if (rank == 0) {
+    return(list(
+      covariance = covariance,
+      inverse = NULL,
+      rank = 0L,
+      failure_reason = "has no estimable dimensions."
+    ))
+  }
+
+  vectors <- decomposition$vectors[, retained, drop = FALSE]
+  inverse <- sweep(
+    vectors,
+    MARGIN = 2,
+    STATS = eigenvalues[retained],
+    FUN = "/"
+  ) %*%
+    t(vectors)
+  dimnames(inverse) <- dimnames(covariance)
+  list(
+    covariance = covariance,
+    inverse = inverse,
+    rank = as.integer(rank),
+    failure_reason = NULL
+  )
 }
 
 .set_member_correlation <- function(
