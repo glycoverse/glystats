@@ -2,14 +2,15 @@
 % Please edit documentation in R/anova.R
 \name{gly_kruskal}
 \alias{gly_kruskal}
-\title{Kruskal-Wallis test for Differential Expression Analysis}
+\title{Kruskal-Wallis or Friedman Test for Differential Expression Analysis}
 \usage{
 gly_kruskal(
   exp,
   group_col = "group",
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  subject_col = NULL
 )
 }
 \arguments{
@@ -27,21 +28,26 @@ If NULL, no adjustment is performed.}
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
-\item{...}{Additional arguments passed to \code{stats::kruskal.test()}.}
+\item{...}{Additional arguments passed to \code{stats::kruskal.test()} or, for
+paired analyses, \code{stats::friedman.test()}.}
+
+\item{subject_col}{An optional character string naming the subject identifier
+column in sample information. When supplied, a Friedman test is performed.}
 }
 \value{
 A list containing three elements:
 \itemize{
 \item \code{tidy_result}: A list containing:
 \itemize{
-\item \code{main_test}: A tibble with Kruskal-Wallis test results containing the following columns:
+\item \code{main_test}: A tibble with Kruskal-Wallis or Friedman test results
+containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
 \item \code{statistic}: Kruskal-Wallis test statistic
 \item \code{p_val}: Raw p-value from Kruskal-Wallis test
 \item \code{parameter}: Degrees of freedom
 \item \code{method}: Statistical method used
-\item \code{effect_size}: Epsilon-squared
+\item \code{effect_size}: Epsilon-squared, or Kendall's W for paired analyses
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 \item \code{post_hoc}: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 }
@@ -50,42 +56,46 @@ A list containing three elements:
 \item \code{variable}: Variable name
 \item \code{ref_group}: Reference group
 \item \code{test_group}: Test/treatment/case group
-\item \code{p_val}: Raw p-value from Dunn's test
-\item \code{p_adj}: Adjusted p-value from Dunn's test
+\item \code{p_val}: Raw post-hoc p-value
+\item \code{p_adj}: Holm-adjusted post-hoc p-value
 }
 }
 \item \code{raw_result}: A list containing:
 \itemize{
-\item \code{main_test}: A list of raw \code{kruskal.test} objects.
-\item \code{post_hoc_test}: A list of raw \code{dunnTest} objects. Post-hoc
-comparison labels and direction-sensitive statistics follow the package
-direction, i.e. \code{test_group - ref_group}.
+\item \code{main_test}: A list of raw \code{kruskal.test} or \code{friedman.test} objects.
+\item \code{post_hoc_test}: A list of raw Dunn or paired Wilcoxon summaries.
 }
 \item \code{meta_data}: A list containing metadata from the input experiment.
 }
 }
 \description{
-Perform Kruskal-Wallis test for glycomics or glycoproteomics data.
-The function supports non-parametric comparison of multiple groups.
+Perform Kruskal-Wallis or Friedman tests for glycomics or glycoproteomics
+data.
 For significant results, Dunn's post-hoc test is automatically performed.
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. At least 2 groups are required in the grouping variable.
+In paired analyses, only subjects observed in every group are used, with at
+most one sample per subject and group. The reported effect size is Kendall's
+\eqn{W}.
 
-For any variable failed to fit a \code{stats::kruskal.test()} model,
+For any variable failed to fit a \code{stats::kruskal.test()} or
+\code{stats::friedman.test()} model,
 NAs will be assigned to the results in both main test and post-hoc test.
 
 \strong{Post-hoc Test:}
 Dunn's test with Holm correction for multiple comparisons (\code{FSA::dunnTest()}) is performed
-for variables with significant main effects (p_adj < 0.05).
+for variables with significant main effects (p_adj < 0.05). Paired analyses
+instead use paired Wilcoxon signed-rank tests with Holm correction.
 }
 \section{Required packages}{
 
-This function requires the \code{FSA} package for Dunn's post-hoc test.
+Unpaired analyses require the \code{FSA} package for Dunn's post-hoc test.
 }
 
 \seealso{
-\code{\link[stats:kruskal.test]{stats::kruskal.test()}}, \code{\link[FSA:dunnTest]{FSA::dunnTest()}}
+\code{\link[stats:kruskal.test]{stats::kruskal.test()}}, \code{\link[stats:friedman.test]{stats::friedman.test()}},
+\code{\link[FSA:dunnTest]{FSA::dunnTest()}}
 }

@@ -489,3 +489,322 @@ test_that("post_hoc_test should not contain NA rows when add_info is TRUE", {
     info = "All variables in post_hoc_test should have significant main effects"
   )
 })
+
+test_that("gly_anova performs subject-blocked repeated-measures analysis", {
+  subjects <- rep(paste0("S", seq_len(6)), each = 3)
+  groups <- factor(rep(c("A", "B", "C"), times = 6))
+  baselines <- rep(c(10, 20, 30, 40, 50, 60), each = 3)
+  changes <- c(
+    0,
+    1,
+    4,
+    0,
+    2,
+    6,
+    0,
+    1,
+    5,
+    0,
+    3,
+    7,
+    0,
+    2,
+    8,
+    0,
+    4,
+    9
+  )
+  expression <- rbind(
+    V1 = baselines + changes,
+    V2 = (baselines + changes) * 1.1
+  )
+  expression["V1", subjects == "S6" & groups == "C"] <- NA_real_
+  sample_order <- c(
+    5,
+    15,
+    1,
+    12,
+    8,
+    17,
+    3,
+    10,
+    14,
+    2,
+    18,
+    7,
+    6,
+    11,
+    16,
+    4,
+    13,
+    9
+  )
+  expression <- expression[, sample_order, drop = FALSE]
+  subjects <- subjects[sample_order]
+  groups <- groups[sample_order]
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  result <- suppressMessages(gly_anova(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  ))
+  data <- tibble::tibble(
+    log_value = log2(expression["V1", ] + 1e-6),
+    group = groups,
+    subject = factor(subjects)
+  )
+  data <- data[data$subject != "S6", , drop = FALSE]
+  expected <- stats::aov(log_value ~ subject + group, data = data)
+  expected_table <- summary(expected)[[1]]
+
+  expect_s3_class(result$raw_result$main_test$V1, "aov")
+  expect_equal(
+    result$tidy_result$main_test$statistic[1],
+    expected_table["group", "F value"]
+  )
+  expect_equal(
+    result$tidy_result$main_test$p_val[1],
+    expected_table["group", "Pr(>F)"]
+  )
+  expect_equal(
+    result$tidy_result$main_test$effect_size[1],
+    expected_table["group", "Sum Sq"] /
+      sum(expected_table[c("group", "Residuals"), "Sum Sq"])
+  )
+  expect_identical(expected_table["Residuals", "Df"], 8)
+  expect_setequal(
+    result$tidy_result$post_hoc_test$ref_group,
+    c("A", "B")
+  )
+})
+
+test_that("paired ANOVA post-hoc results tolerate constant differences and hyphens", {
+  subjects <- rep(paste0("S", seq_len(6)), times = 3)
+  groups <- factor(
+    rep(c("pre-dose", "post-dose", "follow-up"), each = 6),
+    levels = c("pre-dose", "post-dose", "follow-up")
+  )
+  log_expression <- c(seq_len(6), seq_len(6) + 1, seq_len(6) + 2)
+  expression <- rbind(V1 = 2^log_expression - 1e-6)
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  result <- suppressMessages(gly_anova(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  ))
+  post_hoc <- result$tidy_result$post_hoc_test
+
+  expect_s3_class(result$raw_result$main_test$V1, "aov")
+  expect_setequal(
+    paste(post_hoc$ref_group, post_hoc$test_group, sep = "_vs_"),
+    c(
+      "pre-dose_vs_post-dose",
+      "pre-dose_vs_follow-up",
+      "post-dose_vs_follow-up"
+    )
+  )
+  expect_true(all(is.na(post_hoc$p_val)))
+  expect_true(all(is.na(post_hoc$p_adj)))
+  expect_false(anyNA(post_hoc$log2fc))
+})
+
+test_that("paired multi-group tests ignore unused group levels", {
+  subjects <- rep(paste0("S", seq_len(6)), each = 3)
+  groups <- factor(
+    rep(c("A", "B", "C"), times = 6),
+    levels = c("A", "B", "C", "unused")
+  )
+  baselines <- rep(seq(10, 60, by = 10), each = 3)
+  changes <- c(
+    0,
+    1,
+    4,
+    0,
+    2,
+    6,
+    0,
+    1,
+    5,
+    0,
+    3,
+    7,
+    0,
+    2,
+    8,
+    0,
+    4,
+    9
+  )
+  expression <- rbind(V1 = baselines + changes)
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  anova_result <- suppressMessages(gly_anova(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  ))
+  friedman_result <- suppressMessages(suppressWarnings(gly_kruskal(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  )))
+
+  expect_s3_class(anova_result$raw_result$main_test$V1, "aov")
+  expect_match(friedman_result$tidy_result$main_test$method, "Friedman")
+})
+
+test_that("paired multi-group fold changes use complete subject blocks", {
+  subjects <- rep(paste0("S", seq_len(7)), each = 3)
+  groups <- factor(rep(c("A", "B", "C"), times = 7))
+  complete_a <- 10:15
+  expression <- rbind(
+    V1 = c(rbind(complete_a, 2 * complete_a, 4 * complete_a), 1000, 10, NA)
+  )
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  results <- list(
+    suppressMessages(gly_anova(
+      exp,
+      subject_col = "subject",
+      add_info = FALSE,
+      p_adj_method = NULL
+    )),
+    suppressMessages(suppressWarnings(gly_kruskal(
+      exp,
+      subject_col = "subject",
+      add_info = FALSE,
+      p_adj_method = NULL
+    )))
+  )
+
+  purrr::walk(results, function(result) {
+    post_hoc <- result$tidy_result$post_hoc_test
+    expected <- c(A_vs_B = 1, A_vs_C = 2, B_vs_C = 1)
+    comparison <- paste(
+      post_hoc$ref_group,
+      post_hoc$test_group,
+      sep = "_vs_"
+    )
+
+    expect_equal(unname(post_hoc$log2fc), unname(expected[comparison]))
+  })
+})
+
+test_that("paired Wilcoxon post-hoc keeps undefined comparisons unavailable", {
+  subjects <- rep(paste0("S", seq_len(8)), each = 3)
+  groups <- factor(rep(c("A", "B", "C"), times = 8))
+  baseline <- 10:17
+  expression <- rbind(
+    V1 = c(rbind(baseline, baseline, 4 * baseline))
+  )
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  result <- expect_no_error(suppressMessages(suppressWarnings(gly_kruskal(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  ))))
+  post_hoc <- result$tidy_result$post_hoc_test
+  ab <- post_hoc$ref_group == "A" & post_hoc$test_group == "B"
+
+  expect_true(is.na(post_hoc$p_val[ab]))
+  expect_true(is.na(post_hoc$p_adj[ab]))
+  expect_false(grepl("A_vs_B", result$tidy_result$main_test$post_hoc))
+  expect_match(result$tidy_result$main_test$post_hoc, "A_vs_C")
+  expect_match(result$tidy_result$main_test$post_hoc, "B_vs_C")
+})
+
+test_that("gly_kruskal performs Friedman tests for paired designs", {
+  subjects <- rep(paste0("S", seq_len(6)), each = 3)
+  groups <- factor(rep(c("A", "B", "C"), times = 6))
+  baselines <- rep(c(10, 20, 30, 40, 50, 60), each = 3)
+  changes <- rep(c(0, 2, 6), times = 6)
+  expression <- rbind(
+    V1 = baselines + changes,
+    V2 = (baselines + changes) * 1.2
+  )
+  sample_order <- c(
+    8,
+    1,
+    15,
+    5,
+    12,
+    18,
+    3,
+    10,
+    14,
+    2,
+    17,
+    7,
+    6,
+    11,
+    16,
+    4,
+    13,
+    9
+  )
+  expression <- expression[, sample_order, drop = FALSE]
+  subjects <- subjects[sample_order]
+  groups <- groups[sample_order]
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  result <- suppressMessages(suppressWarnings(gly_kruskal(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  )))
+  data <- data.frame(
+    log_value = log2(expression["V1", ] + 1e-6),
+    group = groups,
+    subject = factor(subjects)
+  )
+  expected <- stats::friedman.test(log_value ~ group | subject, data = data)
+
+  expect_match(result$tidy_result$main_test$method[1], "Friedman")
+  expect_equal(result$tidy_result$main_test$statistic[1], expected$statistic)
+  expect_equal(result$tidy_result$main_test$p_val[1], expected$p.value)
+  expect_equal(
+    result$tidy_result$main_test$effect_size[1],
+    unname(expected$statistic) / (6 * (3 - 1))
+  )
+  expect_setequal(
+    paste(
+      result$tidy_result$post_hoc_test$ref_group,
+      result$tidy_result$post_hoc_test$test_group,
+      sep = "_vs_"
+    ),
+    c("A_vs_B", "A_vs_C", "B_vs_C")
+  )
+})

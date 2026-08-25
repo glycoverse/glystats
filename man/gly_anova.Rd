@@ -2,9 +2,16 @@
 % Please edit documentation in R/anova.R
 \name{gly_anova}
 \alias{gly_anova}
-\title{One-way ANOVA for Differential Expression Analysis}
+\title{One-way or Repeated-Measures ANOVA for Differential Expression Analysis}
 \usage{
-gly_anova(exp, group_col = "group", p_adj_method = "BH", add_info = TRUE, ...)
+gly_anova(
+  exp,
+  group_col = "group",
+  p_adj_method = "BH",
+  add_info = TRUE,
+  ...,
+  subject_col = NULL
+)
 }
 \arguments{
 \item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
@@ -22,6 +29,10 @@ If NULL, no adjustment is performed.}
 will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::aov()}.}
+
+\item{subject_col}{An optional character string naming the subject identifier
+column in sample information. When supplied, a subject-blocked
+repeated-measures ANOVA is performed.}
 }
 \value{
 A list containing three elements:
@@ -37,7 +48,7 @@ A list containing three elements:
 \item \code{meansq}: Mean squares
 \item \code{statistic}: F-statistic
 \item \code{p_val}: Raw p-value from ANOVA
-\item \code{effect_size}: Eta-squared
+\item \code{effect_size}: Eta-squared, or partial eta-squared for paired analyses
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
 \item \code{post_hoc}: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 }
@@ -46,36 +57,39 @@ A list containing three elements:
 \item \code{variable}: Variable name
 \item \code{ref_group}: Reference group
 \item \code{test_group}: Test/treatment/case group
-\item \code{p_val}: Raw p-value from Tukey's HSD test
-\item \code{p_adj}: Adjusted p-value from Tukey's HSD test
+\item \code{p_val}: Raw post-hoc p-value
+\item \code{p_adj}: Adjusted post-hoc p-value
 }
 }
 \item \code{raw_result}: A list containing:
 \itemize{
 \item \code{main_test}: A list of raw \code{aov} model objects.
-\item \code{post_hoc_test}: A list of raw \code{TukeyHSD} objects. Post-hoc
-comparison labels follow the package direction, i.e.
-\code{test_group - ref_group}.
+\item \code{post_hoc_test}: A list of raw \code{TukeyHSD} objects or paired t-test
+summaries.
 }
 \item \code{meta_data}: A list containing metadata from the input experiment.
 }
 }
 \description{
-Perform one-way ANOVA for glycomics or glycoproteomics data.
-The function supports parametric comparison of multiple groups.
+Perform one-way or repeated-measures ANOVA for glycomics or
+glycoproteomics data.
 For significant results, Tukey's HSD post-hoc test is automatically performed.
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. At least 2 groups are required in the grouping variable.
+In paired analyses, only subjects observed in every group are used, with at
+most one sample per subject and group. The reported effect size is partial
+eta-squared for the group term.
 
 For any variable failed to fit a \code{stats::aov()} model,
 NAs will be assigned to the results in both main test and post-hoc test.
 
 \strong{Post-hoc Test:}
 Tukey's HSD test for pairwise comparisons (\code{stats::TukeyHSD()}) is performed
-for variables with significant main effects (p_adj < 0.05).
+for variables with significant main effects (p_adj < 0.05). Paired analyses
+instead use paired t-tests with Holm correction.
 }
 \seealso{
 \code{\link[stats:aov]{stats::aov()}}, \code{\link[stats:TukeyHSD]{stats::TukeyHSD()}}

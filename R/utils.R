@@ -188,7 +188,7 @@
   if (!is.factor(groups)) {
     groups <- factor(groups)
   }
-  groups
+  droplevels(groups)
 }
 
 # Helper function to generate validation error message
@@ -418,4 +418,95 @@
     }
   }
   pairs
+}
+
+# Extract subject identifiers for paired analyses
+.extract_paired_subjects <- function(sample_info, subject_col, group_col) {
+  if (is.null(subject_col)) {
+    return(NULL)
+  }
+  if (identical(subject_col, group_col)) {
+    cli::cli_abort("{.arg subject_col} cannot equal {.arg group_col}.")
+  }
+  if (!subject_col %in% colnames(sample_info)) {
+    cli::cli_abort(c(
+      "Column {.field {subject_col}} not found in sample information.",
+      "i" = "Available columns: {.field {colnames(sample_info)}}."
+    ))
+  }
+
+  subjects <- sample_info[[subject_col]]
+  if (any(is.na(subjects))) {
+    cli::cli_abort(
+      "Column {.field {subject_col}} cannot contain missing values."
+    )
+  }
+  as.character(subjects)
+}
+
+# Match samples into complete subject blocks for paired analyses
+.match_paired_samples <- function(expr_mat, groups, subjects, method) {
+  if (is.null(subjects)) {
+    return(list(
+      expr_mat = expr_mat,
+      groups = groups,
+      subjects = NULL,
+      paired = FALSE
+    ))
+  }
+  if (length(subjects) != ncol(expr_mat)) {
+    cli::cli_abort(
+      "subjects must have {.val {ncol(expr_mat)}} values to match expr_mat columns."
+    )
+  }
+
+  groups <- droplevels(groups)
+
+  subject_group <- paste(subjects, groups, sep = "\r")
+  if (anyDuplicated(subject_group) > 0) {
+    cli::cli_abort(
+      "Each subject must have at most one sample in each group for paired {method}."
+    )
+  }
+
+  group_levels <- levels(groups)
+  subjects_by_group <- purrr::map(
+    group_levels,
+    ~ subjects[groups == .x]
+  )
+  complete_subjects <- Reduce(intersect, subjects_by_group)
+  if (length(complete_subjects) < 2) {
+    cli::cli_abort(
+      "At least 2 subjects must have samples in every group for paired {method}."
+    )
+  }
+
+  indices <- purrr::map(group_levels, function(group) {
+    group_indices <- which(groups == group)
+    group_indices[match(complete_subjects, subjects[group_indices])]
+  })
+  sample_indices <- unlist(indices, use.names = FALSE)
+  n_subjects <- length(complete_subjects)
+
+  list(
+    expr_mat = expr_mat[, sample_indices, drop = FALSE],
+    groups = factor(
+      rep(group_levels, each = n_subjects),
+      levels = group_levels
+    ),
+    subjects = factor(
+      rep(complete_subjects, times = length(group_levels)),
+      levels = complete_subjects
+    ),
+    paired = TRUE
+  )
+}
+
+# Return aligned complete values for one variable in a two-group paired design
+.paired_variable_values <- function(expr_mat, groups, var_name) {
+  group_levels <- levels(groups)
+  ref <- expr_mat[var_name, groups == group_levels[1]]
+  test <- expr_mat[var_name, groups == group_levels[2]]
+  complete <- is.finite(ref) & is.finite(test)
+  list(ref = ref[complete], test = test[complete])
 }

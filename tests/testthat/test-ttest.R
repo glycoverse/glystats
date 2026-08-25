@@ -477,3 +477,167 @@ test_that("gly_wilcox ref_group parameter works", {
     "Must be element of set"
   )
 })
+
+test_that("gly_ttest matches samples by subject for paired tests", {
+  subjects <- c("S3", "S1", "S4", "S2", "only_A", "S2", "S4", "S1", "S3")
+  groups <- factor(
+    c(rep("A", 5), rep("B", 4)),
+    levels = c("A", "B")
+  )
+  baselines <- c(S1 = 10, S2 = 20, S3 = 30, S4 = 40, only_A = 50)
+  changes <- c(S1 = 2, S2 = 1, S3 = 4, S4 = 3)
+  values <- unname(baselines[subjects])
+  values[groups == "B"] <- values[groups == "B"] +
+    changes[subjects[groups == "B"]]
+  expression <- rbind(V1 = values, V2 = values * 1.2)
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  result <- suppressMessages(gly_ttest(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE
+  ))
+  complete_subjects <- intersect(
+    subjects[groups == "A"],
+    subjects[groups == "B"]
+  )
+  ref <- log2(expression["V1", groups == "A"] + 1e-6)
+  names(ref) <- subjects[groups == "A"]
+  test <- log2(expression["V1", groups == "B"] + 1e-6)
+  names(test) <- subjects[groups == "B"]
+  expected <- stats::t.test(
+    test[complete_subjects],
+    ref[complete_subjects],
+    paired = TRUE
+  )
+  differences <- test[complete_subjects] - ref[complete_subjects]
+
+  expect_equal(result$raw_result$V1$statistic, expected$statistic)
+  expect_equal(result$tidy_result$p_val[1], expected$p.value)
+  expect_equal(
+    result$tidy_result$effect_size[1],
+    mean(differences) / stats::sd(differences)
+  )
+  expect_match(result$tidy_result$method[1], "Paired t-test")
+})
+
+test_that("gly_wilcox uses signed ranks and paired effect sizes", {
+  subjects <- c("S3", "S1", "S4", "S2", "S2", "S4", "S1", "S3")
+  groups <- factor(c(rep("A", 4), rep("B", 4)), levels = c("A", "B"))
+  ref_values <- c(S1 = 10, S2 = 20, S3 = 30, S4 = 40)
+  changes <- c(S1 = 2, S2 = -1, S3 = 4, S4 = 3)
+  values <- unname(ref_values[subjects])
+  values[groups == "B"] <- values[groups == "B"] +
+    changes[subjects[groups == "B"]]
+  expression <- rbind(V1 = values)
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  result <- suppressMessages(suppressWarnings(gly_wilcox(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    exact = FALSE
+  )))
+  complete_subjects <- subjects[groups == "A"]
+  ref <- log2(expression["V1", groups == "A"] + 1e-6)
+  names(ref) <- subjects[groups == "A"]
+  test <- log2(expression["V1", groups == "B"] + 1e-6)
+  names(test) <- subjects[groups == "B"]
+  differences <- test[complete_subjects] - ref[complete_subjects]
+  ranks <- rank(abs(differences))
+  expected_effect <- (sum(ranks[differences > 0]) -
+    sum(ranks[differences < 0])) /
+    sum(ranks)
+  expected <- stats::wilcox.test(
+    test[complete_subjects],
+    ref[complete_subjects],
+    paired = TRUE,
+    exact = FALSE
+  )
+
+  expect_equal(result$raw_result$V1$statistic, expected$statistic)
+  expect_equal(result$tidy_result$p_val, expected$p.value)
+  expect_equal(result$tidy_result$effect_size, expected_effect)
+  expect_match(result$tidy_result$method, "signed rank")
+
+  missing_expression <- matrix(
+    NA_real_,
+    nrow = 1,
+    ncol = length(groups),
+    dimnames = list("V1", colnames(expression))
+  )
+  expect_identical(
+    .calculate_matched_rank_biserial(missing_expression, groups, "V1"),
+    NA_real_
+  )
+})
+
+test_that("paired two-group tests ignore unused group levels", {
+  subjects <- rep(paste0("S", seq_len(6)), times = 2)
+  groups <- factor(
+    rep(c("A", "B"), each = 6),
+    levels = c("A", "B", "unused")
+  )
+  baseline <- 10:15
+  expression <- rbind(
+    V1 = c(baseline, baseline + c(1, 2, 1, 3, 2, 4))
+  )
+  colnames(expression) <- paste0("sample", seq_along(subjects))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  ttest_result <- suppressMessages(gly_ttest(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE
+  ))
+  wilcox_result <- suppressMessages(suppressWarnings(gly_wilcox(
+    exp,
+    subject_col = "subject",
+    add_info = FALSE,
+    exact = FALSE
+  )))
+
+  expect_match(ttest_result$tidy_result$method, "Paired t-test")
+  expect_match(wilcox_result$tidy_result$method, "signed rank")
+  expect_true(is.finite(ttest_result$tidy_result$p_val))
+  expect_true(is.finite(wilcox_result$tidy_result$p_val))
+})
+
+test_that("paired analyses reject ambiguous subject layouts", {
+  expression <- matrix(
+    seq_len(6),
+    nrow = 1,
+    dimnames = list("V1", paste0("sample", seq_len(6)))
+  )
+  groups <- factor(c("A", "A", "A", "B", "B", "B"))
+
+  expect_snapshot(
+    error = TRUE,
+    .match_paired_samples(
+      expression,
+      groups,
+      subjects = c("S1", "S1", "S2", "S1", "S2", "S3"),
+      method = "t-test"
+    )
+  )
+  expect_snapshot(
+    error = TRUE,
+    .match_paired_samples(
+      expression,
+      groups,
+      subjects = c("S1", "S2", "S3", "S3", "S4", "S5"),
+      method = "t-test"
+    )
+  )
+})

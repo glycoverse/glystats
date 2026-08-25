@@ -2,7 +2,7 @@
 % Please edit documentation in R/ttest.R
 \name{gly_wilcox}
 \alias{gly_wilcox}
-\title{Wilcoxon rank-sum test for Differential Expression Analysis}
+\title{Wilcoxon Test for Differential Expression Analysis}
 \usage{
 gly_wilcox(
   exp,
@@ -10,7 +10,8 @@ gly_wilcox(
   p_adj_method = "BH",
   ref_group = NULL,
   add_info = TRUE,
-  ...
+  ...,
+  subject_col = NULL
 )
 }
 \arguments{
@@ -32,6 +33,10 @@ If NULL (default), the first level of the group factor is used as the reference.
 will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::wilcox.test()}.}
+
+\item{subject_col}{An optional character string naming the subject identifier
+column in sample information. When supplied, samples are matched by subject
+and a paired Wilcoxon signed-rank test is performed.}
 }
 \value{
 A list with three elements:
@@ -41,7 +46,8 @@ A list with three elements:
 \item \code{variable}: Variable name
 \item \code{statistic}: Wilcoxon test statistic
 \item \code{p_val}: Raw p-value from Wilcoxon test
-\item \code{effect_size}: Rank-biserial correlation
+\item \code{effect_size}: Rank-biserial correlation, using matched pairs in paired
+analyses
 \item \code{method}: Statistical method used
 \item \code{alternative}: Alternative hypothesis
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
@@ -54,13 +60,15 @@ The list has classes \code{glystats_wilcox_res} and \code{glystats_res}.
 }
 }
 \description{
-Perform Wilcoxon rank-sum test (Mann-Whitney U test) for glycomics or glycoproteomics data.
-The function supports non-parametric comparison of two groups.
+Perform Wilcoxon rank-sum or signed-rank tests for glycomics or
+glycoproteomics data.
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. Exactly 2 groups are required in the grouping variable.
+In paired analyses, only subjects observed in both groups are used and
+\code{effect_size} is the matched-pairs rank-biserial correlation.
 }
 \seealso{
 \code{\link[stats:wilcox.test]{stats::wilcox.test()}}

@@ -1,5 +1,6 @@
 # glystats (development version)
 
+* `gly_anova()`, `gly_kruskal()`, `gly_ttest()`, and `gly_wilcox()` gain a `subject_col` argument for subject-matched paired analyses, including repeated-measures ANOVA, Friedman tests, paired post-hoc comparisons, and paired effect sizes. (#21)
 * `gly_set_test()` now constructs and tests correlated variable sets in one call, retains isolated variables as singleton sets, and tests structurally rank-deficient sets in their nonredundant subspace when the observed contrast is estimable and classical sample-size requirements are met, without distinguishing identical profiles; custom sets remain available through `sets`. (#20)
 * Analysis functions now accept experiments containing all-`NA` variables without errors, returning `NA` feature-level statistics, loadings, or clusters and `NULL` raw models when no variables can be fitted. (#17)
 * `gly_linear_model()` now fits formula-based, limma-moderated models with interactions, adjustment variables, and named custom contrasts. (#16)

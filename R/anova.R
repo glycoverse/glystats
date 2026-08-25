@@ -1,7 +1,7 @@
-#' One-way ANOVA for Differential Expression Analysis
+#' One-way or Repeated-Measures ANOVA for Differential Expression Analysis
 #'
-#' Perform one-way ANOVA for glycomics or glycoproteomics data.
-#' The function supports parametric comparison of multiple groups.
+#' Perform one-way or repeated-measures ANOVA for glycomics or
+#' glycoproteomics data.
 #' For significant results, Tukey's HSD post-hoc test is automatically performed.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
@@ -16,17 +16,24 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param ... Additional arguments passed to `stats::aov()`.
+#' @param subject_col An optional character string naming the subject identifier
+#'   column in sample information. When supplied, a subject-blocked
+#'   repeated-measures ANOVA is performed.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
+#' In paired analyses, only subjects observed in every group are used, with at
+#' most one sample per subject and group. The reported effect size is partial
+#' eta-squared for the group term.
 #'
 #' For any variable failed to fit a `stats::aov()` model,
 #' NAs will be assigned to the results in both main test and post-hoc test.
 #'
 #' **Post-hoc Test:**
 #' Tukey's HSD test for pairwise comparisons (`stats::TukeyHSD()`) is performed
-#' for variables with significant main effects (p_adj < 0.05).
+#' for variables with significant main effects (p_adj < 0.05). Paired analyses
+#' instead use paired t-tests with Holm correction.
 #'
 #' @returns
 #' A list containing three elements:
@@ -39,20 +46,19 @@
 #'       - `meansq`: Mean squares
 #'       - `statistic`: F-statistic
 #'       - `p_val`: Raw p-value from ANOVA
-#'       - `effect_size`: Eta-squared
+#'       - `effect_size`: Eta-squared, or partial eta-squared for paired analyses
 #'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'       - `post_hoc`: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 #'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
 #'       - `variable`: Variable name
 #'       - `ref_group`: Reference group
 #'       - `test_group`: Test/treatment/case group
-#'       - `p_val`: Raw p-value from Tukey's HSD test
-#'       - `p_adj`: Adjusted p-value from Tukey's HSD test
+#'       - `p_val`: Raw post-hoc p-value
+#'       - `p_adj`: Adjusted post-hoc p-value
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `aov` model objects.
-#'     - `post_hoc_test`: A list of raw `TukeyHSD` objects. Post-hoc
-#'       comparison labels follow the package direction, i.e.
-#'       `test_group - ref_group`.
+#'     - `post_hoc_test`: A list of raw `TukeyHSD` objects or paired t-test
+#'       summaries.
 #'   - `meta_data`: A list containing metadata from the input experiment.
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
@@ -62,7 +68,8 @@ gly_anova <- function(
   group_col = "group",
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  subject_col = NULL
 ) {
   # Validate inputs
   .assert_data_container(exp)
@@ -73,6 +80,7 @@ gly_anova <- function(
     null.ok = TRUE
   )
   checkmate::assert_logical(add_info, len = 1)
+  checkmate::assert_string(subject_col, null.ok = TRUE)
 
   # Extract data from experiment object
   expr_mat <- .get_expr_mat(exp)
@@ -87,9 +95,16 @@ gly_anova <- function(
     method = "anova"
   )
   groups <- group_info$groups
+  subjects <- .extract_paired_subjects(sample_info, subject_col, group_col)
 
   # Run the internal computation
-  result <- .analyze_anova(expr_mat, groups, p_adj_method, ...)
+  result <- .analyze_anova(
+    expr_mat,
+    groups,
+    p_adj_method,
+    ...,
+    subjects = subjects
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -109,7 +124,8 @@ gly_anova <- function(
   expr_mat,
   groups,
   p_adj_method = "BH",
-  ...
+  ...,
+  subjects = NULL
 ) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
@@ -125,17 +141,45 @@ gly_anova <- function(
     cli::cli_abort("groups must have at least 2 levels for ANOVA")
   }
 
+  design <- .match_paired_samples(
+    expr_mat,
+    groups,
+    subjects,
+    method = "ANOVA"
+  )
+  expr_mat <- design$expr_mat
+  groups <- design$groups
+
   # Prepare data
   log_expr_mat <- .log_transform_expr_mat(expr_mat)
-  data <- .prepare_multi_group_data(log_expr_mat, groups, is_logged = TRUE)
+  data <- .prepare_multi_group_data(
+    log_expr_mat,
+    groups,
+    subjects = design$subjects,
+    is_logged = TRUE
+  )
+  anova_formula <- if (design$paired) {
+    log_value ~ subject + group
+  } else {
+    NULL
+  }
 
   # Generate raw results
-  raw_main_test <- .generate_raw_main_results(data, stats::aov, ...)
+  raw_main_test <- .generate_raw_main_results(
+    data,
+    stats::aov,
+    formula = anova_formula,
+    ...,
+    paired = design$paired
+  )
   raw_post_hoc_test <- .generate_raw_posthoc_results(
     raw_main_test,
     data,
     stats::aov,
-    p_adj_method
+    p_adj_method,
+    formula = anova_formula,
+    posthoc_method = if (design$paired) "paired_t" else "tukey",
+    paired = design$paired
   )
 
   # Tibblify results
@@ -143,9 +187,14 @@ gly_anova <- function(
     raw_main_test,
     stats::aov,
     p_adj_method,
-    effect_size_method = "eta_squared",
+    effect_size_method = if (design$paired) {
+      "partial_eta_squared"
+    } else {
+      "eta_squared"
+    },
     expr_mat = log_expr_mat,
-    groups = groups
+    groups = groups,
+    effect_models = raw_main_test
   )
   post_hoc_vec <- .format_posthoc_results(
     raw_post_hoc_test,
@@ -154,7 +203,12 @@ gly_anova <- function(
   )
   main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
-  post_hoc_test <- .add_fold_change(post_hoc_test, expr_mat, groups)
+  post_hoc_test <- .add_fold_change(
+    post_hoc_test,
+    expr_mat,
+    groups,
+    paired_data = if (design$paired) data else NULL
+  )
 
   # Assemble tidy results
   tidy_result <- list(
@@ -328,7 +382,8 @@ gly_ancova <- function(
   covariates <- .normalize_covariates(
     covariates,
     ncol(expr_mat),
-    colnames(expr_mat)
+    colnames(expr_mat),
+    allow_subject = TRUE
   )
   if (is.null(covariates) || ncol(covariates) == 0) {
     cli::cli_abort("covariates must be provided for ANCOVA.")
@@ -405,10 +460,10 @@ gly_ancova <- function(
   )
 }
 
-#' Kruskal-Wallis test for Differential Expression Analysis
+#' Kruskal-Wallis or Friedman Test for Differential Expression Analysis
 #'
-#' Perform Kruskal-Wallis test for glycomics or glycoproteomics data.
-#' The function supports non-parametric comparison of multiple groups.
+#' Perform Kruskal-Wallis or Friedman tests for glycomics or glycoproteomics
+#' data.
 #' For significant results, Dunn's post-hoc test is automatically performed.
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
@@ -422,55 +477,64 @@ gly_ancova <- function(
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#' @param ... Additional arguments passed to `stats::kruskal.test()`.
+#' @param ... Additional arguments passed to `stats::kruskal.test()` or, for
+#'   paired analyses, `stats::friedman.test()`.
+#' @param subject_col An optional character string naming the subject identifier
+#'   column in sample information. When supplied, a Friedman test is performed.
 #'
 #' @section Required packages:
-#' This function requires the `FSA` package for Dunn's post-hoc test.
+#' Unpaired analyses require the `FSA` package for Dunn's post-hoc test.
 #'
 #' @details
 #' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. At least 2 groups are required in the grouping variable.
+#' In paired analyses, only subjects observed in every group are used, with at
+#' most one sample per subject and group. The reported effect size is Kendall's
+#' \eqn{W}.
 #'
-#' For any variable failed to fit a `stats::kruskal.test()` model,
+#' For any variable failed to fit a `stats::kruskal.test()` or
+#' `stats::friedman.test()` model,
 #' NAs will be assigned to the results in both main test and post-hoc test.
 #'
 #' **Post-hoc Test:**
 #' Dunn's test with Holm correction for multiple comparisons (`FSA::dunnTest()`) is performed
-#' for variables with significant main effects (p_adj < 0.05).
+#' for variables with significant main effects (p_adj < 0.05). Paired analyses
+#' instead use paired Wilcoxon signed-rank tests with Holm correction.
 #'
 #' @returns
 #' A list containing three elements:
 #'   - `tidy_result`: A list containing:
-#'     - `main_test`: A tibble with Kruskal-Wallis test results containing the following columns:
+#'     - `main_test`: A tibble with Kruskal-Wallis or Friedman test results
+#'       containing the following columns:
 #'       - `variable`: Variable name
 #'       - `statistic`: Kruskal-Wallis test statistic
 #'       - `p_val`: Raw p-value from Kruskal-Wallis test
 #'       - `parameter`: Degrees of freedom
 #'       - `method`: Statistical method used
-#'       - `effect_size`: Epsilon-squared
+#'       - `effect_size`: Epsilon-squared, or Kendall's W for paired analyses
 #'       - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'       - `post_hoc`: Significant group pairs from post-hoc test, in the format of "ref_vs_test".
 #'     - `post_hoc_test`: A tibble with pairwise comparison results containing the following columns:
 #'       - `variable`: Variable name
 #'       - `ref_group`: Reference group
 #'       - `test_group`: Test/treatment/case group
-#'       - `p_val`: Raw p-value from Dunn's test
-#'       - `p_adj`: Adjusted p-value from Dunn's test
+#'       - `p_val`: Raw post-hoc p-value
+#'       - `p_adj`: Holm-adjusted post-hoc p-value
 #'   - `raw_result`: A list containing:
-#'     - `main_test`: A list of raw `kruskal.test` objects.
-#'     - `post_hoc_test`: A list of raw `dunnTest` objects. Post-hoc
-#'       comparison labels and direction-sensitive statistics follow the package
-#'       direction, i.e. `test_group - ref_group`.
+#'     - `main_test`: A list of raw `kruskal.test` or `friedman.test` objects.
+#'     - `post_hoc_test`: A list of raw Dunn or paired Wilcoxon summaries.
 #'   - `meta_data`: A list containing metadata from the input experiment.
 #'
-#' @seealso [stats::kruskal.test()], [FSA::dunnTest()]
+#' @seealso [stats::kruskal.test()], [stats::friedman.test()],
+#'   [FSA::dunnTest()]
 #' @export
 gly_kruskal <- function(
   exp,
   group_col = "group",
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  subject_col = NULL
 ) {
   # Validate inputs
   .assert_data_container(exp)
@@ -481,9 +545,7 @@ gly_kruskal <- function(
     null.ok = TRUE
   )
   checkmate::assert_logical(add_info, len = 1)
-
-  # Check package availability
-  rlang::check_installed("FSA")
+  checkmate::assert_string(subject_col, null.ok = TRUE)
 
   # Extract data from experiment object
   expr_mat <- .get_expr_mat(exp)
@@ -498,9 +560,16 @@ gly_kruskal <- function(
     method = "kruskal"
   )
   groups <- group_info$groups
+  subjects <- .extract_paired_subjects(sample_info, subject_col, group_col)
 
   # Run the internal computation
-  result <- .analyze_kruskal(expr_mat, groups, p_adj_method, ...)
+  result <- .analyze_kruskal(
+    expr_mat,
+    groups,
+    p_adj_method,
+    ...,
+    subjects = subjects
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -520,11 +589,9 @@ gly_kruskal <- function(
   expr_mat,
   groups,
   p_adj_method = "BH",
-  ...
+  ...,
+  subjects = NULL
 ) {
-  # Check package availability
-  rlang::check_installed("FSA")
-
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
@@ -539,27 +606,68 @@ gly_kruskal <- function(
     cli::cli_abort("groups must have at least 2 levels for Kruskal-Wallis test")
   }
 
+  design <- .match_paired_samples(
+    expr_mat,
+    groups,
+    subjects,
+    method = "rank test"
+  )
+  if (!design$paired) {
+    rlang::check_installed("FSA")
+  }
+  expr_mat <- design$expr_mat
+  groups <- design$groups
+
   # Prepare data
   log_expr_mat <- .log_transform_expr_mat(expr_mat)
-  data <- .prepare_multi_group_data(log_expr_mat, groups, is_logged = TRUE)
+  data <- .prepare_multi_group_data(
+    log_expr_mat,
+    groups,
+    subjects = design$subjects,
+    is_logged = TRUE
+  )
+  test_function <- if (design$paired) {
+    stats::friedman.test
+  } else {
+    stats::kruskal.test
+  }
+  test_formula <- if (design$paired) {
+    log_value ~ group | subject
+  } else {
+    NULL
+  }
 
   # Generate raw results
-  raw_main_test <- .generate_raw_main_results(data, stats::kruskal.test, ...)
+  raw_main_test <- .generate_raw_main_results(
+    data,
+    test_function,
+    formula = test_formula,
+    ...,
+    paired = design$paired
+  )
   raw_post_hoc_test <- .generate_raw_posthoc_results(
     raw_main_test,
     data,
-    stats::kruskal.test,
-    p_adj_method
+    test_function,
+    p_adj_method,
+    formula = test_formula,
+    posthoc_method = if (design$paired) "paired_wilcox" else "dunn",
+    paired = design$paired
   )
 
   # Tibblify results
   main_test <- .tibblify_main_test_results(
     raw_main_test,
-    stats::kruskal.test,
+    test_function,
     p_adj_method,
-    effect_size_method = "epsilon_squared",
+    effect_size_method = if (design$paired) {
+      "kendalls_w"
+    } else {
+      "epsilon_squared"
+    },
     expr_mat = log_expr_mat,
-    groups = groups
+    groups = groups,
+    effect_models = raw_main_test
   )
   post_hoc_vec <- .format_posthoc_results(
     raw_post_hoc_test,
@@ -571,7 +679,12 @@ gly_kruskal <- function(
     raw_post_hoc_test,
     stats::kruskal.test
   )
-  post_hoc_test <- .add_fold_change(post_hoc_test, expr_mat, groups)
+  post_hoc_test <- .add_fold_change(
+    post_hoc_test,
+    expr_mat,
+    groups,
+    paired_data = if (design$paired) data else NULL
+  )
 
   # Assemble tidy results
   tidy_result <- list(
@@ -602,8 +715,19 @@ gly_kruskal <- function(
   data_nested,
   .f,
   formula = NULL,
-  posthoc_method = "tukey"
+  posthoc_method = "tukey",
+  paired = FALSE
 ) {
+  if (paired) {
+    data_nested <- .complete_paired_variable_data(data_nested)
+  }
+  if (identical(posthoc_method, "paired_t")) {
+    return(.paired_posthoc_test(data_nested, method = "t"))
+  }
+  if (identical(posthoc_method, "paired_wilcox")) {
+    return(.paired_posthoc_test(data_nested, method = "wilcox"))
+  }
+
   if (identical(.f, stats::aov)) {
     # Post-hoc for ANOVA/ANCOVA
     if (is.null(formula)) {
@@ -673,7 +797,13 @@ gly_kruskal <- function(
 }
 
 # Helper function to generate raw main test results
-.generate_raw_main_results <- function(data, .f, formula = NULL, ...) {
+.generate_raw_main_results <- function(
+  data,
+  .f,
+  formula = NULL,
+  ...,
+  paired = FALSE
+) {
   dots <- rlang::list2(...)
   disallowed_args <- intersect(names(dots), c("formula", "data"))
   if (length(disallowed_args) > 0) {
@@ -688,7 +818,15 @@ gly_kruskal <- function(
   main_test_raw <- data %>%
     dplyr::nest_by(.data$variable) %>%
     dplyr::mutate(
-      test_result = list(safe_f(formula, data = .data$data, !!!dots))
+      test_result = list(safe_f(
+        formula,
+        data = if (paired) {
+          .complete_paired_variable_data(.data$data)
+        } else {
+          .data$data
+        },
+        !!!dots
+      ))
     )
   main_test_list <- main_test_raw$test_result
   n_na <- sum(is.na(main_test_list))
@@ -705,13 +843,17 @@ gly_kruskal <- function(
   .f,
   p_adj_method,
   formula = NULL,
-  posthoc_method = "tukey"
+  posthoc_method = "tukey",
+  paired = FALSE
 ) {
-  p_fn <- ifelse(
-    identical(.f, stats::aov),
-    function(x) summary(x)[[1]][["Pr(>F)"]][1],
+  p_fn <- if (identical(.f, stats::aov)) {
+    function(x) {
+      result <- summary(x)[[1]]
+      result["group", "Pr(>F)"]
+    }
+  } else {
     function(x) x$p.value
-  )
+  }
   valid_main_test_mods <- main_test_raw[!is.na(main_test_raw)]
   main_test_p_vals <- purrr::map_dbl(valid_main_test_mods, p_fn)
   if (!is.null(p_adj_method)) {
@@ -727,7 +869,8 @@ gly_kruskal <- function(
           .data$data,
           .f,
           formula = formula,
-          posthoc_method = posthoc_method
+          posthoc_method = posthoc_method,
+          paired = paired
         ))
       ) %>%
       dplyr::select(all_of(c("variable", "posthoc_raw")))
@@ -744,6 +887,7 @@ gly_kruskal <- function(
   expr_mat,
   groups,
   covariates = NULL,
+  subjects = NULL,
   is_logged = FALSE
 ) {
   data <- expr_mat %>%
@@ -753,12 +897,19 @@ gly_kruskal <- function(
     tibble::as_tibble() %>%
     dplyr::mutate(group = groups)
 
+  if (!is.null(subjects)) {
+    data$subject <- subjects
+  }
+
   if (!is.null(covariates)) {
     covariate_tbl <- tibble::as_tibble(covariates)
     data <- dplyr::bind_cols(data, covariate_tbl)
   }
 
   keep_cols <- c("sample", "group")
+  if (!is.null(subjects)) {
+    keep_cols <- c(keep_cols, "subject")
+  }
   if (!is.null(covariates)) {
     keep_cols <- c(keep_cols, colnames(covariates))
   }
@@ -778,6 +929,80 @@ gly_kruskal <- function(
   data
 }
 
+# Keep complete subject blocks for one variable in a paired multi-group test
+.complete_paired_variable_data <- function(data) {
+  if (!"subject" %in% colnames(data)) {
+    return(data)
+  }
+
+  group_levels <- levels(data$group)
+  subject_levels <- unique(as.character(data$subject))
+  complete <- purrr::map_lgl(subject_levels, function(subject) {
+    subject_data <- data[as.character(data$subject) == subject, , drop = FALSE]
+    identical(
+      sort(unique(as.character(subject_data$group))),
+      sort(group_levels)
+    ) &&
+      all(is.finite(subject_data$log_value))
+  })
+  complete_subjects <- subject_levels[complete]
+  result <- data[
+    as.character(data$subject) %in% complete_subjects,
+    ,
+    drop = FALSE
+  ]
+  result$subject <- droplevels(result$subject)
+  result
+}
+
+# Run paired post-hoc tests with Holm correction
+.paired_posthoc_test <- function(data, method) {
+  checkmate::assert_choice(method, c("t", "wilcox"))
+  group_levels <- levels(data$group)
+  comparisons <- .make_comparisons(group_levels, reverse = TRUE)
+  p_values <- purrr::map_dbl(comparisons, function(comparison) {
+    test <- data$log_value[data$group == comparison[1]]
+    ref <- data$log_value[data$group == comparison[2]]
+    if (identical(method, "t")) {
+      tryCatch(
+        stats::t.test(test, ref, paired = TRUE)$p.value,
+        error = function(cnd) NA_real_
+      )
+    } else {
+      suppressWarnings(
+        stats::wilcox.test(test, ref, paired = TRUE, exact = FALSE)$p.value
+      )
+    }
+  })
+  adjusted <- stats::p.adjust(p_values, method = "holm")
+  ref_groups <- purrr::map_chr(comparisons, ~ .x[2])
+  test_groups <- purrr::map_chr(comparisons, ~ .x[1])
+
+  if (identical(method, "t")) {
+    return(data.frame(
+      contrast = paste(ref_groups, "-", test_groups),
+      ref_group = ref_groups,
+      test_group = test_groups,
+      p.unadj = p_values,
+      p.value = adjusted,
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  list(
+    res = data.frame(
+      Comparison = purrr::map_chr(
+        comparisons,
+        ~ paste(.x[1], "-", .x[2])
+      ),
+      P.unadj = p_values,
+      P.adj = adjusted,
+      stringsAsFactors = FALSE
+    ),
+    method = "holm"
+  )
+}
+
 # Helper function to convert main test raw results to tibble
 .tibblify_main_test_results <- function(
   main_test_raw,
@@ -785,7 +1010,8 @@ gly_kruskal <- function(
   p_adj_method,
   effect_size_method = NULL,
   expr_mat = NULL,
-  groups = NULL
+  groups = NULL,
+  effect_models = NULL
 ) {
   var_names <- names(main_test_raw)
   all_failed <- all(purrr::map_lgl(main_test_raw, rlang::is_na))
@@ -800,7 +1026,11 @@ gly_kruskal <- function(
       statistic = NA_real_,
       p_val = NA_real_
     )
-  } else if (all_failed && identical(.f, stats::kruskal.test)) {
+  } else if (
+    all_failed &&
+      (identical(.f, stats::kruskal.test) ||
+        identical(.f, stats::friedman.test))
+  ) {
     result_tbl <- tibble::tibble(
       variable = var_names,
       statistic = NA_real_,
@@ -857,7 +1087,8 @@ gly_kruskal <- function(
       result_tbl,
       effect_size_method,
       expr_mat,
-      groups
+      groups,
+      effect_models = effect_models
     )
   }
 
@@ -877,11 +1108,17 @@ gly_kruskal <- function(
   result_tbl,
   effect_size_method,
   expr_mat,
-  groups
+  groups,
+  effect_models = NULL
 ) {
   checkmate::assert_choice(
     effect_size_method,
-    c("eta_squared", "epsilon_squared")
+    c(
+      "eta_squared",
+      "epsilon_squared",
+      "partial_eta_squared",
+      "kendalls_w"
+    )
   )
 
   effect_size_values <- purrr::map2_dbl(
@@ -890,14 +1127,51 @@ gly_kruskal <- function(
     function(var_name, statistic) {
       if (identical(effect_size_method, "eta_squared")) {
         .calculate_eta_squared(expr_mat, groups, var_name)
-      } else {
+      } else if (identical(effect_size_method, "epsilon_squared")) {
         .calculate_epsilon_squared(expr_mat, groups, var_name, statistic)
+      } else if (identical(effect_size_method, "partial_eta_squared")) {
+        .calculate_partial_eta_squared(effect_models[[var_name]])
+      } else {
+        .calculate_kendalls_w(expr_mat, groups, var_name, statistic)
       }
     }
   )
 
   result_tbl$effect_size <- effect_size_values
   result_tbl
+}
+
+# Calculate partial eta-squared for the group term in a blocked ANOVA
+.calculate_partial_eta_squared <- function(model) {
+  if (rlang::is_na(model)) {
+    return(NA_real_)
+  }
+  anova_table <- summary(model)[[1]]
+  group_ss <- anova_table["group", "Sum Sq"]
+  residual_ss <- anova_table["Residuals", "Sum Sq"]
+  denominator <- group_ss + residual_ss
+  if (!is.finite(denominator) || denominator == 0) {
+    return(NA_real_)
+  }
+  group_ss / denominator
+}
+
+# Calculate Kendall's W for a Friedman test
+.calculate_kendalls_w <- function(expr_mat, groups, var_name, statistic) {
+  if (!is.finite(statistic)) {
+    return(NA_real_)
+  }
+  values <- purrr::map(
+    levels(groups),
+    ~ expr_mat[var_name, groups == .x]
+  )
+  complete <- Reduce(`&`, purrr::map(values, is.finite))
+  n_subjects <- sum(complete)
+  n_groups <- length(values)
+  if (n_subjects < 2 || n_groups < 2) {
+    return(NA_real_)
+  }
+  statistic / (n_subjects * (n_groups - 1))
 }
 
 #' Calculate eta-squared for one-way ANOVA
@@ -971,7 +1245,20 @@ gly_kruskal <- function(
   }
   posthoc_map <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
     if (identical(.f, stats::aov)) {
-      if (is.data.frame(raw_result) && "contrast" %in% colnames(raw_result)) {
+      if (
+        is.data.frame(raw_result) &&
+          all(c("ref_group", "test_group") %in% colnames(raw_result))
+      ) {
+        significant <- !is.na(raw_result$p.value) & raw_result$p.value < 0.05
+        sig_pairs <- stringr::str_c(
+          raw_result$ref_group[significant],
+          "_vs_",
+          raw_result$test_group[significant]
+        )
+      } else if (
+        is.data.frame(raw_result) &&
+          "contrast" %in% colnames(raw_result)
+      ) {
         sig_pairs <- raw_result$contrast[raw_result$p.value < 0.05]
         sig_pairs <- purrr::map_chr(sig_pairs, function(x) {
           parts <- stringr::str_split(x, "\\s*-\\s*", simplify = TRUE)
@@ -993,7 +1280,8 @@ gly_kruskal <- function(
       }
     } else {
       dunn_df <- raw_result$res
-      sig_pairs <- dunn_df$Comparison[dunn_df$P.adj < 0.05]
+      significant <- !is.na(dunn_df$P.adj) & dunn_df$P.adj < 0.05
+      sig_pairs <- dunn_df$Comparison[significant]
       # Raw Dunn results are standardized to "test - ref". Convert them back to
       # the package-facing "ref_vs_test" label used elsewhere.
       sig_pairs <- purrr::map_chr(sig_pairs, function(x) {
@@ -1027,7 +1315,21 @@ gly_kruskal <- function(
   # Convert each post-hoc result to tibble and combine
   result_list <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
     if (identical(.f, stats::aov)) {
-      if (is.data.frame(raw_result) && "contrast" %in% colnames(raw_result)) {
+      if (
+        is.data.frame(raw_result) &&
+          all(c("ref_group", "test_group") %in% colnames(raw_result))
+      ) {
+        tibble::tibble(
+          variable = var_name,
+          ref_group = raw_result$ref_group,
+          test_group = raw_result$test_group,
+          p_val = raw_result$p.unadj,
+          p_adj = raw_result$p.value
+        )
+      } else if (
+        is.data.frame(raw_result) &&
+          "contrast" %in% colnames(raw_result)
+      ) {
         comparison_parts <- stringr::str_split(
           raw_result$contrast,
           "\\s*-\\s*",
@@ -1037,7 +1339,11 @@ gly_kruskal <- function(
           variable = var_name,
           ref_group = comparison_parts[, 1],
           test_group = comparison_parts[, 2],
-          p_val = raw_result$p.value,
+          p_val = if ("p.unadj" %in% colnames(raw_result)) {
+            raw_result$p.unadj
+          } else {
+            raw_result$p.value
+          },
           p_adj = raw_result$p.value
         )
       } else {
@@ -1085,7 +1391,50 @@ gly_kruskal <- function(
   dplyr::bind_rows(result_list)
 }
 
-.add_fold_change <- function(post_hoc_test, expr_mat, groups) {
+.add_fold_change <- function(
+  post_hoc_test,
+  expr_mat,
+  groups,
+  paired_data = NULL
+) {
+  if (!is.null(paired_data)) {
+    if (nrow(post_hoc_test) == 0) {
+      post_hoc_test$log2fc <- numeric(0)
+      return(post_hoc_test)
+    }
+
+    fc_res <- purrr::map_dfr(
+      unique(post_hoc_test$variable),
+      function(variable) {
+        variable_data <- paired_data[
+          paired_data$variable == variable,
+          ,
+          drop = FALSE
+        ]
+        complete_data <- .complete_paired_variable_data(variable_data)
+        sample_idx <- match(complete_data$sample, colnames(expr_mat))
+        variable_expr <- expr_mat[variable, sample_idx, drop = FALSE]
+        variable_groups <- factor(
+          complete_data$group,
+          levels = levels(groups)
+        )
+
+        if (length(levels(groups)) == 2) {
+          .fc_2groups(variable_expr, variable_groups)
+        } else {
+          .fc_multi_groups(variable_expr, variable_groups)
+        }
+      }
+    )
+
+    join_by <- if (length(levels(groups)) == 2) {
+      "variable"
+    } else {
+      c("ref_group", "test_group", "variable")
+    }
+    return(dplyr::left_join(post_hoc_test, fc_res, by = join_by))
+  }
+
   if (length(levels(groups)) == 2) {
     fc_res <- .fc_2groups(expr_mat, groups)
     return(dplyr::left_join(post_hoc_test, fc_res, by = "variable"))

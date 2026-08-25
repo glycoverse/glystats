@@ -2,7 +2,7 @@
 % Please edit documentation in R/ttest.R
 \name{gly_ttest}
 \alias{gly_ttest}
-\title{Two-sample t-test for Differential Expression Analysis}
+\title{T-test for Differential Expression Analysis}
 \usage{
 gly_ttest(
   exp,
@@ -10,7 +10,8 @@ gly_ttest(
   p_adj_method = "BH",
   ref_group = NULL,
   add_info = TRUE,
-  ...
+  ...,
+  subject_col = NULL
 )
 }
 \arguments{
@@ -32,6 +33,10 @@ If NULL (default), the first level of the group factor is used as the reference.
 will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::t.test()}.}
+
+\item{subject_col}{An optional character string naming the subject identifier
+column in sample information. When supplied, samples are matched by subject
+and a paired t-test is performed.}
 }
 \value{
 A list with three elements:
@@ -47,7 +52,7 @@ A list with three elements:
 \item \code{parameter}: Degrees of freedom
 \item \code{conf_low}: Lower bound of 95\% confidence interval
 \item \code{conf_high}: Upper bound of 95\% confidence interval
-\item \code{effect_size}: Cohen's d
+\item \code{effect_size}: Cohen's d, or Cohen's dz for paired analyses
 \item \code{method}: Statistical method used
 \item \code{alternative}: Alternative hypothesis
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
@@ -59,13 +64,14 @@ The list has classes \code{glystats_ttest_res} and \code{glystats_res}.
 }
 }
 \description{
-Perform two-sample t-test for glycomics or glycoproteomics data.
-The function supports Student's t-test for comparing two groups.
+Perform independent or paired t-tests for glycomics or glycoproteomics data.
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
 The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. Exactly 2 groups are required in the grouping variable.
+In paired analyses, only subjects observed in both groups are used and
+\code{effect_size} is Cohen's \eqn{d_z} based on within-subject differences.
 }
 \seealso{
 \code{\link[stats:t.test]{stats::t.test()}}

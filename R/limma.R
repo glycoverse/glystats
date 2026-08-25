@@ -303,7 +303,12 @@ gly_limma <- function(
 }
 
 # Normalize covariates for .analyze_limma
-.normalize_covariates <- function(covariates, n_samples, sample_names = NULL) {
+.normalize_covariates <- function(
+  covariates,
+  n_samples,
+  sample_names = NULL,
+  allow_subject = FALSE
+) {
   if (is.null(covariates)) {
     return(NULL)
   }
@@ -344,7 +349,7 @@ gly_limma <- function(
       "covariates cannot include a column named {.field groups}; rename it."
     )
   }
-  if ("subject" %in% colnames(covariates)) {
+  if (!allow_subject && "subject" %in% colnames(covariates)) {
     cli::cli_abort(
       "covariates cannot include a column named {.field subject}; rename it."
     )

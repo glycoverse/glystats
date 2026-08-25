@@ -40,6 +40,33 @@ test_that("gly_ancova works with ancova method", {
   expect_named(result$raw_result, c("main_test", "post_hoc_test"))
 })
 
+test_that("gly_ancova accepts a covariate named subject", {
+  set.seed(456)
+  subjects <- seq_len(24)
+  groups <- factor(rep(c("A", "B"), times = 12), levels = c("A", "B"))
+  log_expression <-
+    3 +
+    1.5 * (groups == "B") +
+    0.02 * subjects +
+    stats::rnorm(24, sd = 0.05)
+  expression <- rbind(V1 = 2^log_expression - 1e-6)
+  colnames(expression) <- paste0("sample", subjects)
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = expression),
+    colData = S4Vectors::DataFrame(group = groups, subject = subjects)
+  )
+
+  result <- suppressMessages(gly_ancova(
+    exp,
+    covariate_cols = "subject",
+    add_info = FALSE,
+    p_adj_method = NULL
+  ))
+
+  expect_s3_class(result$raw_result$main_test$V1, "aov")
+  expect_true(any(is.finite(result$tidy_result$main_test$p_val)))
+})
+
 test_that("gly_ancova comparison direction is correct for 2 groups", {
   # Create a test experiment with 2 groups
   # group B has higher mean than group A
