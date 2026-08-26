@@ -969,6 +969,9 @@ gly_kruskal <- function(
         error = function(cnd) NA_real_
       )
     } else {
+      if (all(test == ref)) {
+        return(NA_real_)
+      }
       suppressWarnings(
         stats::wilcox.test(test, ref, paired = TRUE, exact = FALSE)$p.value
       )
