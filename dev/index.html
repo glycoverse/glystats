@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">glystats</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.11.2.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.12.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,7 +97,7 @@
 <h2 id="role-in-glycoverse">Role in <code>glycoverse</code>
 <a class="anchor" aria-label="anchor" href="#role-in-glycoverse"></a>
 </h2>
-<p><code>glystats</code> is the downstream analysis package in the <code>glycoverse</code> ecosystem. It provides statistical analysis functions for <code><a href="https://glycoverse.github.io/glyexp/reference/GlycomicSE.html" class="external-link">glyexp::GlycomicSE</a></code> and <code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE</a></code> objects. A common workflow is to use <a href="https://github.com/glycoverse/glyread" class="external-link">glyread</a> to import data, <a href="https://github.com/glycoverse/glyclean" class="external-link">glyclean</a> to preprocess data, and then <code>glystats</code> to perform statistical analysis.</p>
+<p><code>glystats</code> is the downstream analysis package in the <code>glycoverse</code> ecosystem. It provides statistical analysis functions for <code><a href="https://rdrr.io/pkg/glyexp/man/GlycomicSE.html" class="external-link">glyexp::GlycomicSE</a></code> and <code><a href="https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE</a></code> objects. A common workflow is to use <a href="https://github.com/glycoverse/glyread" class="external-link">glyread</a> to import data, <a href="https://github.com/glycoverse/glyclean" class="external-link">glyclean</a> to preprocess data, and then <code>glystats</code> to perform statistical analysis.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
@@ -112,7 +112,7 @@
 <span></span>
 <span><span class="co"># ROC analysis</span></span>
 <span><span class="va">roc_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gly_roc.html">gly_roc</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span></code></pre></div>
-<p>That’s it! These functions use <code>glycoverse</code> column conventions to load needed data and perform analysis. All functions start with <code>gly_</code> to leverage the auto-completion in RStudio. They accept a <code><a href="https://glycoverse.github.io/glyexp/reference/GlycomicSE.html" class="external-link">glyexp::GlycomicSE</a></code> or <code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE</a></code> object, and return analysis result as a tibble or a list of tibbles. See documentation for each function for more details.</p>
+<p>That’s it! These functions use <code>glycoverse</code> column conventions to load needed data and perform analysis. All functions start with <code>gly_</code> to leverage the auto-completion in RStudio. They accept a <code><a href="https://rdrr.io/pkg/glyexp/man/GlycomicSE.html" class="external-link">glyexp::GlycomicSE</a></code> or <code><a href="https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE</a></code> object, and return analysis result as a tibble or a list of tibbles. See documentation for each function for more details.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">

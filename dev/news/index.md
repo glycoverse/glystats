@@ -2,6 +2,10 @@
 
 ## glystats (development version)
 
+## glystats 0.12.0
+
+### New features
+
 - [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md),
   [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md),
   [`gly_ttest()`](https://glycoverse.github.io/glystats/dev/reference/gly_ttest.md),
@@ -10,6 +14,9 @@
   gain a `subject_col` argument for subject-matched paired analyses,
   including repeated-measures ANOVA, Friedman tests, paired post-hoc
   comparisons, and paired effect sizes. (#21)
+- [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md)
+  now fits formula-based, limma-moderated models with interactions,
+  adjustment variables, and named custom contrasts. (#16)
 - [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
   now constructs and tests correlated variable sets in one call, retains
   isolated variables as singleton sets, and tests structurally
@@ -17,13 +24,13 @@
   contrast is estimable and classical sample-size requirements are met,
   without distinguishing identical profiles; custom sets remain
   available through `sets`. (#20)
+
+### Minor improvements and bug fixes
+
 - Analysis functions now accept experiments containing all-`NA`
   variables without errors, returning `NA` feature-level statistics,
   loadings, or clusters and `NULL` raw models when no variables can be
   fitted. (#17)
-- [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md)
-  now fits formula-based, limma-moderated models with interactions,
-  adjustment variables, and named custom contrasts. (#16)
 
 ## glystats 0.11.2
 
@@ -34,7 +41,7 @@
 ## glystats 0.11.1
 
 - Statistical analysis functions now recognize legacy
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  [`glyexp::experiment()`](https://rdrr.io/pkg/glyexp/man/experiment.html)
   and current `SummarizedExperiment` containers consistently across
   supported `glyexp` versions.
 
@@ -44,7 +51,7 @@
 
 - All `gly_*_()` matrix and vector interfaces are removed. Use the
   corresponding `gly_*()` function with a
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  [`glyexp::experiment()`](https://rdrr.io/pkg/glyexp/man/experiment.html)
   or `SummarizedExperiment` object instead. (#12)
 - `gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`,
   `gly_enrich_wikipathways()`, `gly_enrich_do()`, `gly_enrich_ncg()`,
@@ -57,7 +64,7 @@
 - All `gly_*()` analysis functions and
   [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
   now accept `SummarizedExperiment` objects in addition to
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  [`glyexp::experiment()`](https://rdrr.io/pkg/glyexp/man/experiment.html)
   objects. (#14)
 
 ## glystats 0.10.1
@@ -244,7 +251,7 @@
 
 - The `universe` argument of `gly_enrich_go()`, `gly_enrich_kegg()`, and
   `gly_enrich_reactome()` accepts a
-  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
+  [`glyexp::experiment()`](https://rdrr.io/pkg/glyexp/man/experiment.html)
   object now.
 - Optimize message output of
   [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md).

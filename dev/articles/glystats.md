@@ -6,9 +6,9 @@ analysis, and more. `glystats` brings these methods together through one
 consistent, user-friendly interface.
 
 **A useful feature:** Every `glystats` analysis accepts
-[`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
+[`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
 and
-[`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
+[`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
 containers, the unified data interfaces used across the `glycoverse`
 ecosystem.
 
@@ -51,7 +51,7 @@ exp
 ```
 
 The result is a
-[`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
+[`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
 containing 12 samples and 263 glycoforms, which is enough to illustrate
 the main workflow.
 
