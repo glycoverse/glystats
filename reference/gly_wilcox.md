@@ -1,9 +1,8 @@
-# Wilcoxon rank-sum test for Differential Expression Analysis
+# Wilcoxon Test for Differential Expression Analysis
 
-Perform Wilcoxon rank-sum test (Mann-Whitney U test) for glycomics or
-glycoproteomics data. The function supports non-parametric comparison of
-two groups. P-values are adjusted for multiple testing using the method
-specified by `p_adj_method`.
+Perform Wilcoxon rank-sum or signed-rank tests for glycomics or
+glycoproteomics data. P-values are adjusted for multiple testing using
+the method specified by `p_adj_method`.
 
 ## Usage
 
@@ -14,7 +13,8 @@ gly_wilcox(
   p_adj_method = "BH",
   ref_group = NULL,
   add_info = TRUE,
-  ...
+  ...,
+  subject_col = NULL
 )
 ```
 
@@ -56,6 +56,12 @@ gly_wilcox(
   Additional arguments passed to
   [`stats::wilcox.test()`](https://rdrr.io/r/stats/wilcox.test.html).
 
+- subject_col:
+
+  An optional character string naming the subject identifier column in
+  sample information. When supplied, samples are matched by subject and
+  a paired Wilcoxon signed-rank test is performed.
+
 ## Value
 
 A list with three elements:
@@ -69,7 +75,8 @@ A list with three elements:
 
   - `p_val`: Raw p-value from Wilcoxon test
 
-  - `effect_size`: Rank-biserial correlation
+  - `effect_size`: Rank-biserial correlation, using matched pairs in
+    paired analyses
 
   - `method`: Statistical method used
 
@@ -90,7 +97,9 @@ A list with three elements:
 
 The function performs log2 transformation on the expression data
 (log2(x + 1e-6)) before statistical testing. Exactly 2 groups are
-required in the grouping variable.
+required in the grouping variable. In paired analyses, only subjects
+observed in both groups are used and `effect_size` is the matched-pairs
+rank-biserial correlation.
 
 ## See also
 

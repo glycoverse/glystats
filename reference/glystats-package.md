@@ -2,16 +2,16 @@
 
 Provides a unified toolbox for bioinformatics analyses of glycomics and
 glycoproteomics data. Implemented methods include differential testing
-(t-test, Wilcoxon rank-sum test, ANOVA, Kruskal–Wallis), multivariate
-modeling and visualization (PCA, t-SNE, UMAP), supervised learning
-(PLS-DA, OPLS-DA), clustering (k-means, hierarchical, consensus
-clustering), network analysis (weighted gene co-expression network
-analysis, WGCNA), survival modeling (Cox proportional hazards),
-correlation analysis, and ROC/AUC evaluation. All user-facing functions
-follow the gly\_\*() naming convention to facilitate auto-completion in
-RStudio. Analysis functions accept 'glyexp' 'GlycomicSE',
-'GlycoproteomicSE', and 'SummarizedExperiment' objects as their unified
-data interface.
+(independent and paired t-tests, Wilcoxon tests, one-way and
+repeated-measures ANOVA, Kruskal–Wallis and Friedman tests),
+formula-based moderated linear models, correlated-set Hotelling tests,
+multivariate modeling and visualization (PCA, t-SNE, UMAP), supervised
+learning (PLS-DA, OPLS-DA), clustering (k-means, hierarchical), survival
+modeling (Cox proportional hazards), correlation analysis, and ROC/AUC
+evaluation. All user-facing functions follow the gly\_\*() naming
+convention to facilitate auto-completion in RStudio. Analysis functions
+accept 'glyexp' 'GlycomicSE', 'GlycoproteomicSE', and
+'SummarizedExperiment' objects as their unified data interface.
 
 ## See also
 

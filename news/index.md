@@ -1,5 +1,35 @@
 # Changelog
 
+## glystats 0.12.0
+
+### New features
+
+- [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md),
+  [`gly_kruskal()`](https://glycoverse.github.io/glystats/reference/gly_kruskal.md),
+  [`gly_ttest()`](https://glycoverse.github.io/glystats/reference/gly_ttest.md),
+  and
+  [`gly_wilcox()`](https://glycoverse.github.io/glystats/reference/gly_wilcox.md)
+  gain a `subject_col` argument for subject-matched paired analyses,
+  including repeated-measures ANOVA, Friedman tests, paired post-hoc
+  comparisons, and paired effect sizes. (#21)
+- [`gly_linear_model()`](https://glycoverse.github.io/glystats/reference/gly_linear_model.md)
+  now fits formula-based, limma-moderated models with interactions,
+  adjustment variables, and named custom contrasts. (#16)
+- [`gly_set_test()`](https://glycoverse.github.io/glystats/reference/gly_set_test.md)
+  now constructs and tests correlated variable sets in one call, retains
+  isolated variables as singleton sets, and tests structurally
+  rank-deficient sets in their nonredundant subspace when the observed
+  contrast is estimable and classical sample-size requirements are met,
+  without distinguishing identical profiles; custom sets remain
+  available through `sets`. (#20)
+
+### Minor improvements and bug fixes
+
+- Analysis functions now accept experiments containing all-`NA`
+  variables without errors, returning `NA` feature-level statistics,
+  loadings, or clusters and `NULL` raw models when no variables can be
+  fitted. (#17)
+
 ## glystats 0.11.2
 
 - Documentation and vignettes now recommend `GlycomicSE` and

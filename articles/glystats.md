@@ -1,18 +1,20 @@
 # Getting Started with glystats
 
-When we talk about omics data analysis, we’re usually diving into
-exciting territories like differential expression analysis, PCA,
-survival analysis, and much more! 🧬 `glystats` brings all these
-powerful analyses together under one unified, user-friendly interface.
+When working with omics data, it is often useful to begin with a small
+set of reliable analyses: differential expression, PCA, survival
+analysis, and more. `glystats` brings these methods together through one
+consistent, user-friendly interface.
 
-**🎯 Key Feature:** Every `glystats` analysis accepts
-\[glyexp::GlycomicSE()\] and \[glyexp::GlycoproteomicSE()\] containers,
-the unified data interfaces at the heart of the `glycoverse` ecosystem
-💓
+**A useful feature:** Every `glystats` analysis accepts
+[`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
+and
+[`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
+containers, the unified data interfaces used across the `glycoverse`
+ecosystem.
 
-New to these containers? No worries! Check out the [glyexp
+If these containers are new to you, the [glyexp
 introduction](https://glycoverse.github.io/glyexp/articles/glyexp.html)
-first to get up to speed.
+provides a useful overview.
 
 ``` r
 
@@ -20,175 +22,24 @@ library(glystats)
 library(glyexp)
 #> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
 #> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
-library(SummarizedExperiment)
-#> Loading required package: MatrixGenerics
-#> Loading required package: matrixStats
-#> 
-#> Attaching package: 'MatrixGenerics'
-#> The following objects are masked from 'package:matrixStats':
-#> 
-#>     colAlls, colAnyNAs, colAnys, colAvgsPerRowSet, colCollapse,
-#>     colCounts, colCummaxs, colCummins, colCumprods, colCumsums,
-#>     colDiffs, colIQRDiffs, colIQRs, colLogSumExps, colMadDiffs,
-#>     colMads, colMaxs, colMeans2, colMedians, colMins, colOrderStats,
-#>     colProds, colQuantiles, colRanges, colRanks, colSdDiffs, colSds,
-#>     colSums2, colTabulates, colVarDiffs, colVars, colWeightedMads,
-#>     colWeightedMeans, colWeightedMedians, colWeightedSds,
-#>     colWeightedVars, rowAlls, rowAnyNAs, rowAnys, rowAvgsPerColSet,
-#>     rowCollapse, rowCounts, rowCummaxs, rowCummins, rowCumprods,
-#>     rowCumsums, rowDiffs, rowIQRDiffs, rowIQRs, rowLogSumExps,
-#>     rowMadDiffs, rowMads, rowMaxs, rowMeans2, rowMedians, rowMins,
-#>     rowOrderStats, rowProds, rowQuantiles, rowRanges, rowRanks,
-#>     rowSdDiffs, rowSds, rowSums2, rowTabulates, rowVarDiffs, rowVars,
-#>     rowWeightedMads, rowWeightedMeans, rowWeightedMedians,
-#>     rowWeightedSds, rowWeightedVars
-#> Loading required package: GenomicRanges
-#> Loading required package: stats4
-#> Loading required package: BiocGenerics
-#> Loading required package: generics
-#> 
-#> Attaching package: 'generics'
-#> The following objects are masked from 'package:base':
-#> 
-#>     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,
-#>     setequal, union
-#> 
-#> Attaching package: 'BiocGenerics'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     IQR, mad, sd, var, xtabs
-#> The following objects are masked from 'package:base':
-#> 
-#>     anyDuplicated, aperm, append, as.data.frame, basename, cbind,
-#>     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
-#>     get, grep, grepl, is.unsorted, lapply, Map, mapply, match, mget,
-#>     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
-#>     rbind, Reduce, rownames, sapply, saveRDS, table, tapply, unique,
-#>     unsplit, which.max, which.min
-#> Loading required package: S4Vectors
-#> 
-#> Attaching package: 'S4Vectors'
-#> The following object is masked from 'package:utils':
-#> 
-#>     findMatches
-#> The following objects are masked from 'package:base':
-#> 
-#>     expand.grid, I, unname
-#> Loading required package: IRanges
-#> Loading required package: Seqinfo
-#> Loading required package: Biobase
-#> Welcome to Bioconductor
-#> 
-#>     Vignettes contain introductory material; view with
-#>     'browseVignettes()'. To cite Bioconductor, see
-#>     'citation("Biobase")', and for packages 'citation("pkgname")'.
-#> 
-#> Attaching package: 'Biobase'
-#> The following object is masked from 'package:MatrixGenerics':
-#> 
-#>     rowMedians
-#> The following objects are masked from 'package:matrixStats':
-#> 
-#>     anyMissing, rowMedians
-#> The following object is masked from 'package:glyexp':
-#> 
-#>     samples
 library(glyread)
 library(glyclean)
-#> 
-#> Attaching package: 'glyclean'
-#> The following object is masked from 'package:S4Vectors':
-#> 
-#>     aggregate
-#> The following object is masked from 'package:stats':
-#> 
-#>     aggregate
 library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following object is masked from 'package:Biobase':
-#> 
-#>     combine
-#> The following objects are masked from 'package:GenomicRanges':
-#> 
-#>     intersect, setdiff, union
-#> The following object is masked from 'package:Seqinfo':
-#> 
-#>     intersect
-#> The following objects are masked from 'package:IRanges':
-#> 
-#>     collapse, desc, intersect, setdiff, slice, union
-#> The following objects are masked from 'package:S4Vectors':
-#> 
-#>     first, intersect, rename, setdiff, setequal, union
-#> The following objects are masked from 'package:BiocGenerics':
-#> 
-#>     combine, intersect, setdiff, setequal, union
-#> The following object is masked from 'package:generics':
-#> 
-#>     explain
-#> The following object is masked from 'package:matrixStats':
-#> 
-#>     count
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 ```
 
-## 🔍 Meet Your Data
+## Explore the data
 
-Let’s start by exploring our demo dataset:
+We will start by exploring the demo dataset:
 
 ``` r
 
 # Here we use `glyread` to read in the data and use `glyclean` to perform preprocessing
-exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |> auto_clean()
-#> ℹ Reading data
-#> ℹ Finding leader proteins
-#> ✔ Finding leader proteins [103ms]
-#> 
-#> ℹ Reading dataℹ Parsing glycan compositions and structures
-#> ✔ Parsing glycan compositions and structures [405ms]
-#> 
-#> ℹ Reading data✔ Reading data [956ms]
-#> 
-#> 
-#> ── Removing variables with too many missing values ──
-#> 
-#> ℹ Applying preset "discovery"...
-#> ℹ Total removed: 2 (0.67%) variables.
-#> ✔ Variable removal completed.
-#> 
-#> ── Normalizing data ──
-#> 
-#> ℹ Normalization method: `normalize_median()`
-#> ℹ Reason: default for "glycoproteomics".
-#> ✔ Normalization completed.
-#> 
-#> ── Imputing missing values ──
-#> 
-#> ℹ Imputation method: `impute_min_prob()`
-#> ℹ Reason: default for "glycoproteomics" with n_samples < 30.
-#> ✔ Imputation completed.
-#> 
-#> ── Aggregating data ──
-#> 
-#> ℹ Aggregating to "gf" level
-#> ✔ Aggregation completed.
-#> 
-#> ── Normalizing data again ──
-#> 
-#> ℹ Normalization method: `normalize_median()`
-#> ℹ Reason: default for "glycoproteomics".
-#> ✔ Normalization completed.
-#> 
-#> ── Correcting batch effects ──
-#> 
-#> ℹ Batch column batch not found in sample_info. Skipping batch correction.
-#> ✔ Batch correction completed.
+exp <- read_pglyco3_pglycoquant("glycopeptides.list", sample_info = "sample_info.csv") |>
+  auto_clean()
+```
+
+``` r
+
 exp
 #> 
 #> ── GlycoproteomicSE ────────────────────────────────────────────────────────────
@@ -199,8 +50,10 @@ exp
 #> ℹ Metadata fields: exp_type <chr>, glycan_type <chr>, quant_method <chr>
 ```
 
-Look at that! 🎉 We’ve got a \[glyexp::GlycoproteomicSE()\] packed with
-12 samples and 263 glycoforms. That’s plenty of data to work with!
+The result is a
+[`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
+containing 12 samples and 263 glycoforms, which is enough to illustrate
+the main workflow.
 
 ``` r
 
@@ -221,9 +74,9 @@ tibble::as_tibble(rowData(exp), rownames = "variable")
 #> # ℹ 215 more rows
 ```
 
-The variable information tibble is like a detailed ID card for each
-glycoform 🆔 - it contains everything you need to know: the protein,
-glycosylation site, and glycan structures.
+The variable information tibble contains descriptive information for
+each glycoform, including the protein, glycosylation site, and glycan
+structures.
 
 ``` r
 
@@ -245,25 +98,23 @@ tibble::as_tibble(colData(exp), rownames = "sample")
 #> 12 20241224-LXJ-Nglyco-C_3 C
 ```
 
-Our sample information tibble features a crucial “group” column 🏷️.
-Here’s the key: “H” = healthy, “M” = hepatitis, “Y” = cirrhosis, and “C”
-= hepatocellular carcinoma. This gives us a perfect setup for
-comparative analysis!
+The sample information tibble includes a `group` column. In this
+dataset, “H” represents healthy samples, “M” hepatitis, “Y” cirrhosis,
+and “C” hepatocellular carcinoma. We will use this column for the
+comparisons below.
 
-## 🚀 One Interface to Rule Them All
+## Use a consistent interface
 
-Here’s where `glystats` really shines! ✨ Every function follows a
-simple, intuitive naming pattern: `gly_` + analysis name. Think
+`glystats` uses a consistent naming pattern: `gly_` followed by the
+analysis name. For example,
 [`gly_ttest()`](https://glycoverse.github.io/glystats/reference/gly_ttest.md)
-for t-tests,
+runs a t-test and
 [`gly_pca()`](https://glycoverse.github.io/glystats/reference/gly_pca.md)
-for PCA, and so on.
+performs PCA.
 
-**Pro tip:** leverage RStudio’s auto-completion to discover all
-available functions! 💡
+RStudio’s auto-completion can help you discover the available functions.
 
-Let’s dive into action with an ANOVA analysis to identify differentially
-expressed glycoforms:
+We can use ANOVA to identify glycoforms that differ between groups:
 
 ``` r
 
@@ -273,20 +124,18 @@ anova_res <- gly_anova(exp)
 #> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
 ```
 
-Boom! 💥 Analysis complete in just one line!
 [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md)
-intelligently follows the `glycoverse` naming conventions, automatically
-detecting the “group” column in your sample info and fitting an ANOVA
-model for each glycoform.
+follows the `glycoverse` column conventions, detects the `group` column
+in the sample information, and fits an ANOVA model for each glycoform.
 
-## 📋 Understanding Your Results
+## Work with the results
 
-All `glystats` functions return a consistent, well-structured list with
-two key components:
+All `glystats` functions return a consistent list with two main
+components:
 
-- `tidy_result`: Clean, analysis-ready tibbles in tidy format 📊
-- `raw_result`: The original result objects from underlying statistical
-  functions 🔧
+- `tidy_result`: Analysis-ready tibbles in tidy format
+- `raw_result`: The original result objects from the underlying
+  statistical functions
 
 For
 [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md),
@@ -318,11 +167,10 @@ get_tidy_result(anova_res, "main_test")
 #> #   effect_size <dbl>, post_hoc <chr>
 ```
 
-Notice something cool? 😎
 [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md)
-thoughtfully adds back all the descriptive columns from your variable
-tibble. Want to control this behavior? Just use the `add_info`
-parameter!
+also adds the descriptive columns from the variable tibble to the tidy
+results. Use the `add_info` parameter when you want to control this
+behavior.
 
 The `raw_result` houses two lists of models - one for the main test, one
 for post hoc comparisons:
@@ -336,7 +184,7 @@ names(get_raw_result(anova_res))
 [`get_tidy_result()`](https://glycoverse.github.io/glystats/reference/get_tidy_result.md)
 and
 [`get_raw_result()`](https://glycoverse.github.io/glystats/reference/get_tidy_result.md)
-are useful to be used in pipes:
+can also be used in a pipe:
 
 ``` r
 
@@ -365,12 +213,12 @@ exp |>
 #> #   effect_size <dbl>, post_hoc <chr>
 ```
 
-## 🎪 The Complete Analytical Arsenal
+## Available analyses
 
-Ready to explore the full power of `glystats`? Here’s your complete
-toolkit for glycomics and glycoproteomics data analysis:
+The package includes the following analyses for glycomics and
+glycoproteomics data:
 
-- **🔬 Differential Expression Analysis:**
+- **Differential expression analysis:**
   - [`gly_ttest()`](https://glycoverse.github.io/glystats/reference/gly_ttest.md):
     Two-sample t-test
   - [`gly_wilcox()`](https://glycoverse.github.io/glystats/reference/gly_wilcox.md):
@@ -381,9 +229,15 @@ toolkit for glycomics and glycoproteomics data analysis:
     Kruskal-Wallis rank sum test
   - [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md):
     Linear models for microarray data (limma)
+  - [`gly_ancova()`](https://glycoverse.github.io/glystats/reference/gly_ancova.md):
+    ANCOVA (Analysis of Covariance)
+  - [`gly_linear_model()`](https://glycoverse.github.io/glystats/reference/gly_linear_model.md):
+    Formula-based moderated linear models
+  - [`gly_set_test()`](https://glycoverse.github.io/glystats/reference/gly_set_test.md):
+    correlated variable-set testing
   - [`gly_fold_change()`](https://glycoverse.github.io/glystats/reference/gly_fold_change.md):
     Calculate fold change
-- **📐 Dimensionality Reduction:**
+- **Dimensionality reduction:**
   - [`gly_pca()`](https://glycoverse.github.io/glystats/reference/gly_pca.md):
     Principal component analysis
   - [`gly_tsne()`](https://glycoverse.github.io/glystats/reference/gly_tsne.md):
@@ -394,41 +248,16 @@ toolkit for glycomics and glycoproteomics data analysis:
     Orthogonal partial least squares discriminant analysis (OPLS-DA)
   - [`gly_plsda()`](https://glycoverse.github.io/glystats/reference/gly_plsda.md):
     Partial least squares discriminant analysis (PLS-DA)
-- **🧩 Clustering:**
+- **Clustering:**
   - [`gly_kmeans()`](https://glycoverse.github.io/glystats/reference/gly_kmeans.md):
     K-means clustering
   - [`gly_hclust()`](https://glycoverse.github.io/glystats/reference/gly_hclust.md):
     Hierarchical clustering
-- **⏱️ Survival Analysis:**
+- **Survival analysis:**
   - [`gly_cox()`](https://glycoverse.github.io/glystats/reference/gly_cox.md):
     Cox proportional hazards model
-- **🔧 Additional Tools:**
+- **Additional tools:**
   - [`gly_cor()`](https://glycoverse.github.io/glystats/reference/gly_cor.md):
     Correlation analysis
   - [`gly_roc()`](https://glycoverse.github.io/glystats/reference/gly_roc.md):
     Receiver operating characteristic (ROC) analysis
-
-## 🚀 What’s Next on Your Journey?
-
-Ready to dive deeper into the `glycoverse`? Here’s your roadmap to
-success:
-
-1.  **📥 Data Import:** Start with
-    [glyread](https://glycoverse.github.io/glyread/articles/glyread.html)
-    to import your data into
-    [`glyexp::GlycomicSE`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
-    or
-    [`glyexp::GlycoproteomicSE`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
-    objects
-
-2.  **🧹 Data Preprocessing:** Use
-    [glyclean](https://glycoverse.github.io/glyclean/articles/glyclean.html)
-    to polish and prepare your data for analysis
-
-3.  **📊 Statistical Analysis:** You’re here! Use `glystats` to unlock
-    powerful insights from your glycomics data
-
-4.  **🎨 Visualization:** Stay tuned! We’re crafting an amazing `glyvis`
-    package for stunning data visualizations
-
-Happy analyzing! 🎉✨

@@ -10,7 +10,8 @@
 - [`gly_ancova()`](https://glycoverse.github.io/glystats/reference/gly_ancova.md)
   : Analysis of Covariance (ANCOVA) for Differential Expression Analysis
 - [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md)
-  : One-way ANOVA for Differential Expression Analysis
+  : One-way or Repeated-Measures ANOVA for Differential Expression
+  Analysis
 - [`gly_cor()`](https://glycoverse.github.io/glystats/reference/gly_cor.md)
   : Correlation Analysis for Glycomics and Glycoproteomics Data
 - [`gly_cox()`](https://glycoverse.github.io/glystats/reference/gly_cox.md)
@@ -22,9 +23,11 @@
 - [`gly_kmeans()`](https://glycoverse.github.io/glystats/reference/gly_kmeans.md)
   : K-means Clustering for Glycomics and Glycoproteomics Data
 - [`gly_kruskal()`](https://glycoverse.github.io/glystats/reference/gly_kruskal.md)
-  : Kruskal-Wallis test for Differential Expression Analysis
+  : Kruskal-Wallis or Friedman Test for Differential Expression Analysis
 - [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
   : Linear Models for Differential Expression Analysis using limma
+- [`gly_linear_model()`](https://glycoverse.github.io/glystats/reference/gly_linear_model.md)
+  : Formula-based Linear Models
 - [`gly_oplsda()`](https://glycoverse.github.io/glystats/reference/gly_oplsda.md)
   : Orthogonal Partial Least Squares Discriminant Analysis (OPLS-DA)
 - [`gly_pca()`](https://glycoverse.github.io/glystats/reference/gly_pca.md)
@@ -33,11 +36,13 @@
   : Partial Least Squares Discriminant Analysis (PLS-DA)
 - [`gly_roc()`](https://glycoverse.github.io/glystats/reference/gly_roc.md)
   : ROC Analysis for Glycomics and Glycoproteomics Data
+- [`gly_set_test()`](https://glycoverse.github.io/glystats/reference/gly_set_test.md)
+  : Construct and Test Correlated Variable Sets
 - [`gly_tsne()`](https://glycoverse.github.io/glystats/reference/gly_tsne.md)
   : t-Distributed Stochastic Neighbor Embedding (t-SNE)
 - [`gly_ttest()`](https://glycoverse.github.io/glystats/reference/gly_ttest.md)
-  : Two-sample t-test for Differential Expression Analysis
+  : T-test for Differential Expression Analysis
 - [`gly_umap()`](https://glycoverse.github.io/glystats/reference/gly_umap.md)
   : Uniform Manifold Approximation and Projection (UMAP)
 - [`gly_wilcox()`](https://glycoverse.github.io/glystats/reference/gly_wilcox.md)
-  : Wilcoxon rank-sum test for Differential Expression Analysis
+  : Wilcoxon Test for Differential Expression Analysis
