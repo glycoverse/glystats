@@ -12,13 +12,17 @@
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the PCA results are returned.
 #' @param ... Additional arguments passed to `prcomp()`.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log(x + 1)` before analysis. Default is
+#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @section Required packages:
 #' This function only uses base R packages and does not require additional dependencies.
 #'
 #' @details
-#' The function performs log transformation on the expression data (log(x + 1)) before
-#' PCA analysis.
+#' By default, the function performs log transformation on the expression data
+#' (`log(x + 1)`) before PCA analysis. Set `log_transform = FALSE` to use the
+#' expression values as supplied, for example when they are already log-transformed.
 #'
 #' @return A list containing:
 #'  - `tidy_result`: A list of tibbles with PCA results:
@@ -39,7 +43,15 @@
 #'  - `meta_data`: A list containing metadata from the input experiment
 #' @seealso [stats::prcomp()]
 #' @export
-gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
+gly_pca <- function(
+  exp,
+  center = TRUE,
+  scale = TRUE,
+  add_info = TRUE,
+  ...,
+  log_transform = TRUE
+) {
+  checkmate::assert_flag(log_transform)
   .assert_data_container(exp)
   checkmate::assert_logical(add_info, len = 1)
 
@@ -47,7 +59,13 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
   expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
-  result <- .analyze_pca(expr_mat, center, scale, ...)
+  result <- .analyze_pca(
+    expr_mat,
+    center,
+    scale,
+    ...,
+    log_transform = log_transform
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -65,7 +83,14 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
 #' This helper receives components extracted from a validated experiment.
 #'
 #' @noRd
-.analyze_pca <- function(expr_mat, center = TRUE, scale = TRUE, ...) {
+.analyze_pca <- function(
+  expr_mat,
+  center = TRUE,
+  scale = TRUE,
+  ...,
+  log_transform = TRUE
+) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_logical(center, len = 1)
@@ -103,7 +128,10 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
   }
 
   # Prepare data for PCA (samples as rows, variables as columns)
-  mat <- log(t(expr_mat) + 1)
+  mat <- t(expr_mat)
+  if (log_transform) {
+    mat <- log(mat + 1)
+  }
 
   # If scaling, check for constant columns (zero variance)
   # These will cause prcomp to fail with "cannot rescale a constant/zero column to unit variance"
@@ -114,7 +142,7 @@ gly_pca <- function(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...) {
     if (length(constant_cols) > 0) {
       constant_names <- colnames(mat)[constant_cols]
       cli::cli_warn(c(
-        "Removed {length(constant_cols)} constant column{?s} before PCA (zero variance after log transformation).",
+        "Removed {length(constant_cols)} constant column{?s} before PCA (zero variance in the analysis data).",
         "i" = "Affected variable{?s}: {.val {constant_names}}"
       ))
       mat <- mat[, -constant_cols, drop = FALSE]

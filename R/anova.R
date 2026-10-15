@@ -20,9 +20,18 @@
 #'   column in sample information. When supplied, a subject-blocked
 #'   repeated-measures ANOVA is performed.
 #'
+#' @param log_transform A single non-missing logical value. If `TRUE` (default),
+#'   transform expression values using `log2(x + 1e-6)` before analysis. If
+#'   `FALSE`, use the supplied values unchanged, for example for already
+#'   log-transformed data.
+#'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-#' statistical testing. At least 2 groups are required in the grouping variable.
+#' Tests and effect sizes use the selected analysis scale. Reported fold changes
+#' continue to use ratios of group means from the original supplied values.
+#'
+#' By default, expression data are transformed using `log2(x + 1e-6)` before
+#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
+#' At least 2 groups are required in the grouping variable.
 #' In paired analyses, only subjects observed in every group are used, with at
 #' most one sample per subject and group. The reported effect size is partial
 #' eta-squared for the group term.
@@ -69,10 +78,12 @@ gly_anova <- function(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  subject_col = NULL
+  subject_col = NULL,
+  log_transform = TRUE
 ) {
   # Validate inputs
   .assert_data_container(exp)
+  checkmate::assert_flag(log_transform)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -103,7 +114,8 @@ gly_anova <- function(
     groups,
     p_adj_method,
     ...,
-    subjects = subjects
+    subjects = subjects,
+    log_transform = log_transform
   )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
@@ -125,8 +137,10 @@ gly_anova <- function(
   groups,
   p_adj_method = "BH",
   ...,
-  subjects = NULL
+  subjects = NULL,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
@@ -151,7 +165,7 @@ gly_anova <- function(
   groups <- design$groups
 
   # Prepare data
-  log_expr_mat <- .log_transform_expr_mat(expr_mat)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   data <- .prepare_multi_group_data(
     log_expr_mat,
     groups,
@@ -253,9 +267,18 @@ gly_anova <- function(
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param ... Additional arguments passed to `stats::aov()`.
 #'
+#' @param log_transform A single non-missing logical value. If `TRUE` (default),
+#'   transform expression values using `log2(x + 1e-6)` before analysis. If
+#'   `FALSE`, use the supplied values unchanged, for example for already
+#'   log-transformed data.
+#'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-#' statistical testing. At least 2 groups and at least 1 covariate are required.
+#' Tests and effect sizes use the selected analysis scale. Reported fold changes
+#' continue to use ratios of group means from the original supplied values.
+#'
+#' By default, expression data are transformed using `log2(x + 1e-6)` before
+#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
+#' At least 2 groups and at least 1 covariate are required.
 #'
 #' For any variable failed to fit a `stats::aov()` model,
 #' NAs will be assigned to the results in both main test and post-hoc test.
@@ -298,10 +321,12 @@ gly_ancova <- function(
   covariate_cols = NULL,
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
   # Validate inputs
   .assert_data_container(exp)
+  checkmate::assert_flag(log_transform)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -340,7 +365,14 @@ gly_ancova <- function(
   }
 
   # Run the internal computation
-  result <- .analyze_ancova(expr_mat, groups, covariates, p_adj_method, ...)
+  result <- .analyze_ancova(
+    expr_mat,
+    groups,
+    covariates,
+    p_adj_method,
+    ...,
+    log_transform = log_transform
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -359,8 +391,10 @@ gly_ancova <- function(
   groups,
   covariates,
   p_adj_method = "BH",
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Check package availability
   rlang::check_installed("emmeans")
 
@@ -395,7 +429,7 @@ gly_ancova <- function(
   }
 
   # Prepare data
-  log_expr_mat <- .log_transform_expr_mat(expr_mat)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   data <- .prepare_multi_group_data(
     log_expr_mat,
     groups,
@@ -485,9 +519,18 @@ gly_ancova <- function(
 #' @section Required packages:
 #' Unpaired analyses require the `FSA` package for Dunn's post-hoc test.
 #'
+#' @param log_transform A single non-missing logical value. If `TRUE` (default),
+#'   transform expression values using `log2(x + 1e-6)` before analysis. If
+#'   `FALSE`, use the supplied values unchanged, for example for already
+#'   log-transformed data.
+#'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-#' statistical testing. At least 2 groups are required in the grouping variable.
+#' Tests and effect sizes use the selected analysis scale. Reported fold changes
+#' continue to use ratios of group means from the original supplied values.
+#'
+#' By default, expression data are transformed using `log2(x + 1e-6)` before
+#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
+#' At least 2 groups are required in the grouping variable.
 #' In paired analyses, only subjects observed in every group are used, with at
 #' most one sample per subject and group. The reported effect size is Kendall's
 #' \eqn{W}.
@@ -534,10 +577,12 @@ gly_kruskal <- function(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  subject_col = NULL
+  subject_col = NULL,
+  log_transform = TRUE
 ) {
   # Validate inputs
   .assert_data_container(exp)
+  checkmate::assert_flag(log_transform)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -568,7 +613,8 @@ gly_kruskal <- function(
     groups,
     p_adj_method,
     ...,
-    subjects = subjects
+    subjects = subjects,
+    log_transform = log_transform
   )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
@@ -590,8 +636,10 @@ gly_kruskal <- function(
   groups,
   p_adj_method = "BH",
   ...,
-  subjects = NULL
+  subjects = NULL,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
@@ -619,7 +667,7 @@ gly_kruskal <- function(
   groups <- design$groups
 
   # Prepare data
-  log_expr_mat <- .log_transform_expr_mat(expr_mat)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   data <- .prepare_multi_group_data(
     log_expr_mat,
     groups,
@@ -888,8 +936,14 @@ gly_kruskal <- function(
   groups,
   covariates = NULL,
   subjects = NULL,
-  is_logged = FALSE
+  is_logged = FALSE,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
+  if (!is_logged) {
+    expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
+  }
+
   data <- expr_mat %>%
     t() %>%
     as.data.frame() %>%
@@ -920,11 +974,6 @@ gly_kruskal <- function(
       names_to = "variable",
       values_to = "log_value"
     )
-
-  if (!is_logged) {
-    data <- data %>%
-      dplyr::mutate(log_value = log2(.data$log_value + 1e-6))
-  }
 
   data
 }

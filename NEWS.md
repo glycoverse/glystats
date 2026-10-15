@@ -1,5 +1,7 @@
 # glystats (development version)
 
+* All expression-analysis functions gain a validated `log_transform` argument. Existing transformation defaults, log bases, and pseudocounts are preserved; Cox, ROC, and fold-change default to `FALSE`. Set construction and testing share the selected scale. Optional fold-change transformation reports differences of log2 means (geometric-mean fold changes).
+
 # glystats 0.12.0
 
 ## New features

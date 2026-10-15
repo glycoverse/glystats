@@ -11,6 +11,14 @@
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'  will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.
 #' @param ... Additional arguments passed to `Rtsne::Rtsne()`.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log(x + 1)` before analysis. Default is
+#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
+#'
+#' @details
+#' By default, expression values are transformed using `log(x + 1)` before
+#' analysis. Set `log_transform = FALSE` to use the expression values as supplied,
+#' for example when they are already log-transformed.
 #'
 #' @section Required packages:
 #' This function requires the `Rtsne` package to be installed for t-SNE analysis.
@@ -25,12 +33,26 @@
 #' The list has classes `glystats_tsne_res` and `glystats_res`.
 #' @seealso [Rtsne::Rtsne()]
 #' @export
-gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
+gly_tsne <- function(
+  exp,
+  dims = 2,
+  perplexity = 30,
+  add_info = TRUE,
+  ...,
+  log_transform = TRUE
+) {
+  checkmate::assert_flag(log_transform)
   .assert_data_container(exp)
   checkmate::assert_logical(add_info, len = 1)
 
   expr_mat <- .get_expr_mat(exp)
-  result <- .analyze_tsne(expr_mat, dims, perplexity, ...)
+  result <- .analyze_tsne(
+    expr_mat,
+    dims,
+    perplexity,
+    ...,
+    log_transform = log_transform
+  )
 
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
@@ -49,7 +71,14 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
 #' This helper receives components extracted from a validated experiment.
 #'
 #' @noRd
-.analyze_tsne <- function(expr_mat, dims = 2, perplexity = 30, ...) {
+.analyze_tsne <- function(
+  expr_mat,
+  dims = 2,
+  perplexity = 30,
+  ...,
+  log_transform = TRUE
+) {
+  checkmate::assert_flag(log_transform)
   rlang::check_installed("Rtsne")
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
@@ -82,7 +111,9 @@ gly_tsne <- function(exp, dims = 2, perplexity = 30, add_info = TRUE, ...) {
   }
 
   # Apply log transformation (common for expression data)
-  mat <- log(mat + 1)
+  if (log_transform) {
+    mat <- log(mat + 1)
+  }
 
   # Perform t-SNE
   dots <- rlang::list2(...)

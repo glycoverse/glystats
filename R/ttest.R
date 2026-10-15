@@ -20,9 +20,18 @@
 #'   column in sample information. When supplied, samples are matched by subject
 #'   and a paired t-test is performed.
 #'
+#' @param log_transform A single non-missing logical value. If `TRUE` (default),
+#'   transform expression values using `log2(x + 1e-6)` before analysis. If
+#'   `FALSE`, use the supplied values unchanged, for example for already
+#'   log-transformed data.
+#'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-#' statistical testing. Exactly 2 groups are required in the grouping variable.
+#' Tests and effect sizes use the selected analysis scale. Reported fold changes
+#' continue to use ratios of group means from the original supplied values.
+#'
+#' By default, expression data are transformed using `log2(x + 1e-6)` before
+#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
+#' Exactly 2 groups are required in the grouping variable.
 #' In paired analyses, only subjects observed in both groups are used and
 #' `effect_size` is Cohen's \eqn{d_z} based on within-subject differences.
 #'
@@ -54,10 +63,12 @@ gly_ttest <- function(
   ref_group = NULL,
   add_info = TRUE,
   ...,
-  subject_col = NULL
+  subject_col = NULL,
+  log_transform = TRUE
 ) {
   # Validate inputs
   .assert_data_container(exp)
+  checkmate::assert_flag(log_transform)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -90,7 +101,8 @@ gly_ttest <- function(
     p_adj_method,
     ref_group,
     ...,
-    subjects = subjects
+    subjects = subjects,
+    log_transform = log_transform
   )
 
   # Process results with add_info logic
@@ -117,8 +129,10 @@ gly_ttest <- function(
   p_adj_method = "BH",
   ref_group = NULL,
   ...,
-  subjects = NULL
+  subjects = NULL,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
@@ -143,7 +157,8 @@ gly_ttest <- function(
     p_adj_method,
     ref_group,
     ...,
-    subjects = subjects
+    subjects = subjects,
+    log_transform = log_transform
   )
 
   # Add S3 class
@@ -173,9 +188,18 @@ gly_ttest <- function(
 #'   column in sample information. When supplied, samples are matched by subject
 #'   and a paired Wilcoxon signed-rank test is performed.
 #'
+#' @param log_transform A single non-missing logical value. If `TRUE` (default),
+#'   transform expression values using `log2(x + 1e-6)` before analysis. If
+#'   `FALSE`, use the supplied values unchanged, for example for already
+#'   log-transformed data.
+#'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-#' statistical testing. Exactly 2 groups are required in the grouping variable.
+#' Tests and effect sizes use the selected analysis scale. Reported fold changes
+#' continue to use ratios of group means from the original supplied values.
+#'
+#' By default, expression data are transformed using `log2(x + 1e-6)` before
+#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
+#' Exactly 2 groups are required in the grouping variable.
 #' In paired analyses, only subjects observed in both groups are used and
 #' `effect_size` is the matched-pairs rank-biserial correlation.
 #'
@@ -210,10 +234,12 @@ gly_wilcox <- function(
   ref_group = NULL,
   add_info = TRUE,
   ...,
-  subject_col = NULL
+  subject_col = NULL,
+  log_transform = TRUE
 ) {
   # Validate inputs
   .assert_data_container(exp)
+  checkmate::assert_flag(log_transform)
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -246,7 +272,8 @@ gly_wilcox <- function(
     p_adj_method,
     ref_group,
     ...,
-    subjects = subjects
+    subjects = subjects,
+    log_transform = log_transform
   )
 
   # Process results with add_info logic
@@ -273,8 +300,10 @@ gly_wilcox <- function(
   p_adj_method = "BH",
   ref_group = NULL,
   ...,
-  subjects = NULL
+  subjects = NULL,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
@@ -299,7 +328,8 @@ gly_wilcox <- function(
     p_adj_method,
     ref_group,
     ...,
-    subjects = subjects
+    subjects = subjects,
+    log_transform = log_transform
   )
 
   # Add S3 class
@@ -315,7 +345,8 @@ gly_wilcox <- function(
   p_adj_method,
   ref_group,
   ...,
-  subjects = NULL
+  subjects = NULL,
+  log_transform = TRUE
 ) {
   # Reorder groups if ref_group is specified
   if (!is.null(ref_group)) {
@@ -331,7 +362,7 @@ gly_wilcox <- function(
   expr_mat <- design$expr_mat
   groups <- design$groups
 
-  log_expr_mat <- .log_transform_expr_mat(expr_mat)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
 
   mod_list <- .gly_dea_2groups_raw(
     log_expr_mat,
@@ -692,9 +723,14 @@ gly_wilcox <- function(
 #'
 #' @param expr_mat A numeric matrix with variables as rows and samples as columns.
 #'
-#' @return A numeric matrix with log2(x + 1e-6) values.
+#' @param log_transform Whether to apply the log2 transformation.
+#' @return A matrix with log2(x + 1e-6) values, or the unchanged input.
 #' @noRd
-.log_transform_expr_mat <- function(expr_mat) {
+.log_transform_expr_mat <- function(expr_mat, log_transform = TRUE) {
+  checkmate::assert_flag(log_transform)
+  if (!log_transform) {
+    return(expr_mat)
+  }
   log2(expr_mat + 1e-6)
 }
 

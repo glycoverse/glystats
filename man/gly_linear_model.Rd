@@ -10,7 +10,8 @@ gly_linear_model(
   contrasts = NULL,
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 }
 \arguments{
@@ -33,6 +34,11 @@ available methods. If \code{NULL}, no adjustment is performed.}
 from the experiment is added to the tidy result.}
 
 \item{...}{Additional arguments passed to \code{\link[limma:lmFit]{limma::lmFit()}}.}
+
+\item{log_transform}{A single non-missing logical value. If \code{TRUE} (default),
+transform expression values using \code{log2(x + 1e-6)} before analysis. If
+\code{FALSE}, use the supplied values unchanged, for example for already
+log-transformed data.}
 }
 \value{
 A list with classes \code{glystats_linear_model_res} and \code{glystats_res}
@@ -57,7 +63,10 @@ contrasts. \code{\link[=gly_limma]{gly_limma()}} is a dedicated wrapper for comm
 expression analysis tasks, with convenient group, covariate, subject, and
 pairwise-comparison arguments.
 
-Expression values are transformed using \code{log2(x + 1e-6)} before modeling.
+By default, expression values are transformed using \code{log2(x + 1e-6)} before
+modeling. Set \code{log_transform = FALSE} to use the supplied values unchanged.
+Coefficient estimates and average expression are reported on the selected
+analysis scale.
 When \code{contrasts} is \code{NULL}, all non-intercept coefficients are tested. When
 contrasts are supplied, only the named contrasts are returned.
 

@@ -28,10 +28,20 @@
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param ... Additional arguments passed to `limma::lmFit()`.
 #'
+#' @param log_transform A single non-missing logical value. If `TRUE` (default),
+#'   transform expression values using `log2(x + 1e-6)` before analysis. If
+#'   `FALSE`, use the supplied values unchanged, for example for already
+#'   log-transformed data.
+#'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-#' statistical testing. The analysis uses linear models with empirical Bayes moderation
+#' By default, expression data are transformed using `log2(x + 1e-6)` before
+#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
+#' The analysis uses linear models with empirical Bayes moderation
 #' to improve statistical power, especially for small sample sizes.
+#'
+#' The `log2fc` column always contains the fitted model contrast. When
+#' `log_transform = FALSE`, its units are those of the supplied expression data;
+#' it is a log2 fold change only when those values are already on a log2 scale.
 #'
 #' For two or more groups, all pairwise comparisons are automatically generated
 #' (one contrast for two groups) and performed using contrast matrices unless
@@ -54,7 +64,8 @@
 #' @returns A list with three elements:
 #'  - `tidy_result`: A tibble with limma results containing the following columns:
 #'    - `variable`: Variable name
-#'    - `log2fc`: Log2 fold change
+#'    - `log2fc`: Model contrast on the analysis scale (log2 fold change when
+#'      expression values are on a log2 scale)
 #'    - `AveExpr`: Average expression level
 #'    - `t`: t-statistic
 #'    - `p_val`: Raw p-value
@@ -76,10 +87,12 @@ gly_limma <- function(
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
   # Validate inputs
   .assert_data_container(exp)
+  checkmate::assert_flag(log_transform)
   checkmate::assert_string(group_col)
   if (length(covariate_cols) == 0) {
     covariate_cols <- NULL
@@ -138,7 +151,8 @@ gly_limma <- function(
     contrasts,
     covariates,
     subjects = subjects,
-    ...
+    ...,
+    log_transform = log_transform
   )
 
   # Process results with add_info logic
@@ -167,8 +181,10 @@ gly_limma <- function(
   contrasts = NULL,
   covariates = NULL,
   subjects = NULL,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
@@ -211,7 +227,8 @@ gly_limma <- function(
     contrasts,
     covariates,
     subjects,
-    ...
+    ...,
+    log_transform = log_transform
   )
 
   result
@@ -429,13 +446,14 @@ gly_limma <- function(
   contrasts = NULL,
   covariates = NULL,
   subjects = NULL,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
   group_levels <- levels(groups)
   n_groups <- length(group_levels)
 
   # Prepare data for limma
-  log_expr_mat <- log2(expr_mat + 1e-6)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   row_has_data <- rowSums(is.finite(log_expr_mat)) > 0
   missing_vars <- character(0)
   if (!all(row_has_data)) {

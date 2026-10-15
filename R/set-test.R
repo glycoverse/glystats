@@ -32,8 +32,13 @@
 #'   which automatic sets are constructed, such as `c("protein",
 #'   "protein_site")`.
 #'
+#' @param log_transform A single non-missing logical. If `TRUE` (default),
+#'   apply `log2(x + 1e-6)` for both automatic set construction and testing.
+#'   If `FALSE`, use supplied values without transformation, including values
+#'   that have already been transformed. Estimates are on the selected scale.
+#'
 #' @details
-#' Expression values are transformed using `log2(x + 1e-6)`. The first factor
+#' By default, expression values are transformed using `log2(x + 1e-6)`. The first factor
 #' level of `group_col` is the reference group and the second is the test group.
 #' The estimate is therefore `test - reference`.
 #'
@@ -91,9 +96,11 @@ gly_set_test <- function(
   threshold = 0.9,
   correlation = "pearson",
   clustering = "connected",
-  within = NULL
+  within = NULL,
+  log_transform = TRUE
 ) {
   .assert_data_container(exp)
+  checkmate::assert_flag(log_transform)
   checkmate::assert_string(group_col)
   checkmate::assert_string(subject_col, null.ok = TRUE)
   checkmate::assert_choice(method, "hotelling")
@@ -117,7 +124,8 @@ gly_set_test <- function(
       strata = .set_strata(var_info, within),
       threshold = threshold,
       correlation = correlation,
-      clustering = clustering
+      clustering = clustering,
+      log_transform = log_transform
     )
     set_construction["within"] <- list(within)
     set_info <- list(
@@ -148,7 +156,8 @@ gly_set_test <- function(
     groups = groups,
     subjects = subjects,
     p_adj_method = p_adj_method,
-    correlation_matrix = set_info$correlation_matrix
+    correlation_matrix = set_info$correlation_matrix,
+    log_transform = log_transform
   )
   result$raw_result$definitions <- set_info$sets
   result$raw_result$set_construction <- set_construction
@@ -203,9 +212,10 @@ gly_set_test <- function(
   strata,
   threshold,
   correlation,
-  clustering
+  clustering,
+  log_transform = TRUE
 ) {
-  log_expr_mat <- suppressWarnings(.log_transform_expr_mat(expr_mat))
+  log_expr_mat <- suppressWarnings(.log_transform_expr_mat(expr_mat, log_transform))
   usable <- .classify_set_profiles(log_expr_mat)
   usable_names <- usable$variable[is.na(usable$reason)]
   exclusions <- dplyr::filter(usable, !is.na(.data$reason))
@@ -458,9 +468,10 @@ gly_set_test <- function(
   groups,
   subjects = NULL,
   p_adj_method = "BH",
-  correlation_matrix = NULL
+  correlation_matrix = NULL,
+  log_transform = TRUE
 ) {
-  log_expr_mat <- suppressWarnings(.log_transform_expr_mat(expr_mat))
+  log_expr_mat <- suppressWarnings(.log_transform_expr_mat(expr_mat, log_transform))
   design <- .set_test_design(groups, subjects)
 
   if (length(sets) == 0) {

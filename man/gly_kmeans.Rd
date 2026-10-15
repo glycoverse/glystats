@@ -10,7 +10,8 @@ gly_kmeans(
   centers = 3,
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 }
 \arguments{
@@ -30,6 +31,10 @@ Default is 3.}
 will be added to the result tibbles. If FALSE, only the clustering results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::kmeans()}.}
+
+\item{log_transform}{A single logical value indicating whether to transform
+expression values using \code{log2(x + 1e-6)} before analysis. Default is
+\code{TRUE}. Set to \code{FALSE} for data that are already log-transformed.}
 }
 \value{
 A list with three elements:
@@ -49,13 +54,17 @@ The function uses \code{stats::kmeans()} to perform clustering and provides
 tidy results with cluster assignments.
 }
 \details{
-The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-clustering. When \code{on = "variable"} (default), variables are clustered based on their
+Set \code{log_transform = FALSE} to use the expression values as supplied, for
+example when they are already log-transformed.
+
+By default, the function performs log2 transformation on the expression data
+(\code{log2(x + 1e-6)}) before clustering. When \code{on = "variable"} (default), variables are clustered based on their
 expression patterns across samples. When \code{on = "sample"}, samples are clustered based
 on their expression profiles across variables.
 
 \strong{Data Preparation:}
-Data is log2-transformed and optionally scaled before clustering.
+Data is log2-transformed when \code{log_transform = TRUE} and optionally scaled
+before clustering.
 
 \strong{Clustering Method:}
 K-means clustering is performed using \code{stats::kmeans()} with the specified parameters.

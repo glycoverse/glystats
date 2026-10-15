@@ -4,7 +4,14 @@
 \alias{gly_pca}
 \title{Principal Component Analysis (PCA)}
 \usage{
-gly_pca(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...)
+gly_pca(
+  exp,
+  center = TRUE,
+  scale = TRUE,
+  add_info = TRUE,
+  ...,
+  log_transform = TRUE
+)
 }
 \arguments{
 \item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
@@ -19,6 +26,10 @@ sample information.}
 will be added to the result tibbles. If FALSE, only the PCA results are returned.}
 
 \item{...}{Additional arguments passed to \code{prcomp()}.}
+
+\item{log_transform}{A single logical value indicating whether to transform
+expression values using \code{log(x + 1)} before analysis. Default is
+\code{TRUE}. Set to \code{FALSE} for data that are already log-transformed.}
 }
 \value{
 A list containing:
@@ -55,8 +66,9 @@ The function uses \code{prcomp()} to perform PCA and \code{broom::tidy()} to tid
 If \code{scale = TRUE}, constant variables (zero variance) will be removed before PCA.
 }
 \details{
-The function performs log transformation on the expression data (log(x + 1)) before
-PCA analysis.
+By default, the function performs log transformation on the expression data
+(\code{log(x + 1)}) before PCA analysis. Set \code{log_transform = FALSE} to use the
+expression values as supplied, for example when they are already log-transformed.
 }
 \section{Required packages}{
 

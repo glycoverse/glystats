@@ -16,8 +16,14 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'   will be added to the result tibble. If FALSE, only the Cox model results are returned.
 #' @param ... Additional arguments passed to `survival::coxph()`.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log2(x + 1e-6)` before analysis. Default is
+#'   `FALSE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @details
+#' Expression values are used as supplied by default. Set `log_transform = TRUE`
+#' to apply `log2(x + 1e-6)` before analysis.
+#'
 #' The function fits an Cox proportional hazards model for each variable by:
 #'
 #' ```r
@@ -46,8 +52,10 @@ gly_cox <- function(
   event_col = "event",
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = FALSE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   .assert_data_container(exp)
   checkmate::assert_string(time_col)
@@ -62,7 +70,14 @@ gly_cox <- function(
   event <- sample_info[[event_col]]
 
   # Run the internal computation
-  result <- .analyze_cox(expr_mat, time, event, p_adj_method, ...)
+  result <- .analyze_cox(
+    expr_mat,
+    time,
+    event,
+    p_adj_method,
+    ...,
+    log_transform = log_transform
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -85,8 +100,10 @@ gly_cox <- function(
   time,
   event,
   p_adj_method = "BH",
-  ...
+  ...,
+  log_transform = FALSE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, min.rows = 1, min.cols = 1)
   checkmate::assert_numeric(time, min.len = 1)
@@ -111,6 +128,8 @@ gly_cox <- function(
 
   # Check if survival package is available
   rlang::check_installed("survival")
+
+  expr_mat <- .log_transform_expr_mat(expr_mat, log_transform = log_transform)
 
   # Fit Cox model for each variable
   safe_f <- purrr::possibly(survival::coxph, otherwise = NA)

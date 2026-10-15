@@ -11,7 +11,8 @@ gly_wilcox(
   ref_group = NULL,
   add_info = TRUE,
   ...,
-  subject_col = NULL
+  subject_col = NULL,
+  log_transform = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,11 @@ will be added to the result tibble. If FALSE, only the statistical results are r
 \item{subject_col}{An optional character string naming the subject identifier
 column in sample information. When supplied, samples are matched by subject
 and a paired Wilcoxon signed-rank test is performed.}
+
+\item{log_transform}{A single non-missing logical value. If \code{TRUE} (default),
+transform expression values using \code{log2(x + 1e-6)} before analysis. If
+\code{FALSE}, use the supplied values unchanged, for example for already
+log-transformed data.}
 }
 \value{
 A list with three elements:
@@ -65,8 +71,12 @@ glycoproteomics data.
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
-The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-statistical testing. Exactly 2 groups are required in the grouping variable.
+Tests and effect sizes use the selected analysis scale. Reported fold changes
+continue to use ratios of group means from the original supplied values.
+
+By default, expression data are transformed using \code{log2(x + 1e-6)} before
+statistical testing. Set \code{log_transform = FALSE} to skip this transformation.
+Exactly 2 groups are required in the grouping variable.
 In paired analyses, only subjects observed in both groups are used and
 \code{effect_size} is the matched-pairs rank-biserial correlation.
 }

@@ -10,7 +10,8 @@ gly_cox(
   event_col = "event",
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = FALSE
 )
 }
 \arguments{
@@ -32,6 +33,10 @@ If NULL, no adjustment is performed.}
 will be added to the result tibble. If FALSE, only the Cox model results are returned.}
 
 \item{...}{Additional arguments passed to \code{survival::coxph()}.}
+
+\item{log_transform}{A single logical value indicating whether to transform
+expression values using \code{log2(x + 1e-6)} before analysis. Default is
+\code{FALSE}. Set to \code{FALSE} for data that are already log-transformed.}
 }
 \value{
 A list with three elements:
@@ -55,6 +60,9 @@ Fit a Cox proportional hazards model for each variable in the expression data,
 and extract p-values and hazard ratios from it.
 }
 \details{
+Expression values are used as supplied by default. Set \code{log_transform = TRUE}
+to apply \code{log2(x + 1e-6)} before analysis.
+
 The function fits an Cox proportional hazards model for each variable by:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{coxph(Surv(time, event) ~ expression_value)

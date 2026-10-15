@@ -18,6 +18,11 @@
 #'   from the experiment is added to the tidy result.
 #' @param ... Additional arguments passed to [limma::lmFit()].
 #'
+#' @param log_transform A single non-missing logical value. If `TRUE` (default),
+#'   transform expression values using `log2(x + 1e-6)` before analysis. If
+#'   `FALSE`, use the supplied values unchanged, for example for already
+#'   log-transformed data.
+#'
 #' @details
 #' `gly_linear_model()` and [gly_limma()] both use limma under the hood, but
 #' serve complementary use cases. `gly_linear_model()` provides a general
@@ -26,7 +31,10 @@
 #' expression analysis tasks, with convenient group, covariate, subject, and
 #' pairwise-comparison arguments.
 #'
-#' Expression values are transformed using `log2(x + 1e-6)` before modeling.
+#' By default, expression values are transformed using `log2(x + 1e-6)` before
+#' modeling. Set `log_transform = FALSE` to use the supplied values unchanged.
+#' Coefficient estimates and average expression are reported on the selected
+#' analysis scale.
 #' When `contrasts` is `NULL`, all non-intercept coefficients are tested. When
 #' contrasts are supplied, only the named contrasts are returned.
 #'
@@ -72,9 +80,11 @@ gly_linear_model <- function(
   contrasts = NULL,
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
   .assert_data_container(exp)
+  checkmate::assert_flag(log_transform)
   .validate_linear_model_formula(formula)
   .validate_linear_model_contrasts(contrasts)
   checkmate::assert_choice(
@@ -91,7 +101,8 @@ gly_linear_model <- function(
     formula = formula,
     contrasts = contrasts,
     p_adj_method = p_adj_method,
-    ...
+    ...,
+    log_transform = log_transform
   )
   result$tidy_result$.glystats_order <- seq_len(nrow(result$tidy_result))
   result$tidy_result <- .process_results_add_info(
@@ -111,8 +122,10 @@ gly_linear_model <- function(
   formula,
   contrasts = NULL,
   p_adj_method = "BH",
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_data_frame(sample_info, nrows = ncol(expr_mat))
   .validate_linear_model_formula(formula)
@@ -176,7 +189,7 @@ gly_linear_model <- function(
     )
   }
 
-  log_expr_mat <- .log_transform_expr_mat(expr_mat)
+  log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   row_has_data <- rowSums(is.finite(log_expr_mat)) > 0
   if (!any(row_has_data)) {
     tidy_result <- purrr::map_dfr(report_original, function(term) {
