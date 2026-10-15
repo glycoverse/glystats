@@ -53,7 +53,8 @@ and merge heights.</p>
 <span>  k_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -62,7 +63,7 @@ and merge heights.</p>
 
 
 <dl><dt id="arg-exp">exp<a class="anchor" aria-label="anchor" href="#arg-exp"></a></dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/glyexp/man/GlycomicSE.html" class="external-link">glyexp::GlycomicSE()</a></code> or <code><a href="https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE()</a></code> object,
+<dd><p>A <code><a href="https://glycoverse.github.io/glyexp/reference/GlycomicSE.html" class="external-link">glyexp::GlycomicSE()</a></code> or <code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE()</a></code> object,
 or another <code>SummarizedExperiment</code> containing an expression matrix and
 sample information.</p></dd>
 
@@ -91,6 +92,12 @@ will be added to the result tibbles. If FALSE, only the clustering results are r
 Note: if both functions need a <code>method</code> parameter, use <code>dist.method</code> for distance
 and <code>hclust.method</code> for clustering method.</p></dd>
 
+
+<dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
+<dd><p>A single logical value indicating whether to transform
+expression values using <code>log2(x + 1e-6)</code> before analysis. Default is
+<code>TRUE</code>. Set to <code>FALSE</code> for data that are already log-transformed.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -112,8 +119,10 @@ and <code>hclust.method</code> for clustering method.</p></dd>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-clustering. When <code>on = "variable"</code> (default), variables are clustered based on their
+    <p>Set <code>log_transform = FALSE</code> to use the expression values as supplied, for
+example when they are already log-transformed.</p>
+<p>By default, the function performs log2 transformation on the expression data
+(<code>log2(x + 1e-6)</code>) before clustering. When <code>on = "variable"</code> (default), variables are clustered based on their
 expression patterns across samples. When <code>on = "sample"</code>, samples are clustered based
 on their expression profiles across variables.</p>
 <p><strong>Distance Calculation:</strong>

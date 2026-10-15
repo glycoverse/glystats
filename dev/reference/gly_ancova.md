@@ -16,7 +16,8 @@ gly_ancova(
   covariate_cols = NULL,
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 ```
 
@@ -25,9 +26,9 @@ gly_ancova(
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing an expression
   matrix and sample information.
 
@@ -57,6 +58,13 @@ gly_ancova(
 
   Additional arguments passed to
   [`stats::aov()`](https://rdrr.io/r/stats/aov.html).
+
+- log_transform:
+
+  A single non-missing logical value. If `TRUE` (default), transform
+  expression values using `log2(x + 1e-6)` before analysis. If `FALSE`,
+  use the supplied values unchanged, for example for already
+  log-transformed data.
 
 ## Value
 
@@ -107,9 +115,13 @@ A list containing two elements:
 
 ## Details
 
-The function performs log2 transformation on the expression data
-(log2(x + 1e-6)) before statistical testing. At least 2 groups and at
-least 1 covariate are required.
+Tests and effect sizes use the selected analysis scale. Reported fold
+changes continue to use ratios of group means from the original supplied
+values.
+
+By default, expression data are transformed using `log2(x + 1e-6)`
+before statistical testing. Set `log_transform = FALSE` to skip this
+transformation. At least 2 groups and at least 1 covariate are required.
 
 For any variable failed to fit a
 [`stats::aov()`](https://rdrr.io/r/stats/aov.html) model, NAs will be

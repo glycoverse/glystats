@@ -12,7 +12,8 @@ gly_cox(
   event_col = "event",
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = FALSE
 )
 ```
 
@@ -21,9 +22,9 @@ gly_cox(
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing an expression
   matrix and sample information.
 
@@ -55,6 +56,12 @@ gly_cox(
   Additional arguments passed to
   [`survival::coxph()`](https://rdrr.io/pkg/survival/man/coxph.html).
 
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log2(x + 1e-6)` before analysis. Default is `FALSE`. Set
+  to `FALSE` for data that are already log-transformed.
+
 ## Value
 
 A list with three elements:
@@ -81,6 +88,9 @@ A list with three elements:
 - `meta_data`: A list containing metadata from the input experiment
 
 ## Details
+
+Expression values are used as supplied by default. Set
+`log_transform = TRUE` to apply `log2(x + 1e-6)` before analysis.
 
 The function fits an Cox proportional hazards model for each variable
 by:

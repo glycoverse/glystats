@@ -2,6 +2,13 @@
 
 ## glystats (development version)
 
+- All expression-analysis functions gain a validated `log_transform`
+  argument. Existing transformation defaults, log bases, and
+  pseudocounts are preserved; Cox, ROC, and fold-change default to
+  `FALSE`. Set construction and testing share the selected scale.
+  Optional fold-change transformation reports differences of log2 means
+  (geometric-mean fold changes).
+
 ## glystats 0.12.0
 
 ### New features
@@ -41,7 +48,7 @@
 ## glystats 0.11.1
 
 - Statistical analysis functions now recognize legacy
-  [`glyexp::experiment()`](https://rdrr.io/pkg/glyexp/man/experiment.html)
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   and current `SummarizedExperiment` containers consistently across
   supported `glyexp` versions.
 
@@ -51,7 +58,7 @@
 
 - All `gly_*_()` matrix and vector interfaces are removed. Use the
   corresponding `gly_*()` function with a
-  [`glyexp::experiment()`](https://rdrr.io/pkg/glyexp/man/experiment.html)
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   or `SummarizedExperiment` object instead. (#12)
 - `gly_enrich_go()`, `gly_enrich_kegg()`, `gly_enrich_reactome()`,
   `gly_enrich_wikipathways()`, `gly_enrich_do()`, `gly_enrich_ncg()`,
@@ -64,7 +71,7 @@
 - All `gly_*()` analysis functions and
   [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
   now accept `SummarizedExperiment` objects in addition to
-  [`glyexp::experiment()`](https://rdrr.io/pkg/glyexp/man/experiment.html)
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   objects. (#14)
 
 ## glystats 0.10.1
@@ -251,7 +258,7 @@
 
 - The `universe` argument of `gly_enrich_go()`, `gly_enrich_kegg()`, and
   `gly_enrich_reactome()` accepts a
-  [`glyexp::experiment()`](https://rdrr.io/pkg/glyexp/man/experiment.html)
+  [`glyexp::experiment()`](https://glycoverse.github.io/glyexp/reference/experiment.html)
   object now.
 - Optimize message output of
   [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md).

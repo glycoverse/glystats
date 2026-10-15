@@ -14,7 +14,8 @@ gly_hclust(
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 ```
 
@@ -23,9 +24,9 @@ gly_hclust(
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing an expression
   matrix and sample information.
 
@@ -59,6 +60,12 @@ gly_hclust(
   [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html). Note: if
   both functions need a `method` parameter, use `dist.method` for
   distance and `hclust.method` for clustering method.
+
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log2(x + 1e-6)` before analysis. Default is `TRUE`. Set
+  to `FALSE` for data that are already log-transformed.
 
 ## Value
 
@@ -101,11 +108,14 @@ A list containing:
 
 ## Details
 
-The function performs log2 transformation on the expression data
-(log2(x + 1e-6)) before clustering. When `on = "variable"` (default),
-variables are clustered based on their expression patterns across
-samples. When `on = "sample"`, samples are clustered based on their
-expression profiles across variables.
+Set `log_transform = FALSE` to use the expression values as supplied,
+for example when they are already log-transformed.
+
+By default, the function performs log2 transformation on the expression
+data (`log2(x + 1e-6)`) before clustering. When `on = "variable"`
+(default), variables are clustered based on their expression patterns
+across samples. When `on = "sample"`, samples are clustered based on
+their expression profiles across variables.
 
 **Distance Calculation:** Distance is calculated using
 [`stats::dist()`](https://rdrr.io/r/stats/dist.html) with the specified

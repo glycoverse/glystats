@@ -12,7 +12,8 @@ gly_linear_model(
   contrasts = NULL,
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 ```
 
@@ -21,9 +22,9 @@ gly_linear_model(
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing expression data
   and sample information.
 
@@ -55,6 +56,13 @@ gly_linear_model(
   Additional arguments passed to
   [`limma::lmFit()`](https://rdrr.io/pkg/limma/man/lmFit.html).
 
+- log_transform:
+
+  A single non-missing logical value. If `TRUE` (default), transform
+  expression values using `log2(x + 1e-6)` before analysis. If `FALSE`,
+  use the supplied values unchanged, for example for already
+  log-transformed data.
+
 ## Value
 
 A list with classes `glystats_linear_model_res` and `glystats_res`
@@ -80,10 +88,12 @@ is a dedicated wrapper for common differential expression analysis
 tasks, with convenient group, covariate, subject, and
 pairwise-comparison arguments.
 
-Expression values are transformed using `log2(x + 1e-6)` before
-modeling. When `contrasts` is `NULL`, all non-intercept coefficients are
-tested. When contrasts are supplied, only the named contrasts are
-returned.
+By default, expression values are transformed using `log2(x + 1e-6)`
+before modeling. Set `log_transform = FALSE` to use the supplied values
+unchanged. Coefficient estimates and average expression are reported on
+the selected analysis scale. When `contrasts` is `NULL`, all
+non-intercept coefficients are tested. When contrasts are supplied, only
+the named contrasts are returned.
 
 Character predictors are handled as factors by
 [`stats::model.matrix()`](https://rdrr.io/r/stats/model.matrix.html).

@@ -9,7 +9,12 @@ test/treatment/case group.
 ## Usage
 
 ``` r
-gly_fold_change(exp, group_col = "group", add_info = TRUE)
+gly_fold_change(
+  exp,
+  group_col = "group",
+  add_info = TRUE,
+  log_transform = FALSE
+)
 ```
 
 ## Arguments
@@ -17,9 +22,9 @@ gly_fold_change(exp, group_col = "group", add_info = TRUE)
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment`.
 
 - group_col:
@@ -32,6 +37,15 @@ gly_fold_change(exp, group_col = "group", add_info = TRUE)
   experiment will be added to the result tibble. If FALSE, only the fold
   change results are returned.
 
+- log_transform:
+
+  A single non-missing logical. If `FALSE` (default), return the log2
+  ratio of arithmetic group means as before. If `TRUE`, apply
+  `log2(x + 1e-6)` and return the difference of group means on that
+  scale, equivalent to the log2 ratio of geometric means of `x + 1e-6`.
+  This option transforms input expression; it does not toggle the log2
+  scale of the reported fold change.
+
 ## Value
 
 A list with three elements:
@@ -41,9 +55,10 @@ A list with three elements:
 
   - `variable`: Variable name
 
-  - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean)) If more
-    than two groups, two additional columns `ref_group` and `test_group`
-    will be added.
+  - `log2fc`: Log2 ratio of arithmetic group means by default, or
+    difference of mean log2-transformed values when
+    `log_transform = TRUE`. If more than two groups, two additional
+    columns `ref_group` and `test_group` will be added.
 
 - `raw_result`: The raw result (same as tidy_result for this function)
 

@@ -51,7 +51,8 @@
 <span>  threshold <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  correlation <span class="op">=</span> <span class="st">"pearson"</span>,</span>
 <span>  clustering <span class="op">=</span> <span class="st">"connected"</span>,</span>
-<span>  within <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  within <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -60,7 +61,7 @@
 
 
 <dl><dt id="arg-exp">exp<a class="anchor" aria-label="anchor" href="#arg-exp"></a></dt>
-<dd><p>A <code><a href="https://rdrr.io/pkg/glyexp/man/GlycomicSE.html" class="external-link">glyexp::GlycomicSE()</a></code> or <code><a href="https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE()</a></code> object,
+<dd><p>A <code><a href="https://glycoverse.github.io/glyexp/reference/GlycomicSE.html" class="external-link">glyexp::GlycomicSE()</a></code> or <code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE()</a></code> object,
 or another <code>SummarizedExperiment</code> containing expression data and sample
 information.</p></dd>
 
@@ -115,6 +116,13 @@ requires every pair in a set to exceed <code>threshold</code>.</p></dd>
 <dd><p>Optional variable-information columns defining strata within
 which automatic sets are constructed, such as <code>c("protein", "protein_site")</code>.</p></dd>
 
+
+<dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
+<dd><p>A single non-missing logical. If <code>TRUE</code> (default),
+apply <code>log2(x + 1e-6)</code> for both automatic set construction and testing.
+If <code>FALSE</code>, use supplied values without transformation, including values
+that have already been transformed. Estimates are on the selected scale.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -132,7 +140,7 @@ Hotelling test objects, and automatic set-construction details (when
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Expression values are transformed using <code>log2(x + 1e-6)</code>. The first factor
+    <p>By default, expression values are transformed using <code>log2(x + 1e-6)</code>. The first factor
 level of <code>group_col</code> is the reference group and the second is the test group.
 The estimate is therefore <code>test - reference</code>.</p>
 <p>Every usable variable is assigned to a set, including a one-variable set when

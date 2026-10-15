@@ -16,7 +16,8 @@ gly_limma(
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 ```
 
@@ -25,9 +26,9 @@ gly_limma(
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing expression data
   and sample information.
 
@@ -80,6 +81,13 @@ gly_limma(
   Additional arguments passed to
   [`limma::lmFit()`](https://rdrr.io/pkg/limma/man/lmFit.html).
 
+- log_transform:
+
+  A single non-missing logical value. If `TRUE` (default), transform
+  expression values using `log2(x + 1e-6)` before analysis. If `FALSE`,
+  use the supplied values unchanged, for example for already
+  log-transformed data.
+
 ## Value
 
 A list with three elements:
@@ -89,7 +97,8 @@ A list with three elements:
 
   - `variable`: Variable name
 
-  - `log2fc`: Log2 fold change
+  - `log2fc`: Model contrast on the analysis scale (log2 fold change
+    when expression values are on a log2 scale)
 
   - `AveExpr`: Average expression level
 
@@ -111,10 +120,16 @@ A list with three elements:
 
 ## Details
 
-The function performs log2 transformation on the expression data
-(log2(x + 1e-6)) before statistical testing. The analysis uses linear
-models with empirical Bayes moderation to improve statistical power,
-especially for small sample sizes.
+By default, expression data are transformed using `log2(x + 1e-6)`
+before statistical testing. Set `log_transform = FALSE` to skip this
+transformation. The analysis uses linear models with empirical Bayes
+moderation to improve statistical power, especially for small sample
+sizes.
+
+The `log2fc` column always contains the fitted model contrast. When
+`log_transform = FALSE`, its units are those of the supplied expression
+data; it is a log2 fold change only when those values are already on a
+log2 scale.
 
 For two or more groups, all pairwise comparisons are automatically
 generated (one contrast for two groups) and performed using contrast

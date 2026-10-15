@@ -8,7 +8,13 @@ variable to assess their discriminatory power between two groups.
 ## Usage
 
 ``` r
-gly_roc(exp, group_col = "group", pos_class = NULL, add_info = TRUE)
+gly_roc(
+  exp,
+  group_col = "group",
+  pos_class = NULL,
+  add_info = TRUE,
+  log_transform = FALSE
+)
 ```
 
 ## Arguments
@@ -16,9 +22,9 @@ gly_roc(exp, group_col = "group", pos_class = NULL, add_info = TRUE)
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing an expression
   matrix and sample information.
 
@@ -39,6 +45,12 @@ gly_roc(exp, group_col = "group", pos_class = NULL, add_info = TRUE)
   A logical value. If TRUE (default), variable information from the
   experiment will be added to the result tibbles. If FALSE, only the ROC
   analysis results are returned.
+
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log2(x + 1e-6)` before analysis. Default is `FALSE`. Set
+  to `FALSE` for data that are already log-transformed.
 
 ## Value
 
@@ -74,6 +86,9 @@ A list with three elements:
   list has classes `glystats_roc_res` and `glystats_res`.
 
 ## Details
+
+Expression values are used as supplied by default. Set
+`log_transform = TRUE` to apply `log2(x + 1e-6)` before analysis.
 
 For each variable, a ROC curve is computed using the expression values
 as predictor and the binary group labels as response.

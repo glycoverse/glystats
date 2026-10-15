@@ -10,7 +10,14 @@ will be removed before PCA.
 ## Usage
 
 ``` r
-gly_pca(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...)
+gly_pca(
+  exp,
+  center = TRUE,
+  scale = TRUE,
+  add_info = TRUE,
+  ...,
+  log_transform = TRUE
+)
 ```
 
 ## Arguments
@@ -18,9 +25,9 @@ gly_pca(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...)
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing an expression
   matrix and sample information.
 
@@ -42,6 +49,12 @@ gly_pca(exp, center = TRUE, scale = TRUE, add_info = TRUE, ...)
 
   Additional arguments passed to
   [`prcomp()`](https://rdrr.io/r/stats/prcomp.html).
+
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log(x + 1)` before analysis. Default is `TRUE`. Set to
+  `FALSE` for data that are already log-transformed.
 
 ## Value
 
@@ -84,8 +97,10 @@ A list containing:
 
 ## Details
 
-The function performs log transformation on the expression data (log(x +
-1)) before PCA analysis.
+By default, the function performs log transformation on the expression
+data (`log(x + 1)`) before PCA analysis. Set `log_transform = FALSE` to
+use the expression values as supplied, for example when they are already
+log-transformed.
 
 ## Required packages
 

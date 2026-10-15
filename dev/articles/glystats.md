@@ -6,9 +6,9 @@ analysis, and more. `glystats` brings these methods together through one
 consistent, user-friendly interface.
 
 **A useful feature:** Every `glystats` analysis accepts
-[`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+[`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
 and
-[`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+[`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
 containers, the unified data interfaces used across the `glycoverse`
 ecosystem.
 
@@ -20,8 +20,6 @@ provides a useful overview.
 
 library(glystats)
 library(glyexp)
-#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
-#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(glyread)
 library(glyclean)
 library(dplyr)
@@ -51,7 +49,7 @@ exp
 ```
 
 The result is a
-[`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+[`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
 containing 12 samples and 263 glycoforms, which is enough to illustrate
 the main workflow.
 

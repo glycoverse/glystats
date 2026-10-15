@@ -14,7 +14,8 @@ gly_plsda(
   ncomp = 2,
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 ```
 
@@ -23,9 +24,9 @@ gly_plsda(
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing an expression
   matrix and sample information.
 
@@ -53,6 +54,12 @@ gly_plsda(
 
   Additional arguments passed to
   [`ropls::opls()`](https://rdrr.io/pkg/ropls/man/opls.html).
+
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log(x + 1)` before analysis. Default is `TRUE`. Set to
+  `FALSE` for data that are already log-transformed.
 
 ## Value
 
@@ -112,6 +119,12 @@ A list containing:
   [`ropls::opls()`](https://rdrr.io/pkg/ropls/man/opls.html)
 
 - `meta_data`: A list containing metadata from the input experiment
+
+## Details
+
+By default, expression values are transformed using `log(x + 1)` before
+analysis. Set `log_transform = FALSE` to use the expression values as
+supplied, for example when they are already log-transformed.
 
 ## Required packages
 

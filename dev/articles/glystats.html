@@ -64,16 +64,14 @@ small set of reliable analyses: differential expression, PCA, survival
 analysis, and more. <code>glystats</code> brings these methods together
 through one consistent, user-friendly interface.</p>
 <p><strong>A useful feature:</strong> Every <code>glystats</code>
-analysis accepts <code><a href="https://rdrr.io/pkg/glyexp/man/GlycomicSE.html" class="external-link">glyexp::GlycomicSE()</a></code> and
-<code><a href="https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE()</a></code> containers, the unified data
+analysis accepts <code><a href="https://glycoverse.github.io/glyexp/reference/GlycomicSE.html" class="external-link">glyexp::GlycomicSE()</a></code> and
+<code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE()</a></code> containers, the unified data
 interfaces used across the <code>glycoverse</code> ecosystem.</p>
 <p>If these containers are new to you, the <a href="https://glycoverse.github.io/glyexp/articles/glyexp.html" class="external-link">glyexp
 introduction</a> provides a useful overview.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://glycoverse.github.io/glystats/">glystats</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://glycoverse.github.io/glyexp/" class="external-link">glyexp</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by</span></span>
-<span><span class="co">#&gt; 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://glycoverse.github.io/glyread/" class="external-link">glyread</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://glycoverse.github.io/glyclean/" class="external-link">glyclean</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
@@ -94,7 +92,7 @@ introduction</a> provides a useful overview.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Row data fields: <span style="color: #00BB00;">protein</span> <span style="color: #0000BB;">&lt;chr&gt;</span>, <span style="color: #00BB00;">glycan_composition</span> <span style="color: #0000BB;">&lt;comp&gt;</span>, <span style="color: #00BB00;">protein_site</span> <span style="color: #0000BB;">&lt;int&gt;</span>, <span style="color: #00BB00;">gene</span> <span style="color: #0000BB;">&lt;chr&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Column data fields: <span style="color: #00BB00;">group</span> <span style="color: #0000BB;">&lt;fct&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Metadata fields: <span style="color: #00BB00;">exp_type</span> <span style="color: #0000BB;">&lt;chr&gt;</span>, <span style="color: #00BB00;">glycan_type</span> <span style="color: #0000BB;">&lt;chr&gt;</span>, <span style="color: #00BB00;">quant_method</span> <span style="color: #0000BB;">&lt;chr&gt;</span></span></span></code></pre></div>
-<p>The result is a <code><a href="https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE()</a></code> containing 12
+<p>The result is a <code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE()</a></code> containing 12
 samples and 263 glycoforms, which is enough to illustrate the main
 workflow.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">

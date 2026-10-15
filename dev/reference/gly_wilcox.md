@@ -14,7 +14,8 @@ gly_wilcox(
   ref_group = NULL,
   add_info = TRUE,
   ...,
-  subject_col = NULL
+  subject_col = NULL,
+  log_transform = TRUE
 )
 ```
 
@@ -23,9 +24,9 @@ gly_wilcox(
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing an expression
   matrix and sample information.
 
@@ -62,6 +63,13 @@ gly_wilcox(
   sample information. When supplied, samples are matched by subject and
   a paired Wilcoxon signed-rank test is performed.
 
+- log_transform:
+
+  A single non-missing logical value. If `TRUE` (default), transform
+  expression values using `log2(x + 1e-6)` before analysis. If `FALSE`,
+  use the supplied values unchanged, for example for already
+  log-transformed data.
+
 ## Value
 
 A list with three elements:
@@ -95,11 +103,15 @@ A list with three elements:
 
 ## Details
 
-The function performs log2 transformation on the expression data
-(log2(x + 1e-6)) before statistical testing. Exactly 2 groups are
-required in the grouping variable. In paired analyses, only subjects
-observed in both groups are used and `effect_size` is the matched-pairs
-rank-biserial correlation.
+Tests and effect sizes use the selected analysis scale. Reported fold
+changes continue to use ratios of group means from the original supplied
+values.
+
+By default, expression data are transformed using `log2(x + 1e-6)`
+before statistical testing. Set `log_transform = FALSE` to skip this
+transformation. Exactly 2 groups are required in the grouping variable.
+In paired analyses, only subjects observed in both groups are used and
+`effect_size` is the matched-pairs rank-biserial correlation.
 
 ## See also
 

@@ -7,7 +7,14 @@ p-values for all pairs, with optional multiple testing correction.
 ## Usage
 
 ``` r
-gly_cor(exp, on = "variable", method = "pearson", p_adj_method = "BH", ...)
+gly_cor(
+  exp,
+  on = "variable",
+  method = "pearson",
+  p_adj_method = "BH",
+  ...,
+  log_transform = TRUE
+)
 ```
 
 ## Arguments
@@ -15,9 +22,9 @@ gly_cor(exp, on = "variable", method = "pearson", p_adj_method = "BH", ...)
 - exp:
 
   A
-  [`glyexp::GlycomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycomicSE.html)
+  [`glyexp::GlycomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycomicSE.html)
   or
-  [`glyexp::GlycoproteomicSE()`](https://rdrr.io/pkg/glyexp/man/GlycoproteomicSE.html)
+  [`glyexp::GlycoproteomicSE()`](https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html)
   object, or another `SummarizedExperiment` containing an expression
   matrix and sample information.
 
@@ -43,6 +50,12 @@ gly_cor(exp, on = "variable", method = "pearson", p_adj_method = "BH", ...)
 
   Additional arguments passed to
   [`Hmisc::rcorr()`](https://rdrr.io/pkg/Hmisc/man/rcorr.html).
+
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log2(x + 1e-6)` before analysis. Default is `TRUE`. Set
+  to `FALSE` for data that are already log-transformed.
 
 ## Value
 
@@ -70,11 +83,14 @@ A list with three elements:
 
 ## Details
 
-The function performs log2 transformation on the expression data
-(log2(x + 1e-6)) before correlation analysis. When `on = "variable"`
-(default), correlations are calculated between variables across samples.
-When `on = "sample"`, correlations are calculated between samples across
-variables.
+Set `log_transform = FALSE` to use the expression values as supplied,
+for example when they are already log-transformed.
+
+By default, the function performs log2 transformation on the expression
+data (`log2(x + 1e-6)`) before correlation analysis. When
+`on = "variable"` (default), correlations are calculated between
+variables across samples. When `on = "sample"`, correlations are
+calculated between samples across variables.
 
 **Correlation Calculation:** Correlation coefficients and p-values are
 calculated using
