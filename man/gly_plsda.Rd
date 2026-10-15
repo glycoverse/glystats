@@ -10,7 +10,8 @@ gly_plsda(
   ncomp = 2,
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 }
 \arguments{
@@ -29,6 +30,10 @@ that contains group labels. Default is "group".}
 will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.}
 
 \item{...}{Additional arguments passed to \code{ropls::opls()}.}
+
+\item{log_transform}{A single logical value indicating whether to transform
+expression values using \code{log(x + 1)} before analysis. Default is
+\code{TRUE}. Set to \code{FALSE} for data that are already log-transformed.}
 }
 \value{
 A list containing:
@@ -72,6 +77,11 @@ A list containing:
 \description{
 Perform partial least squares discriminant analysis on the expression data.
 The function uses \code{ropls::opls()} to perform PLS-DA and returns tidy results.
+}
+\details{
+By default, expression values are transformed using \code{log(x + 1)} before
+analysis. Set \code{log_transform = FALSE} to use the expression values as supplied,
+for example when they are already log-transformed.
 }
 \section{Required packages}{
 

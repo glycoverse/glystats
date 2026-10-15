@@ -13,6 +13,14 @@
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the PLS-DA results are returned.
 #' @param ... Additional arguments passed to `ropls::opls()`.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log(x + 1)` before analysis. Default is
+#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
+#'
+#' @details
+#' By default, expression values are transformed using `log(x + 1)` before
+#' analysis. Set `log_transform = FALSE` to use the expression values as supplied,
+#' for example when they are already log-transformed.
 #'
 #' @section Required packages:
 #' This function requires the following packages to be installed:
@@ -49,8 +57,10 @@ gly_plsda <- function(
   ncomp = 2,
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Check package availability
   rlang::check_installed("ropls")
 
@@ -76,7 +86,14 @@ gly_plsda <- function(
   groups <- group_info$groups
 
   # Run the internal computation
-  result <- .analyze_plsda(expr_mat, groups, ncomp, scale, ...)
+  result <- .analyze_plsda(
+    expr_mat,
+    groups,
+    ncomp,
+    scale,
+    ...,
+    log_transform = log_transform
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -94,7 +111,15 @@ gly_plsda <- function(
 #' This helper receives components extracted from a validated experiment.
 #'
 #' @noRd
-.analyze_plsda <- function(expr_mat, groups, ncomp = 2, scale = TRUE, ...) {
+.analyze_plsda <- function(
+  expr_mat,
+  groups,
+  ncomp = 2,
+  scale = TRUE,
+  ...,
+  log_transform = TRUE
+) {
+  checkmate::assert_flag(log_transform)
   rlang::check_installed("ropls")
 
   # Validate inputs
@@ -121,7 +146,10 @@ gly_plsda <- function(
   }
 
   # Prepare data matrix (samples as rows, variables as columns)
-  mat <- log(t(expr_mat) + 1)
+  mat <- t(expr_mat)
+  if (log_transform) {
+    mat <- log(mat + 1)
+  }
 
   # Perform PLS-DA using ropls::opls with orthoI = 0
   # Set appropriate cross-validation folds based on sample size

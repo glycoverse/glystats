@@ -4,7 +4,14 @@
 \alias{gly_tsne}
 \title{t-Distributed Stochastic Neighbor Embedding (t-SNE)}
 \usage{
-gly_tsne(exp, dims = 2, perplexity = 30, add_info = TRUE, ...)
+gly_tsne(
+  exp,
+  dims = 2,
+  perplexity = 30,
+  add_info = TRUE,
+  ...,
+  log_transform = TRUE
+)
 }
 \arguments{
 \item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
@@ -19,6 +26,10 @@ sample information.}
 will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.}
 
 \item{...}{Additional arguments passed to \code{Rtsne::Rtsne()}.}
+
+\item{log_transform}{A single logical value indicating whether to transform
+expression values using \code{log(x + 1)} before analysis. Default is
+\code{TRUE}. Set to \code{FALSE} for data that are already log-transformed.}
 }
 \value{
 A list with three elements:
@@ -37,6 +48,11 @@ The list has classes \code{glystats_tsne_res} and \code{glystats_res}.
 \description{
 Perform t-SNE dimensionality reduction on the expression data.
 The function uses \code{Rtsne::Rtsne()} to perform t-SNE analysis.
+}
+\details{
+By default, expression values are transformed using \code{log(x + 1)} before
+analysis. Set \code{log_transform = FALSE} to use the expression values as supplied,
+for example when they are already log-transformed.
 }
 \section{Required packages}{
 

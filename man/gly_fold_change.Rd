@@ -4,7 +4,12 @@
 \alias{gly_fold_change}
 \title{Calculate fold change}
 \usage{
-gly_fold_change(exp, group_col = "group", add_info = TRUE)
+gly_fold_change(
+  exp,
+  group_col = "group",
+  add_info = TRUE,
+  log_transform = FALSE
+)
 }
 \arguments{
 \item{exp}{A \code{\link[glyexp:GlycomicSE]{glyexp::GlycomicSE()}} or \code{\link[glyexp:GlycoproteomicSE]{glyexp::GlycoproteomicSE()}} object,
@@ -14,6 +19,13 @@ or another \code{SummarizedExperiment}.}
 
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the fold change results are returned.}
+
+\item{log_transform}{A single non-missing logical. If \code{FALSE} (default),
+return the log2 ratio of arithmetic group means as before. If \code{TRUE},
+apply \code{log2(x + 1e-6)} and return the difference of group means on that
+scale, equivalent to the log2 ratio of geometric means of \code{x + 1e-6}.
+This option transforms input expression; it does not toggle the log2
+scale of the reported fold change.}
 }
 \value{
 A list with three elements:
@@ -21,7 +33,8 @@ A list with three elements:
 \item \code{tidy_result}: A tibble with fold change results containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{log2fc}: Log2 fold change (log2(group2_mean / group1_mean))
+\item \code{log2fc}: Log2 ratio of arithmetic group means by default, or
+difference of mean log2-transformed values when \code{log_transform = TRUE}.
 If more than two groups, two additional columns \code{ref_group} and \code{test_group} will be added.
 }
 \item \code{raw_result}: The raw result (same as tidy_result for this function)

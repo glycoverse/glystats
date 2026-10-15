@@ -15,18 +15,25 @@
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
 #' @param ... Additional arguments passed to `stats::kmeans()`.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log2(x + 1e-6)` before analysis. Default is
+#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @section Required packages:
 #' This function only uses base R packages and does not require additional dependencies.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-#' clustering. When `on = "variable"` (default), variables are clustered based on their
+#' Set `log_transform = FALSE` to use the expression values as supplied, for
+#' example when they are already log-transformed.
+#'
+#' By default, the function performs log2 transformation on the expression data
+#' (`log2(x + 1e-6)`) before clustering. When `on = "variable"` (default), variables are clustered based on their
 #' expression patterns across samples. When `on = "sample"`, samples are clustered based
 #' on their expression profiles across variables.
 #'
 #' **Data Preparation:**
-#' Data is log2-transformed and optionally scaled before clustering.
+#' Data is log2-transformed when `log_transform = TRUE` and optionally scaled
+#' before clustering.
 #'
 #' **Clustering Method:**
 #' K-means clustering is performed using `stats::kmeans()` with the specified parameters.
@@ -46,8 +53,10 @@ gly_kmeans <- function(
   centers = 3,
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   .assert_data_container(exp)
   checkmate::assert_choice(on, c("variable", "sample"))
@@ -62,7 +71,14 @@ gly_kmeans <- function(
   expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
-  result <- .analyze_kmeans(expr_mat, on, centers, scale, ...)
+  result <- .analyze_kmeans(
+    expr_mat,
+    on,
+    centers,
+    scale,
+    ...,
+    log_transform = log_transform
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -85,8 +101,10 @@ gly_kmeans <- function(
   on = "variable",
   centers = 3,
   scale = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_choice(on, c("variable", "sample"))
@@ -143,7 +161,7 @@ gly_kmeans <- function(
   }
 
   # Apply log transformation
-  mat <- .log_transform_expr_mat(mat)
+  mat <- .log_transform_expr_mat(mat, log_transform = log_transform)
   # Scale data if requested
   # Scaling columns requires at least two observations. When clustering a
   # single retained variable, the unscaled row still has a valid one-cluster

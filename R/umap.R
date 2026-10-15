@@ -11,6 +11,14 @@
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'  will be added to the result tibble. If FALSE, only the UMAP coordinates are returned.
 #' @param ... Additional arguments passed to `uwot::umap()`.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log(x + 1)` before analysis. Default is
+#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
+#'
+#' @details
+#' By default, expression values are transformed using `log(x + 1)` before
+#' analysis. Set `log_transform = FALSE` to use the expression values as supplied,
+#' for example when they are already log-transformed.
 #'
 #' @section Required packages:
 #' This function requires the `uwot` package to be installed for UMAP analysis.
@@ -31,14 +39,22 @@ gly_umap <- function(
   n_neighbors = 15,
   n_components = 2,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   rlang::check_installed("uwot")
   .assert_data_container(exp)
   checkmate::assert_flag(add_info)
 
   expr_mat <- .get_expr_mat(exp)
-  result <- .analyze_umap(expr_mat, n_neighbors, n_components, ...)
+  result <- .analyze_umap(
+    expr_mat,
+    n_neighbors,
+    n_components,
+    ...,
+    log_transform = log_transform
+  )
 
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
@@ -61,8 +77,10 @@ gly_umap <- function(
   expr_mat,
   n_neighbors = 15,
   n_components = 2,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   rlang::check_installed("uwot")
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
@@ -84,7 +102,9 @@ gly_umap <- function(
   mat <- t(expr_mat)
 
   # Apply log transformation
-  mat <- log(mat + 1)
+  if (log_transform) {
+    mat <- log(mat + 1)
+  }
 
   # Perform UMAP
   dots <- rlang::list2(...)

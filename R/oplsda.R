@@ -14,6 +14,14 @@
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.
 #' @param ... Additional arguments passed to `ropls::opls()`.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log(x + 1)` before analysis. Default is
+#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
+#'
+#' @details
+#' By default, expression values are transformed using `log(x + 1)` before
+#' analysis. Set `log_transform = FALSE` to use the expression values as supplied,
+#' for example when they are already log-transformed.
 #'
 #' @section Required packages:
 #' This function requires the following packages to be installed:
@@ -53,8 +61,10 @@ gly_oplsda <- function(
   ortho_i = NA,
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Check package availability
   rlang::check_installed("ropls")
 
@@ -83,7 +93,15 @@ gly_oplsda <- function(
   groups <- group_info$groups
 
   # Run the internal computation
-  result <- .analyze_oplsda(expr_mat, groups, pred_i, ortho_i, scale, ...)
+  result <- .analyze_oplsda(
+    expr_mat,
+    groups,
+    pred_i,
+    ortho_i,
+    scale,
+    ...,
+    log_transform = log_transform
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -107,8 +125,10 @@ gly_oplsda <- function(
   pred_i = 1,
   ortho_i = NA,
   scale = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   rlang::check_installed("ropls")
 
   # Validate inputs
@@ -135,7 +155,10 @@ gly_oplsda <- function(
   }
 
   # Prepare data matrix (samples as rows, variables as columns)
-  mat <- log(t(expr_mat) + 1)
+  mat <- t(expr_mat)
+  if (log_transform) {
+    mat <- log(mat + 1)
+  }
 
   # Perform OPLS-DA
   # Set appropriate cross-validation folds based on sample size

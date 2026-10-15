@@ -10,7 +10,8 @@ gly_anova(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  subject_col = NULL
+  subject_col = NULL,
+  log_transform = TRUE
 )
 }
 \arguments{
@@ -33,6 +34,11 @@ will be added to the result tibble. If FALSE, only the statistical results are r
 \item{subject_col}{An optional character string naming the subject identifier
 column in sample information. When supplied, a subject-blocked
 repeated-measures ANOVA is performed.}
+
+\item{log_transform}{A single non-missing logical value. If \code{TRUE} (default),
+transform expression values using \code{log2(x + 1e-6)} before analysis. If
+\code{FALSE}, use the supplied values unchanged, for example for already
+log-transformed data.}
 }
 \value{
 A list containing three elements:
@@ -77,8 +83,12 @@ For significant results, Tukey's HSD post-hoc test is automatically performed.
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
-The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-statistical testing. At least 2 groups are required in the grouping variable.
+Tests and effect sizes use the selected analysis scale. Reported fold changes
+continue to use ratios of group means from the original supplied values.
+
+By default, expression data are transformed using \code{log2(x + 1e-6)} before
+statistical testing. Set \code{log_transform = FALSE} to skip this transformation.
+At least 2 groups are required in the grouping variable.
 In paired analyses, only subjects observed in every group are used, with at
 most one sample per subject and group. The reported effect size is partial
 eta-squared for the group term.

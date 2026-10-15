@@ -16,8 +16,14 @@
 #'   used as the positive class.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log2(x + 1e-6)` before analysis. Default is
+#'   `FALSE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @details
+#' Expression values are used as supplied by default. Set `log_transform = TRUE`
+#' to apply `log2(x + 1e-6)` before analysis.
+#'
 #' For each variable, a ROC curve is computed using the expression values as predictor
 #' and the binary group labels as response.
 #'
@@ -53,8 +59,10 @@ gly_roc <- function(
   exp,
   group_col = "group",
   pos_class = NULL,
-  add_info = TRUE
+  add_info = TRUE,
+  log_transform = FALSE
 ) {
+  checkmate::assert_flag(log_transform)
   rlang::check_installed("pROC")
 
   # Validate inputs
@@ -79,7 +87,12 @@ gly_roc <- function(
   groups <- group_info$groups
 
   # Run the internal computation
-  result <- .analyze_roc(expr_mat, groups, pos_class)
+  result <- .analyze_roc(
+    expr_mat,
+    groups,
+    pos_class,
+    log_transform = log_transform
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -97,7 +110,13 @@ gly_roc <- function(
 #' This helper receives components extracted from a validated experiment.
 #'
 #' @noRd
-.analyze_roc <- function(expr_mat, groups, pos_class = NULL) {
+.analyze_roc <- function(
+  expr_mat,
+  groups,
+  pos_class = NULL,
+  log_transform = FALSE
+) {
+  checkmate::assert_flag(log_transform)
   rlang::check_installed("pROC")
 
   # Validate inputs
@@ -122,6 +141,8 @@ gly_roc <- function(
       ))
     }
   }
+
+  expr_mat <- .log_transform_expr_mat(expr_mat, log_transform = log_transform)
 
   # Prepare data for ROC analysis
   response <- as.numeric(groups == pos_class)

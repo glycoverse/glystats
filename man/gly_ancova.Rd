@@ -10,7 +10,8 @@ gly_ancova(
   covariate_cols = NULL,
   p_adj_method = "BH",
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 }
 \arguments{
@@ -32,6 +33,11 @@ If NULL, no adjustment is performed.}
 will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::aov()}.}
+
+\item{log_transform}{A single non-missing logical value. If \code{TRUE} (default),
+transform expression values using \code{log2(x + 1e-6)} before analysis. If
+\code{FALSE}, use the supplied values unchanged, for example for already
+log-transformed data.}
 }
 \value{
 A list containing two elements:
@@ -73,8 +79,12 @@ For significant results, emmeans post-hoc comparisons (Tukey adjustment) are aut
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
-The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-statistical testing. At least 2 groups and at least 1 covariate are required.
+Tests and effect sizes use the selected analysis scale. Reported fold changes
+continue to use ratios of group means from the original supplied values.
+
+By default, expression data are transformed using \code{log2(x + 1e-6)} before
+statistical testing. Set \code{log_transform = FALSE} to skip this transformation.
+At least 2 groups and at least 1 covariate are required.
 
 For any variable failed to fit a \code{stats::aov()} model,
 NAs will be assigned to the results in both main test and post-hoc test.

@@ -13,7 +13,8 @@ gly_limma(
   ref_group = NULL,
   contrasts = NULL,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 }
 \arguments{
@@ -49,6 +50,11 @@ Use the second format if group names contain hyphens.
 will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
+
+\item{log_transform}{A single non-missing logical value. If \code{TRUE} (default),
+transform expression values using \code{log2(x + 1e-6)} before analysis. If
+\code{FALSE}, use the supplied values unchanged, for example for already
+log-transformed data.}
 }
 \value{
 A list with three elements:
@@ -56,7 +62,8 @@ A list with three elements:
 \item \code{tidy_result}: A tibble with limma results containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{log2fc}: Log2 fold change
+\item \code{log2fc}: Model contrast on the analysis scale (log2 fold change when
+expression values are on a log2 scale)
 \item \code{AveExpr}: Average expression level
 \item \code{t}: t-statistic
 \item \code{p_val}: Raw p-value
@@ -74,9 +81,14 @@ Perform differential expression analysis using linear models with empirical Baye
 moderation from the limma package. Supports both two-group and multi-group comparisons.
 }
 \details{
-The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-statistical testing. The analysis uses linear models with empirical Bayes moderation
+By default, expression data are transformed using \code{log2(x + 1e-6)} before
+statistical testing. Set \code{log_transform = FALSE} to skip this transformation.
+The analysis uses linear models with empirical Bayes moderation
 to improve statistical power, especially for small sample sizes.
+
+The \code{log2fc} column always contains the fitted model contrast. When
+\code{log_transform = FALSE}, its units are those of the supplied expression data;
+it is a log2 fold change only when those values are already on a log2 scale.
 
 For two or more groups, all pairwise comparisons are automatically generated
 (one contrast for two groups) and performed using contrast matrices unless

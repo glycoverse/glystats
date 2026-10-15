@@ -15,13 +15,19 @@
 #'   See `p.adjust.methods` for available methods. Default is "BH".
 #'   If NULL, no adjustment is performed.
 #' @param ... Additional arguments passed to `Hmisc::rcorr()`.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log2(x + 1e-6)` before analysis. Default is
+#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @section Required packages:
 #' This function requires the `Hmisc` package for efficient correlation calculation.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-#' correlation analysis. When `on = "variable"` (default), correlations are calculated between
+#' Set `log_transform = FALSE` to use the expression values as supplied, for
+#' example when they are already log-transformed.
+#'
+#' By default, the function performs log2 transformation on the expression data
+#' (`log2(x + 1e-6)`) before correlation analysis. When `on = "variable"` (default), correlations are calculated between
 #' variables across samples. When `on = "sample"`, correlations are calculated between
 #' samples across variables.
 #'
@@ -50,8 +56,10 @@ gly_cor <- function(
   on = "variable",
   method = "pearson",
   p_adj_method = "BH",
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   .assert_data_container(exp)
   checkmate::assert_choice(on, c("variable", "sample"))
@@ -66,7 +74,14 @@ gly_cor <- function(
   expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
-  result <- .analyze_cor(expr_mat, on, method, p_adj_method, ...)
+  result <- .analyze_cor(
+    expr_mat,
+    on,
+    method,
+    p_adj_method,
+    ...,
+    log_transform = log_transform
+  )
 
   # Add meta_data from experiment
   result$meta_data <- .get_meta_data(exp)
@@ -84,8 +99,10 @@ gly_cor <- function(
   on = "variable",
   method = "pearson",
   p_adj_method = "BH",
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_choice(on, c("variable", "sample"))
@@ -116,7 +133,7 @@ gly_cor <- function(
   }
 
   # Apply log transformation
-  mat <- .log_transform_expr_mat(mat)
+  mat <- .log_transform_expr_mat(mat, log_transform = log_transform)
 
   # Calculate correlation using Hmisc::rcorr
   if (all(rowSums(!is.na(expr_mat)) == 0)) {

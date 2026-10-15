@@ -14,7 +14,8 @@ gly_set_test(
   threshold = 0.9,
   correlation = "pearson",
   clustering = "connected",
-  within = NULL
+  within = NULL,
+  log_transform = TRUE
 )
 }
 \arguments{
@@ -54,6 +55,11 @@ requires every pair in a set to exceed \code{threshold}.}
 
 \item{within}{Optional variable-information columns defining strata within
 which automatic sets are constructed, such as \code{c("protein", "protein_site")}.}
+
+\item{log_transform}{A single non-missing logical. If \code{TRUE} (default),
+apply \code{log2(x + 1e-6)} for both automatic set construction and testing.
+If \code{FALSE}, use supplied values without transformation, including values
+that have already been transformed. Estimates are on the selected scale.}
 }
 \value{
 A list with classes \code{glystats_set_test_res} and \code{glystats_res}
@@ -76,7 +82,7 @@ Construct and jointly test correlated variable sets with Hotelling's
 \eqn{T^2} statistic.
 }
 \details{
-Expression values are transformed using \code{log2(x + 1e-6)}. The first factor
+By default, expression values are transformed using \code{log2(x + 1e-6)}. The first factor
 level of \code{group_col} is the reference group and the second is the test group.
 The estimate is therefore \code{test - reference}.
 

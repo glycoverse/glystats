@@ -18,6 +18,9 @@
 #' @param ... Additional arguments passed to `stats::dist()` and `stats::hclust()`.
 #'   Note: if both functions need a `method` parameter, use `dist.method` for distance
 #'   and `hclust.method` for clustering method.
+#' @param log_transform A single logical value indicating whether to transform
+#'   expression values using `log2(x + 1e-6)` before analysis. Default is
+#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @section Required packages:
 #' This function only uses base R packages and does not require additional dependencies.
@@ -25,8 +28,11 @@
 #' but not required.
 #'
 #' @details
-#' The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-#' clustering. When `on = "variable"` (default), variables are clustered based on their
+#' Set `log_transform = FALSE` to use the expression values as supplied, for
+#' example when they are already log-transformed.
+#'
+#' By default, the function performs log2 transformation on the expression data
+#' (`log2(x + 1e-6)`) before clustering. When `on = "variable"` (default), variables are clustered based on their
 #' expression patterns across samples. When `on = "sample"`, samples are clustered based
 #' on their expression profiles across variables.
 #'
@@ -65,8 +71,10 @@ gly_hclust <- function(
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   .assert_data_container(exp)
   checkmate::assert_choice(on, c("variable", "sample"))
@@ -80,7 +88,14 @@ gly_hclust <- function(
   expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
-  result <- .analyze_hclust(expr_mat, on, k_values, scale, ...)
+  result <- .analyze_hclust(
+    expr_mat,
+    on,
+    k_values,
+    scale,
+    ...,
+    log_transform = log_transform
+  )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -103,8 +118,10 @@ gly_hclust <- function(
   on = "variable",
   k_values = c(2, 3, 4, 5),
   scale = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 ) {
+  checkmate::assert_flag(log_transform)
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_choice(on, c("variable", "sample"))
@@ -166,7 +183,7 @@ gly_hclust <- function(
   }
 
   # Apply log transformation
-  mat <- .log_transform_expr_mat(mat)
+  mat <- .log_transform_expr_mat(mat, log_transform = log_transform)
   # Scale data if requested
   if (scale) {
     mat <- scale(mat)
