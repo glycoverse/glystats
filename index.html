@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,6 +83,18 @@
 </div>
 </div>
 <div class="section level2">
+<h2 id="control-log-transformation">Control log transformation<a class="anchor" aria-label="anchor" href="#control-log-transformation"></a>
+</h2>
+<p>All expression-analysis functions accept <code>log_transform</code>. Existing defaults are preserved: it is <code>TRUE</code> for differential tests, correlation, clustering, dimension reduction, supervised models, and set testing; it is <code>FALSE</code> for <code><a href="reference/gly_cox.html">gly_cox()</a></code>, <code><a href="reference/gly_roc.html">gly_roc()</a></code>, and <code><a href="reference/gly_fold_change.html">gly_fold_change()</a></code>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Skip a second transformation when expression values are already transformed.</span></span>
+<span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gly_pca.html">gly_pca</a></span><span class="op">(</span><span class="va">exp</span>, log_transform <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co"># Opt in for a model that previously used untransformed expression.</span></span>
+<span><span class="va">cox</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gly_cox.html">gly_cox</a></span><span class="op">(</span><span class="va">exp</span>, log_transform <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>PCA, PLS-DA, OPLS-DA, t-SNE, and UMAP preserve <code>log(x + 1)</code>; other analyses use <code>log2(x + 1e-6)</code> when enabled. Set testing uses the same choice for automatic set construction and inference. Model estimates and effect sizes reflect the selected analysis scale. Differential-test fold changes still use the original supplied values; disabling transformation does not tell these functions to back-transform already logged inputs. For limma, the existing <code>log2fc</code> column contains model contrasts and is only a log2 fold change when the supplied analysis scale is log2.</p>
+<p>For <code><a href="reference/gly_fold_change.html">gly_fold_change()</a></code>, <code>FALSE</code> retains the log2 ratio of arithmetic group means. <code>TRUE</code> reports the difference of mean log2-transformed values, the log2 ratio of geometric means of <code>x + 1e-6</code>, rather than a ratio of logarithms. Result extraction and significance-filtering utilities do not transform expression and have no <code>log_transform</code> argument.</p>
+</div>
+<div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
 <ul>
@@ -102,7 +114,7 @@
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <p>Say we already have a preprocessed glycomics or glycoproteomics container called <code>exp</code>:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Two-sample t-test</span></span>
 <span><span class="va">ttest_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gly_ttest.html">gly_ttest</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span>
 <span></span>

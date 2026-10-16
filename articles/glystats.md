@@ -152,16 +152,16 @@ get_tidy_result(anova_res, "main_test")
 #> # A tibble: 225 × 14
 #>    variable     protein glycan_composition protein_site gene  term     df  sumsq
 #>    <chr>        <chr>   <comp>                    <int> <chr> <chr> <dbl>  <dbl>
-#>  1 P08185-176-… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… group     3  55.7 
-#>  2 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 158.  
-#>  3 P04196-344-… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 138.  
-#>  4 P10909-291-… P10909  Hex(6)HexNAc(5)             291 CLU   group     3  22.5 
-#>  5 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 496.  
-#>  6 P04196-345-… P04196  Hex(5)HexNAc(4)             345 HRG   group     3  60.2 
-#>  7 P04196-344-… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 173.  
-#>  8 P04196-344-… P04196  Hex(4)HexNAc(3)             344 HRG   group     3  72.1 
+#>  1 P08185-176-… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… group     3  45.0 
+#>  2 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 159.  
+#>  3 P04196-344-… P04196  Hex(5)HexNAc(4)             344 HRG   group     3  72.6 
+#>  4 P10909-291-… P10909  Hex(6)HexNAc(5)             291 CLU   group     3  16.3 
+#>  5 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 485.  
+#>  6 P04196-345-… P04196  Hex(5)HexNAc(4)             345 HRG   group     3  35.0 
+#>  7 P04196-344-… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 162.  
+#>  8 P04196-344-… P04196  Hex(4)HexNAc(3)             344 HRG   group     3  77.2 
 #>  9 P04196-344-… P04196  Hex(4)HexNAc(4)Ne…          344 HRG   group     3   9.65
-#> 10 P10909-291-… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  75.0 
+#> 10 P10909-291-… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  81.4 
 #> # ℹ 215 more rows
 #> # ℹ 6 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
 #> #   effect_size <dbl>, post_hoc <chr>
@@ -195,20 +195,20 @@ exp |>
 #> ℹ Number of groups: 4
 #> ℹ Groups: "C", "H", "M", and "Y"
 #> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
-#> # A tibble: 54 × 14
+#> # A tibble: 58 × 14
 #>    variable      protein glycan_composition protein_site gene  term     df sumsq
 #>    <chr>         <chr>   <comp>                    <int> <chr> <chr> <dbl> <dbl>
-#>  1 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 158. 
-#>  2 P04196-344-H… P04196  Hex(5)HexNAc(4)             344 HRG   group     3 138. 
-#>  3 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 496. 
-#>  4 P10909-291-H… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  75.0
-#>  5 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 127. 
-#>  6 P13671-855-H… P13671  Hex(5)HexNAc(4)dH…          855 C6    group     3  81.1
-#>  7 P04196-344-H… P04196  Hex(4)HexNAc(3)dH…          344 HRG   group     3 195. 
-#>  8 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 116. 
-#>  9 P01019-161-H… P01019  Hex(5)HexNAc(4)Ne…          161 AGT   group     3  46.4
-#> 10 P01019-161-H… P01019  Hex(4)HexNAc(3)Ne…          161 AGT   group     3  61.4
-#> # ℹ 44 more rows
+#>  1 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 159. 
+#>  2 P04196-344-H… P04196  Hex(5)HexNAc(4)             344 HRG   group     3  72.6
+#>  3 P10909-291-H… P10909  Hex(6)HexNAc(5)             291 CLU   group     3  16.3
+#>  4 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 485. 
+#>  5 P04196-345-H… P04196  Hex(5)HexNAc(4)             345 HRG   group     3  35.0
+#>  6 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 162. 
+#>  7 P04196-344-H… P04196  Hex(4)HexNAc(3)             344 HRG   group     3  77.2
+#>  8 P10909-291-H… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  81.4
+#>  9 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 132. 
+#> 10 P13671-855-H… P13671  Hex(5)HexNAc(4)dH…          855 C6    group     3  81.1
+#> # ℹ 48 more rows
 #> # ℹ 6 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
 #> #   effect_size <dbl>, post_hoc <chr>
 ```

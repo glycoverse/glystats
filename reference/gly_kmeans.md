@@ -13,7 +13,8 @@ gly_kmeans(
   centers = 3,
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 ```
 
@@ -55,6 +56,12 @@ gly_kmeans(
   Additional arguments passed to
   [`stats::kmeans()`](https://rdrr.io/r/stats/kmeans.html).
 
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log2(x + 1e-6)` before analysis. Default is `TRUE`. Set
+  to `FALSE` for data that are already log-transformed.
+
 ## Value
 
 A list with three elements:
@@ -74,14 +81,17 @@ A list with three elements:
 
 ## Details
 
-The function performs log2 transformation on the expression data
-(log2(x + 1e-6)) before clustering. When `on = "variable"` (default),
-variables are clustered based on their expression patterns across
-samples. When `on = "sample"`, samples are clustered based on their
-expression profiles across variables.
+Set `log_transform = FALSE` to use the expression values as supplied,
+for example when they are already log-transformed.
 
-**Data Preparation:** Data is log2-transformed and optionally scaled
-before clustering.
+By default, the function performs log2 transformation on the expression
+data (`log2(x + 1e-6)`) before clustering. When `on = "variable"`
+(default), variables are clustered based on their expression patterns
+across samples. When `on = "sample"`, samples are clustered based on
+their expression profiles across variables.
+
+**Data Preparation:** Data is log2-transformed when
+`log_transform = TRUE` and optionally scaled before clustering.
 
 **Clustering Method:** K-means clustering is performed using
 [`stats::kmeans()`](https://rdrr.io/r/stats/kmeans.html) with the

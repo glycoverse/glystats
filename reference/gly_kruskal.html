@@ -13,7 +13,7 @@ P-values are adjusted for multiple testing using the method specified by p_adj_m
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,8 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  subject_col <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  subject_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -92,6 +93,13 @@ paired analyses, <code><a href="https://rdrr.io/r/stats/friedman.test.html" clas
 <dd><p>An optional character string naming the subject identifier
 column in sample information. When supplied, a Friedman test is performed.</p></dd>
 
+
+<dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
+<dd><p>A single non-missing logical value. If <code>TRUE</code> (default),
+transform expression values using <code>log2(x + 1e-6)</code> before analysis. If
+<code>FALSE</code>, use the supplied values unchanged, for example for already
+log-transformed data.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -119,8 +127,11 @@ containing the following columns:</p><ul><li><p><code>variable</code>: Variable 
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-statistical testing. At least 2 groups are required in the grouping variable.
+    <p>Tests and effect sizes use the selected analysis scale. Reported fold changes
+continue to use ratios of group means from the original supplied values.</p>
+<p>By default, expression data are transformed using <code>log2(x + 1e-6)</code> before
+statistical testing. Set <code>log_transform = FALSE</code> to skip this transformation.
+At least 2 groups are required in the grouping variable.
 In paired analyses, only subjects observed in every group are used, with at
 most one sample per subject and group. The reported effect size is Kendall's
 \(W\).</p>

@@ -9,7 +9,7 @@ The function uses uwot::umap() to perform UMAP analysis."><meta property="og:ima
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,14 @@ The function uses <code><a href="https://jlmelville.github.io/uwot/reference/uma
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_umap</span><span class="op">(</span><span class="va">exp</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, n_components <span class="op">=</span> <span class="fl">2</span>, add_info <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_umap</span><span class="op">(</span></span>
+<span>  <span class="va">exp</span>,</span>
+<span>  n_neighbors <span class="op">=</span> <span class="fl">15</span>,</span>
+<span>  n_components <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -70,6 +77,12 @@ will be added to the result tibble. If FALSE, only the UMAP coordinates are retu
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://jlmelville.github.io/uwot/reference/umap.html" class="external-link">uwot::umap()</a></code>.</p></dd>
 
+
+<dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
+<dd><p>A single logical value indicating whether to transform
+expression values using <code>log(x + 1)</code> before analysis. Default is
+<code>TRUE</code>. Set to <code>FALSE</code> for data that are already log-transformed.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -82,6 +95,12 @@ will be added to the result tibble. If FALSE, only the UMAP coordinates are retu
 <li><p><code>meta_data</code>: A list containing metadata from the input experiment
 The list has classes <code>glystats_umap_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>By default, expression values are transformed using <code>log(x + 1)</code> before
+analysis. Set <code>log_transform = FALSE</code> to use the expression values as supplied,
+for example when they are already log-transformed.</p>
+    </div>
     <div class="section level2">
     <h2 id="required-packages">Required packages<a class="anchor" aria-label="anchor" href="#required-packages"></a></h2>
 

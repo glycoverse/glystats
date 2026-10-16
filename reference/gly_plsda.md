@@ -14,7 +14,8 @@ gly_plsda(
   ncomp = 2,
   scale = TRUE,
   add_info = TRUE,
-  ...
+  ...,
+  log_transform = TRUE
 )
 ```
 
@@ -53,6 +54,12 @@ gly_plsda(
 
   Additional arguments passed to
   [`ropls::opls()`](https://rdrr.io/pkg/ropls/man/opls.html).
+
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log(x + 1)` before analysis. Default is `TRUE`. Set to
+  `FALSE` for data that are already log-transformed.
 
 ## Value
 
@@ -112,6 +119,12 @@ A list containing:
   [`ropls::opls()`](https://rdrr.io/pkg/ropls/man/opls.html)
 
 - `meta_data`: A list containing metadata from the input experiment
+
+## Details
+
+By default, expression values are transformed using `log(x + 1)` before
+analysis. Set `log_transform = FALSE` to use the expression values as
+supplied, for example when they are already log-transformed.
 
 ## Required packages
 

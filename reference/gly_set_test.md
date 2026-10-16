@@ -16,7 +16,8 @@ gly_set_test(
   threshold = 0.9,
   correlation = "pearson",
   clustering = "connected",
-  within = NULL
+  within = NULL,
+  log_transform = TRUE
 )
 ```
 
@@ -84,6 +85,14 @@ gly_set_test(
   automatic sets are constructed, such as
   `c("protein", "protein_site")`.
 
+- log_transform:
+
+  A single non-missing logical. If `TRUE` (default), apply
+  `log2(x + 1e-6)` for both automatic set construction and testing. If
+  `FALSE`, use supplied values without transformation, including values
+  that have already been transformed. Estimates are on the selected
+  scale.
+
 ## Value
 
 A list with classes `glystats_set_test_res` and `glystats_res`
@@ -106,9 +115,9 @@ containing:
 
 ## Details
 
-Expression values are transformed using `log2(x + 1e-6)`. The first
-factor level of `group_col` is the reference group and the second is the
-test group. The estimate is therefore `test - reference`.
+By default, expression values are transformed using `log2(x + 1e-6)`.
+The first factor level of `group_col` is the reference group and the
+second is the test group. The estimate is therefore `test - reference`.
 
 Every usable variable is assigned to a set, including a one-variable set
 when it is not correlated above `threshold` with another variable.

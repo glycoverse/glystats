@@ -8,7 +8,14 @@ to perform UMAP analysis.
 ## Usage
 
 ``` r
-gly_umap(exp, n_neighbors = 15, n_components = 2, add_info = TRUE, ...)
+gly_umap(
+  exp,
+  n_neighbors = 15,
+  n_components = 2,
+  add_info = TRUE,
+  ...,
+  log_transform = TRUE
+)
 ```
 
 ## Arguments
@@ -41,6 +48,12 @@ gly_umap(exp, n_neighbors = 15, n_components = 2, add_info = TRUE, ...)
   Additional arguments passed to
   [`uwot::umap()`](https://jlmelville.github.io/uwot/reference/umap.html).
 
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log(x + 1)` before analysis. Default is `TRUE`. Set to
+  `FALSE` for data that are already log-transformed.
+
 ## Value
 
 A list with three elements:
@@ -61,6 +74,12 @@ A list with three elements:
 
 - `meta_data`: A list containing metadata from the input experiment The
   list has classes `glystats_umap_res` and `glystats_res`.
+
+## Details
+
+By default, expression values are transformed using `log(x + 1)` before
+analysis. Set `log_transform = FALSE` to use the expression values as
+supplied, for example when they are already log-transformed.
 
 ## Required packages
 

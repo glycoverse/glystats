@@ -214,7 +214,6 @@ exp <- auto_clean(real_experiment) |>
 #> 
 #> ── Aggregating data ──
 #> 
-#> ℹ Aggregating to "gfs" level
 #> ✔ Aggregation completed.
 #> 
 #> ── Normalizing data again ──

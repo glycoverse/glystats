@@ -11,7 +11,7 @@ with optional multiple testing correction."><meta property="og:image" content="h
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,14 @@ with optional multiple testing correction.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_cor</span><span class="op">(</span><span class="va">exp</span>, on <span class="op">=</span> <span class="st">"variable"</span>, method <span class="op">=</span> <span class="st">"pearson"</span>, p_adj_method <span class="op">=</span> <span class="st">"BH"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gly_cor</span><span class="op">(</span></span>
+<span>  <span class="va">exp</span>,</span>
+<span>  on <span class="op">=</span> <span class="st">"variable"</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"pearson"</span>,</span>
+<span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,6 +83,12 @@ If NULL, no adjustment is performed.</p></dd>
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://rdrr.io/pkg/Hmisc/man/rcorr.html" class="external-link">Hmisc::rcorr()</a></code>.</p></dd>
 
+
+<dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
+<dd><p>A single logical value indicating whether to transform
+expression values using <code>log2(x + 1e-6)</code> before analysis. Default is
+<code>TRUE</code>. Set to <code>FALSE</code> for data that are already log-transformed.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -91,8 +104,10 @@ The list has classes <code>glystats_cor_res</code> and <code>glystats_res</code>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-correlation analysis. When <code>on = "variable"</code> (default), correlations are calculated between
+    <p>Set <code>log_transform = FALSE</code> to use the expression values as supplied, for
+example when they are already log-transformed.</p>
+<p>By default, the function performs log2 transformation on the expression data
+(<code>log2(x + 1e-6)</code>) before correlation analysis. When <code>on = "variable"</code> (default), correlations are calculated between
 variables across samples. When <code>on = "sample"</code>, correlations are calculated between
 samples across variables.</p>
 <p><strong>Correlation Calculation:</strong>

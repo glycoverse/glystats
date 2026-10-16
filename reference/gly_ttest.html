@@ -9,7 +9,7 @@ P-values are adjusted for multiple testing using the method specified by p_adj_m
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,8 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 <span>  ref_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  subject_col <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  subject_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -92,6 +93,13 @@ will be added to the result tibble. If FALSE, only the statistical results are r
 column in sample information. When supplied, samples are matched by subject
 and a paired t-test is performed.</p></dd>
 
+
+<dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
+<dd><p>A single non-missing logical value. If <code>TRUE</code> (default),
+transform expression values using <code>log2(x + 1e-6)</code> before analysis. If
+<code>FALSE</code>, use the supplied values unchanged, for example for already
+log-transformed data.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -116,8 +124,11 @@ The list has classes <code>glystats_ttest_res</code> and <code>glystats_res</cod
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The function performs log2 transformation on the expression data (log2(x + 1e-6)) before
-statistical testing. Exactly 2 groups are required in the grouping variable.
+    <p>Tests and effect sizes use the selected analysis scale. Reported fold changes
+continue to use ratios of group means from the original supplied values.</p>
+<p>By default, expression data are transformed using <code>log2(x + 1e-6)</code> before
+statistical testing. Set <code>log_transform = FALSE</code> to skip this transformation.
+Exactly 2 groups are required in the grouping variable.
 In paired analyses, only subjects observed in both groups are used and
 <code>effect_size</code> is Cohen's \(d_z\) based on within-subject differences.</p>
     </div>

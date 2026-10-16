@@ -8,7 +8,14 @@ t-SNE analysis.
 ## Usage
 
 ``` r
-gly_tsne(exp, dims = 2, perplexity = 30, add_info = TRUE, ...)
+gly_tsne(
+  exp,
+  dims = 2,
+  perplexity = 30,
+  add_info = TRUE,
+  ...,
+  log_transform = TRUE
+)
 ```
 
 ## Arguments
@@ -41,6 +48,12 @@ gly_tsne(exp, dims = 2, perplexity = 30, add_info = TRUE, ...)
   Additional arguments passed to
   [`Rtsne::Rtsne()`](https://rdrr.io/pkg/Rtsne/man/Rtsne.html).
 
+- log_transform:
+
+  A single logical value indicating whether to transform expression
+  values using `log(x + 1)` before analysis. Default is `TRUE`. Set to
+  `FALSE` for data that are already log-transformed.
+
 ## Value
 
 A list with three elements:
@@ -58,6 +71,12 @@ A list with three elements:
 
 - `meta_data`: A list containing metadata from the input experiment The
   list has classes `glystats_tsne_res` and `glystats_res`.
+
+## Details
+
+By default, expression values are transformed using `log(x + 1)` before
+analysis. Set `log_transform = FALSE` to use the expression values as
+supplied, for example when they are already log-transformed.
 
 ## Required packages
 
