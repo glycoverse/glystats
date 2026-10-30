@@ -8,7 +8,7 @@ gly_fold_change(
   exp,
   group_col = "group",
   add_info = TRUE,
-  log_transform = FALSE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -20,30 +20,31 @@ or another \code{SummarizedExperiment}.}
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the fold change results are returned.}
 
-\item{log_transform}{A single non-missing logical. If \code{FALSE} (default),
-return the log2 ratio of arithmetic group means as before. If \code{TRUE},
-apply \code{log2(x + 1e-6)} and return the difference of group means on that
-scale, equivalent to the log2 ratio of geometric means of \code{x + 1e-6}.
-This option transforms input expression; it does not toggle the log2
-scale of the reported fold change.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
-A list with three elements:
+A list with four elements:
 \itemize{
 \item \code{tidy_result}: A tibble with fold change results containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{log2fc}: Log2 ratio of arithmetic group means by default, or
-difference of mean log2-transformed values when \code{log_transform = TRUE}.
+\item \code{log2fc}: Log2 fold change; see \link{gly_scale} for the scale-dependent definition
 If more than two groups, two additional columns \code{ref_group} and \code{test_group} will be added.
 }
 \item \code{raw_result}: The raw result (same as tidy_result for this function)
 \item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 }
 }
 \description{
 Calculate fold change for a given expression matrix and group information.
-It could only be used for 2-group analysis.
+Pairwise comparisons are returned when more than two groups are supplied.
 When you run this function, you will see message about "Ref Group" and "Test Group".
 "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
+}
+\seealso{
+\link{gly_scale} for input scales, transformations, and fold changes.
 }

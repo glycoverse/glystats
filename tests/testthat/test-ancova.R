@@ -14,7 +14,10 @@ test_that("gly_ancova works with ancova method", {
   # Test core functionality - should return a list with tidy_result and raw_result
   expect_type(result, "list")
   expect_s3_class(result, c("glystats_ancova_res", "glystats_res"))
-  expect_named(result, c("tidy_result", "raw_result"))
+  expect_named(
+    result,
+    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+  )
 
   # Test tidy_result structure
   expect_type(result$tidy_result, "list")

@@ -18,11 +18,6 @@
 #'   from the experiment is added to the tidy result.
 #' @param ... Additional arguments passed to [limma::lmFit()].
 #'
-#' @param log_transform A single non-missing logical value. If `TRUE` (default),
-#'   transform expression values using `log2(x + 1e-6)` before analysis. If
-#'   `FALSE`, use the supplied values unchanged, for example for already
-#'   log-transformed data.
-#'
 #' @details
 #' `gly_linear_model()` and [gly_limma()] both use limma under the hood, but
 #' serve complementary use cases. `gly_linear_model()` provides a general
@@ -31,10 +26,7 @@
 #' expression analysis tasks, with convenient group, covariate, subject, and
 #' pairwise-comparison arguments.
 #'
-#' By default, expression values are transformed using `log2(x + 1e-6)` before
-#' modeling. Set `log_transform = FALSE` to use the supplied values unchanged.
-#' Coefficient estimates and average expression are reported on the selected
-#' analysis scale.
+#' Raw expression values are automatically transformed using `log2(x + 1e-6)` before modeling.
 #' When `contrasts` is `NULL`, all non-intercept coefficients are tested. When
 #' contrasts are supplied, only the named contrasts are returned.
 #'
@@ -53,6 +45,7 @@
 #'   - `raw_result`: A list containing the moderated limma fit, design matrix,
 #'     contrast matrix, and coefficient-name mapping.
 #'   - `meta_data`: Metadata copied from `exp`.
+#'   - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #'
 #' @examplesIf requireNamespace("limma", quietly = TRUE)
 #' exp <- glyexp::real_experiment
@@ -73,6 +66,8 @@
 #' )
 #'
 #' @seealso [gly_limma()], [limma::lmFit()], [limma::eBayes()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_linear_model <- function(
   exp,
@@ -81,10 +76,24 @@ gly_linear_model <- function(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
-  checkmate::assert_flag(log_transform)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   .validate_linear_model_formula(formula)
   .validate_linear_model_contrasts(contrasts)
   checkmate::assert_choice(
@@ -112,7 +121,8 @@ gly_linear_model <- function(
   ) |>
     dplyr::arrange(.data$.glystats_order) |>
     dplyr::select(-".glystats_order")
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
   result
 }
 

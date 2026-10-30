@@ -20,18 +20,9 @@
 #'   column in sample information. When supplied, a subject-blocked
 #'   repeated-measures ANOVA is performed.
 #'
-#' @param log_transform A single non-missing logical value. If `TRUE` (default),
-#'   transform expression values using `log2(x + 1e-6)` before analysis. If
-#'   `FALSE`, use the supplied values unchanged, for example for already
-#'   log-transformed data.
-#'
 #' @details
-#' Tests and effect sizes use the selected analysis scale. Reported fold changes
-#' continue to use ratios of group means from the original supplied values.
-#'
-#' By default, expression data are transformed using `log2(x + 1e-6)` before
-#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
-#' At least 2 groups are required in the grouping variable.
+#' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+#' statistical testing. At least 2 groups are required in the grouping variable.
 #' In paired analyses, only subjects observed in every group are used, with at
 #' most one sample per subject and group. The reported effect size is partial
 #' eta-squared for the group term.
@@ -45,7 +36,7 @@
 #' instead use paired t-tests with Holm correction.
 #'
 #' @returns
-#' A list containing three elements:
+#' A list containing four elements:
 #'   - `tidy_result`: A list containing:
 #'     - `main_test`: A tibble with ANOVA results containing the following columns:
 #'       - `variable`: Variable name
@@ -69,8 +60,11 @@
 #'     - `post_hoc_test`: A list of raw `TukeyHSD` objects or paired t-test
 #'       summaries.
 #'   - `meta_data`: A list containing metadata from the input experiment.
+#'   - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_anova <- function(
   exp,
@@ -79,11 +73,25 @@ gly_anova <- function(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
-  checkmate::assert_flag(log_transform)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -115,7 +123,8 @@ gly_anova <- function(
     p_adj_method,
     ...,
     subjects = subjects,
-    log_transform = log_transform
+    log_transform = log_transform,
+    input_scale = transformation$input_scale
   )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
@@ -123,7 +132,8 @@ gly_anova <- function(
     add_info
   )
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
   result
 }
 
@@ -138,7 +148,8 @@ gly_anova <- function(
   p_adj_method = "BH",
   ...,
   subjects = NULL,
-  log_transform = TRUE
+  log_transform = TRUE,
+  input_scale = "raw"
 ) {
   checkmate::assert_flag(log_transform)
   # Validate inputs
@@ -221,7 +232,8 @@ gly_anova <- function(
     post_hoc_test,
     expr_mat,
     groups,
-    paired_data = if (design$paired) data else NULL
+    paired_data = if (design$paired) data else NULL,
+    input_scale = input_scale
   )
 
   # Assemble tidy results
@@ -267,18 +279,9 @@ gly_anova <- function(
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param ... Additional arguments passed to `stats::aov()`.
 #'
-#' @param log_transform A single non-missing logical value. If `TRUE` (default),
-#'   transform expression values using `log2(x + 1e-6)` before analysis. If
-#'   `FALSE`, use the supplied values unchanged, for example for already
-#'   log-transformed data.
-#'
 #' @details
-#' Tests and effect sizes use the selected analysis scale. Reported fold changes
-#' continue to use ratios of group means from the original supplied values.
-#'
-#' By default, expression data are transformed using `log2(x + 1e-6)` before
-#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
-#' At least 2 groups and at least 1 covariate are required.
+#' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+#' statistical testing. At least 2 groups and at least 1 covariate are required.
 #'
 #' For any variable failed to fit a `stats::aov()` model,
 #' NAs will be assigned to the results in both main test and post-hoc test.
@@ -288,7 +291,7 @@ gly_anova <- function(
 #' for variables with significant main effects (p_adj < 0.05).
 #'
 #' @returns
-#' A list containing two elements:
+#' A list containing four elements:
 #'   - `tidy_result`: A list containing:
 #'     - `main_test`: A tibble with ANCOVA results containing the following columns:
 #'       - `variable`: Variable name
@@ -309,11 +312,15 @@ gly_anova <- function(
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `aov` model objects.
 #'     - `post_hoc_test`: A list of raw emmeans results.
+#'   - `meta_data`: Metadata copied from the input experiment.
+#'   - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #'
 #' @section Required packages:
 #' This function requires the `emmeans` package for post-hoc comparisons.
 #'
 #' @seealso [stats::aov()], [emmeans::emmeans()], [emmeans::contrast()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_ancova <- function(
   exp,
@@ -322,11 +329,25 @@ gly_ancova <- function(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
-  checkmate::assert_flag(log_transform)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -371,13 +392,16 @@ gly_ancova <- function(
     covariates,
     p_adj_method,
     ...,
-    log_transform = log_transform
+    log_transform = log_transform,
+    input_scale = transformation$input_scale
   )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
     add_info
   )
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
   result
 }
 
@@ -392,7 +416,8 @@ gly_ancova <- function(
   covariates,
   p_adj_method = "BH",
   ...,
-  log_transform = TRUE
+  log_transform = TRUE,
+  input_scale = "raw"
 ) {
   checkmate::assert_flag(log_transform)
   # Check package availability
@@ -470,7 +495,12 @@ gly_ancova <- function(
   )
   main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
-  post_hoc_test <- .add_fold_change(post_hoc_test, expr_mat, groups)
+  post_hoc_test <- .add_fold_change(
+    post_hoc_test,
+    expr_mat,
+    groups,
+    input_scale = input_scale
+  )
 
   # Assemble tidy results
   tidy_result <- list(
@@ -519,18 +549,9 @@ gly_ancova <- function(
 #' @section Required packages:
 #' Unpaired analyses require the `FSA` package for Dunn's post-hoc test.
 #'
-#' @param log_transform A single non-missing logical value. If `TRUE` (default),
-#'   transform expression values using `log2(x + 1e-6)` before analysis. If
-#'   `FALSE`, use the supplied values unchanged, for example for already
-#'   log-transformed data.
-#'
 #' @details
-#' Tests and effect sizes use the selected analysis scale. Reported fold changes
-#' continue to use ratios of group means from the original supplied values.
-#'
-#' By default, expression data are transformed using `log2(x + 1e-6)` before
-#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
-#' At least 2 groups are required in the grouping variable.
+#' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+#' statistical testing. At least 2 groups are required in the grouping variable.
 #' In paired analyses, only subjects observed in every group are used, with at
 #' most one sample per subject and group. The reported effect size is Kendall's
 #' \eqn{W}.
@@ -545,7 +566,7 @@ gly_ancova <- function(
 #' instead use paired Wilcoxon signed-rank tests with Holm correction.
 #'
 #' @returns
-#' A list containing three elements:
+#' A list containing four elements:
 #'   - `tidy_result`: A list containing:
 #'     - `main_test`: A tibble with Kruskal-Wallis or Friedman test results
 #'       containing the following columns:
@@ -567,9 +588,12 @@ gly_ancova <- function(
 #'     - `main_test`: A list of raw `kruskal.test` or `friedman.test` objects.
 #'     - `post_hoc_test`: A list of raw Dunn or paired Wilcoxon summaries.
 #'   - `meta_data`: A list containing metadata from the input experiment.
+#'   - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #'
 #' @seealso [stats::kruskal.test()], [stats::friedman.test()],
 #'   [FSA::dunnTest()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_kruskal <- function(
   exp,
@@ -578,11 +602,25 @@ gly_kruskal <- function(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
-  checkmate::assert_flag(log_transform)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -614,7 +652,8 @@ gly_kruskal <- function(
     p_adj_method,
     ...,
     subjects = subjects,
-    log_transform = log_transform
+    log_transform = log_transform,
+    input_scale = transformation$input_scale
   )
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
@@ -622,7 +661,8 @@ gly_kruskal <- function(
     add_info
   )
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
   result
 }
 
@@ -637,7 +677,8 @@ gly_kruskal <- function(
   p_adj_method = "BH",
   ...,
   subjects = NULL,
-  log_transform = TRUE
+  log_transform = TRUE,
+  input_scale = "raw"
 ) {
   checkmate::assert_flag(log_transform)
   # Validate inputs
@@ -731,7 +772,8 @@ gly_kruskal <- function(
     post_hoc_test,
     expr_mat,
     groups,
-    paired_data = if (design$paired) data else NULL
+    paired_data = if (design$paired) data else NULL,
+    input_scale = input_scale
   )
 
   # Assemble tidy results
@@ -1447,7 +1489,8 @@ gly_kruskal <- function(
   post_hoc_test,
   expr_mat,
   groups,
-  paired_data = NULL
+  paired_data = NULL,
+  input_scale = "raw"
 ) {
   if (!is.null(paired_data)) {
     if (nrow(post_hoc_test) == 0) {
@@ -1472,9 +1515,13 @@ gly_kruskal <- function(
         )
 
         if (length(levels(groups)) == 2) {
-          .fc_2groups(variable_expr, variable_groups)
+          .fc_2groups(variable_expr, variable_groups, input_scale = input_scale)
         } else {
-          .fc_multi_groups(variable_expr, variable_groups)
+          .fc_multi_groups(
+            variable_expr,
+            variable_groups,
+            input_scale = input_scale
+          )
         }
       }
     )
@@ -1488,10 +1535,10 @@ gly_kruskal <- function(
   }
 
   if (length(levels(groups)) == 2) {
-    fc_res <- .fc_2groups(expr_mat, groups)
+    fc_res <- .fc_2groups(expr_mat, groups, input_scale = input_scale)
     return(dplyr::left_join(post_hoc_test, fc_res, by = "variable"))
   } else {
-    fc_res <- .fc_multi_groups(expr_mat, groups)
+    fc_res <- .fc_multi_groups(expr_mat, groups, input_scale = input_scale)
     return(dplyr::left_join(
       post_hoc_test,
       fc_res,

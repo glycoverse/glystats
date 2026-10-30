@@ -15,37 +15,33 @@
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
 #' @param ... Additional arguments passed to `stats::kmeans()`.
-#' @param log_transform A single logical value indicating whether to transform
-#'   expression values using `log2(x + 1e-6)` before analysis. Default is
-#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @section Required packages:
 #' This function only uses base R packages and does not require additional dependencies.
 #'
 #' @details
-#' Set `log_transform = FALSE` to use the expression values as supplied, for
-#' example when they are already log-transformed.
-#'
-#' By default, the function performs log2 transformation on the expression data
-#' (`log2(x + 1e-6)`) before clustering. When `on = "variable"` (default), variables are clustered based on their
+#' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+#' clustering. When `on = "variable"` (default), variables are clustered based on their
 #' expression patterns across samples. When `on = "sample"`, samples are clustered based
 #' on their expression profiles across variables.
 #'
 #' **Data Preparation:**
-#' Data is log2-transformed when `log_transform = TRUE` and optionally scaled
-#' before clustering.
+#' Raw data is automatically log2-transformed and optionally scaled before clustering.
 #'
 #' **Clustering Method:**
 #' K-means clustering is performed using `stats::kmeans()` with the specified parameters.
 #'
-#' @returns A list with three elements:
+#' @returns A list with four elements:
 #'  - `tidy_result`: A tibble with cluster assignments containing the following columns:
 #'    - `variable` or `sample`: Variable or sample name (depending on `on` parameter)
 #'    - `cluster`: Cluster assignment
 #'  - `raw_result`: The raw kmeans object from `stats::kmeans()`.
 #'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #'
 #' @seealso [stats::kmeans()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_kmeans <- function(
   exp,
@@ -54,11 +50,25 @@ gly_kmeans <- function(
   scale = TRUE,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
-  checkmate::assert_flag(log_transform)
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_choice(on, c("variable", "sample"))
   checkmate::assert(
     checkmate::check_integerish(centers, lower = 1, len = 1),
@@ -86,7 +96,8 @@ gly_kmeans <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
   result
 }

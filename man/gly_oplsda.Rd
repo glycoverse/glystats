@@ -12,7 +12,7 @@ gly_oplsda(
   scale = TRUE,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -34,9 +34,10 @@ will be added to the result tibbles. If FALSE, only the OPLS-DA results are retu
 
 \item{...}{Additional arguments passed to \code{ropls::opls()}.}
 
-\item{log_transform}{A single logical value indicating whether to transform
-expression values using \code{log(x + 1)} before analysis. Default is
-\code{TRUE}. Set to \code{FALSE} for data that are already log-transformed.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
 A list containing:
@@ -77,16 +78,12 @@ A list containing:
 }
 \item \code{raw_result}: The raw ropls opls object from \code{ropls::opls()}
 \item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 }
 }
 \description{
 Perform orthogonal partial least squares discriminant analysis on the expression data.
 The function uses \code{ropls::opls()} to perform OPLS-DA and returns tidy results.
-}
-\details{
-By default, expression values are transformed using \code{log(x + 1)} before
-analysis. Set \code{log_transform = FALSE} to use the expression values as supplied,
-for example when they are already log-transformed.
 }
 \section{Required packages}{
 
@@ -98,4 +95,6 @@ This function requires the following packages to be installed:
 
 \seealso{
 \code{\link[ropls:opls]{ropls::opls()}}
+
+\link{gly_scale} for input scales, transformations, and fold changes.
 }

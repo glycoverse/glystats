@@ -53,7 +53,10 @@ test_that("gly_linear_model returns moderated coefficient results", {
     result,
     c("glystats_linear_model_res", "glystats_res")
   )
-  expect_named(result, c("tidy_result", "raw_result", "meta_data"))
+  expect_named(
+    result,
+    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+  )
   expect_named(
     result$raw_result,
     c("fit", "design", "contrast_matrix", "coefficient_mapping")

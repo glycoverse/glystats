@@ -1,7 +1,7 @@
 #' Calculate fold change
 #'
 #' Calculate fold change for a given expression matrix and group information.
-#' It could only be used for 2-group analysis.
+#' Pairwise comparisons are returned when more than two groups are supplied.
 #' When you run this function, you will see message about "Ref Group" and "Test Group".
 #' "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
 #'
@@ -11,30 +11,39 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the fold change results are returned.
 #'
-#' @param log_transform A single non-missing logical. If `FALSE` (default),
-#'   return the log2 ratio of arithmetic group means as before. If `TRUE`,
-#'   apply `log2(x + 1e-6)` and return the difference of group means on that
-#'   scale, equivalent to the log2 ratio of geometric means of `x + 1e-6`.
-#'   This option transforms input expression; it does not toggle the log2
-#'   scale of the reported fold change.
-#'
-#' @returns A list with three elements:
+#' @returns A list with four elements:
 #'  - `tidy_result`: A tibble with fold change results containing the following columns:
 #'    - `variable`: Variable name
-#'    - `log2fc`: Log2 ratio of arithmetic group means by default, or
-#'      difference of mean log2-transformed values when `log_transform = TRUE`.
+#'    - `log2fc`: Log2 fold change; see [gly_scale] for the scale-dependent definition
 #'    If more than two groups, two additional columns `ref_group` and `test_group` will be added.
 #'  - `raw_result`: The raw result (same as tidy_result for this function)
 #'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_fold_change <- function(
   exp,
   group_col = "group",
   add_info = TRUE,
-  log_transform = FALSE
+  log_transform = NULL
 ) {
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
-  checkmate::assert_flag(log_transform)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = FALSE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_logical(add_info, len = 1)
 
@@ -52,7 +61,12 @@ gly_fold_change <- function(
   expr_mat <- .get_expr_mat(exp)
 
   # Run the internal computation
-  tidy_result <- .analyze_fold_change(expr_mat, groups, log_transform)
+  tidy_result <- .analyze_fold_change(
+    expr_mat,
+    groups,
+    log_transform = log_transform,
+    input_scale = transformation$input_scale
+  )
 
   # Process results with add_info logic
   tidy_result <- .process_results_add_info(tidy_result, exp, add_info)
@@ -61,7 +75,8 @@ gly_fold_change <- function(
   result <- list(
     tidy_result = tidy_result,
     raw_result = tidy_result,
-    meta_data = .get_meta_data(exp)
+    meta_data = meta_data,
+    preprocessing = transformation
   )
   class(result) <- c("glystats_fc_res", "glystats_res", class(result))
 
@@ -73,19 +88,37 @@ gly_fold_change <- function(
 #' This helper receives components extracted from a validated experiment.
 #'
 #' @noRd
-.analyze_fold_change <- function(expr_mat, groups, log_transform = FALSE) {
+.analyze_fold_change <- function(
+  expr_mat,
+  groups,
+  log_transform = FALSE,
+  input_scale = "raw"
+) {
   # Validate inputs
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
   checkmate::assert_flag(log_transform)
   expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
+  if (log_transform) {
+    input_scale <- "log2"
+  }
 
   # Calculate fold change
   if (length(levels(groups)) == 2) {
-    result <- .fc_2groups(expr_mat, groups, logged = log_transform)
+    result <- .fc_2groups(
+      expr_mat,
+      groups,
+      logged = log_transform,
+      input_scale = input_scale
+    )
   } else {
-    result <- .fc_multi_groups(expr_mat, groups, logged = log_transform)
+    result <- .fc_multi_groups(
+      expr_mat,
+      groups,
+      logged = log_transform,
+      input_scale = input_scale
+    )
   }
   structure(result, class = c("glystats_fc_res", "glystats_res", class(result)))
 }
@@ -100,14 +133,15 @@ gly_fold_change <- function(
 #'   - `variable`: Variable name
 #'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
 #' @noRd
-.fc_2groups <- function(expr_mat, groups, logged = FALSE) {
+.fc_2groups <- function(
+  expr_mat,
+  groups,
+  logged = FALSE,
+  input_scale = if (logged) "log2" else "raw"
+) {
   group1_mean <- rowMeans(expr_mat[, groups == levels(groups)[1], drop = FALSE])
   group2_mean <- rowMeans(expr_mat[, groups == levels(groups)[2], drop = FALSE])
-  log2fc <- if (logged) {
-    group2_mean - group1_mean
-  } else {
-    log2(group2_mean / group1_mean)
-  }
+  log2fc <- .mean_log2fc(group1_mean, group2_mean, input_scale)
   tibble::tibble(variable = rownames(expr_mat), log2fc = log2fc)
 }
 
@@ -123,12 +157,22 @@ gly_fold_change <- function(
 #'   - `ref_group`: Reference group
 #'   - `test_group`: Test/treatment/case group
 #' @noRd
-.fc_multi_groups <- function(expr_mat, groups, logged = FALSE) {
+.fc_multi_groups <- function(
+  expr_mat,
+  groups,
+  logged = FALSE,
+  input_scale = if (logged) "log2" else "raw"
+) {
   comparisons <- .make_comparisons(levels(groups))
   result_list <- purrr::map(comparisons, function(c) {
     sample_mask <- groups %in% c
     sub_groups <- factor(groups[sample_mask], levels = c)
-    .fc_2groups(expr_mat[, sample_mask, drop = FALSE], sub_groups, logged)
+    .fc_2groups(
+      expr_mat[, sample_mask, drop = FALSE],
+      sub_groups,
+      logged,
+      input_scale = input_scale
+    )
   })
   comparison_str <- purrr::map_chr(
     comparisons,

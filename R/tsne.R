@@ -11,27 +11,22 @@
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'  will be added to the result tibble. If FALSE, only the t-SNE coordinates are returned.
 #' @param ... Additional arguments passed to `Rtsne::Rtsne()`.
-#' @param log_transform A single logical value indicating whether to transform
-#'   expression values using `log(x + 1)` before analysis. Default is
-#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
-#'
-#' @details
-#' By default, expression values are transformed using `log(x + 1)` before
-#' analysis. Set `log_transform = FALSE` to use the expression values as supplied,
-#' for example when they are already log-transformed.
 #'
 #' @section Required packages:
 #' This function requires the `Rtsne` package to be installed for t-SNE analysis.
 #'
-#' @return A list with three elements:
+#' @return A list with four elements:
 #' - `tidy_result`: A tibble with t-SNE coordinates containing the following columns:
 #'   - `sample`: Sample name
 #'   - `tsne1`: First t-SNE dimension
 #'   - `tsne2`: Second t-SNE dimension
 #' - `raw_result`: The raw Rtsne object
 #' - `meta_data`: A list containing metadata from the input experiment
+#' - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' The list has classes `glystats_tsne_res` and `glystats_res`.
 #' @seealso [Rtsne::Rtsne()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_tsne <- function(
   exp,
@@ -39,10 +34,24 @@ gly_tsne <- function(
   perplexity = 30,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
-  checkmate::assert_flag(log_transform)
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_logical(add_info, len = 1)
 
   expr_mat <- .get_expr_mat(exp)
@@ -61,7 +70,8 @@ gly_tsne <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
   result
 }

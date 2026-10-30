@@ -16,6 +16,9 @@
 #' @param fc_cutoff The threshold for fold changes. Only positive value is needed.
 #'   For example, `2` means fold change > 2 or < 1/2.
 #'   Default is `2` for glycoproteomics data and `NULL` for others.
+#'   For raw-scale [gly_limma()] results, `NULL` uses significance-only
+#'   filtering and an explicit cutoff is an error because log fold changes
+#'   are unavailable.
 #' @param ... Additional arguments passed to methods. See the method-specific documentation for details.
 #'
 #' @returns A filtered object of the same class as `exp`.
@@ -199,7 +202,15 @@ filter_sig_vars.glystats_limma_res <- function(
     fc_cutoff,
     comparison
   )
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
+  if (identical(res$preprocessing$analysis_scale, "raw")) {
+    if (!is.null(fc_cutoff)) {
+      cli::cli_abort(
+        "{.arg fc_cutoff} cannot be used with raw-scale {.fn gly_limma} results because model contrasts are not log fold changes."
+      )
+    }
+  } else {
+    fc_cutoff <- .decide_fc(exp, fc_cutoff)
+  }
   .filter_sig_vars_limma(
     exp,
     res,

@@ -16,14 +16,8 @@
 #'   used as the positive class.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.
-#' @param log_transform A single logical value indicating whether to transform
-#'   expression values using `log2(x + 1e-6)` before analysis. Default is
-#'   `FALSE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @details
-#' Expression values are used as supplied by default. Set `log_transform = TRUE`
-#' to apply `log2(x + 1e-6)` before analysis.
-#'
 #' For each variable, a ROC curve is computed using the expression values as predictor
 #' and the binary group labels as response.
 #'
@@ -38,7 +32,7 @@
 #' This function requires the `pROC` package to be installed for ROC curve computation.
 #'
 #' @returns
-#' A list with three elements:
+#' A list with four elements:
 #' - `tidy_result`: A list containing two tibbles:
 #'   - `auc`: A tibble containing AUC values for each variable with the following columns:
 #'     - `variable`: Variable name
@@ -52,21 +46,38 @@
 #'     - `sensitivity`: Sensitivity (True Positive Rate)
 #' - `raw_result`: A list of `pROC` objects
 #' - `meta_data`: A list containing metadata from the input experiment
+#' - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' The list has classes `glystats_roc_res` and `glystats_res`.
 #' @seealso [pROC::roc()], [pROC::coords()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_roc <- function(
   exp,
   group_col = "group",
   pos_class = NULL,
   add_info = TRUE,
-  log_transform = FALSE
+  log_transform = NULL
 ) {
-  checkmate::assert_flag(log_transform)
   rlang::check_installed("pROC")
 
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = FALSE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_string(pos_class, null.ok = TRUE)
   checkmate::assert_logical(add_info, len = 1)
@@ -100,7 +111,8 @@ gly_roc <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
   result
 }

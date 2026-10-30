@@ -32,13 +32,8 @@
 #'   which automatic sets are constructed, such as `c("protein",
 #'   "protein_site")`.
 #'
-#' @param log_transform A single non-missing logical. If `TRUE` (default),
-#'   apply `log2(x + 1e-6)` for both automatic set construction and testing.
-#'   If `FALSE`, use supplied values without transformation, including values
-#'   that have already been transformed. Estimates are on the selected scale.
-#'
 #' @details
-#' By default, expression values are transformed using `log2(x + 1e-6)`. The first factor
+#' Raw expression values are automatically transformed using `log2(x + 1e-6)`. The first factor
 #' level of `group_col` is the reference group and the second is the test group.
 #' The estimate is therefore `test - reference`.
 #'
@@ -63,6 +58,7 @@
 #'   Hotelling test objects, and automatic set-construction details (when
 #'   `sets` is `NULL`).
 #' - `meta_data`: Metadata copied from `exp`.
+#' - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #'
 #' @examples
 #' set.seed(1)
@@ -85,6 +81,8 @@
 #' result$tidy_result$sets
 #'
 #' @seealso [stats::cor()], [stats::hclust()], [stats::p.adjust()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_set_test <- function(
   exp,
@@ -97,10 +95,24 @@ gly_set_test <- function(
   correlation = "pearson",
   clustering = "connected",
   within = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
-  checkmate::assert_flag(log_transform)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_string(subject_col, null.ok = TRUE)
   checkmate::assert_choice(method, "hotelling")
@@ -161,7 +173,8 @@ gly_set_test <- function(
   )
   result$raw_result$definitions <- set_info$sets
   result$raw_result$set_construction <- set_construction
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
   result
 }
 
@@ -215,7 +228,10 @@ gly_set_test <- function(
   clustering,
   log_transform = TRUE
 ) {
-  log_expr_mat <- suppressWarnings(.log_transform_expr_mat(expr_mat, log_transform))
+  log_expr_mat <- suppressWarnings(.log_transform_expr_mat(
+    expr_mat,
+    log_transform
+  ))
   usable <- .classify_set_profiles(log_expr_mat)
   usable_names <- usable$variable[is.na(usable$reason)]
   exclusions <- dplyr::filter(usable, !is.na(.data$reason))
@@ -471,7 +487,10 @@ gly_set_test <- function(
   correlation_matrix = NULL,
   log_transform = TRUE
 ) {
-  log_expr_mat <- suppressWarnings(.log_transform_expr_mat(expr_mat, log_transform))
+  log_expr_mat <- suppressWarnings(.log_transform_expr_mat(
+    expr_mat,
+    log_transform
+  ))
   design <- .set_test_design(groups, subjects)
 
   if (length(sets) == 0) {

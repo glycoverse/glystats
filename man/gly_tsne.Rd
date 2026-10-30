@@ -10,7 +10,7 @@ gly_tsne(
   perplexity = 30,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -27,12 +27,13 @@ will be added to the result tibble. If FALSE, only the t-SNE coordinates are ret
 
 \item{...}{Additional arguments passed to \code{Rtsne::Rtsne()}.}
 
-\item{log_transform}{A single logical value indicating whether to transform
-expression values using \code{log(x + 1)} before analysis. Default is
-\code{TRUE}. Set to \code{FALSE} for data that are already log-transformed.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
-A list with three elements:
+A list with four elements:
 \itemize{
 \item \code{tidy_result}: A tibble with t-SNE coordinates containing the following columns:
 \itemize{
@@ -42,17 +43,13 @@ A list with three elements:
 }
 \item \code{raw_result}: The raw Rtsne object
 \item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 The list has classes \code{glystats_tsne_res} and \code{glystats_res}.
 }
 }
 \description{
 Perform t-SNE dimensionality reduction on the expression data.
 The function uses \code{Rtsne::Rtsne()} to perform t-SNE analysis.
-}
-\details{
-By default, expression values are transformed using \code{log(x + 1)} before
-analysis. Set \code{log_transform = FALSE} to use the expression values as supplied,
-for example when they are already log-transformed.
 }
 \section{Required packages}{
 
@@ -61,4 +58,6 @@ This function requires the \code{Rtsne} package to be installed for t-SNE analys
 
 \seealso{
 \code{\link[Rtsne:Rtsne]{Rtsne::Rtsne()}}
+
+\link{gly_scale} for input scales, transformations, and fold changes.
 }

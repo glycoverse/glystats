@@ -9,7 +9,10 @@ test_that("gly_tsne works with default parameters", {
   # Check basic structure
   expect_s3_class(result, c("glystats_tsne_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("tidy_result", "raw_result", "meta_data"))
+  expect_setequal(
+    names(result),
+    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+  )
 
   # Check tidy_result structure
   expect_s3_class(result$tidy_result, "tbl_df")

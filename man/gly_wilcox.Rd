@@ -12,7 +12,7 @@ gly_wilcox(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -39,13 +39,13 @@ will be added to the result tibble. If FALSE, only the statistical results are r
 column in sample information. When supplied, samples are matched by subject
 and a paired Wilcoxon signed-rank test is performed.}
 
-\item{log_transform}{A single non-missing logical value. If \code{TRUE} (default),
-transform expression values using \code{log2(x + 1e-6)} before analysis. If
-\code{FALSE}, use the supplied values unchanged, for example for already
-log-transformed data.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
-A list with three elements:
+A list with four elements:
 \itemize{
 \item \code{tidy_result}: A tibble with Wilcoxon test results containing the following columns:
 \itemize{
@@ -57,11 +57,12 @@ analyses
 \item \code{method}: Statistical method used
 \item \code{alternative}: Alternative hypothesis
 \item \code{p_adj}: Adjusted p-value (if p_adj_method is not NULL)
-\item \code{log2fc}: Log2 fold change (log2(group2_mean / group1_mean))
+\item \code{log2fc}: Log2 fold change; see \link{gly_scale} for the scale-dependent definition
 Additional columns from experiment metadata may be included if add_info = TRUE.
 }
 \item \code{raw_result}: A list of \code{wilcox.test} model objects
 \item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 The list has classes \code{glystats_wilcox_res} and \code{glystats_res}.
 }
 }
@@ -71,15 +72,13 @@ glycoproteomics data.
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
-Tests and effect sizes use the selected analysis scale. Reported fold changes
-continue to use ratios of group means from the original supplied values.
-
-By default, expression data are transformed using \code{log2(x + 1e-6)} before
-statistical testing. Set \code{log_transform = FALSE} to skip this transformation.
-Exactly 2 groups are required in the grouping variable.
+For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+statistical testing. Exactly 2 groups are required in the grouping variable.
 In paired analyses, only subjects observed in both groups are used and
 \code{effect_size} is the matched-pairs rank-biserial correlation.
 }
 \seealso{
 \code{\link[stats:wilcox.test]{stats::wilcox.test()}}
+
+\link{gly_scale} for input scales, transformations, and fold changes.
 }

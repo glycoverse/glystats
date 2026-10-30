@@ -14,14 +14,6 @@
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.
 #' @param ... Additional arguments passed to `ropls::opls()`.
-#' @param log_transform A single logical value indicating whether to transform
-#'   expression values using `log(x + 1)` before analysis. Default is
-#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
-#'
-#' @details
-#' By default, expression values are transformed using `log(x + 1)` before
-#' analysis. Set `log_transform = FALSE` to use the expression values as supplied,
-#' for example when they are already log-transformed.
 #'
 #' @section Required packages:
 #' This function requires the following packages to be installed:
@@ -52,7 +44,10 @@
 #'      - Additional columns from the permutation test matrix (e.g., R2X, R2Y, Q2, etc.)
 #'  - `raw_result`: The raw ropls opls object from `ropls::opls()`
 #'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' @seealso [ropls::opls()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_oplsda <- function(
   exp,
@@ -62,14 +57,28 @@ gly_oplsda <- function(
   scale = TRUE,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
-  checkmate::assert_flag(log_transform)
   # Check package availability
   rlang::check_installed("ropls")
 
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_int(pred_i, lower = 1)
   if (!is.na(ortho_i)) {
@@ -109,7 +118,8 @@ gly_oplsda <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
   result
 }

@@ -14,7 +14,7 @@ gly_limma(
   contrasts = NULL,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -51,19 +51,18 @@ will be added to the result tibble. If FALSE, only the statistical results are r
 
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
 
-\item{log_transform}{A single non-missing logical value. If \code{TRUE} (default),
-transform expression values using \code{log2(x + 1e-6)} before analysis. If
-\code{FALSE}, use the supplied values unchanged, for example for already
-log-transformed data.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
-A list with three elements:
+A list with four elements:
 \itemize{
 \item \code{tidy_result}: A tibble with limma results containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{log2fc}: Model contrast on the analysis scale (log2 fold change when
-expression values are on a log2 scale)
+\item \code{log2fc}: Log2 fold change
 \item \code{AveExpr}: Average expression level
 \item \code{t}: t-statistic
 \item \code{p_val}: Raw p-value
@@ -74,6 +73,7 @@ expression values are on a log2 scale)
 }
 \item \code{raw_result}: The raw limma fit object(s).
 \item \code{meta_data}: A list containing metadata from the input experiment.
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 }
 }
 \description{
@@ -81,14 +81,9 @@ Perform differential expression analysis using linear models with empirical Baye
 moderation from the limma package. Supports both two-group and multi-group comparisons.
 }
 \details{
-By default, expression data are transformed using \code{log2(x + 1e-6)} before
-statistical testing. Set \code{log_transform = FALSE} to skip this transformation.
-The analysis uses linear models with empirical Bayes moderation
+For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+statistical testing. The analysis uses linear models with empirical Bayes moderation
 to improve statistical power, especially for small sample sizes.
-
-The \code{log2fc} column always contains the fitted model contrast. When
-\code{log_transform = FALSE}, its units are those of the supplied expression data;
-it is a log2 fold change only when those values are already on a log2 scale.
 
 For two or more groups, all pairwise comparisons are automatically generated
 (one contrast for two groups) and performed using contrast matrices unless
@@ -114,4 +109,6 @@ This function requires the following packages to be installed:
 
 \seealso{
 \code{\link[limma:lmFit]{limma::lmFit()}}, \code{\link[limma:ebayes]{limma::eBayes()}}, \code{\link[limma:makeContrasts]{limma::makeContrasts()}}
+
+\link{gly_scale} for input scales, transformations, and fold changes.
 }

@@ -16,14 +16,8 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'   will be added to the result tibble. If FALSE, only the Cox model results are returned.
 #' @param ... Additional arguments passed to `survival::coxph()`.
-#' @param log_transform A single logical value indicating whether to transform
-#'   expression values using `log2(x + 1e-6)` before analysis. Default is
-#'   `FALSE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @details
-#' Expression values are used as supplied by default. Set `log_transform = TRUE`
-#' to apply `log2(x + 1e-6)` before analysis.
-#'
 #' The function fits an Cox proportional hazards model for each variable by:
 #'
 #' ```r
@@ -32,7 +26,7 @@
 #'
 #' P-values are adjusted by Benjamini-Hochberg method by default.
 #'
-#' @returns A list with three elements:
+#' @returns A list with four elements:
 #'  - `tidy_result`: A tibble with Cox model results containing the following columns:
 #'    - `variable`: Variable name
 #'    - `coefficient`: Regression coefficient (log hazard ratio)
@@ -43,8 +37,11 @@
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: A list of raw `coxph` model objects.
 #'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #'
 #' @seealso [survival::coxph()], [survival::Surv()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_cox <- function(
   exp,
@@ -53,11 +50,25 @@ gly_cox <- function(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = FALSE
+  log_transform = NULL
 ) {
-  checkmate::assert_flag(log_transform)
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = FALSE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(time_col)
   checkmate::assert_string(event_col)
 
@@ -85,7 +96,8 @@ gly_cox <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
   result
 }

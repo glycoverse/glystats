@@ -35,6 +35,36 @@ library(glyclean)
 library(dplyr)
 ```
 
+## Abundance scale and transformation
+
+Record the supplied abundance scale in `S4Vectors::metadata(exp)$scale`:
+`"raw"`, `"log"` for natural logarithms, `"log2"`, or `"log10"`. Setting
+metadata describes the data; it does not transform them. For older development
+objects labeled `"log"`, set the actual base explicitly if it was 2 or 10.
+
+Every analysis accepts `log_transform = NULL` by default. Known logged data are
+used unchanged. Raw data and old objects without scale metadata retain each
+method's original transformation and pseudo-count. ROC, Cox, and fold change
+continue to use unlogged data by default. Use named `log_transform = TRUE` to
+force a new log or `log_transform = FALSE` to use the supplied values unchanged.
+See `?gly_scale` for the formulas used by each method.
+
+For example, after supplying base-10 logged abundances:
+
+```{r scale-example, eval=FALSE}
+S4Vectors::metadata(exp)$scale <- "log10"
+result <- gly_ttest(exp)
+result$preprocessing # input_scale = "log10", analysis_scale = "log10"
+```
+
+The input is unchanged. Results retain its metadata and record the actual
+transformation separately in `preprocessing`. Estimates, standard errors,
+intervals, and raw models use the analysis scale. `log2fc` from logged data is
+the difference of group means converted to base 2 (a geometric mean ratio),
+whereas raw inputs retain the log2 ratio of arithmetic means. Natural-log
+differences are divided by `log(2)`; base-10 differences are multiplied by
+`log2(10)`. Limma on unlogged raw data reports `estimate` and `NA` `log2fc`.
+
 ## Explore the data
 
 We will start by exploring the demo dataset:

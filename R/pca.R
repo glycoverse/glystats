@@ -12,17 +12,13 @@
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the PCA results are returned.
 #' @param ... Additional arguments passed to `prcomp()`.
-#' @param log_transform A single logical value indicating whether to transform
-#'   expression values using `log(x + 1)` before analysis. Default is
-#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @section Required packages:
 #' This function only uses base R packages and does not require additional dependencies.
 #'
 #' @details
-#' By default, the function performs log transformation on the expression data
-#' (`log(x + 1)`) before PCA analysis. Set `log_transform = FALSE` to use the
-#' expression values as supplied, for example when they are already log-transformed.
+#' For raw data with automatic transformation, the function performs log transformation on the expression data (log(x + 1)) before
+#' PCA analysis.
 #'
 #' @return A list containing:
 #'  - `tidy_result`: A list of tibbles with PCA results:
@@ -41,7 +37,10 @@
 #'      - `cumulative`: Cumulative percentage of variance explained
 #'  - `raw_result`: The raw prcomp object from `stats::prcomp()`
 #'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' @seealso [stats::prcomp()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_pca <- function(
   exp,
@@ -49,10 +48,24 @@ gly_pca <- function(
   scale = TRUE,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
-  checkmate::assert_flag(log_transform)
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_logical(add_info, len = 1)
 
   # Extract data from experiment object
@@ -73,7 +86,8 @@ gly_pca <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
   result
 }

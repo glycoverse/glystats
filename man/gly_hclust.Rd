@@ -11,7 +11,7 @@ gly_hclust(
   scale = TRUE,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -34,9 +34,10 @@ will be added to the result tibbles. If FALSE, only the clustering results are r
 Note: if both functions need a \code{method} parameter, use \code{dist.method} for distance
 and \code{hclust.method} for clustering method.}
 
-\item{log_transform}{A single logical value indicating whether to transform
-expression values using \code{log2(x + 1e-6)} before analysis. Default is
-\code{TRUE}. Set to \code{FALSE} for data that are already log-transformed.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
 A list containing:
@@ -66,6 +67,7 @@ A list containing:
 }
 \item \code{raw_result}: The raw hclust object from \code{stats::hclust()}
 \item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 }
 }
 \description{
@@ -75,11 +77,8 @@ tidy results including cluster assignments, dendrogram data for plotting,
 and merge heights.
 }
 \details{
-Set \code{log_transform = FALSE} to use the expression values as supplied, for
-example when they are already log-transformed.
-
-By default, the function performs log2 transformation on the expression data
-(\code{log2(x + 1e-6)}) before clustering. When \code{on = "variable"} (default), variables are clustered based on their
+For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+clustering. When \code{on = "variable"} (default), variables are clustered based on their
 expression patterns across samples. When \code{on = "sample"}, samples are clustered based
 on their expression profiles across variables.
 
@@ -102,4 +101,6 @@ but not required.
 
 \seealso{
 \code{\link[stats:hclust]{stats::hclust()}}, \code{\link[stats:dist]{stats::dist()}}, \code{\link[stats:cutree]{stats::cutree()}}
+
+\link{gly_scale} for input scales, transformations, and fold changes.
 }
