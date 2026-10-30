@@ -20,22 +20,13 @@
 #'   column in sample information. When supplied, samples are matched by subject
 #'   and a paired t-test is performed.
 #'
-#' @param log_transform A single non-missing logical value. If `TRUE` (default),
-#'   transform expression values using `log2(x + 1e-6)` before analysis. If
-#'   `FALSE`, use the supplied values unchanged, for example for already
-#'   log-transformed data.
-#'
 #' @details
-#' Tests and effect sizes use the selected analysis scale. Reported fold changes
-#' continue to use ratios of group means from the original supplied values.
-#'
-#' By default, expression data are transformed using `log2(x + 1e-6)` before
-#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
-#' Exactly 2 groups are required in the grouping variable.
+#' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+#' statistical testing. Exactly 2 groups are required in the grouping variable.
 #' In paired analyses, only subjects observed in both groups are used and
 #' `effect_size` is Cohen's \eqn{d_z} based on within-subject differences.
 #'
-#' @returns A list with three elements:
+#' @returns A list with four elements:
 #' - `tidy_result`: A tibble with t-test results containing the following columns:
 #'   - `variable`: Variable name
 #'   - `estimate`: Difference in group means (group2 - group1)
@@ -50,11 +41,14 @@
 #'   - `method`: Statistical method used
 #'   - `alternative`: Alternative hypothesis
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
-#'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
+#'   - `log2fc`: Log2 fold change; see [gly_scale] for the scale-dependent definition
 #' - `raw_result`: A list of `t.test` model objects
 #' - `meta_data`: A list containing metadata from the input experiment
+#' - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' The list has classes `glystats_ttest_res` and `glystats_res`.
 #' @seealso [stats::t.test()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_ttest <- function(
   exp,
@@ -64,11 +58,25 @@ gly_ttest <- function(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
-  checkmate::assert_flag(log_transform)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -102,7 +110,8 @@ gly_ttest <- function(
     ref_group,
     ...,
     subjects = subjects,
-    log_transform = log_transform
+    log_transform = log_transform,
+    input_scale = transformation$input_scale
   )
 
   # Process results with add_info logic
@@ -113,7 +122,8 @@ gly_ttest <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
   result
 }
@@ -130,7 +140,8 @@ gly_ttest <- function(
   ref_group = NULL,
   ...,
   subjects = NULL,
-  log_transform = TRUE
+  log_transform = TRUE,
+  input_scale = "raw"
 ) {
   checkmate::assert_flag(log_transform)
   # Validate inputs
@@ -158,7 +169,8 @@ gly_ttest <- function(
     ref_group,
     ...,
     subjects = subjects,
-    log_transform = log_transform
+    log_transform = log_transform,
+    input_scale = input_scale
   )
 
   # Add S3 class
@@ -188,23 +200,14 @@ gly_ttest <- function(
 #'   column in sample information. When supplied, samples are matched by subject
 #'   and a paired Wilcoxon signed-rank test is performed.
 #'
-#' @param log_transform A single non-missing logical value. If `TRUE` (default),
-#'   transform expression values using `log2(x + 1e-6)` before analysis. If
-#'   `FALSE`, use the supplied values unchanged, for example for already
-#'   log-transformed data.
-#'
 #' @details
-#' Tests and effect sizes use the selected analysis scale. Reported fold changes
-#' continue to use ratios of group means from the original supplied values.
-#'
-#' By default, expression data are transformed using `log2(x + 1e-6)` before
-#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
-#' Exactly 2 groups are required in the grouping variable.
+#' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+#' statistical testing. Exactly 2 groups are required in the grouping variable.
 #' In paired analyses, only subjects observed in both groups are used and
 #' `effect_size` is the matched-pairs rank-biserial correlation.
 #'
 #' @returns
-#' A list with three elements:
+#' A list with four elements:
 #' - `tidy_result`: A tibble with Wilcoxon test results containing the following columns:
 #'   - `variable`: Variable name
 #'   - `statistic`: Wilcoxon test statistic
@@ -214,10 +217,11 @@ gly_ttest <- function(
 #'   - `method`: Statistical method used
 #'   - `alternative`: Alternative hypothesis
 #'   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
-#'   - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
+#'   - `log2fc`: Log2 fold change; see [gly_scale] for the scale-dependent definition
 #'   Additional columns from experiment metadata may be included if add_info = TRUE.
 #' - `raw_result`: A list of `wilcox.test` model objects
 #' - `meta_data`: A list containing metadata from the input experiment
+#' - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' The list has classes `glystats_wilcox_res` and `glystats_res`.
 #'
 #' @seealso [stats::wilcox.test()]
@@ -226,6 +230,8 @@ gly_ttest <- function(
 #' @importFrom rlang .data
 #' @importFrom tidyselect all_of
 #'
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_wilcox <- function(
   exp,
@@ -235,11 +241,25 @@ gly_wilcox <- function(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
-  checkmate::assert_flag(log_transform)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_choice(
     p_adj_method,
@@ -273,7 +293,8 @@ gly_wilcox <- function(
     ref_group,
     ...,
     subjects = subjects,
-    log_transform = log_transform
+    log_transform = log_transform,
+    input_scale = transformation$input_scale
   )
 
   # Process results with add_info logic
@@ -284,7 +305,8 @@ gly_wilcox <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
   result
 }
@@ -301,7 +323,8 @@ gly_wilcox <- function(
   ref_group = NULL,
   ...,
   subjects = NULL,
-  log_transform = TRUE
+  log_transform = TRUE,
+  input_scale = "raw"
 ) {
   checkmate::assert_flag(log_transform)
   # Validate inputs
@@ -329,7 +352,8 @@ gly_wilcox <- function(
     ref_group,
     ...,
     subjects = subjects,
-    log_transform = log_transform
+    log_transform = log_transform,
+    input_scale = input_scale
   )
 
   # Add S3 class
@@ -346,7 +370,8 @@ gly_wilcox <- function(
   ref_group,
   ...,
   subjects = NULL,
-  log_transform = TRUE
+  log_transform = TRUE,
+  input_scale = "raw"
 ) {
   # Reorder groups if ref_group is specified
   if (!is.null(ref_group)) {
@@ -378,7 +403,8 @@ gly_wilcox <- function(
     expr_mat,
     groups,
     log_expr_mat,
-    paired = design$paired
+    paired = design$paired,
+    input_scale = input_scale
   )
 
   # Return list with both tidy and raw results
@@ -454,7 +480,8 @@ gly_wilcox <- function(
   expr_mat,
   groups,
   log_expr_mat,
-  paired = FALSE
+  paired = FALSE,
+  input_scale = "raw"
 ) {
   # Create a tibble from the model list
   var_names <- names(mod_list)
@@ -533,7 +560,8 @@ gly_wilcox <- function(
     result_tbl,
     expr_mat,
     groups,
-    paired = paired
+    paired = paired,
+    input_scale = input_scale
   )
   result_tbl <- .add_effect_size_to_2group_result(
     result_tbl,
@@ -551,7 +579,8 @@ gly_wilcox <- function(
   result_tbl,
   expr_mat,
   groups,
-  paired = FALSE
+  paired = FALSE,
+  input_scale = "raw"
 ) {
   # Calculate mean expression for each group for each variable
   group_levels <- levels(groups)
@@ -579,7 +608,7 @@ gly_wilcox <- function(
     group2_mean <- mean(group2_values, na.rm = TRUE)
 
     # Calculate log2 fold change (group2 vs group1)
-    log2(group2_mean / group1_mean)
+    .mean_log2fc(group1_mean, group2_mean, input_scale)
   })
 
   # Add log2fc column to result

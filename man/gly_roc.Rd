@@ -9,7 +9,7 @@ gly_roc(
   group_col = "group",
   pos_class = NULL,
   add_info = TRUE,
-  log_transform = FALSE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -28,12 +28,13 @@ used as the positive class.}
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.}
 
-\item{log_transform}{A single logical value indicating whether to transform
-expression values using \code{log2(x + 1e-6)} before analysis. Default is
-\code{FALSE}. Set to \code{FALSE} for data that are already log-transformed.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
-A list with three elements:
+A list with four elements:
 \itemize{
 \item \code{tidy_result}: A list containing two tibbles:
 \itemize{
@@ -54,6 +55,7 @@ A list with three elements:
 }
 \item \code{raw_result}: A list of \code{pROC} objects
 \item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 The list has classes \code{glystats_roc_res} and \code{glystats_res}.
 }
 }
@@ -64,9 +66,6 @@ Area Under the Curve (AUC) values for each variable to assess their discriminato
 power between two groups.
 }
 \details{
-Expression values are used as supplied by default. Set \code{log_transform = TRUE}
-to apply \code{log2(x + 1e-6)} before analysis.
-
 For each variable, a ROC curve is computed using the expression values as predictor
 and the binary group labels as response.
 
@@ -86,4 +85,6 @@ This function requires the \code{pROC} package to be installed for ROC curve com
 
 \seealso{
 \code{\link[pROC:roc]{pROC::roc()}}, \code{\link[pROC:coords]{pROC::coords()}}
+
+\link{gly_scale} for input scales, transformations, and fold changes.
 }

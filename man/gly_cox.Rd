@@ -11,7 +11,7 @@ gly_cox(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = FALSE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -34,12 +34,13 @@ will be added to the result tibble. If FALSE, only the Cox model results are ret
 
 \item{...}{Additional arguments passed to \code{survival::coxph()}.}
 
-\item{log_transform}{A single logical value indicating whether to transform
-expression values using \code{log2(x + 1e-6)} before analysis. Default is
-\code{FALSE}. Set to \code{FALSE} for data that are already log-transformed.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
-A list with three elements:
+A list with four elements:
 \itemize{
 \item \code{tidy_result}: A tibble with Cox model results containing the following columns:
 \itemize{
@@ -53,6 +54,7 @@ A list with three elements:
 }
 \item \code{raw_result}: A list of raw \code{coxph} model objects.
 \item \code{meta_data}: A list containing metadata from the input experiment
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 }
 }
 \description{
@@ -60,9 +62,6 @@ Fit a Cox proportional hazards model for each variable in the expression data,
 and extract p-values and hazard ratios from it.
 }
 \details{
-Expression values are used as supplied by default. Set \code{log_transform = TRUE}
-to apply \code{log2(x + 1e-6)} before analysis.
-
 The function fits an Cox proportional hazards model for each variable by:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{coxph(Surv(time, event) ~ expression_value)
@@ -72,4 +71,6 @@ P-values are adjusted by Benjamini-Hochberg method by default.
 }
 \seealso{
 \code{\link[survival:coxph]{survival::coxph()}}, \code{\link[survival:Surv]{survival::Surv()}}
+
+\link{gly_scale} for input scales, transformations, and fold changes.
 }

@@ -4,7 +4,10 @@ test_that("gly_pca works", {
   pca_res <- gly_pca(test_gp_se)
   expect_s3_class(pca_res, c("glystats_pca_res", "glystats_res"))
   expect_type(pca_res, "list")
-  expect_setequal(names(pca_res), c("tidy_result", "raw_result", "meta_data"))
+  expect_setequal(
+    names(pca_res),
+    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+  )
 
   # Check tidy_result structure
   expect_type(pca_res$tidy_result, "list")

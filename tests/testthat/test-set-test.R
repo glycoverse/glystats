@@ -239,7 +239,10 @@ test_that("gly_set_test matches an independent Hotelling calculation", {
   expected_f <- expected_df2 * expected_t2 / ((n_ref + n_test - 2) * p)
 
   expect_s3_class(result, c("glystats_set_test_res", "glystats_res"))
-  expect_named(result, c("tidy_result", "raw_result", "meta_data"))
+  expect_named(
+    result,
+    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+  )
   expect_named(result$tidy_result, c("sets", "members"))
   expect_equal(result$tidy_result$sets$statistic, expected_t2)
   expect_equal(result$tidy_result$sets$df1, p)

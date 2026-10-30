@@ -1,7 +1,16 @@
+# Transformation provenance intentionally differs between automatic and explicit modes.
+analysis_without_provenance <- function(result) {
+  result$preprocessing <- NULL
+  result
+}
+
 make_log_transform_set_exp <- function() {
   set.seed(42)
-  mat <- matrix(exp(rnorm(72)), nrow = 3,
-    dimnames = list(c("A", "B", "C"), paste0("S", 1:24)))
+  mat <- matrix(
+    exp(rnorm(72)),
+    nrow = 3,
+    dimnames = list(c("A", "B", "C"), paste0("S", 1:24))
+  )
   SummarizedExperiment::SummarizedExperiment(
     assays = list(expression = mat),
     colData = S4Vectors::DataFrame(group = factor(rep(c("a", "b"), each = 12)))
@@ -18,8 +27,14 @@ test_that("set tests use the selected scale for construction and inference", {
     default <- gly_set_test(exp, sets = sets)
     explicit <- gly_set_test(exp, sets = sets, log_transform = TRUE)
     supplied <- gly_set_test(transformed, sets = sets, log_transform = FALSE)
-    expect_equal(default, explicit)
-    expect_equal(default, supplied)
+    expect_equal(
+      analysis_without_provenance(default),
+      analysis_without_provenance(explicit)
+    )
+    expect_equal(
+      analysis_without_provenance(default),
+      analysis_without_provenance(supplied)
+    )
   }
   raw <- gly_set_test(exp, sets = list(single = "A"), log_transform = FALSE)
   mat <- SummarizedExperiment::assay(exp)
@@ -41,18 +56,37 @@ test_that("fold change preserves arithmetic means and supports log-scale means",
       colData = S4Vectors::DataFrame(group = g)
     )
     default <- gly_fold_change(exp, add_info = FALSE)
-    expect_equal(default, gly_fold_change(exp, add_info = FALSE, log_transform = FALSE))
-    logged <- gly_fold_change(exp, add_info = FALSE, log_transform = TRUE)$tidy_result
+    expect_equal(
+      analysis_without_provenance(default),
+      analysis_without_provenance(gly_fold_change(
+        exp,
+        add_info = FALSE,
+        log_transform = FALSE
+      ))
+    )
+    logged <- gly_fold_change(
+      exp,
+      add_info = FALSE,
+      log_transform = TRUE
+    )$tidy_result
     pairs <- combn(levels(g), 2, simplify = FALSE)
-    expected_raw <- unlist(lapply(pairs, function(pair) {
-      log2(rowMeans(x[, g == pair[2], drop = FALSE]) /
-        rowMeans(x[, g == pair[1], drop = FALSE]))
-    }), use.names = FALSE)
+    expected_raw <- unlist(
+      lapply(pairs, function(pair) {
+        log2(
+          rowMeans(x[, g == pair[2], drop = FALSE]) /
+            rowMeans(x[, g == pair[1], drop = FALSE])
+        )
+      }),
+      use.names = FALSE
+    )
     z <- log2(x + 1e-6)
-    expected_log <- unlist(lapply(pairs, function(pair) {
-      rowMeans(z[, g == pair[2], drop = FALSE]) -
-        rowMeans(z[, g == pair[1], drop = FALSE])
-    }), use.names = FALSE)
+    expected_log <- unlist(
+      lapply(pairs, function(pair) {
+        rowMeans(z[, g == pair[2], drop = FALSE]) -
+          rowMeans(z[, g == pair[1], drop = FALSE])
+      }),
+      use.names = FALSE
+    )
     expect_equal(unname(default$tidy_result$log2fc), expected_raw)
     expect_equal(unname(logged$log2fc), expected_log)
     expect_true(all(is.finite(logged$log2fc)))
@@ -61,7 +95,7 @@ test_that("fold change preserves arithmetic means and supports log-scale means",
 
 test_that("set and fold-change flags require one non-missing logical", {
   exp <- make_log_transform_set_exp()
-  for (invalid in list(NA, NULL, logical(), c(TRUE, FALSE), 1, "TRUE")) {
+  for (invalid in list(NA, logical(), c(TRUE, FALSE), 1, "TRUE")) {
     expect_error(gly_set_test(exp, log_transform = invalid), "log_transform")
     expect_error(gly_fold_change(exp, log_transform = invalid), "log_transform")
   }
@@ -69,8 +103,11 @@ test_that("set and fold-change flags require one non-missing logical", {
 
 
 test_that("fold-change pseudocount handles zeros without altering raw defaults", {
-  mat <- matrix(c(0, 0, 2, 8), nrow = 1,
-    dimnames = list("zero", paste0("S", 1:4)))
+  mat <- matrix(
+    c(0, 0, 2, 8),
+    nrow = 1,
+    dimnames = list("zero", paste0("S", 1:4))
+  )
   groups <- factor(c("a", "a", "b", "b"))
   expect_equal(unname(.analyze_fold_change(mat, groups)$log2fc), Inf)
   expected <- mean(log2(c(2, 8) + 1e-6)) - log2(1e-6)
@@ -86,8 +123,17 @@ test_that("paired set testing skips an already-applied transform", {
   )
   for (sets in list(NULL, list(pair = c("A", "B")))) {
     expect_equal(
-      gly_set_test(exp, sets = sets, subject_col = "subject"),
-      gly_set_test(transformed, sets = sets, subject_col = "subject", log_transform = FALSE)
+      analysis_without_provenance(gly_set_test(
+        exp,
+        sets = sets,
+        subject_col = "subject"
+      )),
+      analysis_without_provenance(gly_set_test(
+        transformed,
+        sets = sets,
+        subject_col = "subject",
+        log_transform = FALSE
+      ))
     )
   }
 })

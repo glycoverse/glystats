@@ -60,32 +60,45 @@ glycoverse](https://github.com/glycoverse/glycoverse#installation).
 
 ## Control log transformation
 
-All expression-analysis functions accept `log_transform`. Existing defaults
-are preserved: it is `TRUE` for differential tests, correlation, clustering,
-dimension reduction, supervised models, and set testing; it is `FALSE` for
-`gly_cox()`, `gly_roc()`, and `gly_fold_change()`.
+All expression-analysis functions default to `log_transform = NULL`.
+Record the supplied abundance scale in `S4Vectors::metadata(exp)$scale`:
+`"raw"`, `"log"` (natural logarithm), `"log2"`, or `"log10"`. Known
+logged values are used unchanged. Raw values and old objects without
+scale metadata retain each method’s previous default; Cox, ROC, and fold
+change continue to use unlogged values by default. Use `TRUE` to force
+the method’s log transformation or `FALSE` to use supplied values
+unchanged. Setting metadata never transforms the data.
 
-```r
-# Skip a second transformation when expression values are already transformed.
-pca <- gly_pca(exp, log_transform = FALSE)
-# Opt in for a model that previously used untransformed expression.
+``` r
+# Data already transformed using log10:
+S4Vectors::metadata(exp)$scale <- "log10"
+pca <- gly_pca(exp)
+pca$preprocessing
+# Explicitly opt in for Cox's log2(x + 1e-6) transformation:
 cox <- gly_cox(exp, log_transform = TRUE)
 ```
 
-PCA, PLS-DA, OPLS-DA, t-SNE, and UMAP preserve `log(x + 1)`;
-other analyses use `log2(x + 1e-6)` when enabled. Set testing uses the same
-choice for automatic set construction and inference. Model estimates and
-effect sizes reflect the selected analysis scale. Differential-test fold
-changes still use the original supplied values; disabling transformation
-does not tell these functions to back-transform already logged inputs.
-For limma, the existing `log2fc` column contains model contrasts and is only
-a log2 fold change when the supplied analysis scale is log2.
+PCA, PLS-DA, OPLS-DA, t-SNE, and UMAP retain `log(x + 1)`; other methods
+use `log2(x + 1e-6)` when enabled. Set construction and inference share
+the same choice. Results retain input metadata in `meta_data` and record
+input/analysis scales and the actual transformation in `preprocessing`.
+Model estimates, standard errors, intervals, and raw fits stay in
+analysis units.
 
-For `gly_fold_change()`, `FALSE` retains the log2 ratio of arithmetic group
-means. `TRUE` reports the difference of mean log2-transformed values, the
-log2 ratio of geometric means of `x + 1e-6`, rather than a ratio of logarithms.
-Result extraction and significance-filtering utilities do not transform
-expression and have no `log_transform` argument.
+For raw inputs, differential-test fold changes remain log2 ratios of
+arithmetic means. For logged inputs, they are differences of group means
+converted to log2 units (geometric mean ratios). Natural-log differences
+are divided by `log(2)`; base-10 differences are multiplied by
+`log2(10)`. Limma contrasts follow the same change of base; raw-scale
+contrasts are returned as `estimate` with `NA` `log2fc`.
+`gly_fold_change(log_transform = TRUE)` uses newly logged values,
+including the original pseudo-count. See `?gly_scale` for the full
+contract.
+
+Older development objects labeled `"log"` must be relabeled if their
+actual base was 2 or 10. The package never guesses the base. Result
+extraction and significance-filtering utilities do not transform
+expression.
 
 ## Documentation
 

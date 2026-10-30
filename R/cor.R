@@ -15,19 +15,13 @@
 #'   See `p.adjust.methods` for available methods. Default is "BH".
 #'   If NULL, no adjustment is performed.
 #' @param ... Additional arguments passed to `Hmisc::rcorr()`.
-#' @param log_transform A single logical value indicating whether to transform
-#'   expression values using `log2(x + 1e-6)` before analysis. Default is
-#'   `TRUE`. Set to `FALSE` for data that are already log-transformed.
 #'
 #' @section Required packages:
 #' This function requires the `Hmisc` package for efficient correlation calculation.
 #'
 #' @details
-#' Set `log_transform = FALSE` to use the expression values as supplied, for
-#' example when they are already log-transformed.
-#'
-#' By default, the function performs log2 transformation on the expression data
-#' (`log2(x + 1e-6)`) before correlation analysis. When `on = "variable"` (default), correlations are calculated between
+#' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+#' correlation analysis. When `on = "variable"` (default), correlations are calculated between
 #' variables across samples. When `on = "sample"`, correlations are calculated between
 #' samples across variables.
 #'
@@ -38,7 +32,7 @@
 #' **Multiple Testing Correction:**
 #' P-values are adjusted for multiple testing using the method specified by `p_adj_method`.
 #'
-#' @return A list with three elements:
+#' @return A list with four elements:
 #'  - `tidy_result`: A tibble with correlation results containing the following columns:
 #'    - `variable1` or `sample1`: First element of the pair (depending on `on` parameter)
 #'    - `variable2` or `sample2`: Second element of the pair (depending on `on` parameter)
@@ -47,9 +41,12 @@
 #'    - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 #'  - `raw_result`: The raw rcorr object from Hmisc::rcorr()
 #'  - `meta_data`: A list containing metadata from the input experiment
+#'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' The list has classes `glystats_cor_res` and `glystats_res`.
 #'
 #' @seealso [Hmisc::rcorr()], [stats::cor()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_cor <- function(
   exp,
@@ -57,11 +54,25 @@ gly_cor <- function(
   method = "pearson",
   p_adj_method = "BH",
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
-  checkmate::assert_flag(log_transform)
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_choice(on, c("variable", "sample"))
   checkmate::assert_choice(method, c("pearson", "spearman"))
   checkmate::assert_choice(
@@ -84,7 +95,8 @@ gly_cor <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
   result
 }

@@ -18,6 +18,7 @@ Description: Provides a unified toolbox for bioinformatics analyses of glycomics
     'SummarizedExperiment' objects as their unified data interface.
 License: MIT + file LICENSE
 Suggests:
+    withr,
     testthat (>= 3.0.0),
     FSA,
     emmeans,

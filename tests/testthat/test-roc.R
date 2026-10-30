@@ -14,7 +14,10 @@ test_that("gly_roc works with 2-group binary classification", {
   # Test structure
   expect_s3_class(result, c("glystats_roc_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("tidy_result", "raw_result", "meta_data"))
+  expect_setequal(
+    names(result),
+    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+  )
 
   # Test tidy_result structure
   expect_type(result$tidy_result, "list")
@@ -74,7 +77,10 @@ test_that("gly_roc works with automatic pos_class detection", {
   # Test basic structure
   expect_s3_class(result, c("glystats_roc_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("tidy_result", "raw_result", "meta_data"))
+  expect_setequal(
+    names(result),
+    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+  )
   expect_s3_class(result$tidy_result$coords, "tbl_df")
 })
 
@@ -124,7 +130,10 @@ test_that("gly_roc works with different group column names", {
 
   expect_s3_class(result, c("glystats_roc_res", "glystats_res"))
   expect_type(result, "list")
-  expect_setequal(names(result), c("tidy_result", "raw_result", "meta_data"))
+  expect_setequal(
+    names(result),
+    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+  )
 })
 
 test_that("gly_roc assigns NA for failed variables", {

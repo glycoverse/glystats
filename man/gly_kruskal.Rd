@@ -11,7 +11,7 @@ gly_kruskal(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -35,13 +35,13 @@ paired analyses, \code{stats::friedman.test()}.}
 \item{subject_col}{An optional character string naming the subject identifier
 column in sample information. When supplied, a Friedman test is performed.}
 
-\item{log_transform}{A single non-missing logical value. If \code{TRUE} (default),
-transform expression values using \code{log2(x + 1e-6)} before analysis. If
-\code{FALSE}, use the supplied values unchanged, for example for already
-log-transformed data.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
-A list containing three elements:
+A list containing four elements:
 \itemize{
 \item \code{tidy_result}: A list containing:
 \itemize{
@@ -72,6 +72,7 @@ containing the following columns:
 \item \code{post_hoc_test}: A list of raw Dunn or paired Wilcoxon summaries.
 }
 \item \code{meta_data}: A list containing metadata from the input experiment.
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 }
 }
 \description{
@@ -81,12 +82,8 @@ For significant results, Dunn's post-hoc test is automatically performed.
 P-values are adjusted for multiple testing using the method specified by \code{p_adj_method}.
 }
 \details{
-Tests and effect sizes use the selected analysis scale. Reported fold changes
-continue to use ratios of group means from the original supplied values.
-
-By default, expression data are transformed using \code{log2(x + 1e-6)} before
-statistical testing. Set \code{log_transform = FALSE} to skip this transformation.
-At least 2 groups are required in the grouping variable.
+For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+statistical testing. At least 2 groups are required in the grouping variable.
 In paired analyses, only subjects observed in every group are used, with at
 most one sample per subject and group. The reported effect size is Kendall's
 \eqn{W}.
@@ -108,4 +105,6 @@ Unpaired analyses require the \code{FSA} package for Dunn's post-hoc test.
 \seealso{
 \code{\link[stats:kruskal.test]{stats::kruskal.test()}}, \code{\link[stats:friedman.test]{stats::friedman.test()}},
 \code{\link[FSA:dunnTest]{FSA::dunnTest()}}
+
+\link{gly_scale} for input scales, transformations, and fold changes.
 }

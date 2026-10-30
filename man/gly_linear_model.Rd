@@ -11,7 +11,7 @@ gly_linear_model(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 }
 \arguments{
@@ -35,10 +35,10 @@ from the experiment is added to the tidy result.}
 
 \item{...}{Additional arguments passed to \code{\link[limma:lmFit]{limma::lmFit()}}.}
 
-\item{log_transform}{A single non-missing logical value. If \code{TRUE} (default),
-transform expression values using \code{log2(x + 1e-6)} before analysis. If
-\code{FALSE}, use the supplied values unchanged, for example for already
-log-transformed data.}
+\item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
+logging data twice. \code{TRUE} forces the method's log transformation on the
+supplied values, even if they are already logged; \code{FALSE} uses the supplied
+values unchanged. This argument must be named when it follows \code{...}.}
 }
 \value{
 A list with classes \code{glystats_linear_model_res} and \code{glystats_res}
@@ -49,6 +49,7 @@ containing:
 \item \code{raw_result}: A list containing the moderated limma fit, design matrix,
 contrast matrix, and coefficient-name mapping.
 \item \code{meta_data}: Metadata copied from \code{exp}.
+\item \code{preprocessing}: Input and analysis scales and the applied transformation; see \link{gly_scale}.
 }
 }
 \description{
@@ -63,10 +64,7 @@ contrasts. \code{\link[=gly_limma]{gly_limma()}} is a dedicated wrapper for comm
 expression analysis tasks, with convenient group, covariate, subject, and
 pairwise-comparison arguments.
 
-By default, expression values are transformed using \code{log2(x + 1e-6)} before
-modeling. Set \code{log_transform = FALSE} to use the supplied values unchanged.
-Coefficient estimates and average expression are reported on the selected
-analysis scale.
+Raw expression values are automatically transformed using \code{log2(x + 1e-6)} before modeling.
 When \code{contrasts} is \code{NULL}, all non-intercept coefficients are tested. When
 contrasts are supplied, only the named contrasts are returned.
 
@@ -100,4 +98,6 @@ contrast_res <- gly_linear_model(
 }
 \seealso{
 \code{\link[=gly_limma]{gly_limma()}}, \code{\link[limma:lmFit]{limma::lmFit()}}, \code{\link[limma:ebayes]{limma::eBayes()}}
+
+\link{gly_scale} for input scales, transformations, and fold changes.
 }

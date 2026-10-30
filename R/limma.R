@@ -28,20 +28,10 @@
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
 #' @param ... Additional arguments passed to `limma::lmFit()`.
 #'
-#' @param log_transform A single non-missing logical value. If `TRUE` (default),
-#'   transform expression values using `log2(x + 1e-6)` before analysis. If
-#'   `FALSE`, use the supplied values unchanged, for example for already
-#'   log-transformed data.
-#'
 #' @details
-#' By default, expression data are transformed using `log2(x + 1e-6)` before
-#' statistical testing. Set `log_transform = FALSE` to skip this transformation.
-#' The analysis uses linear models with empirical Bayes moderation
+#' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+#' statistical testing. The analysis uses linear models with empirical Bayes moderation
 #' to improve statistical power, especially for small sample sizes.
-#'
-#' The `log2fc` column always contains the fitted model contrast. When
-#' `log_transform = FALSE`, its units are those of the supplied expression data;
-#' it is a log2 fold change only when those values are already on a log2 scale.
 #'
 #' For two or more groups, all pairwise comparisons are automatically generated
 #' (one contrast for two groups) and performed using contrast matrices unless
@@ -61,11 +51,10 @@
 #' This function requires the following packages to be installed:
 #' - `limma` for linear model fitting and empirical Bayes moderation
 #'
-#' @returns A list with three elements:
+#' @returns A list with four elements:
 #'  - `tidy_result`: A tibble with limma results containing the following columns:
 #'    - `variable`: Variable name
-#'    - `log2fc`: Model contrast on the analysis scale (log2 fold change when
-#'      expression values are on a log2 scale)
+#'    - `log2fc`: Log2 fold change
 #'    - `AveExpr`: Average expression level
 #'    - `t`: t-statistic
 #'    - `p_val`: Raw p-value
@@ -76,7 +65,10 @@
 #'
 #'  - `raw_result`: The raw limma fit object(s).
 #'  - `meta_data`: A list containing metadata from the input experiment.
+#'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' @seealso [limma::lmFit()], [limma::eBayes()], [limma::makeContrasts()]
+#' @inheritParams gly_scale
+#' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #' @export
 gly_limma <- function(
   exp,
@@ -88,11 +80,25 @@ gly_limma <- function(
   contrasts = NULL,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 ) {
   # Validate inputs
+  checkmate::assert_logical(
+    log_transform,
+    len = 1,
+    any.missing = FALSE,
+    null.ok = TRUE
+  )
   .assert_data_container(exp)
-  checkmate::assert_flag(log_transform)
+  meta_data <- .get_meta_data(exp)
+  transformation <- .resolve_transformation(
+    exp,
+    log_transform,
+    default = TRUE,
+    method = "log2",
+    meta_data = meta_data
+  )
+  log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   if (length(covariate_cols) == 0) {
     covariate_cols <- NULL
@@ -163,9 +169,10 @@ gly_limma <- function(
   )
 
   # Add meta_data from experiment
-  result$meta_data <- .get_meta_data(exp)
+  result$meta_data <- meta_data
+  result$preprocessing <- transformation
 
-  result
+  .limma_effect_scale(result, transformation)
 }
 
 #' Run the internal computation for `gly_limma()`

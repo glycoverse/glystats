@@ -1,5 +1,8 @@
 # glystats (development version)
 
+* Analysis functions gain `log_transform = NULL` to recognize `raw`, natural-log (`log`), `log2`, and `log10` metadata and avoid repeated logging; `TRUE` and `FALSE` explicitly control transformation, and missing metadata preserves each method's historical default. Results record input and analysis scales in `preprocessing` without modifying the experiment.
+* Fold changes from logged inputs now use group mean differences converted to log2 units. Limma preserves native model units, converts logged contrasts to `log2fc`, and reports raw-scale contrasts as `estimate` with `NA` log2 fold changes.
+
 # glystats 0.13.0
 
 * All expression-analysis functions gain a validated `log_transform` argument. Existing transformation defaults, log bases, and pseudocounts are preserved; Cox, ROC, and fold-change default to `FALSE`. Set construction and testing share the selected scale. Optional fold-change transformation reports differences of log2 means (geometric-mean fold changes). (#23)
