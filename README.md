@@ -91,6 +91,8 @@ converted to log2 units (geometric mean ratios). Natural-log differences
 are divided by `log(2)`; base-10 differences are multiplied by
 `log2(10)`. Limma contrasts follow the same change of base; raw-scale
 contrasts are returned as `estimate` with `NA` `log2fc`.
+`filter_sig_vars()` uses significance-only filtering for raw-scale limma
+results and rejects explicit fold-change cutoffs.
 `gly_fold_change(log_transform = TRUE)` uses newly logged values,
 including the original pseudo-count. See `?gly_scale` for the full
 contract.

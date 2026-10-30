@@ -42,6 +42,8 @@ Limma contrasts on a logged analysis scale are converted to \code{log2fc};
 native model estimates and fits stay in analysis units. With an unlogged raw
 limma analysis, contrasts are returned as \code{estimate} and \code{log2fc} is \code{NA},
 because an adjusted raw-scale difference is not a log fold change.
+\code{\link[=filter_sig_vars]{filter_sig_vars()}} then uses significance-only filtering by default and
+rejects explicit fold-change cutoffs for these raw-scale limma results.
 }
 \examples{
 values <- matrix(c(1, 2, 4, 8), nrow = 1,

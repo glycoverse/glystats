@@ -36,6 +36,8 @@
 #' native model estimates and fits stay in analysis units. With an unlogged raw
 #' limma analysis, contrasts are returned as `estimate` and `log2fc` is `NA`,
 #' because an adjusted raw-scale difference is not a log fold change.
+#' [filter_sig_vars()] then uses significance-only filtering by default and
+#' rejects explicit fold-change cutoffs for these raw-scale limma results.
 #'
 #' @examples
 #' values <- matrix(c(1, 2, 4, 8), nrow = 1,
