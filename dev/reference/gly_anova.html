@@ -54,7 +54,7 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  subject_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -95,15 +95,15 @@ repeated-measures ANOVA is performed.</p></dd>
 
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
-<dd><p>A single non-missing logical value. If <code>TRUE</code> (default),
-transform expression values using <code>log2(x + 1e-6)</code> before analysis. If
-<code>FALSE</code>, use the supplied values unchanged, for example for already
-log-transformed data.</p></dd>
+<dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
+logging data twice. <code>TRUE</code> forces the method's log transformation on the
+supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
+values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing three elements:</p><ul><li><p><code>tidy_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A tibble with ANOVA results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+    <p>A list containing four elements:</p><ul><li><p><code>tidy_result</code>: A list containing:</p><ul><li><p><code>main_test</code>: A tibble with ANOVA results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>term</code>: ANOVA term (usually "groups")</p></li>
 <li><p><code>df</code>: Degrees of freedom</p></li>
 <li><p><code>sumsq</code>: Sum of squares</p></li>
@@ -126,14 +126,12 @@ log-transformed data.</p></dd>
 summaries.</p></li>
 </ul></li>
 <li><p><code>meta_data</code>: A list containing metadata from the input experiment.</p></li>
+<li><p><code>preprocessing</code>: Input and analysis scales and the applied transformation; see <a href="gly_scale.html">gly_scale</a>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Tests and effect sizes use the selected analysis scale. Reported fold changes
-continue to use ratios of group means from the original supplied values.</p>
-<p>By default, expression data are transformed using <code>log2(x + 1e-6)</code> before
-statistical testing. Set <code>log_transform = FALSE</code> to skip this transformation.
-At least 2 groups are required in the grouping variable.
+    <p>For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+statistical testing. At least 2 groups are required in the grouping variable.
 In paired analyses, only subjects observed in every group are used, with at
 most one sample per subject and group. The reported effect size is partial
 eta-squared for the group term.</p>
@@ -146,7 +144,8 @@ instead use paired t-tests with Holm correction.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/aov.html" class="external-link">stats::aov()</a></code>, <code><a href="https://rdrr.io/r/stats/TukeyHSD.html" class="external-link">stats::TukeyHSD()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/aov.html" class="external-link">stats::aov()</a></code>, <code><a href="https://rdrr.io/r/stats/TukeyHSD.html" class="external-link">stats::TukeyHSD()</a></code></p>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

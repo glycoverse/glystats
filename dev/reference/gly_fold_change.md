@@ -1,10 +1,10 @@
 # Calculate fold change
 
 Calculate fold change for a given expression matrix and group
-information. It could only be used for 2-group analysis. When you run
-this function, you will see message about "Ref Group" and "Test Group".
-"Ref Group" is the reference group, and "Test Group" is the
-test/treatment/case group.
+information. Pairwise comparisons are returned when more than two groups
+are supplied. When you run this function, you will see message about
+"Ref Group" and "Test Group". "Ref Group" is the reference group, and
+"Test Group" is the test/treatment/case group.
 
 ## Usage
 
@@ -13,7 +13,7 @@ gly_fold_change(
   exp,
   group_col = "group",
   add_info = TRUE,
-  log_transform = FALSE
+  log_transform = NULL
 )
 ```
 
@@ -39,27 +39,34 @@ gly_fold_change(
 
 - log_transform:
 
-  A single non-missing logical. If `FALSE` (default), return the log2
-  ratio of arithmetic group means as before. If `TRUE`, apply
-  `log2(x + 1e-6)` and return the difference of group means on that
-  scale, equivalent to the log2 ratio of geometric means of `x + 1e-6`.
-  This option transforms input expression; it does not toggle the log2
-  scale of the reported fold change.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` forces the method's log transformation on the supplied
+  values, even if they are already logged; `FALSE` uses the supplied
+  values unchanged. This argument must be named when it follows `...`.
 
 ## Value
 
-A list with three elements:
+A list with four elements:
 
 - `tidy_result`: A tibble with fold change results containing the
   following columns:
 
   - `variable`: Variable name
 
-  - `log2fc`: Log2 ratio of arithmetic group means by default, or
-    difference of mean log2-transformed values when
-    `log_transform = TRUE`. If more than two groups, two additional
-    columns `ref_group` and `test_group` will be added.
+  - `log2fc`: Log2 fold change; see
+    [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+    for the scale-dependent definition If more than two groups, two
+    additional columns `ref_group` and `test_group` will be added.
 
 - `raw_result`: The raw result (same as tidy_result for this function)
 
 - `meta_data`: A list containing metadata from the input experiment
+
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
+
+## See also
+
+[gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

@@ -50,7 +50,7 @@ with optional multiple testing correction.</p>
 <span>  method <span class="op">=</span> <span class="st">"pearson"</span>,</span>
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -85,29 +85,29 @@ If NULL, no adjustment is performed.</p></dd>
 
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
-<dd><p>A single logical value indicating whether to transform
-expression values using <code>log2(x + 1e-6)</code> before analysis. Default is
-<code>TRUE</code>. Set to <code>FALSE</code> for data that are already log-transformed.</p></dd>
+<dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
+logging data twice. <code>TRUE</code> forces the method's log transformation on the
+supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
+values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with three elements:</p><ul><li><p><code>tidy_result</code>: A tibble with correlation results containing the following columns:</p><ul><li><p><code>variable1</code> or <code>sample1</code>: First element of the pair (depending on <code>on</code> parameter)</p></li>
+    <p>A list with four elements:</p><ul><li><p><code>tidy_result</code>: A tibble with correlation results containing the following columns:</p><ul><li><p><code>variable1</code> or <code>sample1</code>: First element of the pair (depending on <code>on</code> parameter)</p></li>
 <li><p><code>variable2</code> or <code>sample2</code>: Second element of the pair (depending on <code>on</code> parameter)</p></li>
 <li><p><code>cor</code>: Correlation coefficient</p></li>
 <li><p><code>p_val</code>: Raw p-value from correlation test</p></li>
 <li><p><code>p_adj</code>: Adjusted p-value (if p_adj_method is not NULL)</p></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw rcorr object from Hmisc::rcorr()</p></li>
-<li><p><code>meta_data</code>: A list containing metadata from the input experiment
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment</p></li>
+<li><p><code>preprocessing</code>: Input and analysis scales and the applied transformation; see <a href="gly_scale.html">gly_scale</a>.
 The list has classes <code>glystats_cor_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Set <code>log_transform = FALSE</code> to use the expression values as supplied, for
-example when they are already log-transformed.</p>
-<p>By default, the function performs log2 transformation on the expression data
-(<code>log2(x + 1e-6)</code>) before correlation analysis. When <code>on = "variable"</code> (default), correlations are calculated between
+    <p>For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+correlation analysis. When <code>on = "variable"</code> (default), correlations are calculated between
 variables across samples. When <code>on = "sample"</code>, correlations are calculated between
 samples across variables.</p>
 <p><strong>Correlation Calculation:</strong>
@@ -124,7 +124,8 @@ P-values are adjusted for multiple testing using the method specified by <code>p
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/Hmisc/man/rcorr.html" class="external-link">Hmisc::rcorr()</a></code>, <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">stats::cor()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/Hmisc/man/rcorr.html" class="external-link">Hmisc::rcorr()</a></code>, <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">stats::cor()</a></code></p>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

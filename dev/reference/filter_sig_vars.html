@@ -164,7 +164,10 @@ If you insist to use it, please set <code>p_adj_cutoff</code> to NULL.</p></dd>
 <dt id="arg-fc-cutoff">fc_cutoff<a class="anchor" aria-label="anchor" href="#arg-fc-cutoff"></a></dt>
 <dd><p>The threshold for fold changes. Only positive value is needed.
 For example, <code>2</code> means fold change &gt; 2 or &lt; 1/2.
-Default is <code>2</code> for glycoproteomics data and <code>NULL</code> for others.</p></dd>
+Default is <code>2</code> for glycoproteomics data and <code>NULL</code> for others.
+For raw-scale <code><a href="gly_limma.html">gly_limma()</a></code> results, <code>NULL</code> uses significance-only
+filtering and an explicit cutoff is an error because log fold changes
+are unavailable.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

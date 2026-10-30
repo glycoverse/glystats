@@ -54,7 +54,7 @@ and merge heights.</p>
 <span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -94,9 +94,10 @@ and <code>hclust.method</code> for clustering method.</p></dd>
 
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
-<dd><p>A single logical value indicating whether to transform
-expression values using <code>log2(x + 1e-6)</code> before analysis. Default is
-<code>TRUE</code>. Set to <code>FALSE</code> for data that are already log-transformed.</p></dd>
+<dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
+logging data twice. <code>TRUE</code> forces the method's log transformation on the
+supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
+values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -116,13 +117,12 @@ expression values using <code>log2(x + 1e-6)</code> before analysis. Default is
 </ul></li>
 <li><p><code>raw_result</code>: The raw hclust object from <code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code></p></li>
 <li><p><code>meta_data</code>: A list containing metadata from the input experiment</p></li>
+<li><p><code>preprocessing</code>: Input and analysis scales and the applied transformation; see <a href="gly_scale.html">gly_scale</a>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Set <code>log_transform = FALSE</code> to use the expression values as supplied, for
-example when they are already log-transformed.</p>
-<p>By default, the function performs log2 transformation on the expression data
-(<code>log2(x + 1e-6)</code>) before clustering. When <code>on = "variable"</code> (default), variables are clustered based on their
+    <p>For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
+clustering. When <code>on = "variable"</code> (default), variables are clustered based on their
 expression patterns across samples. When <code>on = "sample"</code>, samples are clustered based
 on their expression profiles across variables.</p>
 <p><strong>Distance Calculation:</strong>
@@ -143,7 +143,8 @@ but not required.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>, <code><a href="https://rdrr.io/r/stats/dist.html" class="external-link">stats::dist()</a></code>, <code><a href="https://rdrr.io/r/stats/cutree.html" class="external-link">stats::cutree()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>, <code><a href="https://rdrr.io/r/stats/dist.html" class="external-link">stats::dist()</a></code>, <code><a href="https://rdrr.io/r/stats/cutree.html" class="external-link">stats::cutree()</a></code></p>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -13,7 +13,7 @@ gly_roc(
   group_col = "group",
   pos_class = NULL,
   add_info = TRUE,
-  log_transform = FALSE
+  log_transform = NULL
 )
 ```
 
@@ -48,13 +48,14 @@ gly_roc(
 
 - log_transform:
 
-  A single logical value indicating whether to transform expression
-  values using `log2(x + 1e-6)` before analysis. Default is `FALSE`. Set
-  to `FALSE` for data that are already log-transformed.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` forces the method's log transformation on the supplied
+  values, even if they are already logged; `FALSE` uses the supplied
+  values unchanged. This argument must be named when it follows `...`.
 
 ## Value
 
-A list with three elements:
+A list with four elements:
 
 - `tidy_result`: A list containing two tibbles:
 
@@ -82,13 +83,14 @@ A list with three elements:
 
 - `raw_result`: A list of `pROC` objects
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_roc_res` and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment
+
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
+  The list has classes `glystats_roc_res` and `glystats_res`.
 
 ## Details
-
-Expression values are used as supplied by default. Set
-`log_transform = TRUE` to apply `log2(x + 1e-6)` before analysis.
 
 For each variable, a ROC curve is computed using the expression values
 as predictor and the binary group labels as response.
@@ -113,3 +115,6 @@ computation.
 
 [`pROC::roc()`](https://rdrr.io/pkg/pROC/man/roc.html),
 [`pROC::coords()`](https://rdrr.io/pkg/pROC/man/coords.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

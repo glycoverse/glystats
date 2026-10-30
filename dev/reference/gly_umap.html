@@ -47,7 +47,7 @@ The function uses <code><a href="https://jlmelville.github.io/uwot/reference/uma
 <span>  n_components <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -79,28 +79,24 @@ will be added to the result tibble. If FALSE, only the UMAP coordinates are retu
 
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
-<dd><p>A single logical value indicating whether to transform
-expression values using <code>log(x + 1)</code> before analysis. Default is
-<code>TRUE</code>. Set to <code>FALSE</code> for data that are already log-transformed.</p></dd>
+<dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
+logging data twice. <code>TRUE</code> forces the method's log transformation on the
+supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
+values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with three elements:</p><ul><li><p><code>tidy_result</code>: A tibble with UMAP coordinates containing the following columns:</p><ul><li><p><code>sample</code>: Sample name</p></li>
+    <p>A list with four elements:</p><ul><li><p><code>tidy_result</code>: A tibble with UMAP coordinates containing the following columns:</p><ul><li><p><code>sample</code>: Sample name</p></li>
 <li><p><code>umap1</code>: First UMAP dimension</p></li>
 <li><p><code>umap2</code>: Second UMAP dimension</p></li>
 <li><p><code>umap3</code>, <code>umap4</code>, etc.: Additional UMAP dimensions (if n_components &gt; 2)</p></li>
 </ul></li>
 <li><p><code>raw_result</code>: The raw UMAP result matrix</p></li>
-<li><p><code>meta_data</code>: A list containing metadata from the input experiment
+<li><p><code>meta_data</code>: A list containing metadata from the input experiment</p></li>
+<li><p><code>preprocessing</code>: Input and analysis scales and the applied transformation; see <a href="gly_scale.html">gly_scale</a>.
 The list has classes <code>glystats_umap_res</code> and <code>glystats_res</code>.</p></li>
 </ul></div>
-    <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>By default, expression values are transformed using <code>log(x + 1)</code> before
-analysis. Set <code>log_transform = FALSE</code> to use the expression values as supplied,
-for example when they are already log-transformed.</p>
-    </div>
     <div class="section level2">
     <h2 id="required-packages">Required packages<a class="anchor" aria-label="anchor" href="#required-packages"></a></h2>
 
@@ -109,7 +105,8 @@ for example when they are already log-transformed.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://jlmelville.github.io/uwot/reference/umap.html" class="external-link">uwot::umap()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="https://jlmelville.github.io/uwot/reference/umap.html" class="external-link">uwot::umap()</a></code></p>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

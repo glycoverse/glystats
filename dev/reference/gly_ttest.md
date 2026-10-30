@@ -15,7 +15,7 @@ gly_ttest(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -65,14 +65,14 @@ gly_ttest(
 
 - log_transform:
 
-  A single non-missing logical value. If `TRUE` (default), transform
-  expression values using `log2(x + 1e-6)` before analysis. If `FALSE`,
-  use the supplied values unchanged, for example for already
-  log-transformed data.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` forces the method's log transformation on the supplied
+  values, even if they are already logged; `FALSE` uses the supplied
+  values unchanged. This argument must be named when it follows `...`.
 
 ## Value
 
-A list with three elements:
+A list with four elements:
 
 - `tidy_result`: A tibble with t-test results containing the following
   columns:
@@ -103,25 +103,31 @@ A list with three elements:
 
   - `p_adj`: Adjusted p-value (if p_adj_method is not NULL)
 
-  - `log2fc`: Log2 fold change (log2(group2_mean / group1_mean))
+  - `log2fc`: Log2 fold change; see
+    [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+    for the scale-dependent definition
 
 - `raw_result`: A list of `t.test` model objects
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_ttest_res` and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment
+
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
+  The list has classes `glystats_ttest_res` and `glystats_res`.
 
 ## Details
 
-Tests and effect sizes use the selected analysis scale. Reported fold
-changes continue to use ratios of group means from the original supplied
-values.
-
-By default, expression data are transformed using `log2(x + 1e-6)`
-before statistical testing. Set `log_transform = FALSE` to skip this
-transformation. Exactly 2 groups are required in the grouping variable.
-In paired analyses, only subjects observed in both groups are used and
-`effect_size` is Cohen's \\d_z\\ based on within-subject differences.
+For raw data with automatic transformation, the function performs log2
+transformation on the expression data (log2(x + 1e-6)) before
+statistical testing. Exactly 2 groups are required in the grouping
+variable. In paired analyses, only subjects observed in both groups are
+used and `effect_size` is Cohen's \\d_z\\ based on within-subject
+differences.
 
 ## See also
 
 [`stats::t.test()`](https://rdrr.io/r/stats/t.test.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

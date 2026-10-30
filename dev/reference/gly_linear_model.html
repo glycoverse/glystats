@@ -48,7 +48,7 @@ experiment using limma's empirical Bayes moderation.</p>
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -89,10 +89,10 @@ from the experiment is added to the tidy result.</p></dd>
 
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
-<dd><p>A single non-missing logical value. If <code>TRUE</code> (default),
-transform expression values using <code>log2(x + 1e-6)</code> before analysis. If
-<code>FALSE</code>, use the supplied values unchanged, for example for already
-log-transformed data.</p></dd>
+<dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
+logging data twice. <code>TRUE</code> forces the method's log transformation on the
+supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
+values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -103,6 +103,7 @@ containing:</p><ul><li><p><code>tidy_result</code>: A tibble with <code>variable
 <li><p><code>raw_result</code>: A list containing the moderated limma fit, design matrix,
 contrast matrix, and coefficient-name mapping.</p></li>
 <li><p><code>meta_data</code>: Metadata copied from <code>exp</code>.</p></li>
+<li><p><code>preprocessing</code>: Input and analysis scales and the applied transformation; see <a href="gly_scale.html">gly_scale</a>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -112,10 +113,7 @@ formula interface for specifying a wide range of analysis designs and custom
 contrasts. <code><a href="gly_limma.html">gly_limma()</a></code> is a dedicated wrapper for common differential
 expression analysis tasks, with convenient group, covariate, subject, and
 pairwise-comparison arguments.</p>
-<p>By default, expression values are transformed using <code>log2(x + 1e-6)</code> before
-modeling. Set <code>log_transform = FALSE</code> to use the supplied values unchanged.
-Coefficient estimates and average expression are reported on the selected
-analysis scale.
+<p>Raw expression values are automatically transformed using <code>log2(x + 1e-6)</code> before modeling.
 When <code>contrasts</code> is <code>NULL</code>, all non-intercept coefficients are tested. When
 contrasts are supplied, only the named contrasts are returned.</p>
 <p>Character predictors are handled as factors by <code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">stats::model.matrix()</a></code>.
@@ -127,7 +125,8 @@ contrast.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="gly_limma.html">gly_limma()</a></code>, <code><a href="https://rdrr.io/pkg/limma/man/lmFit.html" class="external-link">limma::lmFit()</a></code>, <code><a href="https://rdrr.io/pkg/limma/man/ebayes.html" class="external-link">limma::eBayes()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="gly_limma.html">gly_limma()</a></code>, <code><a href="https://rdrr.io/pkg/limma/man/lmFit.html" class="external-link">limma::lmFit()</a></code>, <code><a href="https://rdrr.io/pkg/limma/man/ebayes.html" class="external-link">limma::eBayes()</a></code></p>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
     </div>
 
     <div class="section level2">

@@ -48,7 +48,7 @@ and extract p-values and hazard ratios from it.</p>
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  log_transform <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -88,14 +88,15 @@ will be added to the result tibble. If FALSE, only the Cox model results are ret
 
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
-<dd><p>A single logical value indicating whether to transform
-expression values using <code>log2(x + 1e-6)</code> before analysis. Default is
-<code>FALSE</code>. Set to <code>FALSE</code> for data that are already log-transformed.</p></dd>
+<dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
+logging data twice. <code>TRUE</code> forces the method's log transformation on the
+supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
+values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with three elements:</p><ul><li><p><code>tidy_result</code>: A tibble with Cox model results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+    <p>A list with four elements:</p><ul><li><p><code>tidy_result</code>: A tibble with Cox model results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>coefficient</code>: Regression coefficient (log hazard ratio)</p></li>
 <li><p><code>std.error</code>: Standard error of the coefficient</p></li>
 <li><p><code>statistic</code>: Wald test statistic</p></li>
@@ -105,18 +106,18 @@ expression values using <code>log2(x + 1e-6)</code> before analysis. Default is
 </ul></li>
 <li><p><code>raw_result</code>: A list of raw <code>coxph</code> model objects.</p></li>
 <li><p><code>meta_data</code>: A list containing metadata from the input experiment</p></li>
+<li><p><code>preprocessing</code>: Input and analysis scales and the applied transformation; see <a href="gly_scale.html">gly_scale</a>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Expression values are used as supplied by default. Set <code>log_transform = TRUE</code>
-to apply <code>log2(x + 1e-6)</code> before analysis.</p>
-<p>The function fits an Cox proportional hazards model for each variable by:</p>
+    <p>The function fits an Cox proportional hazards model for each variable by:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="fu">coxph</span><span class="op">(</span><span class="fu">Surv</span><span class="op">(</span><span class="va">time</span>, <span class="va">event</span><span class="op">)</span> <span class="op">~</span> <span class="va">expression_value</span><span class="op">)</span></span></code></pre><p></p></div>
 <p>P-values are adjusted by Benjamini-Hochberg method by default.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">survival::coxph()</a></code>, <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">survival::Surv()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">survival::coxph()</a></code>, <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">survival::Surv()</a></code></p>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -52,7 +52,7 @@
 <span>  correlation <span class="op">=</span> <span class="st">"pearson"</span>,</span>
 <span>  clustering <span class="op">=</span> <span class="st">"connected"</span>,</span>
 <span>  within <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -118,10 +118,10 @@ which automatic sets are constructed, such as <code>c("protein", "protein_site")
 
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
-<dd><p>A single non-missing logical. If <code>TRUE</code> (default),
-apply <code>log2(x + 1e-6)</code> for both automatic set construction and testing.
-If <code>FALSE</code>, use supplied values without transformation, including values
-that have already been transformed. Estimates are on the selected scale.</p></dd>
+<dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
+logging data twice. <code>TRUE</code> forces the method's log transformation on the
+supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
+values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -137,10 +137,11 @@ and mean within-set correlation.</p></li>
 Hotelling test objects, and automatic set-construction details (when
 <code>sets</code> is <code>NULL</code>).</p></li>
 <li><p><code>meta_data</code>: Metadata copied from <code>exp</code>.</p></li>
+<li><p><code>preprocessing</code>: Input and analysis scales and the applied transformation; see <a href="gly_scale.html">gly_scale</a>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>By default, expression values are transformed using <code>log2(x + 1e-6)</code>. The first factor
+    <p>Raw expression values are automatically transformed using <code>log2(x + 1e-6)</code>. The first factor
 level of <code>group_col</code> is the reference group and the second is the test group.
 The estimate is therefore <code>test - reference</code>.</p>
 <p>Every usable variable is assigned to a set, including a one-variable set when
@@ -154,7 +155,8 @@ ineligible sets are retained with
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">stats::cor()</a></code>, <code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>, <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">stats::cor()</a></code>, <code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>, <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust()</a></code></p>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
     </div>
 
     <div class="section level2">

@@ -17,7 +17,7 @@ gly_ancova(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -61,14 +61,14 @@ gly_ancova(
 
 - log_transform:
 
-  A single non-missing logical value. If `TRUE` (default), transform
-  expression values using `log2(x + 1e-6)` before analysis. If `FALSE`,
-  use the supplied values unchanged, for example for already
-  log-transformed data.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` forces the method's log transformation on the supplied
+  values, even if they are already logged; `FALSE` uses the supplied
+  values unchanged. This argument must be named when it follows `...`.
 
 ## Value
 
-A list containing two elements:
+A list containing four elements:
 
 - `tidy_result`: A list containing:
 
@@ -113,15 +113,18 @@ A list containing two elements:
 
   - `post_hoc_test`: A list of raw emmeans results.
 
+- `meta_data`: Metadata copied from the input experiment.
+
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
+
 ## Details
 
-Tests and effect sizes use the selected analysis scale. Reported fold
-changes continue to use ratios of group means from the original supplied
-values.
-
-By default, expression data are transformed using `log2(x + 1e-6)`
-before statistical testing. Set `log_transform = FALSE` to skip this
-transformation. At least 2 groups and at least 1 covariate are required.
+For raw data with automatic transformation, the function performs log2
+transformation on the expression data (log2(x + 1e-6)) before
+statistical testing. At least 2 groups and at least 1 covariate are
+required.
 
 For any variable failed to fit a
 [`stats::aov()`](https://rdrr.io/r/stats/aov.html) model, NAs will be
@@ -141,3 +144,6 @@ This function requires the `emmeans` package for post-hoc comparisons.
 [`stats::aov()`](https://rdrr.io/r/stats/aov.html),
 [`emmeans::emmeans()`](https://rvlenth.github.io/emmeans/reference/emmeans.html),
 [`emmeans::contrast()`](https://rvlenth.github.io/emmeans/reference/contrast.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

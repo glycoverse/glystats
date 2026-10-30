@@ -15,7 +15,7 @@ gly_hclust(
   scale = TRUE,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -63,9 +63,10 @@ gly_hclust(
 
 - log_transform:
 
-  A single logical value indicating whether to transform expression
-  values using `log2(x + 1e-6)` before analysis. Default is `TRUE`. Set
-  to `FALSE` for data that are already log-transformed.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` forces the method's log transformation on the supplied
+  values, even if they are already logged; `FALSE` uses the supplied
+  values unchanged. This argument must be named when it follows `...`.
 
 ## Value
 
@@ -106,16 +107,18 @@ A list containing:
 
 - `meta_data`: A list containing metadata from the input experiment
 
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
+
 ## Details
 
-Set `log_transform = FALSE` to use the expression values as supplied,
-for example when they are already log-transformed.
-
-By default, the function performs log2 transformation on the expression
-data (`log2(x + 1e-6)`) before clustering. When `on = "variable"`
-(default), variables are clustered based on their expression patterns
-across samples. When `on = "sample"`, samples are clustered based on
-their expression profiles across variables.
+For raw data with automatic transformation, the function performs log2
+transformation on the expression data (log2(x + 1e-6)) before
+clustering. When `on = "variable"` (default), variables are clustered
+based on their expression patterns across samples. When `on = "sample"`,
+samples are clustered based on their expression profiles across
+variables.
 
 **Distance Calculation:** Distance is calculated using
 [`stats::dist()`](https://rdrr.io/r/stats/dist.html) with the specified
@@ -140,3 +143,6 @@ dependencies. For enhanced dendrogram plotting capabilities, the
 [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html),
 [`stats::dist()`](https://rdrr.io/r/stats/dist.html),
 [`stats::cutree()`](https://rdrr.io/r/stats/cutree.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

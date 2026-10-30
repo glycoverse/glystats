@@ -15,7 +15,7 @@ gly_anova(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -60,14 +60,14 @@ gly_anova(
 
 - log_transform:
 
-  A single non-missing logical value. If `TRUE` (default), transform
-  expression values using `log2(x + 1e-6)` before analysis. If `FALSE`,
-  use the supplied values unchanged, for example for already
-  log-transformed data.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` forces the method's log transformation on the supplied
+  values, even if they are already logged; `FALSE` uses the supplied
+  values unchanged. This argument must be named when it follows `...`.
 
 ## Value
 
-A list containing three elements:
+A list containing four elements:
 
 - `tidy_result`: A list containing:
 
@@ -118,18 +118,18 @@ A list containing three elements:
 
 - `meta_data`: A list containing metadata from the input experiment.
 
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
+
 ## Details
 
-Tests and effect sizes use the selected analysis scale. Reported fold
-changes continue to use ratios of group means from the original supplied
-values.
-
-By default, expression data are transformed using `log2(x + 1e-6)`
-before statistical testing. Set `log_transform = FALSE` to skip this
-transformation. At least 2 groups are required in the grouping variable.
-In paired analyses, only subjects observed in every group are used, with
-at most one sample per subject and group. The reported effect size is
-partial eta-squared for the group term.
+For raw data with automatic transformation, the function performs log2
+transformation on the expression data (log2(x + 1e-6)) before
+statistical testing. At least 2 groups are required in the grouping
+variable. In paired analyses, only subjects observed in every group are
+used, with at most one sample per subject and group. The reported effect
+size is partial eta-squared for the group term.
 
 For any variable failed to fit a
 [`stats::aov()`](https://rdrr.io/r/stats/aov.html) model, NAs will be
@@ -144,3 +144,6 @@ Paired analyses instead use paired t-tests with Holm correction.
 
 [`stats::aov()`](https://rdrr.io/r/stats/aov.html),
 [`stats::TukeyHSD()`](https://rdrr.io/r/stats/TukeyHSD.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

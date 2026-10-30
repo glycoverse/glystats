@@ -13,7 +13,7 @@ gly_cor(
   method = "pearson",
   p_adj_method = "BH",
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -53,13 +53,14 @@ gly_cor(
 
 - log_transform:
 
-  A single logical value indicating whether to transform expression
-  values using `log2(x + 1e-6)` before analysis. Default is `TRUE`. Set
-  to `FALSE` for data that are already log-transformed.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` forces the method's log transformation on the supplied
+  values, even if they are already logged; `FALSE` uses the supplied
+  values unchanged. This argument must be named when it follows `...`.
 
 ## Value
 
-A list with three elements:
+A list with four elements:
 
 - `tidy_result`: A tibble with correlation results containing the
   following columns:
@@ -78,19 +79,20 @@ A list with three elements:
 
 - `raw_result`: The raw rcorr object from Hmisc::rcorr()
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_cor_res` and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment
+
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
+  The list has classes `glystats_cor_res` and `glystats_res`.
 
 ## Details
 
-Set `log_transform = FALSE` to use the expression values as supplied,
-for example when they are already log-transformed.
-
-By default, the function performs log2 transformation on the expression
-data (`log2(x + 1e-6)`) before correlation analysis. When
-`on = "variable"` (default), correlations are calculated between
-variables across samples. When `on = "sample"`, correlations are
-calculated between samples across variables.
+For raw data with automatic transformation, the function performs log2
+transformation on the expression data (log2(x + 1e-6)) before
+correlation analysis. When `on = "variable"` (default), correlations are
+calculated between variables across samples. When `on = "sample"`,
+correlations are calculated between samples across variables.
 
 **Correlation Calculation:** Correlation coefficients and p-values are
 calculated using
@@ -110,3 +112,6 @@ calculation.
 
 [`Hmisc::rcorr()`](https://rdrr.io/pkg/Hmisc/man/rcorr.html),
 [`stats::cor()`](https://rdrr.io/r/stats/cor.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

@@ -131,7 +131,10 @@ filter_sig_vars(
 
   The threshold for fold changes. Only positive value is needed. For
   example, `2` means fold change \> 2 or \< 1/2. Default is `2` for
-  glycoproteomics data and `NULL` for others.
+  glycoproteomics data and `NULL` for others. For raw-scale
+  [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
+  results, `NULL` uses significance-only filtering and an explicit
+  cutoff is an error because log fold changes are unavailable.
 
 - ...:
 

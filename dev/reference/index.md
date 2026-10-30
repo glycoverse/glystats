@@ -36,6 +36,8 @@
   : Partial Least Squares Discriminant Analysis (PLS-DA)
 - [`gly_roc()`](https://glycoverse.github.io/glystats/dev/reference/gly_roc.md)
   : ROC Analysis for Glycomics and Glycoproteomics Data
+- [`gly_scale`](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+  : Abundance scales and automatic transformations
 - [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
   : Construct and Test Correlated Variable Sets
 - [`gly_tsne()`](https://glycoverse.github.io/glystats/dev/reference/gly_tsne.md)

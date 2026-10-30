@@ -33,7 +33,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glystats-development-version">glystats (development version)<a class="anchor" aria-label="anchor" href="#glystats-development-version"></a></h2>
-</div>
+<ul><li>Analysis functions gain <code>log_transform = NULL</code> to recognize <code>raw</code>, natural-log (<code>log</code>), <code>log2</code>, and <code>log10</code> metadata and avoid repeated logging; <code>TRUE</code> and <code>FALSE</code> explicitly control transformation, and missing metadata preserves each method’s historical default. Results record input and analysis scales in <code>preprocessing</code> without modifying the experiment. (#24)</li>
+<li>Fold changes from logged inputs now use group mean differences converted to log2 units. Limma preserves native model units, converts logged contrasts to <code>log2fc</code>, and reports raw-scale contrasts as <code>estimate</code> with <code>NA</code> log2 fold changes. <code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> uses significance-only filtering for raw-scale limma results and rejects explicit fold-change cutoffs. (#24)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.13.0" id="glystats-0130">glystats 0.13.0<a class="anchor" aria-label="anchor" href="#glystats-0130"></a></h2>
 <ul><li>All expression-analysis functions gain a validated <code>log_transform</code> argument. Existing transformation defaults, log bases, and pseudocounts are preserved; Cox, ROC, and fold-change default to <code>FALSE</code>. Set construction and testing share the selected scale. Optional fold-change transformation reports differences of log2 means (geometric-mean fold changes). (#23)</li>

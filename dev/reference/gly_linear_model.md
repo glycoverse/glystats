@@ -13,7 +13,7 @@ gly_linear_model(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -58,10 +58,10 @@ gly_linear_model(
 
 - log_transform:
 
-  A single non-missing logical value. If `TRUE` (default), transform
-  expression values using `log2(x + 1e-6)` before analysis. If `FALSE`,
-  use the supplied values unchanged, for example for already
-  log-transformed data.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` forces the method's log transformation on the supplied
+  values, even if they are already logged; `FALSE` uses the supplied
+  values unchanged. This argument must be named when it follows `...`.
 
 ## Value
 
@@ -76,6 +76,10 @@ containing:
 
 - `meta_data`: Metadata copied from `exp`.
 
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
+
 ## Details
 
 `gly_linear_model()` and
@@ -88,10 +92,8 @@ is a dedicated wrapper for common differential expression analysis
 tasks, with convenient group, covariate, subject, and
 pairwise-comparison arguments.
 
-By default, expression values are transformed using `log2(x + 1e-6)`
-before modeling. Set `log_transform = FALSE` to use the supplied values
-unchanged. Coefficient estimates and average expression are reported on
-the selected analysis scale. When `contrasts` is `NULL`, all
+Raw expression values are automatically transformed using
+`log2(x + 1e-6)` before modeling. When `contrasts` is `NULL`, all
 non-intercept coefficients are tested. When contrasts are supplied, only
 the named contrasts are returned.
 
@@ -109,6 +111,9 @@ coefficient or contrast.
 [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md),
 [`limma::lmFit()`](https://rdrr.io/pkg/limma/man/lmFit.html),
 [`limma::eBayes()`](https://rdrr.io/pkg/limma/man/ebayes.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
+for input scales, transformations, and fold changes.
 
 ## Examples
 
