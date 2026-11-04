@@ -19,7 +19,8 @@
 #' - `tidy_result`: A tibble with t-SNE coordinates containing the following columns:
 #'   - `sample`: Sample name
 #'   - `tsne1`: First t-SNE dimension
-#'   - `tsne2`: Second t-SNE dimension
+#'   - `tsne2`: Second t-SNE dimension, if requested
+#'   - `tsne3`, etc.: Additional requested t-SNE dimensions
 #' - `raw_result`: The raw Rtsne object
 #' - `meta_data`: A list containing metadata from the input experiment
 #' - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
@@ -96,13 +97,13 @@ gly_tsne <- function(
   sample_order <- colnames(expr_mat)
   expr_mat <- .remove_all_na_variables(expr_mat)
   if (nrow(expr_mat) == 0) {
+    tidy_result <- tibble::tibble(sample = sample_order, .rows = ncol(expr_mat))
+    for (i in seq_len(dims)) {
+      tidy_result[[paste0("tsne", i)]] <- NA_real_
+    }
     return(structure(
       list(
-        tidy_result = tibble::tibble(
-          sample = sample_order,
-          tsne1 = NA_real_,
-          tsne2 = NA_real_
-        ),
+        tidy_result = tidy_result,
         raw_result = NULL
       ),
       class = c("glystats_tsne_res", "glystats_res")
@@ -146,11 +147,10 @@ gly_tsne <- function(
   tsne_res <- do.call(Rtsne::Rtsne, call_args)
 
   # Create tidy result tibble
-  tidy_result <- tibble::tibble(
-    sample = rownames(mat),
-    tsne1 = tsne_res$Y[, 1],
-    tsne2 = tsne_res$Y[, 2]
-  )
+  tidy_result <- tibble::tibble(sample = rownames(mat), .rows = nrow(mat))
+  for (i in seq_len(ncol(tsne_res$Y))) {
+    tidy_result[[paste0("tsne", i)]] <- tsne_res$Y[, i]
+  }
 
   # Return list with both tidy and raw results
   structure(

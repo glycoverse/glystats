@@ -19,7 +19,7 @@
 #' - `tidy_result`: A tibble with UMAP coordinates containing the following columns:
 #'   - `sample`: Sample name
 #'   - `umap1`: First UMAP dimension
-#'   - `umap2`: Second UMAP dimension
+#'   - `umap2`: Second UMAP dimension, if requested
 #'   - `umap3`, `umap4`, etc.: Additional UMAP dimensions (if n_components > 2)
 #' - `raw_result`: The raw UMAP result matrix
 #' - `meta_data`: A list containing metadata from the input experiment
@@ -98,7 +98,7 @@ gly_umap <- function(
   sample_order <- colnames(expr_mat)
   expr_mat <- .remove_all_na_variables(expr_mat)
   if (nrow(expr_mat) == 0) {
-    tidy_result <- tibble::tibble(sample = sample_order)
+    tidy_result <- tibble::tibble(sample = sample_order, .rows = ncol(expr_mat))
     for (i in seq_len(n_components)) {
       tidy_result[[paste0("umap", i)]] <- NA_real_
     }
@@ -137,17 +137,9 @@ gly_umap <- function(
   umap_res <- do.call(uwot::umap, call_args)
 
   # Create tidy result tibble
-  tidy_result <- tibble::tibble(
-    sample = rownames(mat),
-    umap1 = umap_res[, 1],
-    umap2 = umap_res[, 2]
-  )
-
-  # Handle more than 2 components
-  if (n_components > 2) {
-    for (i in 3:n_components) {
-      tidy_result[[paste0("umap", i)]] <- umap_res[, i]
-    }
+  tidy_result <- tibble::tibble(sample = rownames(mat), .rows = nrow(mat))
+  for (i in seq_len(ncol(umap_res))) {
+    tidy_result[[paste0("umap", i)]] <- umap_res[, i]
   }
 
   # Return list with both tidy and raw results
