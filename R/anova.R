@@ -982,6 +982,11 @@ gly_kruskal <- function(
   log_transform = TRUE
 ) {
   checkmate::assert_flag(log_transform)
+  # Downstream fits and effect sizes identify features by name. Retain the
+  # former wide-table rejection instead of pooling distinct rows together.
+  if (anyDuplicated(rownames(expr_mat)) > 0L) {
+    cli::cli_abort("Assay row names must be unique for differential testing.")
+  }
   if (!is_logged) {
     expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   }

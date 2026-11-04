@@ -114,3 +114,86 @@ test_that("ANCOVA preserves a feature sharing a covariate name", {
   expect_setequal(names(result$raw_result$main_test), rownames(values))
   expect_true(all(is.finite(result$tidy_result$main_test$p_val)))
 })
+
+
+duplicate_identifier_experiment <- function() {
+  values <- rbind(
+    c(1, 2, 4, 3, 10, 11, 13, 12),
+    c(100, 110, 90, 105, 2, 4, 1, 3)
+  )
+  dimnames(values) <- list(rep("duplicate", 2), paste0("s", seq_len(8)))
+  SummarizedExperiment::SummarizedExperiment(
+    assays = list(abundance = values),
+    colData = S4Vectors::DataFrame(
+      group = factor(rep(c("A", "B"), each = 4)),
+      person = rep(letters[1:4], 2),
+      age = c(20, 40, 30, 50, 22, 42, 32, 52)
+    )
+  )
+}
+
+test_that("the former wide-table preparation also rejected duplicate identifiers", {
+  exp <- duplicate_identifier_experiment()
+  wide <- as.data.frame(t(SummarizedExperiment::assay(exp)))
+  expect_gt(anyDuplicated(names(wide)), 0L)
+  expect_error(
+    tibble::as_tibble(tibble::rownames_to_column(wide, "sample")),
+    "unique"
+  )
+})
+
+test_that("duplicate assay identifiers cannot pool distinct differential fits", {
+  exp <- duplicate_identifier_experiment()
+  before <- SummarizedExperiment::assay(exp)
+  for (paired in c(FALSE, TRUE)) {
+    for (analyze in list(gly_ttest, gly_wilcox, gly_anova)) {
+      expect_error(
+        suppressMessages(analyze(
+          exp,
+          subject_col = if (paired) "person" else NULL,
+          log_transform = FALSE,
+          add_info = FALSE
+        )),
+        "Assay row names must be unique"
+      )
+    }
+  }
+  expect_identical(SummarizedExperiment::assay(exp), before)
+})
+
+test_that("paired rank tests reject duplicate assay identifiers", {
+  expect_error(
+    suppressMessages(gly_kruskal(
+      duplicate_identifier_experiment(),
+      subject_col = "person",
+      log_transform = FALSE,
+      add_info = FALSE
+    )),
+    "Assay row names must be unique"
+  )
+})
+
+test_that("unpaired rank tests reject duplicate assay identifiers", {
+  skip_if_not_installed("FSA")
+  expect_error(
+    suppressMessages(gly_kruskal(
+      duplicate_identifier_experiment(),
+      log_transform = FALSE,
+      add_info = FALSE
+    )),
+    "Assay row names must be unique"
+  )
+})
+
+test_that("covariate-adjusted tests reject duplicate assay identifiers", {
+  skip_if_not_installed("emmeans")
+  expect_error(
+    suppressMessages(gly_ancova(
+      duplicate_identifier_experiment(),
+      covariate_cols = "age",
+      log_transform = FALSE,
+      add_info = FALSE
+    )),
+    "Assay row names must be unique"
+  )
+})
