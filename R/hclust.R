@@ -271,7 +271,7 @@ gly_hclust <- function(
   tidy_result$heights <- tibble::tibble(
     merge_step = seq_along(hclust_res$height),
     height = hclust_res$height,
-    n_clusters = length(hclust_res$labels) - seq_along(hclust_res$height)
+    n_clusters = length(hclust_res$order) - seq_along(hclust_res$height)
   )
 
   # 3. Try to create dendrogram data using ggdendro if available
