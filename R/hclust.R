@@ -208,6 +208,12 @@ gly_hclust <- function(
   dist_args <- dots
   hclust_args <- dots
 
+  # Forward arguments only to the function that accepts them.
+  dist_args$members <- NULL
+  hclust_args$diag <- NULL
+  hclust_args$upper <- NULL
+  hclust_args$p <- NULL
+
   # If dist.method is specified, use it for dist() and remove from hclust_args
   if ("dist.method" %in% names(dots)) {
     dist_args$method <- dots$dist.method
@@ -265,7 +271,7 @@ gly_hclust <- function(
   tidy_result$heights <- tibble::tibble(
     merge_step = seq_along(hclust_res$height),
     height = hclust_res$height,
-    n_clusters = length(hclust_res$labels) - seq_along(hclust_res$height) + 1
+    n_clusters = length(hclust_res$labels) - seq_along(hclust_res$height)
   )
 
   # 3. Try to create dendrogram data using ggdendro if available
