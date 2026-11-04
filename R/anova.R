@@ -986,36 +986,36 @@ gly_kruskal <- function(
     expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   }
 
-  data <- expr_mat %>%
-    t() %>%
-    as.data.frame() %>%
-    tibble::rownames_to_column("sample") %>%
-    tibble::as_tibble() %>%
-    dplyr::mutate(group = groups)
+  # Keep feature identifiers as values, never as temporary column names.
+  # Otherwise names such as "sample", "group", or a covariate can collide
+  # with the analysis columns and be dropped, overwritten, or repaired.
+  sample_indices <- rep(seq_len(ncol(expr_mat)), each = nrow(expr_mat))
+  sample_names <- colnames(expr_mat)
+  if (is.null(sample_names)) {
+    sample_names <- as.character(seq_len(ncol(expr_mat)))
+  }
+  variable_names <- rownames(expr_mat)
+  if (is.null(variable_names)) {
+    variable_names <- paste0("V", seq_len(nrow(expr_mat)))
+  }
+  data <- tibble::tibble(
+    sample = sample_names[sample_indices],
+    group = groups[sample_indices],
+    variable = rep(variable_names, times = ncol(expr_mat)),
+    log_value = as.vector(expr_mat)
+  )
 
   if (!is.null(subjects)) {
-    data$subject <- subjects
+    data$subject <- subjects[sample_indices]
   }
 
   if (!is.null(covariates)) {
     covariate_tbl <- tibble::as_tibble(covariates)
-    data <- dplyr::bind_cols(data, covariate_tbl)
-  }
-
-  keep_cols <- c("sample", "group")
-  if (!is.null(subjects)) {
-    keep_cols <- c(keep_cols, "subject")
-  }
-  if (!is.null(covariates)) {
-    keep_cols <- c(keep_cols, colnames(covariates))
-  }
-
-  data <- data %>%
-    tidyr::pivot_longer(
-      cols = -all_of(keep_cols),
-      names_to = "variable",
-      values_to = "log_value"
+    data <- dplyr::bind_cols(
+      data,
+      covariate_tbl[sample_indices, , drop = FALSE]
     )
+  }
 
   data
 }
