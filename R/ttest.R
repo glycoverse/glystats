@@ -422,17 +422,11 @@ gly_wilcox <- function(
   ...,
   paired = FALSE
 ) {
-  data <- log_expr_mat %>%
-    t() %>%
-    as.data.frame() %>%
-    tibble::rownames_to_column("sample") %>%
-    tibble::as_tibble() %>%
-    dplyr::mutate(group = groups) %>%
-    tidyr::pivot_longer(
-      cols = -all_of(c("sample", "group")),
-      names_to = "variable",
-      values_to = "log_value"
-    )
+  data <- .prepare_multi_group_data(
+    log_expr_mat,
+    groups,
+    is_logged = TRUE
+  )
 
   # Perform statistical tests and store raw results
   dots <- rlang::list2(...)
