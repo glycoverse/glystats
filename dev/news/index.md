@@ -2,6 +2,11 @@
 
 ## glystats (development version)
 
+- UMAP and t-SNE tidy results respect the requested embedding
+  dimensions: one-dimensional fits no longer index a nonexistent second
+  coordinate, and t-SNE retains additional dimensions, including its
+  all-missing-data result.
+
 - [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
   forwards distance-only and clustering-only arguments to the correct
   function and reports the number of clusters remaining after each merge

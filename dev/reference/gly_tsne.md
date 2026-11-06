@@ -66,7 +66,9 @@ A list with four elements:
 
   - `tsne1`: First t-SNE dimension
 
-  - `tsne2`: Second t-SNE dimension
+  - `tsne2`: Second t-SNE dimension, if requested
+
+  - `tsne3`, etc.: Additional requested t-SNE dimensions
 
 - `raw_result`: The raw Rtsne object
 

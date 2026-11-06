@@ -66,7 +66,7 @@ A list with four elements:
 
   - `umap1`: First UMAP dimension
 
-  - `umap2`: Second UMAP dimension
+  - `umap2`: Second UMAP dimension, if requested
 
   - `umap3`, `umap4`, etc.: Additional UMAP dimensions (if n_components
     \> 2)
