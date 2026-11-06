@@ -2,6 +2,11 @@
 
 ## glystats (development version)
 
+- [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
+  forwards distance-only and clustering-only arguments to the correct
+  function and reports the number of clusters remaining after each merge
+  without an off-by-one error.
+
 - Differential tests preserve feature identifiers that match internal
   analysis columns or covariate names instead of dropping, overwriting,
   or renaming those features. Duplicate assay row names remain rejected
