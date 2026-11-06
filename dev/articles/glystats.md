@@ -20,6 +20,8 @@ provides a useful overview.
 
 library(glystats)
 library(glyexp)
+#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
+#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(glyread)
 library(glyclean)
 library(dplyr)
@@ -78,9 +80,9 @@ exp
 #> ── GlycoproteomicSE ────────────────────────────────────────────────────────────
 #> ℹ Abundance assay: 12 samples, 225 variables
 #> ℹ Glycan type: N
-#> ℹ Row data fields: protein <chr>, glycan_composition <comp>, protein_site <int>, gene <chr>
+#> ℹ Row data fields: protein <chr>, glycan_composition <comp>, protein_site <int>, gene <chr>, protein_group <chr>
 #> ℹ Column data fields: group <fct>
-#> ℹ Metadata fields: exp_type <chr>, glycan_type <chr>, quant_method <chr>
+#> ℹ Metadata fields: exp_type <chr>, glycan_type <chr>, quant_method <chr>, scale <chr>
 ```
 
 The result is a
@@ -91,19 +93,19 @@ the main workflow.
 ``` r
 
 tibble::as_tibble(rowData(exp), rownames = "variable")
-#> # A tibble: 225 × 5
-#>    variable                        protein glycan_composition protein_site gene 
-#>    <chr>                           <chr>   <comp>                    <int> <chr>
-#>  1 P08185-176-Hex(5)HexNAc(4)NeuA… P08185  Hex(5)HexNAc(4)Ne…          176 SERP…
-#>  2 P04196-344-Hex(5)HexNAc(4)NeuA… P04196  Hex(5)HexNAc(4)Ne…          344 HRG  
-#>  3 P04196-344-Hex(5)HexNAc(4)      P04196  Hex(5)HexNAc(4)             344 HRG  
-#>  4 P10909-291-Hex(6)HexNAc(5)      P10909  Hex(6)HexNAc(5)             291 CLU  
-#>  5 P04196-344-Hex(5)HexNAc(4)NeuA… P04196  Hex(5)HexNAc(4)Ne…          344 HRG  
-#>  6 P04196-345-Hex(5)HexNAc(4)      P04196  Hex(5)HexNAc(4)             345 HRG  
-#>  7 P04196-344-Hex(5)HexNAc(4)dHex… P04196  Hex(5)HexNAc(4)dH…          344 HRG  
-#>  8 P04196-344-Hex(4)HexNAc(3)      P04196  Hex(4)HexNAc(3)             344 HRG  
-#>  9 P04196-344-Hex(4)HexNAc(4)NeuA… P04196  Hex(4)HexNAc(4)Ne…          344 HRG  
-#> 10 P10909-291-Hex(5)HexNAc(4)      P10909  Hex(5)HexNAc(4)             291 CLU  
+#> # A tibble: 225 × 6
+#>    variable          protein glycan_composition protein_site gene  protein_group
+#>    <chr>             <chr>   <comp>                    <int> <chr> <chr>        
+#>  1 P08185-176-Hex(5… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… P08185       
+#>  2 P04196-344-Hex(5… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   P04196       
+#>  3 P04196-344-Hex(5… P04196  Hex(5)HexNAc(4)             344 HRG   P04196       
+#>  4 P10909-291-Hex(6… P10909  Hex(6)HexNAc(5)             291 CLU   P10909       
+#>  5 P04196-344-Hex(5… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   P04196       
+#>  6 P04196-345-Hex(5… P04196  Hex(5)HexNAc(4)             345 HRG   P04196       
+#>  7 P04196-344-Hex(5… P04196  Hex(5)HexNAc(4)dH…          344 HRG   P04196       
+#>  8 P04196-344-Hex(4… P04196  Hex(4)HexNAc(3)             344 HRG   P04196       
+#>  9 P04196-344-Hex(4… P04196  Hex(4)HexNAc(4)Ne…          344 HRG   P04196       
+#> 10 P10909-291-Hex(5… P10909  Hex(5)HexNAc(4)             291 CLU   P10909       
 #> # ℹ 215 more rows
 ```
 
@@ -182,22 +184,22 @@ to get the tidy result tibble:
 ``` r
 
 get_tidy_result(anova_res, "main_test")
-#> # A tibble: 225 × 14
-#>    variable     protein glycan_composition protein_site gene  term     df  sumsq
-#>    <chr>        <chr>   <comp>                    <int> <chr> <chr> <dbl>  <dbl>
-#>  1 P08185-176-… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… group     3  45.0 
-#>  2 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 159.  
-#>  3 P04196-344-… P04196  Hex(5)HexNAc(4)             344 HRG   group     3  72.6 
-#>  4 P10909-291-… P10909  Hex(6)HexNAc(5)             291 CLU   group     3  16.3 
-#>  5 P04196-344-… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 485.  
-#>  6 P04196-345-… P04196  Hex(5)HexNAc(4)             345 HRG   group     3  35.0 
-#>  7 P04196-344-… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 162.  
-#>  8 P04196-344-… P04196  Hex(4)HexNAc(3)             344 HRG   group     3  77.2 
-#>  9 P04196-344-… P04196  Hex(4)HexNAc(4)Ne…          344 HRG   group     3   9.65
-#> 10 P10909-291-… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  81.4 
+#> # A tibble: 225 × 15
+#>    variable    protein glycan_composition protein_site gene  protein_group term 
+#>    <chr>       <chr>   <comp>                    <int> <chr> <chr>         <chr>
+#>  1 P08185-176… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… P08185        group
+#>  2 P04196-344… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   P04196        group
+#>  3 P04196-344… P04196  Hex(5)HexNAc(4)             344 HRG   P04196        group
+#>  4 P10909-291… P10909  Hex(6)HexNAc(5)             291 CLU   P10909        group
+#>  5 P04196-344… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   P04196        group
+#>  6 P04196-345… P04196  Hex(5)HexNAc(4)             345 HRG   P04196        group
+#>  7 P04196-344… P04196  Hex(5)HexNAc(4)dH…          344 HRG   P04196        group
+#>  8 P04196-344… P04196  Hex(4)HexNAc(3)             344 HRG   P04196        group
+#>  9 P04196-344… P04196  Hex(4)HexNAc(4)Ne…          344 HRG   P04196        group
+#> 10 P10909-291… P10909  Hex(5)HexNAc(4)             291 CLU   P10909        group
 #> # ℹ 215 more rows
-#> # ℹ 6 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
-#> #   effect_size <dbl>, post_hoc <chr>
+#> # ℹ 8 more variables: df <dbl>, sumsq <dbl>, meansq <dbl>, statistic <dbl>,
+#> #   p_val <dbl>, p_adj <dbl>, effect_size <dbl>, post_hoc <chr>
 ```
 
 [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
@@ -228,22 +230,22 @@ exp |>
 #> ℹ Number of groups: 4
 #> ℹ Groups: "C", "H", "M", and "Y"
 #> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
-#> # A tibble: 58 × 14
-#>    variable      protein glycan_composition protein_site gene  term     df sumsq
-#>    <chr>         <chr>   <comp>                    <int> <chr> <chr> <dbl> <dbl>
-#>  1 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 159. 
-#>  2 P04196-344-H… P04196  Hex(5)HexNAc(4)             344 HRG   group     3  72.6
-#>  3 P10909-291-H… P10909  Hex(6)HexNAc(5)             291 CLU   group     3  16.3
-#>  4 P04196-344-H… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   group     3 485. 
-#>  5 P04196-345-H… P04196  Hex(5)HexNAc(4)             345 HRG   group     3  35.0
-#>  6 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 162. 
-#>  7 P04196-344-H… P04196  Hex(4)HexNAc(3)             344 HRG   group     3  77.2
-#>  8 P10909-291-H… P10909  Hex(5)HexNAc(4)             291 CLU   group     3  81.4
-#>  9 P04196-344-H… P04196  Hex(5)HexNAc(4)dH…          344 HRG   group     3 132. 
-#> 10 P13671-855-H… P13671  Hex(5)HexNAc(4)dH…          855 C6    group     3  81.1
+#> # A tibble: 58 × 15
+#>    variable    protein glycan_composition protein_site gene  protein_group term 
+#>    <chr>       <chr>   <comp>                    <int> <chr> <chr>         <chr>
+#>  1 P04196-344… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   P04196        group
+#>  2 P04196-344… P04196  Hex(5)HexNAc(4)             344 HRG   P04196        group
+#>  3 P10909-291… P10909  Hex(6)HexNAc(5)             291 CLU   P10909        group
+#>  4 P04196-344… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   P04196        group
+#>  5 P04196-345… P04196  Hex(5)HexNAc(4)             345 HRG   P04196        group
+#>  6 P04196-344… P04196  Hex(5)HexNAc(4)dH…          344 HRG   P04196        group
+#>  7 P04196-344… P04196  Hex(4)HexNAc(3)             344 HRG   P04196        group
+#>  8 P10909-291… P10909  Hex(5)HexNAc(4)             291 CLU   P10909        group
+#>  9 P04196-344… P04196  Hex(5)HexNAc(4)dH…          344 HRG   P04196        group
+#> 10 P13671-855… P13671  Hex(5)HexNAc(4)dH…          855 C6    P13671        group
 #> # ℹ 48 more rows
-#> # ℹ 6 more variables: meansq <dbl>, statistic <dbl>, p_val <dbl>, p_adj <dbl>,
-#> #   effect_size <dbl>, post_hoc <chr>
+#> # ℹ 8 more variables: df <dbl>, sumsq <dbl>, meansq <dbl>, statistic <dbl>,
+#> #   p_val <dbl>, p_adj <dbl>, effect_size <dbl>, post_hoc <chr>
 ```
 
 ## Available analyses
