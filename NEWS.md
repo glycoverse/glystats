@@ -1,5 +1,6 @@
 # glystats (development version)
 
+* `gly_hclust()` forwards distance-only and clustering-only arguments to the correct function and reports the number of clusters remaining after each merge without an off-by-one error.
 * Differential tests preserve feature identifiers that match internal analysis columns or covariate names instead of dropping, overwriting, or renaming those features. Duplicate assay row names remain rejected instead of pooling separate features.
 
 * Analysis functions gain `log_transform = NULL` to recognize `raw`, natural-log (`log`), `log2`, and `log10` metadata and avoid repeated logging; `TRUE` and `FALSE` explicitly control transformation, and missing metadata preserves each method's historical default. Results record input and analysis scales in `preprocessing` without modifying the experiment. (#24)
