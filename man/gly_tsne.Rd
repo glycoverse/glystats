@@ -39,7 +39,8 @@ A list with four elements:
 \itemize{
 \item \code{sample}: Sample name
 \item \code{tsne1}: First t-SNE dimension
-\item \code{tsne2}: Second t-SNE dimension
+\item \code{tsne2}: Second t-SNE dimension, if requested
+\item \code{tsne3}, etc.: Additional requested t-SNE dimensions
 }
 \item \code{raw_result}: The raw Rtsne object
 \item \code{meta_data}: A list containing metadata from the input experiment

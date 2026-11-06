@@ -39,7 +39,7 @@ A list with four elements:
 \itemize{
 \item \code{sample}: Sample name
 \item \code{umap1}: First UMAP dimension
-\item \code{umap2}: Second UMAP dimension
+\item \code{umap2}: Second UMAP dimension, if requested
 \item \code{umap3}, \code{umap4}, etc.: Additional UMAP dimensions (if n_components > 2)
 }
 \item \code{raw_result}: The raw UMAP result matrix
