@@ -122,7 +122,7 @@ exp
 #> ℹ Glycan type: N
 #> ℹ Row data fields: protein <chr>, glycan_composition <comp>, protein_site <int>, gene <chr>, protein_group <chr>
 #> ℹ Column data fields: group <fct>
-#> ℹ Metadata fields: exp_type <chr>, glycan_type <chr>, quant_method <chr>, scale <chr>
+#> ℹ Metadata fields: exp_type <chr>, glycan_type <chr>, quant_method <chr>, scale <chr>, pipeline <glycln_p>
 ```
 
 The result is a
