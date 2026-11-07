@@ -105,10 +105,12 @@ If you insist to use it, please set \code{p_adj_cutoff} to NULL.}
 
 \item{fc_cutoff}{The threshold for fold changes. Only positive value is needed.
 For example, \code{2} means fold change > 2 or < 1/2.
-Default is \code{2} for glycoproteomics data and \code{NULL} for others.
-For raw-scale \code{\link[=gly_limma]{gly_limma()}} results, \code{NULL} uses significance-only
-filtering and an explicit cutoff is an error because log fold changes
-are unavailable.}
+Explicit \code{NULL} disables fold-change filtering for every scale. When omitted,
+the default is \code{2} for glycoproteomics comparisons with available fold changes
+and \code{NULL} otherwise. For \code{"logx"} results, a non-\code{NULL} cutoff warns and is
+ignored because original-abundance fold changes are unavailable; filtering
+uses only the selected significance cutoff. Raw-scale \code{\link[=gly_limma]{gly_limma()}} results
+and other \code{\link[=gly_linear_model]{gly_linear_model()}} results reject non-\code{NULL} cutoffs.}
 
 \item{...}{Additional arguments passed to methods. See the method-specific documentation for details.}
 

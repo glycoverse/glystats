@@ -5,22 +5,25 @@
 \title{Abundance scales and automatic transformations}
 \arguments{
 \item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
-logging data twice. \code{TRUE} forces the method's log transformation on the
-supplied values, even if they are already logged; \code{FALSE} uses the supplied
-values unchanged. This argument must be named when it follows \code{...}.}
+logging data twice. \code{TRUE} requests the method's log transformation for
+raw data; if the input is already on \code{"log"}, \code{"log2"}, \code{"log10"}, or
+\code{"logx"}, it warns and uses the supplied values unchanged. \code{FALSE} always
+uses the supplied values unchanged. This argument must be named when it
+follows \code{...}.}
 }
 \description{
 Abundance scales and automatic transformations
 }
 \details{
 The supported scales are \code{"raw"}, \code{"log"} (natural logarithm), \code{"log2"},
-and \code{"log10"}. Missing scale metadata is treated as \code{"raw"} for compatibility
-with older experiments. An explicitly supplied invalid scale is an error.
+\code{"log10"}, and \code{"logx"}. Missing scale metadata is treated as \code{"raw"} for
+compatibility with older experiments. An explicitly supplied invalid scale is an error.
 Older development objects labeled \code{"log"} must be relabeled if the data
 were actually transformed with base 2 or 10. The base is never inferred.
 
-With \code{log_transform = NULL}, known logged data are used unchanged. Raw data
-retain the method's historical default: PCA, t-SNE, UMAP, PLS-DA, and OPLS-DA
+Known logged data are always used unchanged. An explicit
+\code{log_transform = TRUE} produces a warning and is ignored for these scales.
+Raw data retain the method's historical default: PCA, t-SNE, UMAP, PLS-DA, and OPLS-DA
 use \code{log(x + 1)}; differential tests, linear models, set tests, correlation,
 and clustering use \code{log2(x + 1e-6)}. ROC, Cox, and fold change use raw values.
 For these last three methods, \code{TRUE} requests \code{log2(x + 1e-6)}.
@@ -32,12 +35,13 @@ analysis in \code{preprocessing}: \code{input_scale}, \code{scale_missing},
 Model estimates, standard errors, intervals, and raw fits use analysis units.
 
 For raw inputs, fold changes retain \code{log2(mean(test) / mean(reference))}.
-For logged inputs, \code{log2fc} is the difference of group means converted to
+For ordinary logged inputs, \code{log2fc} is the difference of group means converted to
 base 2: divide natural-log differences by \code{log(2)} and multiply base-10
 differences by \code{log2(10)}. This estimates a ratio of geometric means.
 Differential tests calculate fold changes from the input scale independently
-of the matrix used for testing. In \code{gly_fold_change(log_transform = TRUE)},
-fold changes instead use the newly logged matrix, including its pseudo-count.
+of the matrix used for testing. For raw input to
+\code{gly_fold_change(log_transform = TRUE)}, fold changes instead use the newly
+logged matrix, including its pseudo-count.
 Limma contrasts on a logged analysis scale are converted to \code{log2fc};
 native model estimates and fits stay in analysis units. With an unlogged raw
 limma analysis, contrasts are returned as \code{estimate} and \code{log2fc} is \code{NA},
@@ -45,6 +49,33 @@ because an adjusted raw-scale difference is not a log fold change.
 \code{\link[=filter_sig_vars]{filter_sig_vars()}} then uses significance-only filtering by default and
 rejects explicit fold-change cutoffs for these raw-scale limma results.
 }
+\section{Transformed coordinates (\code{logx})}{
+
+\code{"logx"} denotes logarithmic or log-like coordinates, such as CLR, ALR, or
+VSN output, whose original abundances cannot be recovered from the scale
+label alone. It does not specify a logarithm base or a common effect unit.
+These coordinates are used unchanged by PCA, t-SNE, UMAP, PLS-DA, OPLS-DA,
+correlation, clustering, ROC, Cox, linear models, set tests, and differential
+tests. Negative values and zero are valid coordinates. The transformation
+and each method's statistical assumptions still need to suit the analysis;
+accepting \code{logx} does not make CLR, ALR, and VSN interchangeable.
+
+\code{log_transform = TRUE} warns and is ignored for \code{logx}, just as for other
+logged scales: another logarithm would not recover ordinary log abundance.
+\code{\link[=gly_fold_change]{gly_fold_change()}} rejects \code{logx} because
+original-abundance fold changes are not defined by this label. Differential
+tests retain their native estimates and effect sizes, but return \code{NA} in
+\code{log2fc}, including post-hoc comparisons. Limma returns its native contrast
+in \code{estimate} and \code{NA} in \code{log2fc}; raw model components remain unchanged.
+\code{\link[=filter_sig_vars]{filter_sig_vars()}} uses significance-only filtering for \code{logx}, including
+glycoproteomics results. A non-\code{NULL} fold-change cutoff warns and is ignored.
+Explicit \code{fc_cutoff = NULL} disables fold-change filtering for every scale.
+When omitted, glycoproteomics comparisons with available fold changes retain
+their default cutoff of 2. To obtain
+abundance fold changes, supply a separate experiment on a known abundance
+scale rather than relabeling transformed coordinates.
+}
+
 \examples{
 values <- matrix(c(1, 2, 4, 8), nrow = 1,
                  dimnames = list("feature", paste0("s", 1:4)))

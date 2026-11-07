@@ -54,7 +54,8 @@
 #' @returns A list with four elements:
 #'  - `tidy_result`: A tibble with limma results containing the following columns:
 #'    - `variable`: Variable name
-#'    - `log2fc`: Log2 fold change
+#'    - `log2fc`: Log2 fold change, or `NA` on raw and `logx` analysis scales
+#'    - `estimate`: Native model contrast for non-log2 analysis scales; see [gly_scale]
 #'    - `AveExpr`: Average expression level
 #'    - `t`: t-statistic
 #'    - `p_val`: Raw p-value

@@ -29,9 +29,11 @@ used as the positive class.}
 will be added to the result tibbles. If FALSE, only the ROC analysis results are returned.}
 
 \item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
-logging data twice. \code{TRUE} forces the method's log transformation on the
-supplied values, even if they are already logged; \code{FALSE} uses the supplied
-values unchanged. This argument must be named when it follows \code{...}.}
+logging data twice. \code{TRUE} requests the method's log transformation for
+raw data; if the input is already on \code{"log"}, \code{"log2"}, \code{"log10"}, or
+\code{"logx"}, it warns and uses the supplied values unchanged. \code{FALSE} always
+uses the supplied values unchanged. This argument must be named when it
+follows \code{...}.}
 }
 \value{
 A list with four elements:

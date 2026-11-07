@@ -129,3 +129,110 @@ test_that("logged and legacy limma results retain fold-change filtering", {
     "signal"
   )
 })
+
+for (method in c("ttest", "wilcox", "limma", "anova", "ancova", "kruskal")) {
+  local({
+    name <- method
+    test_that(
+      paste(name, "distinguishes omitted FC defaults from explicit NULL"),
+      {
+        # Fixed results isolate filtering from fit variability: all variables are
+        # significant but have a log2 fold change below the default cutoff.
+        exp <- raw_limma_filter_experiment()
+        tab <- tibble::tibble(
+          variable = rownames(exp),
+          p_val = 0.001,
+          p_adj = 0.001,
+          log2fc = 0.5,
+          ref_group = "A",
+          test_group = "B"
+        )
+        multi <- name %in% c("anova", "ancova", "kruskal")
+        tidy <- if (multi) list(main_test = tab, post_hoc_test = tab) else tab
+        if (name == "limma") {
+          tidy$comparison <- "A_vs_B"
+        }
+        res <- structure(
+          list(tidy_result = tidy),
+          class = paste0("glystats_", name, "_res")
+        )
+        modes <- if (multi) {
+          list(list(on = "post_hoc_test", comparison = "A_vs_B"))
+        } else {
+          list(list())
+        }
+        for (scale in c("raw", "log", "log2", "log10")) {
+          S4Vectors::metadata(exp)$scale <- scale
+          res$preprocessing <- list(
+            analysis_scale = if (scale == "raw") "log2" else scale
+          )
+          for (mode in modes) {
+            args <- c(list(exp = exp, res = res), mode)
+            original <- exp
+            expect_identical(nrow(do.call(filter_sig_vars, args)), 0L)
+            explicit <- do.call(
+              filter_sig_vars,
+              c(args, list(fc_cutoff = NULL))
+            )
+            expect_identical(rownames(explicit), rownames(exp))
+            expect_identical(
+              S4Vectors::metadata(explicit),
+              S4Vectors::metadata(exp)
+            )
+            expect_identical(exp, original)
+            expect_error(
+              do.call(
+                filter_sig_vars,
+                c(args, list(fc_cutoff = NULL, p_adj_cutoff = NULL))
+              ),
+              "All are NULL"
+            )
+            generic <- methods::as(exp, "SummarizedExperiment")
+            S4Vectors::metadata(generic)$exp_type <- "others"
+            args$exp <- generic
+            expect_identical(
+              do.call(filter_sig_vars, args),
+              do.call(filter_sig_vars, c(args, list(fc_cutoff = NULL)))
+            )
+            expect_identical(nrow(do.call(filter_sig_vars, args)), nrow(exp))
+          }
+          if (multi) {
+            expect_identical(
+              rownames(filter_sig_vars(exp, res, fc_cutoff = NULL)),
+              rownames(exp)
+            )
+          }
+        }
+      }
+    )
+  })
+}
+
+test_that("known-scale linear models still reject explicit fold-change cutoffs", {
+  exp <- raw_limma_filter_experiment()
+  res <- structure(
+    list(
+      tidy_result = tibble::tibble(
+        variable = rownames(exp),
+        term = "groupB",
+        p_adj = 0.001,
+        p_val = 0.001
+      ),
+      preprocessing = list(analysis_scale = "log2")
+    ),
+    class = "glystats_linear_model_res"
+  )
+  for (scale in c("raw", "log", "log2", "log10")) {
+    S4Vectors::metadata(exp)$scale <- scale
+    res$preprocessing$analysis_scale <- scale
+    expect_error(filter_sig_vars(exp, res, fc_cutoff = 2), "fc_cutoff")
+    expect_identical(
+      filter_sig_vars(exp, res),
+      filter_sig_vars(exp, res, fc_cutoff = NULL)
+    )
+    expect_identical(
+      rownames(filter_sig_vars(exp, res, fc_cutoff = NULL)),
+      rownames(exp)
+    )
+  }
+})

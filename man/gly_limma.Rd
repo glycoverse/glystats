@@ -52,9 +52,11 @@ will be added to the result tibble. If FALSE, only the statistical results are r
 \item{...}{Additional arguments passed to \code{limma::lmFit()}.}
 
 \item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
-logging data twice. \code{TRUE} forces the method's log transformation on the
-supplied values, even if they are already logged; \code{FALSE} uses the supplied
-values unchanged. This argument must be named when it follows \code{...}.}
+logging data twice. \code{TRUE} requests the method's log transformation for
+raw data; if the input is already on \code{"log"}, \code{"log2"}, \code{"log10"}, or
+\code{"logx"}, it warns and uses the supplied values unchanged. \code{FALSE} always
+uses the supplied values unchanged. This argument must be named when it
+follows \code{...}.}
 }
 \value{
 A list with four elements:
@@ -62,7 +64,8 @@ A list with four elements:
 \item \code{tidy_result}: A tibble with limma results containing the following columns:
 \itemize{
 \item \code{variable}: Variable name
-\item \code{log2fc}: Log2 fold change
+\item \code{log2fc}: Log2 fold change, or \code{NA} on raw and \code{logx} analysis scales
+\item \code{estimate}: Native model contrast for non-log2 analysis scales; see \link{gly_scale}
 \item \code{AveExpr}: Average expression level
 \item \code{t}: t-statistic
 \item \code{p_val}: Raw p-value

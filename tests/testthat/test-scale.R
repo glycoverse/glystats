@@ -105,8 +105,15 @@ test_that("scale resolution covers defaults, overrides, and invalid metadata", {
     exp <- scale_test_experiment(scale)
     for (option in list(NULL, TRUE, FALSE)) {
       for (default in c(TRUE, FALSE)) {
-        plan <- .resolve_transformation(exp, option, default)
-        expected <- if (is.null(option)) scale == "raw" && default else option
+        if (identical(option, TRUE) && scale != "raw") {
+          expect_warning(
+            plan <- .resolve_transformation(exp, option, default),
+            "log_transform"
+          )
+        } else {
+          plan <- .resolve_transformation(exp, option, default)
+        }
+        expected <- scale == "raw" && if (is.null(option)) default else option
         expect_identical(plan$log_transform, expected)
         expect_identical(plan$input_scale, scale)
         expect_identical(plan$analysis_scale, if (expected) "log2" else scale)
@@ -140,6 +147,43 @@ test_that("scale resolution covers defaults, overrides, and invalid metadata", {
   }
 })
 
+test_that("named scalar scales retain their transformation semantics", {
+  for (scale in c("raw", "log", "log2", "log10", "logx")) {
+    exp <- scale_test_experiment(scale)
+    named_exp <- exp
+    S4Vectors::metadata(named_exp)$scale <- c(abundance = scale)
+    for (option in list(
+      NULL,
+      TRUE,
+      FALSE,
+      c(requested = TRUE),
+      c(requested = FALSE)
+    )) {
+      for (default in c(TRUE, FALSE)) {
+        resolve <- function(x) .resolve_transformation(x, option, default)
+        if (scale != "raw" && isTRUE(option)) {
+          expect_warning(
+            named <- resolve(named_exp),
+            class = "glystats_already_logged"
+          )
+          unnamed <- suppressWarnings(resolve(exp))
+        } else {
+          expect_no_warning(named <- resolve(named_exp))
+          unnamed <- resolve(exp)
+        }
+        expect_identical(named, unnamed)
+        expect_identical(named$input_scale, scale)
+      }
+    }
+    named_result <- run_scale_test("ttest", named_exp)
+    unnamed_result <- run_scale_test("ttest", exp)
+    expect_identical(named_result$preprocessing, unnamed_result$preprocessing)
+    expect_equal(named_result$tidy_result, unnamed_result$tidy_result)
+    expect_identical(named_result$meta_data$scale, c(abundance = scale))
+    expect_identical(S4Vectors::metadata(named_exp)$scale, c(abundance = scale))
+  }
+})
+
 test_that("every public entry routes scales and options without forwarding them through dots", {
   # Intercept the fit boundary to exercise every wrapper across the full contract
   # without repeating expensive stochastic fits hundreds of times.
@@ -166,7 +210,7 @@ test_that("every public entry routes scales and options without forwarding them 
         expected <- if (is.null(option)) {
           scale == "raw" && !name %in% c("cox", "roc", "fold_change")
         } else {
-          option
+          option && scale == "raw"
         }
         result <- testthat::with_mocked_bindings(
           run_scale_test(name, exp, option),
@@ -344,7 +388,20 @@ for (name in names(scale_test_methods())) {
         expect_equal(auto$tidy_result, unchanged$tidy_result)
         expect_identical(auto$preprocessing$analysis_scale, "log2")
         expect_false(auto$preprocessing$log_transform)
+        ignored <- run_scale_test(method, exp, TRUE)
+        expect_equal(ignored$tidy_result, unchanged$tidy_result)
+        expect_false(ignored$preprocessing$log_transform)
+        expect_true(ignored$preprocessing$requested_log_transform)
+        # Raw data still receives the historical method-specific transform.
+        exp <- scale_test_experiment("raw")
+        original <- exp
         forced <- run_scale_test(method, exp, TRUE)
+        missing <- exp
+        S4Vectors::metadata(missing)$scale <- NULL
+        expect_equal(
+          run_scale_test(method, missing, TRUE)$tidy_result,
+          forced$tidy_result
+        )
         expect_true(forced$preprocessing$log_transform)
         manual <- exp
         values <- .get_expr_mat(exp)
@@ -445,4 +502,61 @@ test_that("automatic set construction uses the recorded scale once", {
     expected$correlation_matrix
   )
   expect_false(result$preprocessing$log_transform)
+})
+
+test_that("all wrappers warn and ignore repeated logging based on metadata", {
+  for (method in names(scale_test_methods())) {
+    capture <- function(...) {
+      stop("fit boundary reached")
+    }
+    bindings <- stats::setNames(list(capture), paste0(".analyze_", method))
+    for (scale in c("log", "log2", "log10", "logx")) {
+      if (method == "fold_change" && scale == "logx") {
+        next
+      }
+      for (edge in c(FALSE, TRUE)) {
+        exp <- scale_test_experiment(scale)
+        if (edge) {
+          SummarizedExperiment::assay(exp)[1, 1:2] <- c(-1, 0)
+        }
+        args <- c(
+          list(exp = exp, log_transform = TRUE),
+          scale_test_methods()[[method]]
+        )
+        # No expensive fitting is needed to verify that the public entry emits
+        # its warning before it reaches the numerical backend.
+        testthat::with_mocked_bindings(
+          expect_warning(
+            expect_error(
+              do.call(get(paste0("gly_", method)), args),
+              "fit boundary reached"
+            ),
+            "log_transform"
+          ),
+          !!!bindings
+        )
+      }
+    }
+  }
+})
+
+test_that("legacy and S4 inputs also ignore repeated log requests", {
+  withr::local_options(lifecycle_verbosity = "quiet")
+  legacy <- exp_2groups()
+  for (scale in c("log", "log2", "log10", "logx")) {
+    legacy$meta_data$scale <- scale
+    for (exp in list(legacy, glyexp::as_glycoproteomic_se(legacy))) {
+      original <- exp
+      expect_warning(
+        actual <- gly_ttest(exp, log_transform = TRUE),
+        "log_transform"
+      )
+      expected <- gly_ttest(exp, log_transform = FALSE)
+      expect_equal(actual$tidy_result, expected$tidy_result)
+      expect_true(actual$preprocessing$requested_log_transform)
+      expect_false(actual$preprocessing$log_transform)
+      expect_identical(actual$preprocessing$transformation, "none")
+      expect_identical(exp, original)
+    }
+  }
 })

@@ -40,7 +40,7 @@ RoxygenNote: 7.3.3
 URL: https://glycoverse.github.io/glystats/
 Imports:
     tibble,
-    glyexp (>= 0.16.0),
+    glyexp (>= 0.19.0),
     rlang,
     tidyr,
     dplyr,

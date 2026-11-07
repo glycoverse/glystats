@@ -15,10 +15,12 @@
 #'   If you insist to use it, please set `p_adj_cutoff` to NULL.
 #' @param fc_cutoff The threshold for fold changes. Only positive value is needed.
 #'   For example, `2` means fold change > 2 or < 1/2.
-#'   Default is `2` for glycoproteomics data and `NULL` for others.
-#'   For raw-scale [gly_limma()] results, `NULL` uses significance-only
-#'   filtering and an explicit cutoff is an error because log fold changes
-#'   are unavailable.
+#'   Explicit `NULL` disables fold-change filtering for every scale. When omitted,
+#'   the default is `2` for glycoproteomics comparisons with available fold changes
+#'   and `NULL` otherwise. For `"logx"` results, a non-`NULL` cutoff warns and is
+#'   ignored because original-abundance fold changes are unavailable; filtering
+#'   uses only the selected significance cutoff. Raw-scale [gly_limma()] results
+#'   and other [gly_linear_model()] results reject non-`NULL` cutoffs.
 #' @param ... Additional arguments passed to methods. See the method-specific documentation for details.
 #'
 #' @returns A filtered object of the same class as `exp`.
@@ -67,6 +69,12 @@ filter_sig_vars.glystats_anova_res <- function(
   comparison = NULL,
   ...
 ) {
+  fc_cutoff <- .decide_fc(
+    exp,
+    fc_cutoff,
+    res,
+    use_default = missing(fc_cutoff) && isTRUE(on == "post_hoc_test")
+  )
   .check_filter_sig_vars_args_anova(
     exp,
     res,
@@ -76,7 +84,6 @@ filter_sig_vars.glystats_anova_res <- function(
     on,
     comparison
   )
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_anova(
     exp,
     res,
@@ -100,6 +107,12 @@ filter_sig_vars.glystats_ancova_res <- function(
   comparison = NULL,
   ...
 ) {
+  fc_cutoff <- .decide_fc(
+    exp,
+    fc_cutoff,
+    res,
+    use_default = missing(fc_cutoff) && isTRUE(on == "post_hoc_test")
+  )
   .check_filter_sig_vars_args_anova(
     exp,
     res,
@@ -109,7 +122,6 @@ filter_sig_vars.glystats_ancova_res <- function(
     on,
     comparison
   )
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_anova(
     exp,
     res,
@@ -133,6 +145,12 @@ filter_sig_vars.glystats_kruskal_res <- function(
   comparison = NULL,
   ...
 ) {
+  fc_cutoff <- .decide_fc(
+    exp,
+    fc_cutoff,
+    res,
+    use_default = missing(fc_cutoff) && isTRUE(on == "post_hoc_test")
+  )
   .check_filter_sig_vars_args_anova(
     exp,
     res,
@@ -142,7 +160,6 @@ filter_sig_vars.glystats_kruskal_res <- function(
     on,
     comparison
   )
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_anova(
     exp,
     res,
@@ -164,8 +181,8 @@ filter_sig_vars.glystats_ttest_res <- function(
   fc_cutoff = NULL,
   ...
 ) {
+  fc_cutoff <- .decide_fc(exp, fc_cutoff, res, use_default = missing(fc_cutoff))
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
 }
 
@@ -179,8 +196,8 @@ filter_sig_vars.glystats_wilcox_res <- function(
   fc_cutoff = NULL,
   ...
 ) {
+  fc_cutoff <- .decide_fc(exp, fc_cutoff, res, use_default = missing(fc_cutoff))
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
 }
 
@@ -195,6 +212,14 @@ filter_sig_vars.glystats_limma_res <- function(
   comparison = NULL,
   ...
 ) {
+  if (!identical(res$preprocessing$analysis_scale, "raw")) {
+    fc_cutoff <- .decide_fc(
+      exp,
+      fc_cutoff,
+      res,
+      use_default = missing(fc_cutoff)
+    )
+  }
   .check_filter_sig_vars_args_limma(
     exp,
     p_adj_cutoff,
@@ -208,8 +233,6 @@ filter_sig_vars.glystats_limma_res <- function(
         "{.arg fc_cutoff} cannot be used with raw-scale {.fn gly_limma} results because model contrasts are not log fold changes."
       )
     }
-  } else {
-    fc_cutoff <- .decide_fc(exp, fc_cutoff)
   }
   .filter_sig_vars_limma(
     exp,
@@ -232,6 +255,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
   term = NULL,
   ...
 ) {
+  fc_cutoff <- .decide_fc(exp, fc_cutoff, res)
   .check_filter_sig_vars_args(
     exp,
     p_adj_cutoff,
@@ -485,8 +509,30 @@ filter_sig_vars.glystats_linear_model_res <- function(
   )
 }
 
-.decide_fc <- function(exp, user_provided) {
-  if (!is.null(user_provided)) {
+.decide_fc <- function(exp, user_provided, res = NULL, use_default = FALSE) {
+  .assert_data_container(exp)
+  checkmate::assert_number(
+    user_provided,
+    lower = 1,
+    null.ok = TRUE,
+    .var.name = "fc_cutoff"
+  )
+  if (
+    identical(unname(res$preprocessing$input_scale), "logx") ||
+      identical(unname(res$meta_data$scale), "logx")
+  ) {
+    if (!is.null(user_provided)) {
+      cli::cli_warn(
+        c(
+          "{.arg fc_cutoff} is ignored for logx results because original-abundance fold changes are unavailable.",
+          "i" = "Using {.code fc_cutoff = NULL} to filter only by significance."
+        ),
+        class = "glystats_fc_cutoff_ignored"
+      )
+    }
+    return(NULL)
+  }
+  if (!use_default || !is.null(user_provided)) {
     return(user_provided)
   }
   if (identical(.get_exp_type(exp), "glycoproteomics")) {
