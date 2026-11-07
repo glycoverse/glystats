@@ -23,7 +23,8 @@ will be added to the result tibble. If FALSE, only the fold change results are r
 \item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
 logging data twice. \code{TRUE} forces the method's log transformation on the
 supplied values, even if they are already logged; \code{FALSE} uses the supplied
-values unchanged. This argument must be named when it follows \code{...}.}
+values unchanged. For \code{"logx"}, only \code{NULL} or \code{FALSE} is supported.
+This argument must be named when it follows \code{...}.}
 }
 \value{
 A list with four elements:
@@ -44,6 +45,10 @@ Calculate fold change for a given expression matrix and group information.
 Pairwise comparisons are returned when more than two groups are supplied.
 When you run this function, you will see message about "Ref Group" and "Test Group".
 "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
+}
+\details{
+\code{scale = "logx"} is not supported because the transformed coordinates do
+not determine original-abundance fold changes. See \link{gly_scale}.
 }
 \seealso{
 \link{gly_scale} for input scales, transformations, and fold changes.

@@ -5,6 +5,9 @@
 #' When you run this function, you will see message about "Ref Group" and "Test Group".
 #' "Ref Group" is the reference group, and "Test Group" is the test/treatment/case group.
 #'
+#' `scale = "logx"` is not supported because the transformed coordinates do
+#' not determine original-abundance fold changes. See [gly_scale].
+#'
 #' @param exp A [glyexp::GlycomicSE()] or [glyexp::GlycoproteomicSE()] object,
 #'   or another `SummarizedExperiment`.
 #' @param group_col The column name of the group information in the sample information.
@@ -43,6 +46,12 @@ gly_fold_change <- function(
     method = "log2",
     meta_data = meta_data
   )
+  if (identical(transformation$input_scale, "logx")) {
+    cli::cli_abort(c(
+      "{.fn gly_fold_change} cannot be used with scale {.val logx}.",
+      "i" = "Original-abundance fold changes cannot be inferred from transformed coordinates."
+    ))
+  }
   log_transform <- transformation$log_transform
   checkmate::assert_string(group_col)
   checkmate::assert_logical(add_info, len = 1)

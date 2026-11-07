@@ -16,8 +16,8 @@
 #' @param fc_cutoff The threshold for fold changes. Only positive value is needed.
 #'   For example, `2` means fold change > 2 or < 1/2.
 #'   Default is `2` for glycoproteomics data and `NULL` for others.
-#'   For raw-scale [gly_limma()] results, `NULL` uses significance-only
-#'   filtering and an explicit cutoff is an error because log fold changes
+#'   For `"logx"` results and raw-scale [gly_limma()] results, `NULL` uses
+#'   significance-only filtering and an explicit cutoff is an error because log fold changes
 #'   are unavailable.
 #' @param ... Additional arguments passed to methods. See the method-specific documentation for details.
 #'
@@ -76,7 +76,7 @@ filter_sig_vars.glystats_anova_res <- function(
     on,
     comparison
   )
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff, res)
   .filter_sig_vars_anova(
     exp,
     res,
@@ -109,7 +109,7 @@ filter_sig_vars.glystats_ancova_res <- function(
     on,
     comparison
   )
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff, res)
   .filter_sig_vars_anova(
     exp,
     res,
@@ -142,7 +142,7 @@ filter_sig_vars.glystats_kruskal_res <- function(
     on,
     comparison
   )
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff, res)
   .filter_sig_vars_anova(
     exp,
     res,
@@ -165,7 +165,7 @@ filter_sig_vars.glystats_ttest_res <- function(
   ...
 ) {
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff, res)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
 }
 
@@ -180,7 +180,7 @@ filter_sig_vars.glystats_wilcox_res <- function(
   ...
 ) {
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
-  fc_cutoff <- .decide_fc(exp, fc_cutoff)
+  fc_cutoff <- .decide_fc(exp, fc_cutoff, res)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
 }
 
@@ -209,7 +209,7 @@ filter_sig_vars.glystats_limma_res <- function(
       )
     }
   } else {
-    fc_cutoff <- .decide_fc(exp, fc_cutoff)
+    fc_cutoff <- .decide_fc(exp, fc_cutoff, res)
   }
   .filter_sig_vars_limma(
     exp,
@@ -485,7 +485,18 @@ filter_sig_vars.glystats_linear_model_res <- function(
   )
 }
 
-.decide_fc <- function(exp, user_provided) {
+.decide_fc <- function(exp, user_provided, res = NULL) {
+  if (
+    identical(res$preprocessing$input_scale, "logx") ||
+      identical(res$meta_data$scale, "logx")
+  ) {
+    if (!is.null(user_provided)) {
+      cli::cli_abort(
+        "{.arg fc_cutoff} cannot be used with logx results because original-abundance fold changes are unavailable."
+      )
+    }
+    return(NULL)
+  }
   if (!is.null(user_provided)) {
     return(user_provided)
   }

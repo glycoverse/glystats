@@ -4,12 +4,13 @@
 #' @param log_transform `NULL` (default) uses `metadata(exp)$scale` to avoid
 #'   logging data twice. `TRUE` forces the method's log transformation on the
 #'   supplied values, even if they are already logged; `FALSE` uses the supplied
-#'   values unchanged. This argument must be named when it follows `...`.
+#'   values unchanged. For `"logx"`, only `NULL` or `FALSE` is supported.
+#'   This argument must be named when it follows `...`.
 #'
 #' @details
 #' The supported scales are `"raw"`, `"log"` (natural logarithm), `"log2"`,
-#' and `"log10"`. Missing scale metadata is treated as `"raw"` for compatibility
-#' with older experiments. An explicitly supplied invalid scale is an error.
+#' `"log10"`, and `"logx"`. Missing scale metadata is treated as `"raw"` for
+#' compatibility with older experiments. An explicitly supplied invalid scale is an error.
 #' Older development objects labeled `"log"` must be relabeled if the data
 #' were actually transformed with base 2 or 10. The base is never inferred.
 #'
@@ -26,7 +27,7 @@
 #' Model estimates, standard errors, intervals, and raw fits use analysis units.
 #'
 #' For raw inputs, fold changes retain `log2(mean(test) / mean(reference))`.
-#' For logged inputs, `log2fc` is the difference of group means converted to
+#' For ordinary logged inputs, `log2fc` is the difference of group means converted to
 #' base 2: divide natural-log differences by `log(2)` and multiply base-10
 #' differences by `log2(10)`. This estimates a ratio of geometric means.
 #' Differential tests calculate fold changes from the input scale independently
@@ -38,6 +39,27 @@
 #' because an adjusted raw-scale difference is not a log fold change.
 #' [filter_sig_vars()] then uses significance-only filtering by default and
 #' rejects explicit fold-change cutoffs for these raw-scale limma results.
+#'
+#' @section Transformed coordinates (`logx`):
+#' `"logx"` denotes logarithmic or log-like coordinates, such as CLR, ALR, or
+#' VSN output, whose original abundances cannot be recovered from the scale
+#' label alone. It does not specify a logarithm base or a common effect unit.
+#' These coordinates are used unchanged by PCA, t-SNE, UMAP, PLS-DA, OPLS-DA,
+#' correlation, clustering, ROC, Cox, linear models, set tests, and differential
+#' tests. Negative values and zero are valid coordinates. The transformation
+#' and each method's statistical assumptions still need to suit the analysis;
+#' accepting `logx` does not make CLR, ALR, and VSN interchangeable.
+#'
+#' `log_transform = TRUE` is rejected for `logx`: another logarithm would not
+#' recover ordinary log abundance. [gly_fold_change()] rejects `logx` because
+#' original-abundance fold changes are not defined by this label. Differential
+#' tests retain their native estimates and effect sizes, but return `NA` in
+#' `log2fc`, including post-hoc comparisons. Limma returns its native contrast
+#' in `estimate` and `NA` in `log2fc`; raw model components remain unchanged.
+#' [filter_sig_vars()] uses significance-only filtering for `logx`, including
+#' glycoproteomics results, and rejects explicit fold-change cutoffs. To obtain
+#' abundance fold changes, supply a separate experiment on a known abundance
+#' scale rather than relabeling transformed coordinates.
 #'
 #' @examples
 #' values <- matrix(c(1, 2, 4, 8), nrow = 1,
@@ -68,8 +90,21 @@ NULL
   meta <- meta_data
   scale_missing <- !"scale" %in% names(meta)
   input_scale <- if (scale_missing) "raw" else meta[["scale"]]
-  if (!checkmate::test_choice(input_scale, c("raw", "log", "log2", "log10"))) {
-    cli::cli_abort('Metadata `scale` must be "raw", "log", "log2", or "log10".')
+  if (
+    !checkmate::test_choice(
+      input_scale,
+      c("raw", "log", "log2", "log10", "logx")
+    )
+  ) {
+    cli::cli_abort(
+      'Metadata `scale` must be "raw", "log", "log2", "log10", or "logx".'
+    )
+  }
+  if (identical(input_scale, "logx") && isTRUE(log_transform)) {
+    cli::cli_abort(c(
+      "{.arg log_transform = TRUE} cannot be used with scale {.val logx}.",
+      "i" = "Use NULL or FALSE to analyze the supplied transformed coordinates."
+    ))
   }
   apply_log <- if (is.null(log_transform)) {
     identical(input_scale, "raw") && default
@@ -98,7 +133,9 @@ NULL
 }
 
 .mean_log2fc <- function(reference, test, input_scale = "raw") {
-  if (input_scale == "raw") {
+  if (input_scale == "logx") {
+    rep(NA_real_, length(reference))
+  } else if (input_scale == "raw") {
     log2(test / reference)
   } else {
     (test - reference) * .log2_factor(input_scale)
@@ -110,7 +147,9 @@ NULL
     return(result)
   }
   result$tidy_result$estimate <- result$tidy_result$log2fc
-  result$tidy_result$log2fc <- if (transformation$analysis_scale == "raw") {
+  result$tidy_result$log2fc <- if (
+    transformation$analysis_scale %in% c("raw", "logx")
+  ) {
     rep(NA_real_, nrow(result$tidy_result))
   } else {
     result$tidy_result$estimate * .log2_factor(transformation$analysis_scale)

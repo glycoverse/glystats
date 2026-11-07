@@ -33,7 +33,8 @@ If NULL, no adjustment is performed.}
 \item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
 logging data twice. \code{TRUE} forces the method's log transformation on the
 supplied values, even if they are already logged; \code{FALSE} uses the supplied
-values unchanged. This argument must be named when it follows \code{...}.}
+values unchanged. For \code{"logx"}, only \code{NULL} or \code{FALSE} is supported.
+This argument must be named when it follows \code{...}.}
 }
 \value{
 A list with four elements:
