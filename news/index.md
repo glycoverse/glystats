@@ -41,9 +41,9 @@
 - [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
   and
   [`gly_linear_model()`](https://glycoverse.github.io/glystats/reference/gly_linear_model.md)
-  preserve native model units, convert logged contrasts to `log2fc`, and
-  report raw-scale contrasts as `estimate` with `NA` log2 fold changes.
-  (#24)
+  preserve native model units, convert `log`, `log2`, and `log10`
+  contrasts to `log2fc`, and report raw-scale contrasts as `estimate`
+  with `NA` log2 fold changes. (#24)
 
 ### Minor improvements and fixes
 

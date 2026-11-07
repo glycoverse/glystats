@@ -49,7 +49,7 @@
 <li>
 <code><a href="../reference/gly_fold_change.html">gly_fold_change()</a></code> and differential tests calculate fold changes from <code>log</code>, <code>log2</code>, and <code>log10</code> inputs using group mean differences converted to log2 units. <code><a href="../reference/gly_fold_change.html">gly_fold_change()</a></code> rejects <code>logx</code> inputs because abundance fold changes are undefined on this scale. (#24, #31)</li>
 <li>
-<code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code><a href="../reference/gly_linear_model.html">gly_linear_model()</a></code> preserve native model units, convert logged contrasts to <code>log2fc</code>, and report raw-scale contrasts as <code>estimate</code> with <code>NA</code> log2 fold changes. (#24)</li>
+<code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code><a href="../reference/gly_linear_model.html">gly_linear_model()</a></code> preserve native model units, convert <code>log</code>, <code>log2</code>, and <code>log10</code> contrasts to <code>log2fc</code>, and report raw-scale contrasts as <code>estimate</code> with <code>NA</code> log2 fold changes. (#24)</li>
 </ul></div>
 <div class="section level3">
 <h3 id="minor-improvements-and-fixes-0-14-0">Minor improvements and fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-fixes-0-14-0"></a></h3>
