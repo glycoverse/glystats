@@ -1,5 +1,68 @@
 # Changelog
 
+## glystats 0.14.0
+
+### Breaking changes
+
+- `log_transform = TRUE` no longer applies a second logarithm to
+  experiments marked `log`, `log2`, `log10`, or `logx`; it warns and
+  uses the supplied values unchanged. Use `NULL` (the default) or
+  `FALSE` to analyze logged values without this warning. (#31)
+- `filter_sig_vars(fc_cutoff = NULL)` now disables fold-change filtering
+  for glycoproteomics instead of selecting a cutoff of 2. Omit the
+  argument or set it to `2` to retain the previous filtering behavior
+  when fold changes are available. (#31)
+
+### New features
+
+- Analysis functions gain `log_transform = NULL` to recognize `raw`,
+  natural-log (`log`), `log2`, `log10`, and `logx` metadata and avoid
+  repeated logging. `TRUE` transforms raw data but warns and leaves
+  logged inputs unchanged, `FALSE` keeps the supplied values, and
+  missing metadata preserves each method’s historical default. Results
+  record input and analysis scales in `preprocessing` without modifying
+  the experiment. (#24, \#31)
+- Differential tests retain native effects for `logx` transformed
+  coordinates and report `NA` `log2fc` because abundance fold changes
+  are undefined on this scale. (#31)
+- [`filter_sig_vars()`](https://glycoverse.github.io/glystats/reference/filter_sig_vars.md)
+  uses significance-only filtering for `logx` inputs, warning and
+  ignoring non-`NULL` fold-change cutoffs. `fc_cutoff = NULL` disables
+  fold-change filtering on every scale; omitting it retains the default
+  cutoff of 2 for glycoproteomics comparisons with available fold
+  changes. Raw-scale limma results use significance-only filtering and
+  reject explicit fold-change cutoffs. (#24, \#31)
+- [`gly_fold_change()`](https://glycoverse.github.io/glystats/reference/gly_fold_change.md)
+  and differential tests calculate fold changes from `log`, `log2`, and
+  `log10` inputs using group mean differences converted to log2 units.
+  [`gly_fold_change()`](https://glycoverse.github.io/glystats/reference/gly_fold_change.md)
+  rejects `logx` inputs because abundance fold changes are undefined on
+  this scale. (#24, \#31)
+- [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md)
+  and
+  [`gly_linear_model()`](https://glycoverse.github.io/glystats/reference/gly_linear_model.md)
+  preserve native model units, convert logged contrasts to `log2fc`, and
+  report raw-scale contrasts as `estimate` with `NA` log2 fold changes.
+  (#24)
+
+### Minor improvements and fixes
+
+- Differential tests preserve feature identifiers that match internal
+  analysis columns or covariate names instead of dropping, overwriting,
+  or renaming those features. Duplicate assay row names remain rejected
+  instead of pooling separate features. (#25)
+- [`gly_hclust()`](https://glycoverse.github.io/glystats/reference/gly_hclust.md)
+  forwards distance-only and clustering-only arguments to the correct
+  function and reports the number of clusters remaining after each merge
+  without an off-by-one error. (#26)
+- [`gly_tsne()`](https://glycoverse.github.io/glystats/reference/gly_tsne.md)
+  and
+  [`gly_umap()`](https://glycoverse.github.io/glystats/reference/gly_umap.md)
+  tidy results respect the requested embedding dimensions.
+  One-dimensional fits no longer index a nonexistent second coordinate,
+  and t-SNE retains additional dimensions, including its
+  all-missing-data result. (#27)
+
 ## glystats 0.13.0
 
 - All expression-analysis functions gain a validated `log_transform`

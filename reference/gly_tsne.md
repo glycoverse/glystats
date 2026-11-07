@@ -14,7 +14,7 @@ gly_tsne(
   perplexity = 30,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -50,13 +50,16 @@ gly_tsne(
 
 - log_transform:
 
-  A single logical value indicating whether to transform expression
-  values using `log(x + 1)` before analysis. Default is `TRUE`. Set to
-  `FALSE` for data that are already log-transformed.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` requests the method's log transformation for raw data;
+  if the input is already on `"log"`, `"log2"`, `"log10"`, or `"logx"`,
+  it warns and uses the supplied values unchanged. `FALSE` always uses
+  the supplied values unchanged. This argument must be named when it
+  follows `...`.
 
 ## Value
 
-A list with three elements:
+A list with four elements:
 
 - `tidy_result`: A tibble with t-SNE coordinates containing the
   following columns:
@@ -65,18 +68,18 @@ A list with three elements:
 
   - `tsne1`: First t-SNE dimension
 
-  - `tsne2`: Second t-SNE dimension
+  - `tsne2`: Second t-SNE dimension, if requested
+
+  - `tsne3`, etc.: Additional requested t-SNE dimensions
 
 - `raw_result`: The raw Rtsne object
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_tsne_res` and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment
 
-## Details
-
-By default, expression values are transformed using `log(x + 1)` before
-analysis. Set `log_transform = FALSE` to use the expression values as
-supplied, for example when they are already log-transformed.
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md).
+  The list has classes `glystats_tsne_res` and `glystats_res`.
 
 ## Required packages
 
@@ -86,3 +89,6 @@ analysis.
 ## See also
 
 [`Rtsne::Rtsne()`](https://rdrr.io/pkg/Rtsne/man/Rtsne.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

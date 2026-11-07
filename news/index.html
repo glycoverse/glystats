@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,35 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.14.0" id="glystats-0140">glystats 0.14.0<a class="anchor" aria-label="anchor" href="#glystats-0140"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-14-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-14-0"></a></h3>
+<ul><li>
+<code>log_transform = TRUE</code> no longer applies a second logarithm to experiments marked <code>log</code>, <code>log2</code>, <code>log10</code>, or <code>logx</code>; it warns and uses the supplied values unchanged. Use <code>NULL</code> (the default) or <code>FALSE</code> to analyze logged values without this warning. (#31)</li>
+<li>
+<code>filter_sig_vars(fc_cutoff = NULL)</code> now disables fold-change filtering for glycoproteomics instead of selecting a cutoff of 2. Omit the argument or set it to <code>2</code> to retain the previous filtering behavior when fold changes are available. (#31)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-14-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-14-0"></a></h3>
+<ul><li>Analysis functions gain <code>log_transform = NULL</code> to recognize <code>raw</code>, natural-log (<code>log</code>), <code>log2</code>, <code>log10</code>, and <code>logx</code> metadata and avoid repeated logging. <code>TRUE</code> transforms raw data but warns and leaves logged inputs unchanged, <code>FALSE</code> keeps the supplied values, and missing metadata preserves each method’s historical default. Results record input and analysis scales in <code>preprocessing</code> without modifying the experiment. (#24, #31)</li>
+<li>Differential tests retain native effects for <code>logx</code> transformed coordinates and report <code>NA</code> <code>log2fc</code> because abundance fold changes are undefined on this scale. (#31)</li>
+<li>
+<code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> uses significance-only filtering for <code>logx</code> inputs, warning and ignoring non-<code>NULL</code> fold-change cutoffs. <code>fc_cutoff = NULL</code> disables fold-change filtering on every scale; omitting it retains the default cutoff of 2 for glycoproteomics comparisons with available fold changes. Raw-scale limma results use significance-only filtering and reject explicit fold-change cutoffs. (#24, #31)</li>
+<li>
+<code><a href="../reference/gly_fold_change.html">gly_fold_change()</a></code> and differential tests calculate fold changes from <code>log</code>, <code>log2</code>, and <code>log10</code> inputs using group mean differences converted to log2 units. <code><a href="../reference/gly_fold_change.html">gly_fold_change()</a></code> rejects <code>logx</code> inputs because abundance fold changes are undefined on this scale. (#24, #31)</li>
+<li>
+<code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code><a href="../reference/gly_linear_model.html">gly_linear_model()</a></code> preserve native model units, convert logged contrasts to <code>log2fc</code>, and report raw-scale contrasts as <code>estimate</code> with <code>NA</code> log2 fold changes. (#24)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-improvements-and-fixes-0-14-0">Minor improvements and fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-fixes-0-14-0"></a></h3>
+<ul><li>Differential tests preserve feature identifiers that match internal analysis columns or covariate names instead of dropping, overwriting, or renaming those features. Duplicate assay row names remain rejected instead of pooling separate features. (#25)</li>
+<li>
+<code><a href="../reference/gly_hclust.html">gly_hclust()</a></code> forwards distance-only and clustering-only arguments to the correct function and reports the number of clusters remaining after each merge without an off-by-one error. (#26)</li>
+<li>
+<code><a href="../reference/gly_tsne.html">gly_tsne()</a></code> and <code><a href="../reference/gly_umap.html">gly_umap()</a></code> tidy results respect the requested embedding dimensions. One-dimensional fits no longer index a nonexistent second coordinate, and t-SNE retains additional dimensions, including its all-missing-data result. (#27)</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.13.0" id="glystats-0130">glystats 0.13.0<a class="anchor" aria-label="anchor" href="#glystats-0130"></a></h2>
 <ul><li>All expression-analysis functions gain a validated <code>log_transform</code> argument. Existing transformation defaults, log bases, and pseudocounts are preserved; Cox, ROC, and fold-change default to <code>FALSE</code>. Set construction and testing share the selected scale. Optional fold-change transformation reports differences of log2 means (geometric-mean fold changes). (#23)</li>

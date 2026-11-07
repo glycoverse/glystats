@@ -16,7 +16,7 @@ gly_pca(
   scale = TRUE,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -52,9 +52,12 @@ gly_pca(
 
 - log_transform:
 
-  A single logical value indicating whether to transform expression
-  values using `log(x + 1)` before analysis. Default is `TRUE`. Set to
-  `FALSE` for data that are already log-transformed.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` requests the method's log transformation for raw data;
+  if the input is already on `"log"`, `"log2"`, `"log10"`, or `"logx"`,
+  it warns and uses the supplied values unchanged. `FALSE` always uses
+  the supplied values unchanged. This argument must be named when it
+  follows `...`.
 
 ## Value
 
@@ -95,12 +98,14 @@ A list containing:
 
 - `meta_data`: A list containing metadata from the input experiment
 
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md).
+
 ## Details
 
-By default, the function performs log transformation on the expression
-data (`log(x + 1)`) before PCA analysis. Set `log_transform = FALSE` to
-use the expression values as supplied, for example when they are already
-log-transformed.
+For raw data with automatic transformation, the function performs log
+transformation on the expression data (log(x + 1)) before PCA analysis.
 
 ## Required packages
 
@@ -110,3 +115,6 @@ dependencies.
 ## See also
 
 [`stats::prcomp()`](https://rdrr.io/r/stats/prcomp.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

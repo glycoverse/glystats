@@ -13,7 +13,7 @@ gly_cox(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = FALSE
+  log_transform = NULL
 )
 ```
 
@@ -58,13 +58,16 @@ gly_cox(
 
 - log_transform:
 
-  A single logical value indicating whether to transform expression
-  values using `log2(x + 1e-6)` before analysis. Default is `FALSE`. Set
-  to `FALSE` for data that are already log-transformed.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` requests the method's log transformation for raw data;
+  if the input is already on `"log"`, `"log2"`, `"log10"`, or `"logx"`,
+  it warns and uses the supplied values unchanged. `FALSE` always uses
+  the supplied values unchanged. This argument must be named when it
+  follows `...`.
 
 ## Value
 
-A list with three elements:
+A list with four elements:
 
 - `tidy_result`: A tibble with Cox model results containing the
   following columns:
@@ -87,10 +90,11 @@ A list with three elements:
 
 - `meta_data`: A list containing metadata from the input experiment
 
-## Details
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md).
 
-Expression values are used as supplied by default. Set
-`log_transform = TRUE` to apply `log2(x + 1e-6)` before analysis.
+## Details
 
 The function fits an Cox proportional hazards model for each variable
 by:
@@ -103,3 +107,6 @@ P-values are adjusted by Benjamini-Hochberg method by default.
 
 [`survival::coxph()`](https://rdrr.io/pkg/survival/man/coxph.html),
 [`survival::Surv()`](https://rdrr.io/pkg/survival/man/Surv.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md)
+for input scales, transformations, and fold changes.

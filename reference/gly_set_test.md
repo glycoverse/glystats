@@ -17,7 +17,7 @@ gly_set_test(
   correlation = "pearson",
   clustering = "connected",
   within = NULL,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -87,11 +87,12 @@ gly_set_test(
 
 - log_transform:
 
-  A single non-missing logical. If `TRUE` (default), apply
-  `log2(x + 1e-6)` for both automatic set construction and testing. If
-  `FALSE`, use supplied values without transformation, including values
-  that have already been transformed. Estimates are on the selected
-  scale.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` requests the method's log transformation for raw data;
+  if the input is already on `"log"`, `"log2"`, `"log10"`, or `"logx"`,
+  it warns and uses the supplied values unchanged. `FALSE` always uses
+  the supplied values unchanged. This argument must be named when it
+  follows `...`.
 
 ## Value
 
@@ -113,11 +114,16 @@ containing:
 
 - `meta_data`: Metadata copied from `exp`.
 
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md).
+
 ## Details
 
-By default, expression values are transformed using `log2(x + 1e-6)`.
-The first factor level of `group_col` is the reference group and the
-second is the test group. The estimate is therefore `test - reference`.
+Raw expression values are automatically transformed using
+`log2(x + 1e-6)`. The first factor level of `group_col` is the reference
+group and the second is the test group. The estimate is therefore
+`test - reference`.
 
 Every usable variable is assigned to a set, including a one-variable set
 when it is not correlated above `threshold` with another variable.
@@ -133,6 +139,9 @@ the estimable subspace. Other ineligible sets are retained with
 [`stats::cor()`](https://rdrr.io/r/stats/cor.html),
 [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html),
 [`stats::p.adjust()`](https://rdrr.io/r/stats/p.adjust.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md)
+for input scales, transformations, and fold changes.
 
 ## Examples
 

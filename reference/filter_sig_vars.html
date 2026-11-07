@@ -15,7 +15,7 @@ gly_wilcox(), gly_limma(), and gly_linear_model()."><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -164,7 +164,12 @@ If you insist to use it, please set <code>p_adj_cutoff</code> to NULL.</p></dd>
 <dt id="arg-fc-cutoff">fc_cutoff<a class="anchor" aria-label="anchor" href="#arg-fc-cutoff"></a></dt>
 <dd><p>The threshold for fold changes. Only positive value is needed.
 For example, <code>2</code> means fold change &gt; 2 or &lt; 1/2.
-Default is <code>2</code> for glycoproteomics data and <code>NULL</code> for others.</p></dd>
+Explicit <code>NULL</code> disables fold-change filtering for every scale. When omitted,
+the default is <code>2</code> for glycoproteomics comparisons with available fold changes
+and <code>NULL</code> otherwise. For <code>"logx"</code> results, a non-<code>NULL</code> cutoff warns and is
+ignored because original-abundance fold changes are unavailable; filtering
+uses only the selected significance cutoff. Raw-scale <code><a href="gly_limma.html">gly_limma()</a></code> results
+and other <code><a href="gly_linear_model.html">gly_linear_model()</a></code> results reject non-<code>NULL</code> cutoffs.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

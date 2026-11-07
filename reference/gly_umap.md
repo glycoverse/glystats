@@ -14,7 +14,7 @@ gly_umap(
   n_components = 2,
   add_info = TRUE,
   ...,
-  log_transform = TRUE
+  log_transform = NULL
 )
 ```
 
@@ -50,13 +50,16 @@ gly_umap(
 
 - log_transform:
 
-  A single logical value indicating whether to transform expression
-  values using `log(x + 1)` before analysis. Default is `TRUE`. Set to
-  `FALSE` for data that are already log-transformed.
+  `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
+  twice. `TRUE` requests the method's log transformation for raw data;
+  if the input is already on `"log"`, `"log2"`, `"log10"`, or `"logx"`,
+  it warns and uses the supplied values unchanged. `FALSE` always uses
+  the supplied values unchanged. This argument must be named when it
+  follows `...`.
 
 ## Value
 
-A list with three elements:
+A list with four elements:
 
 - `tidy_result`: A tibble with UMAP coordinates containing the following
   columns:
@@ -65,21 +68,19 @@ A list with three elements:
 
   - `umap1`: First UMAP dimension
 
-  - `umap2`: Second UMAP dimension
+  - `umap2`: Second UMAP dimension, if requested
 
   - `umap3`, `umap4`, etc.: Additional UMAP dimensions (if n_components
     \> 2)
 
 - `raw_result`: The raw UMAP result matrix
 
-- `meta_data`: A list containing metadata from the input experiment The
-  list has classes `glystats_umap_res` and `glystats_res`.
+- `meta_data`: A list containing metadata from the input experiment
 
-## Details
-
-By default, expression values are transformed using `log(x + 1)` before
-analysis. Set `log_transform = FALSE` to use the expression values as
-supplied, for example when they are already log-transformed.
+- `preprocessing`: Input and analysis scales and the applied
+  transformation; see
+  [gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md).
+  The list has classes `glystats_umap_res` and `glystats_res`.
 
 ## Required packages
 
@@ -89,3 +90,6 @@ analysis.
 ## See also
 
 [`uwot::umap()`](https://jlmelville.github.io/uwot/reference/umap.html)
+
+[gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md)
+for input scales, transformations, and fold changes.
