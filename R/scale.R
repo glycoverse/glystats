@@ -104,6 +104,7 @@ NULL
       'Metadata `scale` must be "raw", "log", "log2", "log10", or "logx".'
     )
   }
+  input_scale <- unname(input_scale)
   is_raw <- identical(input_scale, "raw")
   if (!is_raw && isTRUE(log_transform)) {
     cli::cli_warn(

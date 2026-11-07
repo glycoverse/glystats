@@ -147,6 +147,43 @@ test_that("scale resolution covers defaults, overrides, and invalid metadata", {
   }
 })
 
+test_that("named scalar scales retain their transformation semantics", {
+  for (scale in c("raw", "log", "log2", "log10", "logx")) {
+    exp <- scale_test_experiment(scale)
+    named_exp <- exp
+    S4Vectors::metadata(named_exp)$scale <- c(abundance = scale)
+    for (option in list(
+      NULL,
+      TRUE,
+      FALSE,
+      c(requested = TRUE),
+      c(requested = FALSE)
+    )) {
+      for (default in c(TRUE, FALSE)) {
+        resolve <- function(x) .resolve_transformation(x, option, default)
+        if (scale != "raw" && isTRUE(option)) {
+          expect_warning(
+            named <- resolve(named_exp),
+            class = "glystats_already_logged"
+          )
+          unnamed <- suppressWarnings(resolve(exp))
+        } else {
+          expect_no_warning(named <- resolve(named_exp))
+          unnamed <- resolve(exp)
+        }
+        expect_identical(named, unnamed)
+        expect_identical(named$input_scale, scale)
+      }
+    }
+    named_result <- run_scale_test("ttest", named_exp)
+    unnamed_result <- run_scale_test("ttest", exp)
+    expect_identical(named_result$preprocessing, unnamed_result$preprocessing)
+    expect_equal(named_result$tidy_result, unnamed_result$tidy_result)
+    expect_identical(named_result$meta_data$scale, c(abundance = scale))
+    expect_identical(S4Vectors::metadata(named_exp)$scale, c(abundance = scale))
+  }
+})
+
 test_that("every public entry routes scales and options without forwarding them through dots", {
   # Intercept the fit boundary to exercise every wrapper across the full contract
   # without repeating expensive stochastic fits hundreds of times.
