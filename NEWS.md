@@ -1,12 +1,18 @@
 # glystats (development version)
 
-* Analysis functions now accept `logx` transformed coordinates without another logarithm; forcing `log_transform = TRUE` is rejected. Differential tests retain native effects with `NA` `log2fc`, `gly_fold_change()` rejects undefined abundance fold changes, and `filter_sig_vars()` uses significance-only filtering while rejecting explicit fold-change cutoffs.
+## Breaking changes
+
+* `log_transform = TRUE` no longer applies a second logarithm to experiments marked `log`, `log2`, `log10`, or `logx`; it warns and continues with the supplied values unchanged. Use `NULL` (the default) or `FALSE` to analyze logged values without this warning.
+
+## Other changes
+
+* Analysis functions now accept `logx` transformed coordinates without another logarithm; explicit `log_transform = TRUE` warns and is ignored. Differential tests retain native effects with `NA` `log2fc`, `gly_fold_change()` rejects undefined abundance fold changes, and `filter_sig_vars()` uses significance-only filtering while rejecting explicit fold-change cutoffs.
 
 * UMAP and t-SNE tidy results respect the requested embedding dimensions: one-dimensional fits no longer index a nonexistent second coordinate, and t-SNE retains additional dimensions, including its all-missing-data result.
 * `gly_hclust()` forwards distance-only and clustering-only arguments to the correct function and reports the number of clusters remaining after each merge without an off-by-one error.
 * Differential tests preserve feature identifiers that match internal analysis columns or covariate names instead of dropping, overwriting, or renaming those features. Duplicate assay row names remain rejected instead of pooling separate features.
 
-* Analysis functions gain `log_transform = NULL` to recognize `raw`, natural-log (`log`), `log2`, and `log10` metadata and avoid repeated logging; `TRUE` and `FALSE` explicitly control transformation, and missing metadata preserves each method's historical default. Results record input and analysis scales in `preprocessing` without modifying the experiment. (#24)
+* Analysis functions gain `log_transform = NULL` to recognize `raw`, natural-log (`log`), `log2`, and `log10` metadata and avoid repeated logging; `TRUE` requests transformation only for raw data and warns without transforming logged inputs, `FALSE` keeps the supplied values, and missing metadata preserves each method's historical default. Results record input and analysis scales in `preprocessing` without modifying the experiment. (#24)
 * Fold changes from logged inputs now use group mean differences converted to log2 units. Limma preserves native model units, converts logged contrasts to `log2fc`, and reports raw-scale contrasts as `estimate` with `NA` log2 fold changes. `filter_sig_vars()` uses significance-only filtering for raw-scale limma results and rejects explicit fold-change cutoffs. (#24)
 
 # glystats 0.13.0

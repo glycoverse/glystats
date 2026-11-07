@@ -111,9 +111,14 @@ test_that("logx resolves to unchanged native coordinates only", {
       expect_false(plan$scale_missing)
     }
   }
-  expect_error(.resolve_transformation(exp, TRUE), "logx")
+  expect_warning(plan <- .resolve_transformation(exp, TRUE), "log_transform")
+  expect_false(plan$log_transform)
+  expect_true(plan$requested_log_transform)
   for (option in list(NULL, FALSE, TRUE)) {
-    expect_error(gly_fold_change(exp, log_transform = option), "logx")
+    expect_error(
+      suppressWarnings(gly_fold_change(exp, log_transform = option)),
+      "logx"
+    )
   }
 })
 
@@ -130,7 +135,10 @@ for (name in names(logx_test_methods())) {
       expect_false(auto$preprocessing$log_transform)
       expect_identical(auto$meta_data, S4Vectors::metadata(exp))
       expect_identical(exp, original)
-      expect_error(run_logx_test(method, exp, TRUE), "logx")
+      ignored <- run_logx_test(method, exp, TRUE)
+      expect_equal(ignored$tidy_result, explicit$tidy_result)
+      expect_false(ignored$preprocessing$log_transform)
+      expect_true(ignored$preprocessing$requested_log_transform)
       # Compare with the established native-coordinate path, not just the new
       # automatic and explicit branches with each other.
       reference <- exp

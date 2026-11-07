@@ -66,15 +66,17 @@ Record the supplied abundance scale in `S4Vectors::metadata(exp)$scale`:
 Known logged values are used unchanged. Raw values and old objects
 without scale metadata retain each method’s previous default; Cox, ROC,
 and fold change continue to use unlogged values by default. Use `TRUE`
-to force the method’s log transformation or `FALSE` to use supplied
-values unchanged. Setting metadata never transforms the data.
+to request the method’s log transformation for raw values, or `FALSE` to
+use supplied values unchanged. If the recorded scale is already `log`,
+`log2`, `log10`, or `logx`, `TRUE` warns and is ignored: no second
+logarithm is applied. Setting metadata never transforms the data.
 
 ``` r
 # Data already transformed using log10:
 S4Vectors::metadata(exp)$scale <- "log10"
 pca <- gly_pca(exp)
 pca$preprocessing
-# Explicitly opt in for Cox's log2(x + 1e-6) transformation:
+# This warns and still uses the supplied log10 values unchanged:
 cox <- gly_cox(exp, log_transform = TRUE)
 ```
 
@@ -92,7 +94,7 @@ differences are divided by `log(2)`; base-10 differences are multiplied
 by `log2(10)`. Limma contrasts follow the same change of base; raw-scale
 contrasts are returned as `estimate` with `NA` `log2fc`.
 `filter_sig_vars()` uses significance-only filtering for raw-scale limma
-results and rejects explicit fold-change cutoffs.
+results and rejects explicit fold-change cutoffs. For raw input,
 `gly_fold_change(log_transform = TRUE)` uses newly logged values,
 including the original pseudo-count. See `?gly_scale` for the full
 contract.
@@ -100,9 +102,10 @@ contract.
 `"logx"` identifies transformed coordinates such as CLR, ALR, or VSN
 output. All analyses except `gly_fold_change()` can use these
 coordinates unchanged, including negative and zero values.
-`log_transform = TRUE` is rejected for `logx`. The method’s statistical
-assumptions still need to be appropriate for the chosen coordinates; the
-label does not make these transformations equivalent.
+`log_transform = TRUE` warns and is ignored for `logx`, just as for
+ordinary logged scales. The method’s statistical assumptions still need
+to be appropriate for the chosen coordinates; the label does not make
+these transformations equivalent.
 
 Original-abundance fold changes cannot be inferred from `logx`.
 `gly_fold_change()` therefore rejects it. Differential tests retain

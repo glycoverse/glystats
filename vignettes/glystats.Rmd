@@ -46,7 +46,10 @@ Every analysis accepts `log_transform = NULL` by default. Known logged data are
 used unchanged. Raw data and old objects without scale metadata retain each
 method's original transformation and pseudo-count. ROC, Cox, and fold change
 continue to use unlogged data by default. Use named `log_transform = TRUE` to
-force a new log or `log_transform = FALSE` to use the supplied values unchanged.
+request a log transformation of raw values, or `log_transform = FALSE` to use
+the supplied values unchanged. On an already logged scale, explicit `TRUE`
+produces a warning and is ignored, so the analysis continues without another
+logarithm.
 See `?gly_scale` for the formulas used by each method.
 
 For example, after supplying base-10 logged abundances:
@@ -71,8 +74,8 @@ The `"logx"` scale covers CLR, ALR, VSN, and other transformed logarithmic or
 log-like coordinates that cannot be converted back to original abundances from
 the label alone. It permits negative and zero values and does not imply a
 known logarithm base. All analyses except `gly_fold_change()` can use `logx`
-with `log_transform = NULL` or `FALSE`, preserving the supplied coordinates.
-Forcing another logarithm with `TRUE` is an error. Check the analysis assumptions
+with any `log_transform` setting, preserving the supplied coordinates.
+Explicit `TRUE` produces a warning and is ignored. Check the analysis assumptions
 for the particular transformation, especially for compositional data.
 
 For example, a CLR experiment from `glyclean` can be analyzed directly:

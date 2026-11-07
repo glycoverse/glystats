@@ -2,10 +2,11 @@
 #'
 #' @name gly_scale
 #' @param log_transform `NULL` (default) uses `metadata(exp)$scale` to avoid
-#'   logging data twice. `TRUE` forces the method's log transformation on the
-#'   supplied values, even if they are already logged; `FALSE` uses the supplied
-#'   values unchanged. For `"logx"`, only `NULL` or `FALSE` is supported.
-#'   This argument must be named when it follows `...`.
+#'   logging data twice. `TRUE` requests the method's log transformation for
+#'   raw data; if the input is already on `"log"`, `"log2"`, `"log10"`, or
+#'   `"logx"`, it warns and uses the supplied values unchanged. `FALSE` always
+#'   uses the supplied values unchanged. This argument must be named when it
+#'   follows `...`.
 #'
 #' @details
 #' The supported scales are `"raw"`, `"log"` (natural logarithm), `"log2"`,
@@ -14,8 +15,9 @@
 #' Older development objects labeled `"log"` must be relabeled if the data
 #' were actually transformed with base 2 or 10. The base is never inferred.
 #'
-#' With `log_transform = NULL`, known logged data are used unchanged. Raw data
-#' retain the method's historical default: PCA, t-SNE, UMAP, PLS-DA, and OPLS-DA
+#' Known logged data are always used unchanged. An explicit
+#' `log_transform = TRUE` produces a warning and is ignored for these scales.
+#' Raw data retain the method's historical default: PCA, t-SNE, UMAP, PLS-DA, and OPLS-DA
 #' use `log(x + 1)`; differential tests, linear models, set tests, correlation,
 #' and clustering use `log2(x + 1e-6)`. ROC, Cox, and fold change use raw values.
 #' For these last three methods, `TRUE` requests `log2(x + 1e-6)`.
@@ -31,8 +33,9 @@
 #' base 2: divide natural-log differences by `log(2)` and multiply base-10
 #' differences by `log2(10)`. This estimates a ratio of geometric means.
 #' Differential tests calculate fold changes from the input scale independently
-#' of the matrix used for testing. In `gly_fold_change(log_transform = TRUE)`,
-#' fold changes instead use the newly logged matrix, including its pseudo-count.
+#' of the matrix used for testing. For raw input to
+#' `gly_fold_change(log_transform = TRUE)`, fold changes instead use the newly
+#' logged matrix, including its pseudo-count.
 #' Limma contrasts on a logged analysis scale are converted to `log2fc`;
 #' native model estimates and fits stay in analysis units. With an unlogged raw
 #' limma analysis, contrasts are returned as `estimate` and `log2fc` is `NA`,
@@ -50,8 +53,9 @@
 #' and each method's statistical assumptions still need to suit the analysis;
 #' accepting `logx` does not make CLR, ALR, and VSN interchangeable.
 #'
-#' `log_transform = TRUE` is rejected for `logx`: another logarithm would not
-#' recover ordinary log abundance. [gly_fold_change()] rejects `logx` because
+#' `log_transform = TRUE` warns and is ignored for `logx`, just as for other
+#' logged scales: another logarithm would not recover ordinary log abundance.
+#' [gly_fold_change()] rejects `logx` because
 #' original-abundance fold changes are not defined by this label. Differential
 #' tests retain their native estimates and effect sizes, but return `NA` in
 #' `log2fc`, including post-hoc comparisons. Limma returns its native contrast
@@ -100,17 +104,17 @@ NULL
       'Metadata `scale` must be "raw", "log", "log2", "log10", or "logx".'
     )
   }
-  if (identical(input_scale, "logx") && isTRUE(log_transform)) {
-    cli::cli_abort(c(
-      "{.arg log_transform = TRUE} cannot be used with scale {.val logx}.",
-      "i" = "Use NULL or FALSE to analyze the supplied transformed coordinates."
-    ))
+  is_raw <- identical(input_scale, "raw")
+  if (!is_raw && isTRUE(log_transform)) {
+    cli::cli_warn(
+      c(
+        "{.arg log_transform = TRUE} is ignored because the input already uses scale {.val {input_scale}}.",
+        "i" = "Using the supplied values without another logarithm."
+      ),
+      class = "glystats_already_logged"
+    )
   }
-  apply_log <- if (is.null(log_transform)) {
-    identical(input_scale, "raw") && default
-  } else {
-    log_transform
-  }
+  apply_log <- is_raw && if (is.null(log_transform)) default else log_transform
   list(
     input_scale = input_scale,
     scale_missing = scale_missing,
