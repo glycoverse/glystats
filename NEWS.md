@@ -11,7 +11,7 @@
 * Differential tests retain native effects for `logx` transformed coordinates and report `NA` `log2fc` because abundance fold changes are undefined on this scale. (#31)
 * `filter_sig_vars()` uses significance-only filtering for `logx` inputs, warning and ignoring non-`NULL` fold-change cutoffs. `fc_cutoff = NULL` disables fold-change filtering on every scale; omitting it retains the default cutoff of 2 for glycoproteomics comparisons with available fold changes. Raw-scale limma results use significance-only filtering and reject explicit fold-change cutoffs. (#24, #31)
 * `gly_fold_change()` and differential tests calculate fold changes from `log`, `log2`, and `log10` inputs using group mean differences converted to log2 units. `gly_fold_change()` rejects `logx` inputs because abundance fold changes are undefined on this scale. (#24, #31)
-* `gly_limma()` and `gly_linear_model()` preserve native model units, convert logged contrasts to `log2fc`, and report raw-scale contrasts as `estimate` with `NA` log2 fold changes. (#24)
+* `gly_limma()` and `gly_linear_model()` preserve native model units, convert `log`, `log2`, and `log10` contrasts to `log2fc`, and report raw-scale contrasts as `estimate` with `NA` log2 fold changes. (#24)
 
 ## Minor improvements and fixes
 
