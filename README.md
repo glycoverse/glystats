@@ -111,10 +111,13 @@ Original-abundance fold changes cannot be inferred from `logx`.
 `gly_fold_change()` therefore rejects it. Differential tests retain
 native estimates and effect sizes but return `NA` in `log2fc`; limma
 reports its native contrast in `estimate`. `filter_sig_vars()` uses
-significance-only filtering for `logx`, even for glycoproteomics, and
-rejects explicit fold-change cutoffs. Use a separate experiment on a
-known abundance scale when fold changes are needed; relabeling `logx`
-coordinates does not recover abundances.
+significance-only filtering for `logx`, even for glycoproteomics; a
+non-`NULL` fold-change cutoff warns and is ignored. Explicit
+`fc_cutoff = NULL` disables fold-change filtering on every scale.
+Omitting the argument retains the default cutoff of 2 for
+glycoproteomics comparisons with available fold changes. Use a separate
+experiment on a known abundance scale when fold changes are needed;
+relabeling `logx` coordinates does not recover abundances.
 
 Older development objects labeled `"log"` must be relabeled if their
 actual base was 2 or 10. The package never guesses the base. Result

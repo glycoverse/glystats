@@ -61,7 +61,10 @@
 #' `log2fc`, including post-hoc comparisons. Limma returns its native contrast
 #' in `estimate` and `NA` in `log2fc`; raw model components remain unchanged.
 #' [filter_sig_vars()] uses significance-only filtering for `logx`, including
-#' glycoproteomics results, and rejects explicit fold-change cutoffs. To obtain
+#' glycoproteomics results. A non-`NULL` fold-change cutoff warns and is ignored.
+#' Explicit `fc_cutoff = NULL` disables fold-change filtering for every scale.
+#' When omitted, glycoproteomics comparisons with available fold changes retain
+#' their default cutoff of 2. To obtain
 #' abundance fold changes, supply a separate experiment on a known abundance
 #' scale rather than relabeling transformed coordinates.
 #'

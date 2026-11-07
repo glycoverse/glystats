@@ -185,27 +185,60 @@ for (name in c(
         res <- run_logx_test(method, exp)
         expect_no_error(filtered <- filter_sig_vars(exp, res, p_adj_cutoff = 1))
         expect_gt(nrow(filtered), 0)
-        expect_error(filter_sig_vars(exp, res, fc_cutoff = 2), "fc_cutoff")
+        modes <- list(list())
         if (method %in% c("anova", "ancova", "kruskal")) {
           post <- res$tidy_result$post_hoc_test
-          comparison <- paste0(post$ref_group[1], "_vs_", post$test_group[1])
-          expect_no_error(filter_sig_vars(
-            exp,
-            res,
-            p_adj_cutoff = 1,
-            on = "post_hoc_test",
-            comparison = comparison
-          ))
-          expect_error(
-            filter_sig_vars(
-              exp,
-              res,
-              fc_cutoff = 2,
+          modes <- c(
+            modes,
+            list(list(
               on = "post_hoc_test",
-              comparison = comparison
-            ),
-            "fc_cutoff"
+              comparison = paste0(post$ref_group[1], "_vs_", post$test_group[1])
+            ))
           )
+        }
+        for (mode in modes) {
+          args <- c(list(exp = exp, res = res), mode)
+          original <- exp
+          explicit <- do.call(filter_sig_vars, c(args, list(fc_cutoff = NULL)))
+          expect_identical(do.call(filter_sig_vars, args), explicit)
+          for (cutoff in c(1, 2, 100)) {
+            expect_warning(
+              ignored <- do.call(
+                filter_sig_vars,
+                c(args, list(fc_cutoff = cutoff))
+              ),
+              class = "glystats_fc_cutoff_ignored"
+            )
+            expect_identical(ignored, explicit)
+            expect_warning(
+              expect_error(
+                do.call(
+                  filter_sig_vars,
+                  c(
+                    args,
+                    list(
+                      p_adj_cutoff = NULL,
+                      p_val_cutoff = NULL,
+                      fc_cutoff = cutoff
+                    )
+                  )
+                ),
+                "All are NULL"
+              ),
+              class = "glystats_fc_cutoff_ignored"
+            )
+          }
+          for (bad in list(0, -1, 0.5, NA_real_, c(1, 2), "2")) {
+            expect_error(
+              do.call(filter_sig_vars, c(args, list(fc_cutoff = bad))),
+              "fc_cutoff"
+            )
+          }
+          expect_identical(
+            S4Vectors::metadata(exp),
+            S4Vectors::metadata(explicit)
+          )
+          expect_identical(exp, original)
         }
       }
     )
@@ -278,7 +311,11 @@ test_that("native glycomic and glycoproteomic logx classes preserve their inputs
     expect_identical(class(filtered), class(exp))
     expect_identical(rownames(filtered), rownames(exp))
     expect_identical(exp, before)
-    expect_error(filter_sig_vars(exp, res, fc_cutoff = 2), "fc_cutoff")
+    expect_warning(
+      ignored <- filter_sig_vars(exp, res, fc_cutoff = 2),
+      class = "glystats_fc_cutoff_ignored"
+    )
+    expect_identical(ignored, filter_sig_vars(exp, res, fc_cutoff = NULL))
   }
 })
 
