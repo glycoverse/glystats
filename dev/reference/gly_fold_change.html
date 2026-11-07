@@ -75,9 +75,11 @@ will be added to the result tibble. If FALSE, only the fold change results are r
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
 <dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
-logging data twice. <code>TRUE</code> forces the method's log transformation on the
-supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
-values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
+logging data twice. <code>TRUE</code> requests the method's log transformation for
+raw data; if the input is already on <code>"log"</code>, <code>"log2"</code>, <code>"log10"</code>, or
+<code>"logx"</code>, it warns and uses the supplied values unchanged. <code>FALSE</code> always
+uses the supplied values unchanged. This argument must be named when it
+follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -90,6 +92,11 @@ If more than two groups, two additional columns <code>ref_group</code> and <code
 <li><p><code>meta_data</code>: A list containing metadata from the input experiment</p></li>
 <li><p><code>preprocessing</code>: Input and analysis scales and the applied transformation; see <a href="gly_scale.html">gly_scale</a>.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><code>scale = "logx"</code> is not supported because the transformed coordinates do
+not determine original-abundance fold changes. See <a href="gly_scale.html">gly_scale</a>.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>

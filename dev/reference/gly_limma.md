@@ -84,9 +84,11 @@ gly_limma(
 - log_transform:
 
   `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
-  twice. `TRUE` forces the method's log transformation on the supplied
-  values, even if they are already logged; `FALSE` uses the supplied
-  values unchanged. This argument must be named when it follows `...`.
+  twice. `TRUE` requests the method's log transformation for raw data;
+  if the input is already on `"log"`, `"log2"`, `"log10"`, or `"logx"`,
+  it warns and uses the supplied values unchanged. `FALSE` always uses
+  the supplied values unchanged. This argument must be named when it
+  follows `...`.
 
 ## Value
 
@@ -97,7 +99,11 @@ A list with four elements:
 
   - `variable`: Variable name
 
-  - `log2fc`: Log2 fold change
+  - `log2fc`: Log2 fold change, or `NA` on raw and `logx` analysis
+    scales
+
+  - `estimate`: Native model contrast for non-log2 analysis scales; see
+    [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
 
   - `AveExpr`: Average expression level
 

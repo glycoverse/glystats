@@ -82,19 +82,21 @@ introduction</a> provides a useful overview.</p>
 </h2>
 <p>Record the supplied abundance scale in
 <code>S4Vectors::metadata(exp)$scale</code>: <code>"raw"</code>,
-<code>"log"</code> for natural logarithms, <code>"log2"</code>, or
-<code>"log10"</code>. Setting metadata describes the data; it does not
-transform them. For older development objects labeled
-<code>"log"</code>, set the actual base explicitly if it was 2 or
-10.</p>
+<code>"log"</code> for natural logarithms, <code>"log2"</code>,
+<code>"log10"</code>, or <code>"logx"</code>. Setting metadata describes
+the data; it does not transform them. For older development objects
+labeled <code>"log"</code>, set the actual base explicitly if it was 2
+or 10.</p>
 <p>Every analysis accepts <code>log_transform = NULL</code> by default.
 Known logged data are used unchanged. Raw data and old objects without
 scale metadata retain each method’s original transformation and
 pseudo-count. ROC, Cox, and fold change continue to use unlogged data by
-default. Use named <code>log_transform = TRUE</code> to force a new log
-or <code>log_transform = FALSE</code> to use the supplied values
-unchanged. See <code><a href="../reference/gly_scale.html">?gly_scale</a></code> for the formulas used by each
-method.</p>
+default. Use named <code>log_transform = TRUE</code> to request a log
+transformation of raw values, or <code>log_transform = FALSE</code> to
+use the supplied values unchanged. On an already logged scale, explicit
+<code>TRUE</code> produces a warning and is ignored, so the analysis
+continues without another logarithm. See <code><a href="../reference/gly_scale.html">?gly_scale</a></code> for the
+formulas used by each method.</p>
 <p>For example, after supplying base-10 logged abundances:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span><span class="op">$</span><span class="va">scale</span> <span class="op">&lt;-</span> <span class="st">"log10"</span></span>
@@ -103,22 +105,57 @@ method.</p>
 <p>The input is unchanged. Results retain its metadata and record the
 actual transformation separately in <code>preprocessing</code>.
 Estimates, standard errors, intervals, and raw models use the analysis
-scale. <code>log2fc</code> from logged data is the difference of group
-means converted to base 2 (a geometric mean ratio), whereas raw inputs
-retain the log2 ratio of arithmetic means. Natural-log differences are
-divided by <code>log(2)</code>; base-10 differences are multiplied by
-<code>log2(10)</code>. Limma on unlogged raw data reports
+scale. <code>log2fc</code> from ordinary logged data is the difference
+of group means converted to base 2 (a geometric mean ratio), whereas raw
+inputs retain the log2 ratio of arithmetic means. Natural-log
+differences are divided by <code>log(2)</code>; base-10 differences are
+multiplied by <code>log2(10)</code>. Limma on unlogged raw data reports
 <code>estimate</code> and <code>NA</code> <code>log2fc</code>.</p>
+<div class="section level3">
+<h3 id="transformed-coordinates-logx">Transformed coordinates: logx<a class="anchor" aria-label="anchor" href="#transformed-coordinates-logx"></a>
+</h3>
+<p>The <code>"logx"</code> scale covers CLR, ALR, VSN, and other
+transformed logarithmic or log-like coordinates that cannot be converted
+back to original abundances from the label alone. It permits negative
+and zero values and does not imply a known logarithm base. All analyses
+except <code><a href="../reference/gly_fold_change.html">gly_fold_change()</a></code> can use <code>logx</code> with any
+<code>log_transform</code> setting, preserving the supplied coordinates.
+Explicit <code>TRUE</code> produces a warning and is ignored. Check the
+analysis assumptions for the particular transformation, especially for
+compositional data.</p>
+<p>For example, a CLR experiment from <code>glyclean</code> can be
+analyzed directly:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">clr_exp</span> <span class="op">&lt;-</span> <span class="fu">glyclean</span><span class="fu">::</span><span class="fu"><a href="https://glycoverse.github.io/glyclean/reference/transform_clr.html" class="external-link">transform_clr</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span>
+<span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gly_pca.html">gly_pca</a></span><span class="op">(</span><span class="va">clr_exp</span><span class="op">)</span></span>
+<span><span class="va">de</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gly_ttest.html">gly_ttest</a></span><span class="op">(</span><span class="va">clr_exp</span><span class="op">)</span></span>
+<span><span class="va">de</span><span class="op">$</span><span class="va">preprocessing</span> <span class="co"># input_scale = "logx", analysis_scale = "logx"</span></span>
+<span><span class="va">de</span><span class="op">$</span><span class="va">tidy_result</span>   <span class="co"># native estimates and effect sizes; log2fc is NA</span></span>
+<span><span class="va">sig</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_sig_vars.html">filter_sig_vars</a></span><span class="op">(</span><span class="va">clr_exp</span>, <span class="va">de</span><span class="op">)</span> <span class="co"># significance only</span></span></code></pre></div>
+<p><code><a href="../reference/gly_fold_change.html">gly_fold_change()</a></code> rejects <code>logx</code> rather than
+reporting coordinate differences as abundance fold changes. Differential
+tests retain their native estimates and effect sizes but report
+<code>NA</code> for <code>log2fc</code>, including post-hoc comparisons.
+Limma reports its native contrast in <code>estimate</code>.
+<code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> defaults to significance-only filtering
+for <code>logx</code>, including for glycoproteomics; a
+non-<code>NULL</code> <code>fc_cutoff</code> warns and is ignored.
+Explicit <code>fc_cutoff = NULL</code> disables fold-change filtering on
+every scale. Omitting the argument retains the default cutoff of 2 for
+glycoproteomics comparisons with available fold changes. Supply an
+experiment on a known abundance scale to compute fold changes; do not
+relabel transformed coordinates as ordinary log values.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="explore-the-data">Explore the data<a class="anchor" aria-label="anchor" href="#explore-the-data"></a>
 </h2>
 <p>We will start by exploring the demo dataset:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Here we use `glyread` to read in the data and use `glyclean` to perform preprocessing</span></span>
 <span><span class="va">exp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glycoverse.github.io/glyread/reference/read_pglyco3_pglycoquant.html" class="external-link">read_pglyco3_pglycoquant</a></span><span class="op">(</span><span class="st">"glycopeptides.list"</span>, sample_info <span class="op">=</span> <span class="st">"sample_info.csv"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://glycoverse.github.io/glyclean/reference/auto_clean.html" class="external-link">auto_clean</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exp</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">GlycoproteomicSE</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────</span></span></span>
@@ -130,7 +167,7 @@ divided by <code>log(2)</code>; base-10 differences are multiplied by
 <p>The result is a <code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE()</a></code> containing 12
 samples and 263 glycoforms, which is enough to illustrate the main
 workflow.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span>, rownames <span class="op">=</span> <span class="st">"variable"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 225 × 6</span></span></span>
 <span><span class="co">#&gt;    variable          protein glycan_composition protein_site gene  protein_group</span></span>
@@ -149,7 +186,7 @@ workflow.</p>
 <p>The variable information tibble contains descriptive information for
 each glycoform, including the protein, glycosylation site, and glycan
 structures.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span>, rownames <span class="op">=</span> <span class="st">"sample"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 2</span></span></span>
 <span><span class="co">#&gt;    sample                  group</span></span>
@@ -182,7 +219,7 @@ performs PCA.</p>
 functions.</p>
 <p>We can use ANOVA to identify glycoforms that differ between
 groups:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anova_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gly_anova.html">gly_anova</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Number of groups: <span style="color: #0000BB;">4</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Groups: <span style="color: #0000BB;">"C"</span>, <span style="color: #0000BB;">"H"</span>, <span style="color: #0000BB;">"M"</span>, and <span style="color: #0000BB;">"Y"</span></span></span>
@@ -208,7 +245,7 @@ two informative tibbles: <code>main_test</code> and
 <code>post_hoc_test</code>.</p>
 <p>You can use <code><a href="../reference/get_tidy_result.html">get_tidy_result()</a></code> to get the tidy result
 tibble:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_tidy_result.html">get_tidy_result</a></span><span class="op">(</span><span class="va">anova_res</span>, <span class="st">"main_test"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 225 × 15</span></span></span>
 <span><span class="co">#&gt;    variable    protein glycan_composition protein_site gene  protein_group term </span></span>
@@ -231,12 +268,12 @@ variable tibble to the tidy results. Use the <code>add_info</code>
 parameter when you want to control this behavior.</p>
 <p>The <code>raw_result</code> houses two lists of models - one for the
 main test, one for post hoc comparisons:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_tidy_result.html">get_raw_result</a></span><span class="op">(</span><span class="va">anova_res</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "main_test"     "post_hoc_test"</span></span></code></pre></div>
 <p><code><a href="../reference/get_tidy_result.html">get_tidy_result()</a></code> and <code><a href="../reference/get_tidy_result.html">get_raw_result()</a></code> can
 also be used in a pipe:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exp</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/gly_anova.html">gly_anova</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/get_tidy_result.html">get_tidy_result</a></span><span class="op">(</span><span class="st">"main_test"</span><span class="op">)</span> <span class="op">|&gt;</span></span>

@@ -43,20 +43,23 @@
 
 <dl><dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
 <dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
-logging data twice. <code>TRUE</code> forces the method's log transformation on the
-supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
-values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
+logging data twice. <code>TRUE</code> requests the method's log transformation for
+raw data; if the input is already on <code>"log"</code>, <code>"log2"</code>, <code>"log10"</code>, or
+<code>"logx"</code>, it warns and uses the supplied values unchanged. <code>FALSE</code> always
+uses the supplied values unchanged. This argument must be named when it
+follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The supported scales are <code>"raw"</code>, <code>"log"</code> (natural logarithm), <code>"log2"</code>,
-and <code>"log10"</code>. Missing scale metadata is treated as <code>"raw"</code> for compatibility
-with older experiments. An explicitly supplied invalid scale is an error.
+<code>"log10"</code>, and <code>"logx"</code>. Missing scale metadata is treated as <code>"raw"</code> for
+compatibility with older experiments. An explicitly supplied invalid scale is an error.
 Older development objects labeled <code>"log"</code> must be relabeled if the data
 were actually transformed with base 2 or 10. The base is never inferred.</p>
-<p>With <code>log_transform = NULL</code>, known logged data are used unchanged. Raw data
-retain the method's historical default: PCA, t-SNE, UMAP, PLS-DA, and OPLS-DA
+<p>Known logged data are always used unchanged. An explicit
+<code>log_transform = TRUE</code> produces a warning and is ignored for these scales.
+Raw data retain the method's historical default: PCA, t-SNE, UMAP, PLS-DA, and OPLS-DA
 use <code>log(x + 1)</code>; differential tests, linear models, set tests, correlation,
 and clustering use <code>log2(x + 1e-6)</code>. ROC, Cox, and fold change use raw values.
 For these last three methods, <code>TRUE</code> requests <code>log2(x + 1e-6)</code>.</p>
@@ -66,18 +69,46 @@ analysis in <code>preprocessing</code>: <code>input_scale</code>, <code>scale_mi
 <code>analysis_scale</code>, and <code>transformation</code>. The input object is never modified.
 Model estimates, standard errors, intervals, and raw fits use analysis units.</p>
 <p>For raw inputs, fold changes retain <code>log2(mean(test) / mean(reference))</code>.
-For logged inputs, <code>log2fc</code> is the difference of group means converted to
+For ordinary logged inputs, <code>log2fc</code> is the difference of group means converted to
 base 2: divide natural-log differences by <code>log(2)</code> and multiply base-10
 differences by <code>log2(10)</code>. This estimates a ratio of geometric means.
 Differential tests calculate fold changes from the input scale independently
-of the matrix used for testing. In <code>gly_fold_change(log_transform = TRUE)</code>,
-fold changes instead use the newly logged matrix, including its pseudo-count.
+of the matrix used for testing. For raw input to
+<code>gly_fold_change(log_transform = TRUE)</code>, fold changes instead use the newly
+logged matrix, including its pseudo-count.
 Limma contrasts on a logged analysis scale are converted to <code>log2fc</code>;
 native model estimates and fits stay in analysis units. With an unlogged raw
 limma analysis, contrasts are returned as <code>estimate</code> and <code>log2fc</code> is <code>NA</code>,
 because an adjusted raw-scale difference is not a log fold change.
 <code><a href="filter_sig_vars.html">filter_sig_vars()</a></code> then uses significance-only filtering by default and
 rejects explicit fold-change cutoffs for these raw-scale limma results.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="transformed-coordinates-logx-">Transformed coordinates (<code>logx</code>)<a class="anchor" aria-label="anchor" href="#transformed-coordinates-logx-"></a></h2>
+
+
+<p><code>"logx"</code> denotes logarithmic or log-like coordinates, such as CLR, ALR, or
+VSN output, whose original abundances cannot be recovered from the scale
+label alone. It does not specify a logarithm base or a common effect unit.
+These coordinates are used unchanged by PCA, t-SNE, UMAP, PLS-DA, OPLS-DA,
+correlation, clustering, ROC, Cox, linear models, set tests, and differential
+tests. Negative values and zero are valid coordinates. The transformation
+and each method's statistical assumptions still need to suit the analysis;
+accepting <code>logx</code> does not make CLR, ALR, and VSN interchangeable.</p>
+<p><code>log_transform = TRUE</code> warns and is ignored for <code>logx</code>, just as for other
+logged scales: another logarithm would not recover ordinary log abundance.
+<code><a href="gly_fold_change.html">gly_fold_change()</a></code> rejects <code>logx</code> because
+original-abundance fold changes are not defined by this label. Differential
+tests retain their native estimates and effect sizes, but return <code>NA</code> in
+<code>log2fc</code>, including post-hoc comparisons. Limma returns its native contrast
+in <code>estimate</code> and <code>NA</code> in <code>log2fc</code>; raw model components remain unchanged.
+<code><a href="filter_sig_vars.html">filter_sig_vars()</a></code> uses significance-only filtering for <code>logx</code>, including
+glycoproteomics results. A non-<code>NULL</code> fold-change cutoff warns and is ignored.
+Explicit <code>fc_cutoff = NULL</code> disables fold-change filtering for every scale.
+When omitted, glycoproteomics comparisons with available fold changes retain
+their default cutoff of 2. To obtain
+abundance fold changes, supply a separate experiment on a known abundance
+scale rather than relabeling transformed coordinates.</p>
     </div>
 
     <div class="section level2">

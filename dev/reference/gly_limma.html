@@ -112,15 +112,18 @@ will be added to the result tibble. If FALSE, only the statistical results are r
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
 <dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
-logging data twice. <code>TRUE</code> forces the method's log transformation on the
-supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
-values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
+logging data twice. <code>TRUE</code> requests the method's log transformation for
+raw data; if the input is already on <code>"log"</code>, <code>"log2"</code>, <code>"log10"</code>, or
+<code>"logx"</code>, it warns and uses the supplied values unchanged. <code>FALSE</code> always
+uses the supplied values unchanged. This argument must be named when it
+follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with four elements:</p><ul><li><p><code>tidy_result</code>: A tibble with limma results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
-<li><p><code>log2fc</code>: Log2 fold change</p></li>
+<li><p><code>log2fc</code>: Log2 fold change, or <code>NA</code> on raw and <code>logx</code> analysis scales</p></li>
+<li><p><code>estimate</code>: Native model contrast for non-log2 analysis scales; see <a href="gly_scale.html">gly_scale</a></p></li>
 <li><p><code>AveExpr</code>: Average expression level</p></li>
 <li><p><code>t</code>: t-statistic</p></li>
 <li><p><code>p_val</code>: Raw p-value</p></li>

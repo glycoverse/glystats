@@ -130,11 +130,17 @@ filter_sig_vars(
 - fc_cutoff:
 
   The threshold for fold changes. Only positive value is needed. For
-  example, `2` means fold change \> 2 or \< 1/2. Default is `2` for
-  glycoproteomics data and `NULL` for others. For raw-scale
+  example, `2` means fold change \> 2 or \< 1/2. Explicit `NULL`
+  disables fold-change filtering for every scale. When omitted, the
+  default is `2` for glycoproteomics comparisons with available fold
+  changes and `NULL` otherwise. For `"logx"` results, a non-`NULL`
+  cutoff warns and is ignored because original-abundance fold changes
+  are unavailable; filtering uses only the selected significance cutoff.
+  Raw-scale
   [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
-  results, `NULL` uses significance-only filtering and an explicit
-  cutoff is an error because log fold changes are unavailable.
+  results and other
+  [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md)
+  results reject non-`NULL` cutoffs.
 
 - ...:
 

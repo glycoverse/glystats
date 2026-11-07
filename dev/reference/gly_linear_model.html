@@ -90,9 +90,11 @@ from the experiment is added to the tidy result.</p></dd>
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
 <dd><p><code>NULL</code> (default) uses <code>metadata(exp)$scale</code> to avoid
-logging data twice. <code>TRUE</code> forces the method's log transformation on the
-supplied values, even if they are already logged; <code>FALSE</code> uses the supplied
-values unchanged. This argument must be named when it follows <code>...</code>.</p></dd>
+logging data twice. <code>TRUE</code> requests the method's log transformation for
+raw data; if the input is already on <code>"log"</code>, <code>"log2"</code>, <code>"log10"</code>, or
+<code>"logx"</code>, it warns and uses the supplied values unchanged. <code>FALSE</code> always
+uses the supplied values unchanged. This argument must be named when it
+follows <code>...</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

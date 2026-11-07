@@ -40,9 +40,11 @@ gly_fold_change(
 - log_transform:
 
   `NULL` (default) uses `metadata(exp)$scale` to avoid logging data
-  twice. `TRUE` forces the method's log transformation on the supplied
-  values, even if they are already logged; `FALSE` uses the supplied
-  values unchanged. This argument must be named when it follows `...`.
+  twice. `TRUE` requests the method's log transformation for raw data;
+  if the input is already on `"log"`, `"log2"`, `"log10"`, or `"logx"`,
+  it warns and uses the supplied values unchanged. `FALSE` always uses
+  the supplied values unchanged. This argument must be named when it
+  follows `...`.
 
 ## Value
 
@@ -65,6 +67,12 @@ A list with four elements:
 - `preprocessing`: Input and analysis scales and the applied
   transformation; see
   [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
+
+## Details
+
+`scale = "logx"` is not supported because the transformed coordinates do
+not determine original-abundance fold changes. See
+[gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md).
 
 ## See also
 

@@ -30,17 +30,19 @@ library(dplyr)
 ## Abundance scale and transformation
 
 Record the supplied abundance scale in `S4Vectors::metadata(exp)$scale`:
-`"raw"`, `"log"` for natural logarithms, `"log2"`, or `"log10"`. Setting
-metadata describes the data; it does not transform them. For older
-development objects labeled `"log"`, set the actual base explicitly if
-it was 2 or 10.
+`"raw"`, `"log"` for natural logarithms, `"log2"`, `"log10"`, or
+`"logx"`. Setting metadata describes the data; it does not transform
+them. For older development objects labeled `"log"`, set the actual base
+explicitly if it was 2 or 10.
 
 Every analysis accepts `log_transform = NULL` by default. Known logged
 data are used unchanged. Raw data and old objects without scale metadata
 retain each method’s original transformation and pseudo-count. ROC, Cox,
 and fold change continue to use unlogged data by default. Use named
-`log_transform = TRUE` to force a new log or `log_transform = FALSE` to
-use the supplied values unchanged. See
+`log_transform = TRUE` to request a log transformation of raw values, or
+`log_transform = FALSE` to use the supplied values unchanged. On an
+already logged scale, explicit `TRUE` produces a warning and is ignored,
+so the analysis continues without another logarithm. See
 [`?gly_scale`](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
 for the formulas used by each method.
 
@@ -56,11 +58,49 @@ result$preprocessing # input_scale = "log10", analysis_scale = "log10"
 The input is unchanged. Results retain its metadata and record the
 actual transformation separately in `preprocessing`. Estimates, standard
 errors, intervals, and raw models use the analysis scale. `log2fc` from
-logged data is the difference of group means converted to base 2 (a
-geometric mean ratio), whereas raw inputs retain the log2 ratio of
+ordinary logged data is the difference of group means converted to base
+2 (a geometric mean ratio), whereas raw inputs retain the log2 ratio of
 arithmetic means. Natural-log differences are divided by `log(2)`;
 base-10 differences are multiplied by `log2(10)`. Limma on unlogged raw
 data reports `estimate` and `NA` `log2fc`.
+
+### Transformed coordinates: logx
+
+The `"logx"` scale covers CLR, ALR, VSN, and other transformed
+logarithmic or log-like coordinates that cannot be converted back to
+original abundances from the label alone. It permits negative and zero
+values and does not imply a known logarithm base. All analyses except
+[`gly_fold_change()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md)
+can use `logx` with any `log_transform` setting, preserving the supplied
+coordinates. Explicit `TRUE` produces a warning and is ignored. Check
+the analysis assumptions for the particular transformation, especially
+for compositional data.
+
+For example, a CLR experiment from `glyclean` can be analyzed directly:
+
+``` r
+
+clr_exp <- glyclean::transform_clr(exp)
+pca <- gly_pca(clr_exp)
+de <- gly_ttest(clr_exp)
+de$preprocessing # input_scale = "logx", analysis_scale = "logx"
+de$tidy_result   # native estimates and effect sizes; log2fc is NA
+sig <- filter_sig_vars(clr_exp, de) # significance only
+```
+
+[`gly_fold_change()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md)
+rejects `logx` rather than reporting coordinate differences as abundance
+fold changes. Differential tests retain their native estimates and
+effect sizes but report `NA` for `log2fc`, including post-hoc
+comparisons. Limma reports its native contrast in `estimate`.
+[`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
+defaults to significance-only filtering for `logx`, including for
+glycoproteomics; a non-`NULL` `fc_cutoff` warns and is ignored. Explicit
+`fc_cutoff = NULL` disables fold-change filtering on every scale.
+Omitting the argument retains the default cutoff of 2 for
+glycoproteomics comparisons with available fold changes. Supply an
+experiment on a known abundance scale to compute fold changes; do not
+relabel transformed coordinates as ordinary log values.
 
 ## Explore the data
 
