@@ -113,6 +113,15 @@ variable. If more than 2 groups are present, an error will be thrown.
 This function requires the `pROC` package to be installed for ROC curve
 computation.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`pROC::roc()`](https://rdrr.io/pkg/pROC/man/roc.html),
@@ -120,3 +129,5 @@ computation.
 
 [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.

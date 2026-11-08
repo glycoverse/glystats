@@ -142,6 +142,15 @@ assigned to the results in both main test and post-hoc test.
 performed for variables with significant main effects (p_adj \< 0.05).
 Paired analyses instead use paired t-tests with Holm correction.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`stats::aov()`](https://rdrr.io/r/stats/aov.html),
@@ -149,3 +158,5 @@ Paired analyses instead use paired t-tests with Holm correction.
 
 [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.

@@ -84,6 +84,12 @@
 </div>
 </div>
 <div class="section level2">
+<h2 id="se-identities-and-annotations">SE identities and annotations<a class="anchor" aria-label="anchor" href="#se-identities-and-annotations"></a>
+</h2>
+<p>Analysis uses the object’s row/column axes, not ordinary <code>rowData$variable</code> or <code>colData$sample</code> columns. Non-empty unique axis names remain result IDs. Unnamed, duplicated, or empty-name axes use unique input-position IDs without changing the experiment. Every SE result includes <code>identifiers</code>, mapping those IDs to input positions and the original labels (also with <code>add_info = FALSE</code>). Metadata are attached by position; colliding annotation columns are preserved with an <code>_metadata</code> suffix rather than overwriting result fields.</p>
+<p>For position-keyed variables, pass the same unmodified input to <code><a href="reference/filter_sig_vars.html">filter_sig_vars()</a></code>. Re-run analysis after reordering or changing it; position IDs are not persistent IDs across different inputs. See <code><a href="reference/gly_identity.html">?gly_identity</a></code> for the full contract and how to recover original labels.</p>
+</div>
+<div class="section level2">
 <h2 id="control-log-transformation">Control log transformation<a class="anchor" aria-label="anchor" href="#control-log-transformation"></a>
 </h2>
 <p>All expression-analysis functions default to <code>log_transform = NULL</code>. Record the supplied abundance scale in <code>S4Vectors::metadata(exp)$scale</code>: <code>"raw"</code>, <code>"log"</code> (natural logarithm), <code>"log2"</code>, <code>"log10"</code>, or <code>"logx"</code>. Known logged values are used unchanged. Raw values and old objects without scale metadata retain each method’s previous default; Cox, ROC, and fold change continue to use unlogged values by default. Use <code>TRUE</code> to request the method’s log transformation for raw values, or <code>FALSE</code> to use supplied values unchanged. If the recorded scale is already <code>log</code>, <code>log2</code>, <code>log10</code>, or <code>logx</code>, <code>TRUE</code> warns and is ignored: no second logarithm is applied. Setting metadata never transforms the data.</p>
@@ -130,6 +136,7 @@
 <span><span class="co"># ROC analysis</span></span>
 <span><span class="va">roc_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gly_roc.html">gly_roc</a></span><span class="op">(</span><span class="va">exp</span><span class="op">)</span></span></code></pre></div>
 <p>That’s it! These functions use <code>glycoverse</code> column conventions to load needed data and perform analysis. All functions start with <code>gly_</code> to leverage the auto-completion in RStudio. They accept a <code><a href="https://glycoverse.github.io/glyexp/reference/GlycomicSE.html" class="external-link">glyexp::GlycomicSE</a></code> or <code><a href="https://glycoverse.github.io/glyexp/reference/GlycoproteomicSE.html" class="external-link">glyexp::GlycoproteomicSE</a></code> object, and return analysis result as a tibble or a list of tibbles. See documentation for each function for more details.</p>
+<p>SE result identity columns are <code>.variable</code> and <code>.sample</code>, while ordinary metadata <code>variable</code> and <code>sample</code> remain annotation columns. Check <code>result$identifiers$columns</code> to distinguish this output contract from older results. Correlation endpoints use <code>.variable1</code>/<code>.variable2</code> or <code>.sample1</code>/<code>.sample2</code>. This is an output API change, including for fully named unique inputs; plotting consumers require adaptation.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">

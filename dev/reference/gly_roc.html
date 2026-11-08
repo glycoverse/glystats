@@ -126,9 +126,19 @@ and the binary group labels as response.</p>
 <p>This function requires the <code>pROC</code> package to be installed for ROC curve computation.</p>
     </div>
     <div class="section level2">
+    <h2 id="se-identifiers">SE identifiers<a class="anchor" aria-label="anchor" href="#se-identifiers"></a></h2>
+
+
+<p>For SE inputs, the result also contains an <code>identifiers</code> mapping of result
+IDs to input positions and original names; see <a href="gly_identity.html">gly_identity</a>.
+In SE tidy results, identity columns are <code>.variable</code>/<code>.sample</code> (dotted
+endpoints for correlations); undotted metadata columns remain annotations.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/pROC/man/roc.html" class="external-link">pROC::roc()</a></code>, <code><a href="https://rdrr.io/pkg/pROC/man/coords.html" class="external-link">pROC::coords()</a></code></p>
-<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.
+<a href="gly_identity.html">gly_identity</a> for SE identifiers, annotation alignment, and unnamed inputs.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

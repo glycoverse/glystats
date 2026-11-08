@@ -74,7 +74,7 @@ gly_ttest(
 
 ## Value
 
-A list with four elements:
+A list containing:
 
 - `tidy_result`: A tibble with t-test results containing the following
   columns:
@@ -127,9 +127,20 @@ variable. In paired analyses, only subjects observed in both groups are
 used and `effect_size` is Cohen's \\d_z\\ based on within-subject
 differences.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`stats::t.test()`](https://rdrr.io/r/stats/t.test.html)
 
 [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.

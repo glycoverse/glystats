@@ -87,9 +87,20 @@ A list with four elements:
 This function requires the `uwot` package to be installed for UMAP
 analysis.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`uwot::umap()`](https://jlmelville.github.io/uwot/reference/umap.html)
 
 [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.

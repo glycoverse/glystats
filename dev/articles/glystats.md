@@ -225,7 +225,7 @@ to get the tidy result tibble:
 
 get_tidy_result(anova_res, "main_test")
 #> # A tibble: 225 × 15
-#>    variable    protein glycan_composition protein_site gene  protein_group term 
+#>    .variable   protein glycan_composition protein_site gene  protein_group term 
 #>    <chr>       <chr>   <comp>                    <int> <chr> <chr>         <chr>
 #>  1 P08185-176… P08185  Hex(5)HexNAc(4)Ne…          176 SERP… P08185        group
 #>  2 P04196-344… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   P04196        group
@@ -271,7 +271,7 @@ exp |>
 #> ℹ Groups: "C", "H", "M", and "Y"
 #> ℹ Pairwise comparisons will be performed, with levels coming first as reference groups.
 #> # A tibble: 58 × 15
-#>    variable    protein glycan_composition protein_site gene  protein_group term 
+#>    .variable   protein glycan_composition protein_site gene  protein_group term 
 #>    <chr>       <chr>   <comp>                    <int> <chr> <chr>         <chr>
 #>  1 P04196-344… P04196  Hex(5)HexNAc(4)Ne…          344 HRG   P04196        group
 #>  2 P04196-344… P04196  Hex(5)HexNAc(4)             344 HRG   P04196        group

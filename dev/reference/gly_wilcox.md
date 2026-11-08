@@ -116,9 +116,20 @@ statistical testing. Exactly 2 groups are required in the grouping
 variable. In paired analyses, only subjects observed in both groups are
 used and `effect_size` is the matched-pairs rank-biserial correlation.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`stats::wilcox.test()`](https://rdrr.io/r/stats/wilcox.test.html)
 
 [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.

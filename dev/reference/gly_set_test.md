@@ -134,6 +134,15 @@ classical sample-size requirement and the observed mean contrast lies in
 the estimable subspace. Other ineligible sets are retained with
 `status = "failed"`, `NA` statistics, and an explicit `failure_reason`.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`stats::cor()`](https://rdrr.io/r/stats/cor.html),
@@ -142,6 +151,8 @@ the estimable subspace. Other ineligible sets are retained with
 
 [gly_scale](https://glycoverse.github.io/glystats/dev/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/dev/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.
 
 ## Examples
 
