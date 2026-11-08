@@ -40,7 +40,7 @@ all_na_row_experiment <- function(all_rows = FALSE) {
 }
 
 expect_na_variable_result <- function(tbl, columns, variable = "V1") {
-  variable_result <- tbl[tbl$variable == variable, , drop = FALSE]
+  variable_result <- tbl[tbl$.variable == variable, , drop = FALSE]
   expect_gt(nrow(variable_result), 0)
   expect_equal(
     vapply(variable_result[columns], \(x) all(is.na(x)), logical(1)),
@@ -136,8 +136,8 @@ test_that("correlation and ROC analyses retain all-NA variables", {
     suppressMessages(suppressWarnings(gly_cor(exp, on = "variable")))
   )
   na_cor <- variable_cor$tidy_result[
-    variable_cor$tidy_result$variable1 == "V1" |
-      variable_cor$tidy_result$variable2 == "V1",
+    variable_cor$tidy_result$.variable1 == "V1" |
+      variable_cor$tidy_result$.variable2 == "V1",
     ,
     drop = FALSE
   ]
@@ -219,7 +219,7 @@ test_that("PLS-DA and OPLS-DA restore all-NA variable outputs", {
     plsda_result$tidy_result$variables,
     setdiff(
       colnames(plsda_result$tidy_result$variables),
-      c("variable", "type")
+      c(".variable", "type")
     )
   )
   expect_na_variable_result(plsda_result$tidy_result$vip, "vip")
@@ -231,7 +231,7 @@ test_that("PLS-DA and OPLS-DA restore all-NA variable outputs", {
     oplsda_result$tidy_result$variables,
     setdiff(
       colnames(oplsda_result$tidy_result$variables),
-      c("variable", "type")
+      c(".variable", "type")
     )
   )
   expect_na_variable_result(oplsda_result$tidy_result$vip, "vip")

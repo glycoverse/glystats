@@ -29,8 +29,14 @@
 #'   \item `generated`: whether position IDs were needed for that axis.
 #'   \item `names_missing`: whether the entire original name vector was `NULL`.
 #' }
-#' The `variable`/`sample` columns in tidy results remain identifier columns.
-#' Use the mapping's `name` column for display labels. Correlation endpoints,
+#' SE tidy results use `.variable` and `.sample` as identity columns.
+#' `identifiers$columns` is the named character vector
+#' `c(variable = ".variable", sample = ".sample")`, identifying this output
+#' contract. Ordinary metadata named `variable` or `sample` remains unchanged.
+#' Use the mapping's `name` column for display labels. Correlation endpoint
+#' columns are `.variable1`/`.variable2` or `.sample1`/`.sample2`. Clustering
+#' tables use the corresponding dotted identity column; dendrogram `label`
+#' columns remain unchanged. Correlation endpoints,
 #' clustering labels, set memberships, and raw model names use the same IDs.
 #' Custom `sets` in [gly_set_test()] must likewise refer to these IDs, not
 #' ambiguous original labels.
@@ -52,7 +58,12 @@
 #' filtering remains supported, including reordered inputs.
 #'
 #' The deprecated `glyexp_experiment` input retains its legacy ID-column
-#' contract. Its sample/variable metadata extraction is not changed.
+#' contract, including undotted `variable`/`sample` result identities. Results
+#' made by older glystats versions also retain their original columns. Use the
+#' explicit `identifiers$columns` marker, not the mere presence of a dotted
+#' column (which may be old ordinary metadata), to detect the new contract.
+#' This SE result-column change is an API change even for named unique inputs;
+#' consumers such as plotting packages must adapt before adopting this output.
 #'
 #' @examples
 #' values <- matrix(c(1, 2, 3, 4, 5, 8, 6, 10), nrow = 2,

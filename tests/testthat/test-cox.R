@@ -44,7 +44,7 @@ test_that("gly_cox works with basic survival data", {
   expect_equal(nrow(result$tidy_result), 10)
 
   # Check required columns in tidy_result
-  expect_true("variable" %in% colnames(result$tidy_result))
+  expect_true(".variable" %in% colnames(result$tidy_result))
   expect_true("coefficient" %in% colnames(result$tidy_result))
   expect_true("hr" %in% colnames(result$tidy_result))
   expect_true("p_val" %in% colnames(result$tidy_result))

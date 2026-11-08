@@ -19,7 +19,7 @@ test_that("gly_tsne works with default parameters", {
   expect_equal(nrow(result$tidy_result), ncol(test_gp_se))
   expect_true("tsne1" %in% names(result$tidy_result))
   expect_true("tsne2" %in% names(result$tidy_result))
-  expect_true("sample" %in% names(result$tidy_result))
+  expect_true(".sample" %in% names(result$tidy_result))
 
   # Check that coordinates are numeric
   expect_type(result$tidy_result$tsne1, "double")
@@ -40,7 +40,7 @@ test_that("gly_tsne works with custom parameters", {
 
   expect_s3_class(result, c("glystats_tsne_res", "glystats_res"))
   expect_equal(nrow(result$tidy_result), ncol(test_gp_se))
-  expect_true(all(c("tsne1", "tsne2", "sample") %in% names(result$tidy_result)))
+  expect_true(all(c("tsne1", "tsne2", ".sample") %in% names(result$tidy_result)))
 })
 
 test_that("gly_tsne handles perplexity adjustment", {
@@ -76,7 +76,7 @@ test_that("gly_tsne has consistent sample names", {
 
   # Should have same sample names as input expression matrix
   expect_equal(
-    sort(result$tidy_result$sample),
+    sort(result$tidy_result$.sample),
     sort(colnames(test_gp_se))
   )
 })

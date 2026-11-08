@@ -326,7 +326,7 @@ test_that("gly_set_test tests identical profiles in their effective subspace", {
     rep(redundant$tidy_result$sets$estimate[[1]][["A"]], 2)
   )
   expect_setequal(
-    redundant$tidy_result$members$variable,
+    redundant$tidy_result$members$.variable,
     c("A", "A_alias", "B")
   )
   expect_disjoint(

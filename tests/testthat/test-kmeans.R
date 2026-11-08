@@ -18,7 +18,7 @@ test_that("gly_kmeans works with basic parameters", {
 
   # Check tidy_result structure
   expect_s3_class(result$tidy_result, "tbl_df")
-  expect_true("variable" %in% colnames(result$tidy_result))
+  expect_true(".variable" %in% colnames(result$tidy_result))
   expect_true("cluster" %in% colnames(result$tidy_result))
   expect_equal(nrow(result$tidy_result), 10)
 

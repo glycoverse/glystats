@@ -34,7 +34,7 @@ test_that("gly_ancova works with ancova method", {
   post_hoc_test <- result$tidy_result$post_hoc_test
   expect_true(tibble::is_tibble(post_hoc_test))
   expect_true(all(
-    c("variable", "ref_group", "test_group", "p_val", "p_adj", "log2fc") %in%
+    c(".variable", "ref_group", "test_group", "p_val", "p_adj", "log2fc") %in%
       colnames(post_hoc_test)
   ))
 

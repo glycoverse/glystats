@@ -28,24 +28,44 @@ test_that("ordinary metadata IDs never override SE axes", {
   samples <- result$tidy_result$samples
   expect_equal(vars$value, baseline$tidy_result$variables$value)
   expect_equal(samples$value, baseline$tidy_result$samples$value)
-  expect_identical(vars$variable, baseline$tidy_result$variables$variable)
-  expect_identical(samples$sample, baseline$tidy_result$samples$sample)
+  expect_identical(vars$.variable, baseline$tidy_result$variables$.variable)
+  expect_identical(samples$.sample, baseline$tidy_result$samples$.sample)
   expect_equal(nrow(vars), nrow(baseline$tidy_result$variables))
-  expect_identical(vars$annotation, c("first", "second", "third")[match(vars$variable, rownames(se))])
-  expect_identical(vars$variable_metadata, c("g2", "g1", "g1")[match(vars$variable, rownames(se))])
-  expect_true(all(samples$sample_metadata == "s1"))
+  expect_identical(
+    vars$annotation,
+    c("first", "second", "third")[match(vars$.variable, rownames(se))]
+  )
+  expect_identical(
+    vars$variable,
+    c("g2", "g1", "g1")[match(vars$.variable, rownames(se))]
+  )
+  expect_true(all(samples$sample == "s1"))
 })
 
 test_that("metadata sample and variable remain usable model columns", {
   se <- identity_se()
-  SummarizedExperiment::colData(se)$sample <- SummarizedExperiment::colData(se)$group
+  SummarizedExperiment::colData(se)$sample <- SummarizedExperiment::colData(
+    se
+  )$group
   SummarizedExperiment::rowData(se)$variable <- c("x", "x", "y")
   by_group <- quiet_identity(gly_ttest(se, log_transform = FALSE))
-  by_sample <- quiet_identity(gly_ttest(se, group_col = "sample", log_transform = FALSE))
+  by_sample <- quiet_identity(gly_ttest(
+    se,
+    group_col = "sample",
+    log_transform = FALSE
+  ))
   expect_equal(by_group$tidy_result, by_sample$tidy_result)
   skip_if_not_installed("limma")
-  lm_group <- quiet_identity(gly_linear_model(se, ~ group, log_transform = FALSE))
-  lm_sample <- quiet_identity(gly_linear_model(se, ~ sample, log_transform = FALSE))
+  lm_group <- quiet_identity(gly_linear_model(
+    se,
+    ~group,
+    log_transform = FALSE
+  ))
+  lm_sample <- quiet_identity(gly_linear_model(
+    se,
+    ~sample,
+    log_transform = FALSE
+  ))
   expect_equal(lm_group$tidy_result$p_val, lm_sample$tidy_result$p_val)
   expect_identical(.get_var_info(se)$variable, c("x", "x", "y"))
 })
@@ -59,38 +79,79 @@ test_that("annotation collisions preserve data and cannot add spurious joins", {
   result <- quiet_identity(gly_ttest(se, log_transform = FALSE))$tidy_result
   expect_equal(nrow(result), 3L)
   expect_true(all(result$p_val >= 0 & result$p_val <= 1))
-  expect_identical(result$p_val_metadata, c(99, 98, 97)[match(result$variable, rownames(se))])
-  expect_identical(result$variable_metadata, (1:3)[match(result$variable, rownames(se))])
-  expect_identical(result$variable_metadata_metadata, c("x", "x", "y")[match(result$variable, rownames(se))])
-  expect_identical(result$sample, c("not", "sample", "ids")[match(result$variable, rownames(se))])
+  expect_identical(
+    result$p_val_metadata,
+    c(99, 98, 97)[match(result$.variable, rownames(se))]
+  )
+  expect_identical(
+    result$variable_metadata,
+    (1:3)[match(result$.variable, rownames(se))]
+  )
+  expect_identical(
+    result$variable,
+    c("x", "x", "y")[match(result$.variable, rownames(se))]
+  )
+  expect_identical(
+    result$sample,
+    c("not", "sample", "ids")[match(result$.variable, rownames(se))]
+  )
 })
 
 test_that("NULL, duplicate and empty names use consistent position IDs", {
   for (kind in c("NULL", "duplicate", "empty")) {
     se <- identity_se()
-    if (kind == "NULL") dimnames(se) <- NULL
-    if (kind == "duplicate") dimnames(se) <- list(rep("g", 3), rep("s", 8))
-    if (kind == "empty") dimnames(se) <- list(c("", "g", "g"), rep("", 8))
+    if (kind == "NULL") {
+      dimnames(se) <- NULL
+    }
+    if (kind == "duplicate") {
+      dimnames(se) <- list(rep("g", 3), rep("s", 8))
+    }
+    if (kind == "empty") {
+      dimnames(se) <- list(c("", "g", "g"), rep("", 8))
+    }
     before <- se
     result <- quiet_identity(gly_ttest(se, log_transform = FALSE))
     map <- result$identifiers$variable
     expect_true(map$generated)
     expect_identical(map$data$id, paste0(".glystats_variable_", 1:3))
-    expect_equal(result$tidy_result$p_val, quiet_identity(gly_ttest(identity_se(), log_transform = FALSE))$tidy_result$p_val)
-    expect_identical(result$tidy_result$variable, map$data$id)
-    expect_identical(result$tidy_result$annotation, c("first", "second", "third"))
+    expect_equal(
+      result$tidy_result$p_val,
+      quiet_identity(gly_ttest(
+        identity_se(),
+        log_transform = FALSE
+      ))$tidy_result$p_val
+    )
+    expect_identical(result$tidy_result$.variable, map$data$id)
+    expect_identical(
+      result$tidy_result$annotation,
+      c("first", "second", "third")
+    )
     expect_identical(map$names_missing, kind == "NULL")
     expect_identical(se, before)
-    no_info <- quiet_identity(gly_ttest(se, log_transform = FALSE, add_info = FALSE))
+    no_info <- quiet_identity(gly_ttest(
+      se,
+      log_transform = FALSE,
+      add_info = FALSE
+    ))
     expect_identical(no_info$identifiers, result$identifiers)
   }
 })
 
 test_that("paired post-hoc effects use positions even for duplicate samples", {
   se <- identity_se()
-  ref <- quiet_identity(gly_anova(se, subject_col = "person", log_transform = FALSE, add_info = FALSE))
+  ref <- quiet_identity(gly_anova(
+    se,
+    subject_col = "person",
+    log_transform = FALSE,
+    add_info = FALSE
+  ))
   colnames(se) <- rep("same", ncol(se))
-  got <- quiet_identity(gly_anova(se, subject_col = "person", log_transform = FALSE, add_info = FALSE))
+  got <- quiet_identity(gly_anova(
+    se,
+    subject_col = "person",
+    log_transform = FALSE,
+    add_info = FALSE
+  ))
   expect_equal(got$tidy_result, ref$tidy_result)
 })
 
@@ -101,7 +162,10 @@ test_that("position-keyed filtering selects original rows and rejects stale inpu
   res$tidy_result$p_adj <- c(.01, .9, .9)
   filtered <- filter_sig_vars(se, res, fc_cutoff = NULL)
   expect_identical(filtered, se[1, , drop = FALSE])
-  expect_error(filter_sig_vars(se[c(2, 1, 3), ], res), "same unmodified experiment")
+  expect_error(
+    filter_sig_vars(se[c(2, 1, 3), ], res),
+    "same unmodified experiment"
+  )
   changed <- se
   SummarizedExperiment::assay(changed)[1, 1] <- 999
   expect_error(filter_sig_vars(changed, res), "same unmodified experiment")
@@ -111,14 +175,20 @@ test_that("position-keyed filtering selects original rows and rejects stale inpu
   rownames(se) <- NULL
   res <- quiet_identity(gly_ttest(se, log_transform = FALSE))
   res$tidy_result$p_adj <- c(.9, .01, .9)
-  expect_identical(filter_sig_vars(se, res, fc_cutoff = NULL), se[2, , drop = FALSE])
+  expect_identical(
+    filter_sig_vars(se, res, fc_cutoff = NULL),
+    se[2, , drop = FALSE]
+  )
 })
 
 test_that("named filtering remains compatible with reordered SE inputs", {
   se <- identity_se()
   res <- quiet_identity(gly_ttest(se, log_transform = FALSE))
   res$tidy_result$p_adj <- c(.01, .9, .9)
-  expect_identical(filter_sig_vars(se[3:1, ], res, fc_cutoff = NULL), se[1, , drop = FALSE])
+  expect_identical(
+    filter_sig_vars(se[3:1, ], res, fc_cutoff = NULL),
+    se[1, , drop = FALSE]
+  )
 })
 
 test_that("missing variables are restored using unique position IDs", {
@@ -127,9 +197,11 @@ test_that("missing variables are restored using unique position IDs", {
   SummarizedExperiment::assay(se)[2, ] <- NA_real_
   result <- quiet_identity(gly_pca(se, log_transform = FALSE))
   vars <- result$tidy_result$variables
-  expect_setequal(vars$variable, result$identifiers$variable$data$id)
-  expect_true(all(is.na(vars$value[vars$variable == ".glystats_variable_2"])))
-  expect_true(all(vars$annotation[vars$variable == ".glystats_variable_2"] == "second"))
+  expect_setequal(vars$.variable, result$identifiers$variable$data$id)
+  expect_true(all(is.na(vars$value[vars$.variable == ".glystats_variable_2"])))
+  expect_true(all(
+    vars$annotation[vars$.variable == ".glystats_variable_2"] == "second"
+  ))
 })
 
 test_that("identity helpers support empty axes without inventing rows", {
@@ -145,7 +217,10 @@ test_that("analysis families share position IDs and metadata alignment", {
   SummarizedExperiment::colData(se)$time <- c(8, 3, 5, 9, 4, 7, 6, 2)
   SummarizedExperiment::colData(se)$event <- c(1, 1, 0, 1, 0, 1, 1, 0)
   ref <- se
-  dimnames(ref) <- list(.se_axis_ids(se, "variable"), .se_axis_ids(se, "sample"))
+  dimnames(ref) <- list(
+    .se_axis_ids(se, "variable"),
+    .se_axis_ids(se, "sample")
+  )
   methods <- list(
     pca = function(x) gly_pca(x, log_transform = FALSE),
     fold_change = function(x) gly_fold_change(x, log_transform = FALSE),
@@ -153,16 +228,44 @@ test_that("analysis families share position IDs and metadata alignment", {
     kmeans = function(x) gly_kmeans(x, centers = 2, log_transform = FALSE),
     cox = function(x) gly_cox(x, log_transform = FALSE),
     set_test = function(x) gly_set_test(x, log_transform = FALSE),
-    custom_sets = function(x) gly_set_test(x, sets = list(a = c(".glystats_variable_1", ".glystats_variable_2")), log_transform = FALSE)
+    custom_sets = function(x) {
+      gly_set_test(
+        x,
+        sets = list(a = c(".glystats_variable_1", ".glystats_variable_2")),
+        log_transform = FALSE
+      )
+    }
   )
   if (requireNamespace("limma", quietly = TRUE)) {
     methods$limma <- function(x) gly_limma(x, log_transform = FALSE)
-    methods$linear_model <- function(x) gly_linear_model(x, ~ group, log_transform = FALSE)
+    methods$linear_model <- function(x) {
+      gly_linear_model(x, ~group, log_transform = FALSE)
+    }
   }
-  if (requireNamespace("pROC", quietly = TRUE)) methods$roc <- function(x) gly_roc(x)
-  if (requireNamespace("ggdendro", quietly = TRUE)) methods$hclust <- function(x) gly_hclust(x, k_values = 2, log_transform = FALSE)
-  if (requireNamespace("Rtsne", quietly = TRUE)) methods$tsne <- function(x) gly_tsne(x, perplexity = 2, max_iter = 250, log_transform = FALSE)
-  if (requireNamespace("uwot", quietly = TRUE)) methods$umap <- function(x) gly_umap(x, n_neighbors = 3, n_epochs = 20, n_threads = 1, log_transform = FALSE)
+  if (requireNamespace("pROC", quietly = TRUE)) {
+    methods$roc <- function(x) gly_roc(x)
+  }
+  if (requireNamespace("ggdendro", quietly = TRUE)) {
+    methods$hclust <- function(x) {
+      gly_hclust(x, k_values = 2, log_transform = FALSE)
+    }
+  }
+  if (requireNamespace("Rtsne", quietly = TRUE)) {
+    methods$tsne <- function(x) {
+      gly_tsne(x, perplexity = 2, max_iter = 250, log_transform = FALSE)
+    }
+  }
+  if (requireNamespace("uwot", quietly = TRUE)) {
+    methods$umap <- function(x) {
+      gly_umap(
+        x,
+        n_neighbors = 3,
+        n_epochs = 20,
+        n_threads = 1,
+        log_transform = FALSE
+      )
+    }
+  }
   for (method in methods) {
     set.seed(42)
     got <- quiet_identity(method(se))
@@ -181,7 +284,10 @@ test_that("supervised models keep distinct unnamed samples and variables", {
   se <- exp_topliss_valid()
   dimnames(se) <- NULL
   ref <- se
-  dimnames(ref) <- list(.se_axis_ids(se, "variable"), .se_axis_ids(se, "sample"))
+  dimnames(ref) <- list(
+    .se_axis_ids(se, "variable"),
+    .se_axis_ids(se, "sample")
+  )
   for (method in list(gly_plsda, gly_oplsda)) {
     set.seed(42)
     got <- quiet_identity(method(se, permI = 0, log_transform = FALSE))
@@ -197,10 +303,13 @@ test_that("top-level names override stale names stored in the assay", {
   se <- identity_se()
   rownames(se) <- paste0("new", 1:3)
   colnames(se) <- paste0("new_sample", 1:8)
-  expect_false(identical(rownames(SummarizedExperiment::assay(se, withDimnames = FALSE)), rownames(se)))
+  expect_false(identical(
+    rownames(SummarizedExperiment::assay(se, withDimnames = FALSE)),
+    rownames(se)
+  ))
   result <- gly_pca(se, log_transform = FALSE)
-  expect_setequal(result$tidy_result$variables$variable, rownames(se))
-  expect_setequal(result$tidy_result$samples$sample, colnames(se))
+  expect_setequal(result$tidy_result$variables$.variable, rownames(se))
+  expect_setequal(result$tidy_result$samples$.sample, colnames(se))
 })
 
 test_that("linear model filters use the stored position mapping", {
@@ -209,12 +318,22 @@ test_that("linear model filters use the stored position mapping", {
   rownames(se) <- rep("same", nrow(se))
   for (method in list(
     function(x) gly_limma(x, log_transform = FALSE),
-    function(x) gly_linear_model(x, ~ group, log_transform = FALSE)
+    function(x) gly_linear_model(x, ~group, log_transform = FALSE)
   )) {
     result <- quiet_identity(method(se))
-    result$tidy_result$p_adj <- ifelse(result$tidy_result$variable == ".glystats_variable_2", .01, .9)
-    expect_identical(filter_sig_vars(se, result, fc_cutoff = NULL), se[2, , drop = FALSE])
-    expect_error(filter_sig_vars(se[3:1, ], result), "same unmodified experiment")
+    result$tidy_result$p_adj <- ifelse(
+      result$tidy_result$.variable == ".glystats_variable_2",
+      .01,
+      .9
+    )
+    expect_identical(
+      filter_sig_vars(se, result, fc_cutoff = NULL),
+      se[2, , drop = FALSE]
+    )
+    expect_error(
+      filter_sig_vars(se[3:1, ], result),
+      "same unmodified experiment"
+    )
   }
 })
 
@@ -225,9 +344,76 @@ test_that("generated IDs cannot accidentally match legacy experiment IDs", {
   mat <- .get_expr_mat(se)
   legacy <- suppressWarnings(glyexp::experiment(
     mat,
-    sample_info = tibble::tibble(sample = colnames(mat), group = c(rep("A", 4), rep("B", 4))),
+    sample_info = tibble::tibble(
+      sample = colnames(mat),
+      group = c(rep("A", 4), rep("B", 4))
+    ),
     var_info = tibble::tibble(variable = rownames(mat)),
     exp_type = "others"
   ))
   expect_error(filter_sig_vars(legacy, result), "same unmodified experiment")
+})
+
+
+test_that("dot identities preserve ordinary metadata and disambiguate reserved names", {
+  se <- identity_se()
+  SummarizedExperiment::rowData(se)$variable <- c("x", "x", "y")
+  SummarizedExperiment::rowData(se)$.variable <- c(
+    "reserved1",
+    "reserved2",
+    "reserved3"
+  )
+  SummarizedExperiment::rowData(se)$.variable_metadata <- 1:3
+  SummarizedExperiment::colData(se)$sample <- rep("ordinary", ncol(se))
+  SummarizedExperiment::colData(se)$.sample <- rep("reserved", ncol(se))
+  res <- gly_pca(se, log_transform = FALSE)
+  vars <- res$tidy_result$variables
+  expect_identical(unique(vars$.variable), rownames(se))
+  expect_identical(
+    vars$variable,
+    c("x", "x", "y")[match(vars$.variable, rownames(se))]
+  )
+  expect_identical(
+    vars$.variable_metadata_metadata,
+    paste0("reserved", 1:3)[match(vars$.variable, rownames(se))]
+  )
+  expect_true(all(res$tidy_result$samples$sample == "ordinary"))
+  expect_true(all(res$tidy_result$samples$.sample_metadata == "reserved"))
+  expect_identical(
+    res$identifiers$columns,
+    c(variable = ".variable", sample = ".sample")
+  )
+  plain <- gly_pca(se, log_transform = FALSE, add_info = FALSE)
+  expect_named(plain$tidy_result$variables, c(".variable", "PC", "value"))
+  expect_named(plain$tidy_result$samples, c(".sample", "PC", "value"))
+  tt <- quiet_identity(gly_ttest(se, log_transform = FALSE))
+  filtered <- filter_sig_vars(se, tt, fc_cutoff = NULL)
+  expect_identical(rownames(filtered), c("g1", "g2"))
+})
+
+test_that("filter identity dispatch uses the contract marker, not metadata names", {
+  se <- identity_se()
+  res <- quiet_identity(gly_ttest(se, log_transform = FALSE, add_info = FALSE))
+  expected <- filter_sig_vars(se, res, fc_cutoff = NULL)
+  # Simulate a pre-contract result carrying ordinary dotted metadata.
+  old <- res
+  old$identifiers <- NULL
+  names(old$tidy_result)[names(old$tidy_result) == ".variable"] <- "variable"
+  old$tidy_result$.variable <- rep("not-an-id", nrow(old$tidy_result))
+  expect_identical(filter_sig_vars(se, old, fc_cutoff = NULL), expected)
+})
+
+test_that("correlation and set outputs advertise the same SE identity contract", {
+  se <- identity_se()
+  cor <- gly_cor(se, log_transform = FALSE)
+  expect_true(all(c(".variable1", ".variable2") %in% names(cor$tidy_result)))
+  expect_true(all(
+    cor$tidy_result$.variable1 %in% cor$identifiers$variable$data$id
+  ))
+  expect_false(any(c("variable1", "variable2") %in% names(cor$tidy_result)))
+  sets <- quiet_identity(gly_set_test(se, log_transform = FALSE))
+  expect_true(".variable" %in% names(sets$tidy_result$members))
+  expect_true(all(
+    sets$tidy_result$members$.variable %in% sets$identifiers$variable$data$id
+  ))
 })

@@ -52,13 +52,15 @@ test_that("plain SummarizedExperiment inputs do not require glyexp subclasses", 
   expect_equal(result$meta_data, S4Vectors::metadata(se))
 })
 
-test_that("SummarizedExperiment inputs preserve existing identifier columns", {
+test_that("SummarizedExperiment inputs preserve ordinary sample and variable metadata", {
   se <- methods::as(test_gp_se, "SummarizedExperiment")
   SummarizedExperiment::colData(se)$sample <- colnames(se)
   SummarizedExperiment::rowData(se)$variable <- rownames(se)
 
   result <- gly_pca(se)
 
+  expect_setequal(result$tidy_result$samples$.sample, colnames(se))
+  expect_setequal(result$tidy_result$variables$.variable, rownames(se))
   expect_setequal(
     result$tidy_result$samples$sample,
     SummarizedExperiment::colData(se)$sample

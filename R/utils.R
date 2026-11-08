@@ -29,7 +29,10 @@
 .get_expr_mat <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
     expr_mat <- as.matrix(SummarizedExperiment::assay(exp, 1))
-    dimnames(expr_mat) <- list(.se_axis_ids(exp, "variable"), .se_axis_ids(exp, "sample"))
+    dimnames(expr_mat) <- list(
+      .se_axis_ids(exp, "variable"),
+      .se_axis_ids(exp, "sample")
+    )
     return(expr_mat)
   }
   glyexp::get_expr_mat(exp)
@@ -66,11 +69,17 @@
 .se_axis_map <- function(exp, axis) {
   original <- if (axis == "variable") rownames(exp) else colnames(exp)
   n <- if (axis == "variable") nrow(exp) else ncol(exp)
-  generated <- is.null(original) || anyNA(original) ||
-    any(!nzchar(original)) || anyDuplicated(original) > 0L
-  ids <- if (n == 0L) character() else if (generated) {
+  generated <- is.null(original) ||
+    anyNA(original) ||
+    any(!nzchar(original)) ||
+    anyDuplicated(original) > 0L
+  ids <- if (n == 0L) {
+    character()
+  } else if (generated) {
     paste0(".glystats_", axis, "_", seq_len(n))
-  } else original
+  } else {
+    original
+  }
   list(
     data = tibble::tibble(
       position = seq_len(n),
@@ -94,12 +103,27 @@
   }
   variable <- .se_axis_map(exp, "variable")
   sample <- .se_axis_map(exp, "sample")
-  result$identifiers <- list(variable = variable, sample = sample)
-  filterable <- inherits(result, c(
-    "glystats_ttest_res", "glystats_wilcox_res", "glystats_anova_res",
-    "glystats_ancova_res", "glystats_kruskal_res", "glystats_limma_res",
-    "glystats_linear_model_res"
-  ))
+  result$identifiers <- list(
+    variable = variable,
+    sample = sample,
+    columns = c(variable = ".variable", sample = ".sample")
+  )
+  # These analyses do not attach metadata through the common finalizer.
+  if (inherits(result, c("glystats_cor_res", "glystats_set_test_res"))) {
+    result$tidy_result <- .namespace_se_result_ids(result$tidy_result)
+  }
+  filterable <- inherits(
+    result,
+    c(
+      "glystats_ttest_res",
+      "glystats_wilcox_res",
+      "glystats_anova_res",
+      "glystats_ancova_res",
+      "glystats_kruskal_res",
+      "glystats_limma_res",
+      "glystats_linear_model_res"
+    )
+  )
   if (variable$generated && filterable) {
     result$identifiers$input_hash <- rlang::hash(exp)
   }
@@ -112,14 +136,18 @@
   recorded <- res$identifiers
   if (!methods::is(exp, "SummarizedExperiment")) {
     if (isTRUE(recorded$variable$generated)) {
-      cli::cli_abort("Position-keyed results require the same unmodified experiment used for analysis.")
+      cli::cli_abort(
+        "Position-keyed results require the same unmodified experiment used for analysis."
+      )
     }
     return(invisible(NULL))
   }
   variable <- .se_axis_map(exp, "variable")
   if (variable$generated || isTRUE(recorded$variable$generated)) {
-    if (is.null(recorded$input_hash) ||
-        !identical(recorded$input_hash, rlang::hash(exp))) {
+    if (
+      is.null(recorded$input_hash) ||
+        !identical(recorded$input_hash, rlang::hash(exp))
+    ) {
       cli::cli_abort(c(
         "Position-keyed results require the same unmodified experiment used for analysis.",
         "i" = "Re-run the analysis after changing or reordering the experiment."
@@ -132,7 +160,8 @@
 # Attach annotations by the position of each result ID on the input SE axis.
 # Matching against metadata values would reintroduce the legacy ID contract.
 .add_se_info <- function(tbl, exp, axis) {
-  if (!axis %in% names(tbl)) {
+  key <- paste0(".", axis)
+  if (!key %in% names(tbl)) {
     return(tbl)
   }
   info <- if (axis == "variable") .get_var_info(exp) else .get_sample_info(exp)
@@ -140,9 +169,11 @@
     return(tbl)
   }
   ids <- .se_axis_ids(exp, axis)
-  indices <- match(tbl[[axis]], ids)
+  indices <- match(tbl[[key]], ids)
   if (anyNA(indices)) {
-    cli::cli_abort("Result {.field {axis}} IDs do not match the input experiment.")
+    cli::cli_abort(
+      "Result {.field {axis}} IDs do not match the input experiment."
+    )
   }
   # Retain the historical add_info ordering: input-axis order, preserving
   # the relative order of repeated result rows (e.g. contrasts/components).
@@ -165,9 +196,9 @@
   }
   names(info) <- info_names
   dplyr::bind_cols(
-    tbl[, axis, drop = FALSE],
+    tbl[, key, drop = FALSE],
     info[indices, , drop = FALSE],
-    tbl[, setdiff(names(tbl), axis), drop = FALSE]
+    tbl[, setdiff(names(tbl), key), drop = FALSE]
   )
 }
 
@@ -454,29 +485,57 @@
 }
 
 # Process a single tibble with add_info logic
+# Run once, before adding annotations, so ordinary metadata is never renamed.
+.namespace_se_result_ids <- function(x) {
+  if (tibble::is_tibble(x)) {
+    identity <- c(
+      "variable",
+      "sample",
+      "variable1",
+      "variable2",
+      "sample1",
+      "sample2"
+    )
+    matched <- names(x) %in% identity
+    names(x)[matched] <- paste0(".", names(x)[matched])
+    return(x)
+  }
+  if (is.list(x)) {
+    return(lapply(x, .namespace_se_result_ids))
+  }
+  x
+}
+
 .process_tibble_add_info <- function(tbl, exp, add_info) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    tbl <- .namespace_se_result_ids(tbl)
+    if (add_info) {
+      has_variable <- ".variable" %in% names(tbl)
+      has_sample <- ".sample" %in% names(tbl)
+      if (has_variable) {
+        tbl <- .add_se_info(tbl, exp, "variable")
+      }
+      if (has_sample) tbl <- .add_se_info(tbl, exp, "sample")
+    }
+    return(tbl)
+  }
   if (!add_info) {
     return(tbl)
   }
-
-  # Inspect result columns before appending metadata. An ordinary metadata
-  # column named sample/variable must not trigger a second annotation pass.
   has_variable <- .has_variable_column(tbl)
   has_sample <- .has_sample_column(tbl)
   if (has_variable) {
     tbl <- .add_variable_info(tbl, exp)
   }
-
   if (has_sample) {
     tbl <- .add_sample_info(tbl, exp)
   }
-
-  return(tbl)
+  tbl
 }
 
 # Process results with add_info logic (handles both single tibbles and lists)
 .process_results_add_info <- function(results, exp, add_info) {
-  if (!add_info) {
+  if (!add_info && !methods::is(exp, "SummarizedExperiment")) {
     return(results)
   }
 

@@ -31,8 +31,14 @@ or empty label; \code{NA} when that axis had no names).
 \item \code{generated}: whether position IDs were needed for that axis.
 \item \code{names_missing}: whether the entire original name vector was \code{NULL}.
 }
-The \code{variable}/\code{sample} columns in tidy results remain identifier columns.
-Use the mapping's \code{name} column for display labels. Correlation endpoints,
+SE tidy results use \code{.variable} and \code{.sample} as identity columns.
+\code{identifiers$columns} is the named character vector
+\code{c(variable = ".variable", sample = ".sample")}, identifying this output
+contract. Ordinary metadata named \code{variable} or \code{sample} remains unchanged.
+Use the mapping's \code{name} column for display labels. Correlation endpoint
+columns are \code{.variable1}/\code{.variable2} or \code{.sample1}/\code{.sample2}. Clustering
+tables use the corresponding dotted identity column; dendrogram \code{label}
+columns remain unchanged. Correlation endpoints,
 clustering labels, set memberships, and raw model names use the same IDs.
 Custom \code{sets} in \code{\link[=gly_set_test]{gly_set_test()}} must likewise refer to these IDs, not
 ambiguous original labels.
@@ -54,7 +60,12 @@ axis safely. With ordinary unique variable names, existing name-based
 filtering remains supported, including reordered inputs.
 
 The deprecated \code{glyexp_experiment} input retains its legacy ID-column
-contract. Its sample/variable metadata extraction is not changed.
+contract, including undotted \code{variable}/\code{sample} result identities. Results
+made by older glystats versions also retain their original columns. Use the
+explicit \code{identifiers$columns} marker, not the mere presence of a dotted
+column (which may be old ordinary metadata), to detect the new contract.
+This SE result-column change is an API change even for named unique inputs;
+consumers such as plotting packages must adapt before adopting this output.
 }
 \examples{
 values <- matrix(c(1, 2, 3, 4, 5, 8, 6, 10), nrow = 2,

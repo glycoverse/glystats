@@ -55,6 +55,8 @@ not determine original-abundance fold changes. See \link{gly_scale}.
 
 For SE inputs, the result also contains an \code{identifiers} mapping of result
 IDs to input positions and original names; see \link{gly_identity}.
+In SE tidy results, identity columns are \code{.variable}/\code{.sample} (dotted
+endpoints for correlations); undotted metadata columns remain annotations.
 }
 
 \seealso{

@@ -17,13 +17,13 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
 
   expect_equal(
     colnames(result_no_info$tidy_result),
-    c("variable", "log2fc")
+    c(".variable", "log2fc")
   )
 
   expect_equal(
     colnames(result_with_info$tidy_result),
     c(
-      "variable",
+      ".variable",
       "protein",
       "glycan_composition",
       "protein_site",
@@ -48,11 +48,11 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
 
   expect_equal(
     colnames(tbl_no_info),
-    c("sample", "PC", "value")
+    c(".sample", "PC", "value")
   )
 
   expect_equal(
     colnames(tbl_with_info),
-    c("sample", "group", "PC", "value")
+    c(".sample", "group", "PC", "value")
   )
 })

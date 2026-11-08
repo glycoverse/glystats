@@ -63,6 +63,8 @@ This function requires the \code{uwot} package to be installed for UMAP analysis
 
 For SE inputs, the result also contains an \code{identifiers} mapping of result
 IDs to input positions and original names; see \link{gly_identity}.
+In SE tidy results, identity columns are \code{.variable}/\code{.sample} (dotted
+endpoints for correlations); undotted metadata columns remain annotations.
 }
 
 \seealso{

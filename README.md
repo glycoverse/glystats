@@ -60,18 +60,20 @@ glycoverse](https://github.com/glycoverse/glycoverse#installation).
 
 ## SE identities and annotations
 
-Analysis uses the object's row/column axes, not ordinary `rowData$variable`
-or `colData$sample` columns. Non-empty unique axis names remain result IDs.
-Unnamed, duplicated, or empty-name axes use unique input-position IDs without
-changing the experiment. Every SE result includes `identifiers`, mapping those
-IDs to input positions and the original labels (also with `add_info = FALSE`).
-Metadata are attached by position; colliding annotation columns are preserved
-with an `_metadata` suffix rather than overwriting result fields.
+Analysis uses the object’s row/column axes, not ordinary
+`rowData$variable` or `colData$sample` columns. Non-empty unique axis
+names remain result IDs. Unnamed, duplicated, or empty-name axes use
+unique input-position IDs without changing the experiment. Every SE
+result includes `identifiers`, mapping those IDs to input positions and
+the original labels (also with `add_info = FALSE`). Metadata are
+attached by position; colliding annotation columns are preserved with an
+`_metadata` suffix rather than overwriting result fields.
 
 For position-keyed variables, pass the same unmodified input to
-`filter_sig_vars()`. Re-run analysis after reordering or changing it; position
-IDs are not persistent IDs across different inputs. See `?gly_identity` for the
-full contract and how to recover original labels.
+`filter_sig_vars()`. Re-run analysis after reordering or changing it;
+position IDs are not persistent IDs across different inputs. See
+`?gly_identity` for the full contract and how to recover original
+labels.
 
 ## Control log transformation
 
@@ -177,3 +179,10 @@ leverage the auto-completion in RStudio. They accept a
 `glyexp::GlycomicSE` or `glyexp::GlycoproteomicSE` object, and return
 analysis result as a tibble or a list of tibbles. See documentation for
 each function for more details.
+
+SE result identity columns are `.variable` and `.sample`, while ordinary
+metadata `variable` and `sample` remain annotation columns. Check
+`result$identifiers$columns` to distinguish this output contract from
+older results. Correlation endpoints use `.variable1`/`.variable2` or
+`.sample1`/`.sample2`. This is an output API change, including for fully
+named unique inputs; plotting consumers require adaptation.

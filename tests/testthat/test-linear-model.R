@@ -72,13 +72,13 @@ test_that("gly_linear_model returns moderated coefficient results", {
     c("treatmentB", "timeT2", "age", "batchY", "treatmentB:timeT2")
   )
   expect_identical(
-    result$tidy_result$variable,
+    result$tidy_result$.variable,
     rep(rownames(exp), times = 5)
   )
   expect_named(
     result$tidy_result,
     c(
-      "variable",
+      ".variable",
       "feature_type",
       "term",
       "estimate",
@@ -191,7 +191,7 @@ test_that("gly_linear_model preserves all-NA variables", {
   SummarizedExperiment::assay(exp)["V1", ] <- NA_real_
 
   result <- gly_linear_model(exp, ~ treatment + age, add_info = FALSE)
-  failed <- dplyr::filter(result$tidy_result, .data$variable == "V1")
+  failed <- dplyr::filter(result$tidy_result, .data$.variable == "V1")
 
   expect_identical(unique(failed$term), c("treatmentB", "age"))
   expect_true(all(is.na(failed$estimate)))
@@ -223,7 +223,7 @@ test_that("gly_linear_model aligns weights after removing all-NA variables", {
   expect_identical(rownames(matrix_result$raw_result$fit), rownames(exp)[-1])
   expect_identical(rownames(gene_result$raw_result$fit), rownames(exp)[-1])
   expect_true(all(is.na(matrix_result$tidy_result$estimate[
-    matrix_result$tidy_result$variable == "V1"
+    matrix_result$tidy_result$.variable == "V1"
   ])))
 })
 
@@ -345,11 +345,11 @@ test_that("filter_sig_vars filters linear model results by term", {
   result$tidy_result$p_adj <- 1
   result$tidy_result$p_val <- 1
   result$tidy_result$p_adj[
-    result$tidy_result$variable == "V1" &
+    result$tidy_result$.variable == "V1" &
       result$tidy_result$term == "treatmentB"
   ] <- 0.001
   result$tidy_result$p_adj[
-    result$tidy_result$variable == "V2" &
+    result$tidy_result$.variable == "V2" &
       result$tidy_result$term == "timeT2"
   ] <- 0.001
 

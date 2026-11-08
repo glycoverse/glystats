@@ -333,7 +333,20 @@ test_that("legacy S3 logx inputs retain native estimates and metadata", {
   expect_s3_class(legacy, "glyexp_experiment")
   for (method in c("pca", "ttest")) {
     res <- run_logx_test(method, legacy)
-    expect_equal(res$tidy_result, run_logx_test(method, se)$tidy_result)
+    se_result <- run_logx_test(method, se)
+    expect_null(res$identifiers)
+    expect_identical(
+      se_result$identifiers$columns,
+      c(variable = ".variable", sample = ".sample")
+    )
+    legacy_names <- function(tbl) {
+      if (tibble::is_tibble(tbl)) {
+        names(tbl) <- sub("^\\.(variable|sample)$", "\\1", names(tbl))
+        return(tbl)
+      }
+      lapply(tbl, legacy_names)
+    }
+    expect_equal(res$tidy_result, legacy_names(se_result$tidy_result))
     expect_identical(res$preprocessing$analysis_scale, "logx")
     expect_false(res$preprocessing$log_transform)
     expect_identical(res$meta_data, legacy$meta_data)

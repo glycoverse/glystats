@@ -423,7 +423,7 @@ test_that("disabling logs preserves all-missing variable handling", {
   SummarizedExperiment::assay(exp)[1, ] <- NA_real_
   pca <- gly_pca(exp, add_info = FALSE, log_transform = FALSE)
   expect_true(all(is.na(
-    pca$tidy_result$variables$value[pca$tidy_result$variables$variable == "V1"]
+    pca$tidy_result$variables$value[pca$tidy_result$variables$.variable == "V1"]
   )))
   kmeans <- gly_kmeans(
     exp,

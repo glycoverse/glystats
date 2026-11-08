@@ -1,5 +1,13 @@
 identifier_test_matrix <- function() {
-  ids <- c("ordinary", "sample", "group", "subject", "variable", "log_value", "age")
+  ids <- c(
+    "ordinary",
+    "sample",
+    "group",
+    "subject",
+    "variable",
+    "log_value",
+    "age"
+  )
   values <- outer(seq_along(ids), c(1, 3, 2, 5, 4, 8, 6, 10), "+")
   dimnames(values) <- list(ids, paste0("s", seq_len(ncol(values))))
   values
@@ -28,7 +36,7 @@ test_that("two-group tests preserve identifiers matching analysis columns", {
         p_adj_method = NULL
       )))
 
-      expect_setequal(result$tidy_result$variable, rownames(values))
+      expect_setequal(result$tidy_result$.variable, rownames(values))
       expect_setequal(names(result$raw_result), rownames(values))
       expect_equal(nrow(result$tidy_result), nrow(values))
       for (id in rownames(values)) {
@@ -39,7 +47,7 @@ test_that("two-group tests preserve identifiers matching analysis columns", {
         ))
         expect_equal(result$raw_result[[id]]$p.value, expected$p.value)
         expect_equal(
-          result$tidy_result$p_val[result$tidy_result$variable == id],
+          result$tidy_result$p_val[result$tidy_result$.variable == id],
           expected$p.value
         )
       }
@@ -88,7 +96,7 @@ test_that("ANOVA retains reserved feature identifiers in paired and unpaired fit
       log_transform = FALSE,
       add_info = FALSE
     )))
-    expect_setequal(result$tidy_result$main_test$variable, rownames(values))
+    expect_setequal(result$tidy_result$main_test$.variable, rownames(values))
     expect_setequal(names(result$raw_result$main_test), rownames(values))
     expect_true(all(is.finite(result$tidy_result$main_test$p_val)))
   }
@@ -110,7 +118,7 @@ test_that("ANCOVA preserves a feature sharing a covariate name", {
     log_transform = FALSE,
     add_info = FALSE
   )))
-  expect_setequal(result$tidy_result$main_test$variable, rownames(values))
+  expect_setequal(result$tidy_result$main_test$.variable, rownames(values))
   expect_setequal(names(result$raw_result$main_test), rownames(values))
   expect_true(all(is.finite(result$tidy_result$main_test$p_val)))
 })
@@ -152,12 +160,14 @@ test_that("duplicate SE identifiers keep distinct differential fits", {
       if (identical(analyze, gly_kruskal) && !paired) {
         skip_if_not_installed("FSA")
       }
-      run <- function(x) suppressWarnings(suppressMessages(analyze(
-        x,
-        subject_col = if (paired) "person" else NULL,
-        log_transform = FALSE,
-        add_info = FALSE
-      )))
+      run <- function(x) {
+        suppressWarnings(suppressMessages(analyze(
+          x,
+          subject_col = if (paired) "person" else NULL,
+          log_transform = FALSE,
+          add_info = FALSE
+        )))
+      }
       result <- run(exp)
       expected <- run(reference)
       tbl <- result$tidy_result
@@ -168,8 +178,11 @@ test_that("duplicate SE identifiers keep distinct differential fits", {
       }
       expect_equal(nrow(tbl), 2L)
       expect_equal(tbl$p_val, ref$p_val)
-      expect_identical(tbl$variable, result$identifiers$variable$data$id)
-      expect_identical(result$identifiers$variable$data$name, rep("duplicate", 2))
+      expect_identical(tbl$.variable, result$identifiers$variable$data$id)
+      expect_identical(
+        result$identifiers$variable$data$name,
+        rep("duplicate", 2)
+      )
     }
   }
   expect_identical(exp, before)
@@ -179,11 +192,14 @@ test_that("ANCOVA keeps distinct rows with duplicate SE identifiers", {
   skip_if_not_installed("emmeans")
   exp <- duplicate_identifier_experiment()
   result <- suppressWarnings(suppressMessages(gly_ancova(
-    exp, covariate_cols = "age", log_transform = FALSE, add_info = FALSE
+    exp,
+    covariate_cols = "age",
+    log_transform = FALSE,
+    add_info = FALSE
   )))
   expect_equal(nrow(result$tidy_result$main_test), 2L)
   expect_identical(
-    result$tidy_result$main_test$variable,
+    result$tidy_result$main_test$.variable,
     result$identifiers$variable$data$id
   )
 })

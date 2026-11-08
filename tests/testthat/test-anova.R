@@ -33,7 +33,7 @@ test_that("gly_anova works with anova method", {
   post_hoc_test <- result$tidy_result$post_hoc_test
   expect_true(tibble::is_tibble(post_hoc_test))
   expect_true(all(
-    c("variable", "ref_group", "test_group", "p_val", "p_adj", "log2fc") %in%
+    c(".variable", "ref_group", "test_group", "p_val", "p_adj", "log2fc") %in%
       colnames(post_hoc_test)
   ))
 
@@ -231,7 +231,7 @@ test_that("gly_anova assigns NA for failed variables", {
   expect_true(all(is.na(main_test_raw[na_vars])))
   main_test_tidy <- result$tidy_result$main_test
   p_values <- main_test_tidy |>
-    dplyr::filter(variable %in% na_vars) |>
+    dplyr::filter(.variable %in% na_vars) |>
     dplyr::pull(p_val)
   expect_true(all(is.na(p_values)))
 })

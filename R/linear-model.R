@@ -70,6 +70,8 @@
 #' @section SE identifiers:
 #' For SE inputs, the result also contains an `identifiers` mapping of result
 #' IDs to input positions and original names; see [gly_identity].
+#' In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+#' endpoints for correlations); undotted metadata columns remain annotations.
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
 #'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export

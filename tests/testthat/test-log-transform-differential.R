@@ -82,7 +82,7 @@ test_that("t-tests use the chosen scale and preserve raw fold changes", {
       var.equal = TRUE,
       alternative = "greater"
     )
-    row <- result$tidy_result[result$tidy_result$variable == "V1", ]
+    row <- result$tidy_result[result$tidy_result$.variable == "V1", ]
     pooled_sd <- sqrt((stats::var(ref) + stats::var(test)) / 2)
     expect_equal(row$p_val, reference$p.value)
     expect_equal(unname(row$statistic), unname(reference$statistic))
@@ -175,7 +175,7 @@ test_that("ANOVA and its post-hoc models use the chosen scale", {
     reference <- stats::aov(value ~ group)
     reference_table <- summary(reference)[[1]]
     row <- result$tidy_result$main_test[
-      result$tidy_result$main_test$variable == "V1",
+      result$tidy_result$main_test$.variable == "V1",
     ]
     expect_equal(row$p_val, reference_table[1, "Pr(>F)"])
     expect_equal(
@@ -191,7 +191,7 @@ test_that("ANOVA and its post-hoc models use the chosen scale", {
     expected_fc <- vapply(
       seq_len(nrow(posthoc)),
       function(i) {
-        values <- expression[posthoc$variable[i], ]
+        values <- expression[posthoc$.variable[i], ]
         log2(
           mean(values[group == posthoc$test_group[i]]) /
             mean(values[group == posthoc$ref_group[i]])

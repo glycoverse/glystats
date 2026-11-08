@@ -299,7 +299,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
   }
   variables <- result |>
     .add_filters(p_adj_cutoff, p_val_cutoff, NULL) |>
-    dplyr::pull("variable") |>
+    dplyr::pull(.result_variable_column(res)) |>
     unique()
   .filter_variables(exp, variables)
 }
@@ -325,7 +325,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
     }
   }
 
-  sig_vars <- sig_df |> dplyr::pull("variable") |> unique()
+  sig_vars <- sig_df |> dplyr::pull(.result_variable_column(res)) |> unique()
   .filter_variables(exp, sig_vars)
 }
 
@@ -339,7 +339,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
 ) {
   sig_vars <- res$tidy_result |>
     .add_filters(p_adj_cutoff, p_val_cutoff, fc_cutoff) |>
-    dplyr::pull("variable") |>
+    dplyr::pull(.result_variable_column(res)) |>
     unique()
   .filter_variables(exp, sig_vars)
 }
@@ -357,7 +357,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
     df <- .filter_comparison(df, comparison)
   }
   df <- .add_filters(df, p_adj_cutoff, p_val_cutoff, fc_cutoff)
-  sig_vars <- df |> dplyr::pull("variable") |> unique()
+  sig_vars <- df |> dplyr::pull(.result_variable_column(res)) |> unique()
   .filter_variables(exp, sig_vars)
 }
 
@@ -548,4 +548,10 @@ filter_sig_vars.glystats_linear_model_res <- function(
     return(2)
   }
   NULL
+}
+
+# The recorded output contract distinguishes new SE results from legacy results
+# whose ordinary metadata may itself contain a .variable column.
+.result_variable_column <- function(res) {
+  res$identifiers$columns[["variable"]] %||% "variable"
 }
