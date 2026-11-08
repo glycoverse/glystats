@@ -64,7 +64,11 @@
 #'
 #' @seealso [stats::aov()], [stats::TukeyHSD()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_anova <- function(
   exp,
@@ -134,7 +138,7 @@ gly_anova <- function(
   # Add meta_data from experiment
   result$meta_data <- meta_data
   result$preprocessing <- transformation
-  result
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_anova()`
@@ -320,7 +324,11 @@ gly_anova <- function(
 #'
 #' @seealso [stats::aov()], [emmeans::emmeans()], [emmeans::contrast()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_ancova <- function(
   exp,
@@ -402,7 +410,7 @@ gly_ancova <- function(
   )
   result$meta_data <- meta_data
   result$preprocessing <- transformation
-  result
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_ancova()`
@@ -593,7 +601,11 @@ gly_ancova <- function(
 #' @seealso [stats::kruskal.test()], [stats::friedman.test()],
 #'   [FSA::dunnTest()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_kruskal <- function(
   exp,
@@ -663,7 +675,7 @@ gly_kruskal <- function(
   # Add meta_data from experiment
   result$meta_data <- meta_data
   result$preprocessing <- transformation
-  result
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_kruskal()`

@@ -79,8 +79,15 @@ statistical testing. Exactly 2 groups are required in the grouping variable.
 In paired analyses, only subjects observed in both groups are used and
 \code{effect_size} is the matched-pairs rank-biserial correlation.
 }
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \seealso{
 \code{\link[stats:wilcox.test]{stats::wilcox.test()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

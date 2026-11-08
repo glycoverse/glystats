@@ -82,7 +82,11 @@
 #'
 #' @seealso [stats::cor()], [stats::hclust()], [stats::p.adjust()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_set_test <- function(
   exp,
@@ -175,7 +179,7 @@ gly_set_test <- function(
   result$raw_result$set_construction <- set_construction
   result$meta_data <- meta_data
   result$preprocessing <- transformation
-  result
+  .record_se_identity(result, exp)
 }
 
 .validate_set_variable_names <- function(expr_mat) {

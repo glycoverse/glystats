@@ -77,8 +77,15 @@ P-values are adjusted for multiple testing using the method specified by \code{p
 This function requires the \code{Hmisc} package for efficient correlation calculation.
 }
 
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \seealso{
 \code{\link[Hmisc:rcorr]{Hmisc::rcorr()}}, \code{\link[stats:cor]{stats::cor()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

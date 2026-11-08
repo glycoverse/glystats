@@ -90,8 +90,15 @@ This function requires the following packages to be installed:
 }
 }
 
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \seealso{
 \code{\link[ropls:opls]{ropls::opls()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

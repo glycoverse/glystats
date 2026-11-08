@@ -16,7 +16,7 @@ test_that("gly_oplsda works with valid Topliss ratio", {
   expect_type(oplsda_res, "list")
   expect_setequal(
     names(oplsda_res),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Check tidy_result structure

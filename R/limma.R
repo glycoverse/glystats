@@ -51,7 +51,7 @@
 #' This function requires the following packages to be installed:
 #' - `limma` for linear model fitting and empirical Bayes moderation
 #'
-#' @returns A list with four elements:
+#' @returns A list containing:
 #'  - `tidy_result`: A tibble with limma results containing the following columns:
 #'    - `variable`: Variable name
 #'    - `log2fc`: Log2 fold change, or `NA` on raw and `logx` analysis scales
@@ -69,7 +69,11 @@
 #'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' @seealso [limma::lmFit()], [limma::eBayes()], [limma::makeContrasts()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_limma <- function(
   exp,
@@ -173,7 +177,7 @@ gly_limma <- function(
   result$meta_data <- meta_data
   result$preprocessing <- transformation
 
-  .limma_effect_scale(result, transformation)
+  .record_se_identity(.limma_effect_scale(result, transformation), exp)
 }
 
 #' Run the internal computation for `gly_limma()`

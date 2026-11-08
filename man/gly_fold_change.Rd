@@ -28,7 +28,7 @@ uses the supplied values unchanged. This argument must be named when it
 follows \code{...}.}
 }
 \value{
-A list with four elements:
+A list containing:
 \itemize{
 \item \code{tidy_result}: A tibble with fold change results containing the following columns:
 \itemize{
@@ -51,6 +51,13 @@ When you run this function, you will see message about "Ref Group" and "Test Gro
 \code{scale = "logx"} is not supported because the transformed coordinates do
 not determine original-abundance fold changes. See \link{gly_scale}.
 }
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \seealso{
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

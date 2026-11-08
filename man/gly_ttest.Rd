@@ -47,7 +47,7 @@ uses the supplied values unchanged. This argument must be named when it
 follows \code{...}.}
 }
 \value{
-A list with four elements:
+A list containing:
 \itemize{
 \item \code{tidy_result}: A tibble with t-test results containing the following columns:
 \itemize{
@@ -82,8 +82,15 @@ statistical testing. Exactly 2 groups are required in the grouping variable.
 In paired analyses, only subjects observed in both groups are used and
 \code{effect_size} is Cohen's \eqn{d_z} based on within-subject differences.
 }
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \seealso{
 \code{\link[stats:t.test]{stats::t.test()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

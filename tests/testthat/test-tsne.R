@@ -11,7 +11,7 @@ test_that("gly_tsne works with default parameters", {
   expect_type(result, "list")
   expect_setequal(
     names(result),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Check tidy_result structure

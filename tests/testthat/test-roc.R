@@ -16,7 +16,7 @@ test_that("gly_roc works with 2-group binary classification", {
   expect_type(result, "list")
   expect_setequal(
     names(result),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Test tidy_result structure

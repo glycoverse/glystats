@@ -67,7 +67,11 @@
 #'
 #' @seealso [gly_limma()], [limma::lmFit()], [limma::eBayes()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_linear_model <- function(
   exp,
@@ -123,7 +127,7 @@ gly_linear_model <- function(
     dplyr::select(-".glystats_order")
   result$meta_data <- meta_data
   result$preprocessing <- transformation
-  result
+  .record_se_identity(result, exp)
 }
 
 .analyze_linear_model <- function(

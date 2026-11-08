@@ -21,8 +21,8 @@ test_that("t-SNE tidy output contains every fitted dimension", {
   unnamed <- embedding_dimension_fixture()
   colnames(unnamed) <- NULL
   result <- gly_tsne(unnamed, dims = 2, perplexity = 1, log_transform = FALSE, add_info = FALSE)
-  expect_equal(dim(result$tidy_result), c(8L, 2L))
-  expect_identical(names(result$tidy_result), c("tsne1", "tsne2"))
+  expect_equal(dim(result$tidy_result), c(8L, 3L))
+  expect_identical(names(result$tidy_result), c("sample", "tsne1", "tsne2"))
 })
 
 test_that("UMAP tidy output contains every fitted dimension", {
@@ -41,8 +41,8 @@ test_that("UMAP tidy output contains every fitted dimension", {
   unnamed <- embedding_dimension_fixture()
   colnames(unnamed) <- NULL
   result <- gly_umap(unnamed, n_components = 2, n_neighbors = 3, log_transform = FALSE, add_info = FALSE)
-  expect_equal(dim(result$tidy_result), c(8L, 2L))
-  expect_identical(names(result$tidy_result), c("umap1", "umap2"))
+  expect_equal(dim(result$tidy_result), c(8L, 3L))
+  expect_identical(names(result$tidy_result), c("sample", "umap1", "umap2"))
 })
 
 test_that("all-missing embeddings respect their requested dimensions", {
@@ -61,8 +61,8 @@ test_that("all-missing embeddings respect their requested dimensions", {
   }
   unnamed <- embedding_dimension_fixture(TRUE)
   colnames(unnamed) <- NULL
-  expect_equal(dim(gly_tsne(unnamed, dims = 3, add_info = FALSE)$tidy_result), c(8L, 3L))
-  expect_equal(dim(gly_umap(unnamed, n_components = 3, add_info = FALSE)$tidy_result), c(8L, 3L))
+  expect_equal(dim(gly_tsne(unnamed, dims = 3, add_info = FALSE)$tidy_result), c(8L, 4L))
+  expect_equal(dim(gly_umap(unnamed, n_components = 3, add_info = FALSE)$tidy_result), c(8L, 4L))
 })
 
 test_that("actual one-dimensional backends return usable tidy results", {

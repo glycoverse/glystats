@@ -31,7 +31,7 @@
 #' **Clustering Method:**
 #' K-means clustering is performed using `stats::kmeans()` with the specified parameters.
 #'
-#' @returns A list with four elements:
+#' @returns A list containing:
 #'  - `tidy_result`: A tibble with cluster assignments containing the following columns:
 #'    - `variable` or `sample`: Variable or sample name (depending on `on` parameter)
 #'    - `cluster`: Cluster assignment
@@ -41,7 +41,11 @@
 #'
 #' @seealso [stats::kmeans()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_kmeans <- function(
   exp,
@@ -99,7 +103,7 @@ gly_kmeans <- function(
   result$meta_data <- meta_data
   result$preprocessing <- transformation
 
-  result
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_kmeans()`

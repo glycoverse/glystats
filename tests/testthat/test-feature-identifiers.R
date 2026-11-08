@@ -142,58 +142,48 @@ test_that("the former wide-table preparation also rejected duplicate identifiers
   )
 })
 
-test_that("duplicate assay identifiers cannot pool distinct differential fits", {
+test_that("duplicate SE identifiers keep distinct differential fits", {
   exp <- duplicate_identifier_experiment()
-  before <- SummarizedExperiment::assay(exp)
+  before <- exp
+  reference <- exp
+  rownames(reference) <- c("first", "second")
   for (paired in c(FALSE, TRUE)) {
-    for (analyze in list(gly_ttest, gly_wilcox, gly_anova)) {
-      expect_error(
-        suppressMessages(analyze(
-          exp,
-          subject_col = if (paired) "person" else NULL,
-          log_transform = FALSE,
-          add_info = FALSE
-        )),
-        "Assay row names must be unique"
-      )
+    for (analyze in list(gly_ttest, gly_wilcox, gly_anova, gly_kruskal)) {
+      if (identical(analyze, gly_kruskal) && !paired) {
+        skip_if_not_installed("FSA")
+      }
+      run <- function(x) suppressWarnings(suppressMessages(analyze(
+        x,
+        subject_col = if (paired) "person" else NULL,
+        log_transform = FALSE,
+        add_info = FALSE
+      )))
+      result <- run(exp)
+      expected <- run(reference)
+      tbl <- result$tidy_result
+      ref <- expected$tidy_result
+      if (is.list(tbl) && !tibble::is_tibble(tbl)) {
+        tbl <- tbl$main_test
+        ref <- ref$main_test
+      }
+      expect_equal(nrow(tbl), 2L)
+      expect_equal(tbl$p_val, ref$p_val)
+      expect_identical(tbl$variable, result$identifiers$variable$data$id)
+      expect_identical(result$identifiers$variable$data$name, rep("duplicate", 2))
     }
   }
-  expect_identical(SummarizedExperiment::assay(exp), before)
+  expect_identical(exp, before)
 })
 
-test_that("paired rank tests reject duplicate assay identifiers", {
-  expect_error(
-    suppressMessages(gly_kruskal(
-      duplicate_identifier_experiment(),
-      subject_col = "person",
-      log_transform = FALSE,
-      add_info = FALSE
-    )),
-    "Assay row names must be unique"
-  )
-})
-
-test_that("unpaired rank tests reject duplicate assay identifiers", {
-  skip_if_not_installed("FSA")
-  expect_error(
-    suppressMessages(gly_kruskal(
-      duplicate_identifier_experiment(),
-      log_transform = FALSE,
-      add_info = FALSE
-    )),
-    "Assay row names must be unique"
-  )
-})
-
-test_that("covariate-adjusted tests reject duplicate assay identifiers", {
+test_that("ANCOVA keeps distinct rows with duplicate SE identifiers", {
   skip_if_not_installed("emmeans")
-  expect_error(
-    suppressMessages(gly_ancova(
-      duplicate_identifier_experiment(),
-      covariate_cols = "age",
-      log_transform = FALSE,
-      add_info = FALSE
-    )),
-    "Assay row names must be unique"
+  exp <- duplicate_identifier_experiment()
+  result <- suppressWarnings(suppressMessages(gly_ancova(
+    exp, covariate_cols = "age", log_transform = FALSE, add_info = FALSE
+  )))
+  expect_equal(nrow(result$tidy_result$main_test), 2L)
+  expect_identical(
+    result$tidy_result$main_test$variable,
+    result$identifiers$variable$data$id
   )
 })

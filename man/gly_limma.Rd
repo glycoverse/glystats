@@ -59,7 +59,7 @@ uses the supplied values unchanged. This argument must be named when it
 follows \code{...}.}
 }
 \value{
-A list with four elements:
+A list containing:
 \itemize{
 \item \code{tidy_result}: A tibble with limma results containing the following columns:
 \itemize{
@@ -110,8 +110,15 @@ This function requires the following packages to be installed:
 }
 }
 
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \seealso{
 \code{\link[limma:lmFit]{limma::lmFit()}}, \code{\link[limma:ebayes]{limma::eBayes()}}, \code{\link[limma:makeContrasts]{limma::makeContrasts()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

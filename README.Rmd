@@ -60,6 +60,21 @@ pak::pkg_install("glycoverse/glystats")
 **Note:** Tips and troubleshooting for the meta-package [glycoverse](https://github.com/glycoverse/glycoverse)
 are also applicable here: [Installation of glycoverse](https://github.com/glycoverse/glycoverse#installation).
 
+## SE identities and annotations
+
+Analysis uses the object's row/column axes, not ordinary `rowData$variable`
+or `colData$sample` columns. Non-empty unique axis names remain result IDs.
+Unnamed, duplicated, or empty-name axes use unique input-position IDs without
+changing the experiment. Every SE result includes `identifiers`, mapping those
+IDs to input positions and the original labels (also with `add_info = FALSE`).
+Metadata are attached by position; colliding annotation columns are preserved
+with an `_metadata` suffix rather than overwriting result fields.
+
+For position-keyed variables, pass the same unmodified input to
+`filter_sig_vars()`. Re-run analysis after reordering or changing it; position
+IDs are not persistent IDs across different inputs. See `?gly_identity` for the
+full contract and how to recover original labels.
+
 ## Control log transformation
 
 All expression-analysis functions default to `log_transform = NULL`. Record the

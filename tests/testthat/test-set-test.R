@@ -241,7 +241,7 @@ test_that("gly_set_test matches an independent Hotelling calculation", {
   expect_s3_class(result, c("glystats_set_test_res", "glystats_res"))
   expect_named(
     result,
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
   expect_named(result$tidy_result, c("sets", "members"))
   expect_equal(result$tidy_result$sets$statistic, expected_t2)

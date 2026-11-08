@@ -148,3 +148,7 @@ res <- gly_anova(exp)
 sig_exp <- filter_sig_vars(exp, res)
 
 }
+\seealso{
+\link{gly_identity} for position IDs and the requirement to use the
+unmodified input when variable names are missing, empty, or duplicated.
+}

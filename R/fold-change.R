@@ -14,7 +14,7 @@
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the fold change results are returned.
 #'
-#' @returns A list with four elements:
+#' @returns A list containing:
 #'  - `tidy_result`: A tibble with fold change results containing the following columns:
 #'    - `variable`: Variable name
 #'    - `log2fc`: Log2 fold change; see [gly_scale] for the scale-dependent definition
@@ -23,7 +23,11 @@
 #'  - `meta_data`: A list containing metadata from the input experiment
 #'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_fold_change <- function(
   exp,
@@ -89,7 +93,7 @@ gly_fold_change <- function(
   )
   class(result) <- c("glystats_fc_res", "glystats_res", class(result))
 
-  result
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_fold_change()`

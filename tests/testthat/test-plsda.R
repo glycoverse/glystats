@@ -16,7 +16,7 @@ test_that("gly_plsda works with valid dataset", {
   expect_type(plsda_res, "list")
   expect_setequal(
     names(plsda_res),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Check tidy_result structure

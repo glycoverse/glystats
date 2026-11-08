@@ -13,7 +13,7 @@ test_that("gly_anova works with anova method", {
   expect_s3_class(result, c("glystats_anova_res", "glystats_res"))
   expect_named(
     result,
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Test tidy_result structure

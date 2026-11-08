@@ -1,5 +1,8 @@
 # glystats (development version)
 
+* SE analyses now identify samples and variables from the object axes, never from ordinary `sample`/`variable` metadata columns. Annotation conflicts retain both values using `_metadata` suffixes.
+* Unnamed, empty, and repeated SE axis labels are supported using unique input-position IDs throughout fits, paired effects, missing-row recovery, and filtering. Results expose the original-label/position mapping in `identifiers`; filtering ambiguous variables requires the same unmodified input. See `?gly_identity`.
+
 # glystats 0.14.0
 
 ## Breaking changes

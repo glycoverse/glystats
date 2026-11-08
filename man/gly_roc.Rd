@@ -85,8 +85,15 @@ The function requires exactly 2 groups in the specified grouping variable. If mo
 This function requires the \code{pROC} package to be installed for ROC curve computation.
 }
 
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \seealso{
 \code{\link[pROC:roc]{pROC::roc()}}, \code{\link[pROC:coords]{pROC::coords()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

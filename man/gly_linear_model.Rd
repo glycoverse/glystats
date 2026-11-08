@@ -78,6 +78,12 @@ a specific reference level is required.
 P-values are adjusted independently across variables for each coefficient or
 contrast.
 }
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \examples{
 \dontshow{if (requireNamespace("limma", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 exp <- glyexp::real_experiment
@@ -102,4 +108,5 @@ contrast_res <- gly_linear_model(
 \code{\link[=gly_limma]{gly_limma()}}, \code{\link[limma:lmFit]{limma::lmFit()}}, \code{\link[limma:ebayes]{limma::eBayes()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

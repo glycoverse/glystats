@@ -26,7 +26,7 @@
 #'
 #' P-values are adjusted by Benjamini-Hochberg method by default.
 #'
-#' @returns A list with four elements:
+#' @returns A list containing:
 #'  - `tidy_result`: A tibble with Cox model results containing the following columns:
 #'    - `variable`: Variable name
 #'    - `coefficient`: Regression coefficient (log hazard ratio)
@@ -41,7 +41,11 @@
 #'
 #' @seealso [survival::coxph()], [survival::Surv()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_cox <- function(
   exp,
@@ -99,7 +103,7 @@ gly_cox <- function(
   result$meta_data <- meta_data
   result$preprocessing <- transformation
 
-  result
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_cox()`

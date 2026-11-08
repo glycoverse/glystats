@@ -100,8 +100,15 @@ Tukey's HSD test for pairwise comparisons (\code{stats::TukeyHSD()}) is performe
 for variables with significant main effects (p_adj < 0.05). Paired analyses
 instead use paired t-tests with Holm correction.
 }
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \seealso{
 \code{\link[stats:aov]{stats::aov()}}, \code{\link[stats:TukeyHSD]{stats::TukeyHSD()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

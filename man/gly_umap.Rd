@@ -59,8 +59,15 @@ The function uses \code{uwot::umap()} to perform UMAP analysis.
 This function requires the \code{uwot} package to be installed for UMAP analysis.
 }
 
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+}
+
 \seealso{
 \code{\link[uwot:umap]{uwot::umap()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }
