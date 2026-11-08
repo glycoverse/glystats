@@ -43,7 +43,7 @@ test_that("raw-scale limma filtering keeps significant glycoproteomics variables
     expect_identical(result$preprocessing$analysis_scale, "raw")
     expect_true(all(is.na(result$tidy_result$log2fc)))
     expect_identical(
-      result$tidy_result$variable[result$tidy_result$p_adj < 0.05],
+      result$tidy_result$.variable[result$tidy_result$p_adj < 0.05],
       "signal"
     )
     expect_identical(rownames(filter_sig_vars(exp, result)), "signal")

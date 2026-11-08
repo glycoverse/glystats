@@ -14,7 +14,7 @@
       Error in `.set_strata()`:
       ! Columns in `within` were not found in variable information.
       x Missing columns: unknown.
-      i Available columns: variable and site.
+      i Available columns: site.
 
 ---
 

@@ -24,6 +24,8 @@
 #' @param ... Additional arguments passed to methods. See the method-specific documentation for details.
 #'
 #' @returns A filtered object of the same class as `exp`.
+#' @seealso [gly_identity] for position IDs and the requirement to use the
+#'   unmodified input when variable names are missing, empty, or duplicated.
 #'
 #' @examples
 #' library(glyexp)
@@ -69,6 +71,7 @@ filter_sig_vars.glystats_anova_res <- function(
   comparison = NULL,
   ...
 ) {
+  .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(
     exp,
     fc_cutoff,
@@ -107,6 +110,7 @@ filter_sig_vars.glystats_ancova_res <- function(
   comparison = NULL,
   ...
 ) {
+  .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(
     exp,
     fc_cutoff,
@@ -145,6 +149,7 @@ filter_sig_vars.glystats_kruskal_res <- function(
   comparison = NULL,
   ...
 ) {
+  .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(
     exp,
     fc_cutoff,
@@ -181,6 +186,7 @@ filter_sig_vars.glystats_ttest_res <- function(
   fc_cutoff = NULL,
   ...
 ) {
+  .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(exp, fc_cutoff, res, use_default = missing(fc_cutoff))
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
@@ -196,6 +202,7 @@ filter_sig_vars.glystats_wilcox_res <- function(
   fc_cutoff = NULL,
   ...
 ) {
+  .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(exp, fc_cutoff, res, use_default = missing(fc_cutoff))
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
   .filter_sig_vars_ttest(exp, res, p_adj_cutoff, p_val_cutoff, fc_cutoff)
@@ -212,6 +219,7 @@ filter_sig_vars.glystats_limma_res <- function(
   comparison = NULL,
   ...
 ) {
+  .validate_filter_identity(exp, res)
   if (!identical(res$preprocessing$analysis_scale, "raw")) {
     fc_cutoff <- .decide_fc(
       exp,
@@ -255,6 +263,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
   term = NULL,
   ...
 ) {
+  .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(exp, fc_cutoff, res)
   .check_filter_sig_vars_args(
     exp,
@@ -290,7 +299,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
   }
   variables <- result |>
     .add_filters(p_adj_cutoff, p_val_cutoff, NULL) |>
-    dplyr::pull("variable") |>
+    dplyr::pull(.result_variable_column(res)) |>
     unique()
   .filter_variables(exp, variables)
 }
@@ -316,7 +325,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
     }
   }
 
-  sig_vars <- sig_df |> dplyr::pull("variable") |> unique()
+  sig_vars <- sig_df |> dplyr::pull(.result_variable_column(res)) |> unique()
   .filter_variables(exp, sig_vars)
 }
 
@@ -330,7 +339,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
 ) {
   sig_vars <- res$tidy_result |>
     .add_filters(p_adj_cutoff, p_val_cutoff, fc_cutoff) |>
-    dplyr::pull("variable") |>
+    dplyr::pull(.result_variable_column(res)) |>
     unique()
   .filter_variables(exp, sig_vars)
 }
@@ -348,7 +357,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
     df <- .filter_comparison(df, comparison)
   }
   df <- .add_filters(df, p_adj_cutoff, p_val_cutoff, fc_cutoff)
-  sig_vars <- df |> dplyr::pull("variable") |> unique()
+  sig_vars <- df |> dplyr::pull(.result_variable_column(res)) |> unique()
   .filter_variables(exp, sig_vars)
 }
 
@@ -539,4 +548,10 @@ filter_sig_vars.glystats_linear_model_res <- function(
     return(2)
   }
   NULL
+}
+
+# The recorded output contract distinguishes new SE results from legacy results
+# whose ordinary metadata may itself contain a .variable column.
+.result_variable_column <- function(res) {
+  res$identifiers$columns[["variable"]] %||% "variable"
 }

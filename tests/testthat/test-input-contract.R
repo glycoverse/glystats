@@ -52,13 +52,15 @@ test_that("plain SummarizedExperiment inputs do not require glyexp subclasses", 
   expect_equal(result$meta_data, S4Vectors::metadata(se))
 })
 
-test_that("SummarizedExperiment inputs preserve existing identifier columns", {
+test_that("SummarizedExperiment inputs preserve ordinary sample and variable metadata", {
   se <- methods::as(test_gp_se, "SummarizedExperiment")
   SummarizedExperiment::colData(se)$sample <- colnames(se)
   SummarizedExperiment::rowData(se)$variable <- rownames(se)
 
   result <- gly_pca(se)
 
+  expect_setequal(result$tidy_result$samples$.sample, colnames(se))
+  expect_setequal(result$tidy_result$variables$.variable, rownames(se))
   expect_setequal(
     result$tidy_result$samples$sample,
     SummarizedExperiment::colData(se)$sample
@@ -67,4 +69,46 @@ test_that("SummarizedExperiment inputs preserve existing identifier columns", {
     result$tidy_result$variables$variable,
     SummarizedExperiment::rowData(se)$variable
   )
+})
+
+test_that("merged glyexp development constructors supply synchronized analysis identities", {
+  values <- matrix(
+    seq_len(24),
+    nrow = 3,
+    dimnames = list(c("v1", "v2", "v3"), paste0("s", seq_len(8)))
+  )
+  rd <- S4Vectors::DataFrame(
+    glycan_composition = rep(glyrepr::glycan_composition(c(Hex = 1)), 3),
+    variable = c("annotation 3", "annotation 1", "annotation 2"),
+    row.names = c("v3", "v1", "v2")
+  )
+  cd <- S4Vectors::DataFrame(
+    group = rep(c("A", "B"), each = 4),
+    sample = rep("ordinary sample annotation", 8),
+    row.names = colnames(values)
+  )
+  for (proteomic in c(FALSE, TRUE)) {
+    info <- rd
+    ctor <- glyexp::GlycomicSE
+    if (proteomic) {
+      info$protein <- c("p3", "p1", "p2")
+      info$protein_site <- c(3L, 1L, 2L)
+      ctor <- glyexp::GlycoproteomicSE
+    }
+    se <- ctor(
+      values,
+      rowData = info,
+      colData = cd,
+      metadata = list(glycan_type = "N")
+    )
+    result <- suppressMessages(gly_ttest(se, log_transform = FALSE))
+    expect_identical(result$tidy_result$.variable, rownames(values))
+    expect_identical(result$tidy_result$variable, paste("annotation", 1:3))
+    expect_identical(
+      colnames(SummarizedExperiment::assay(se, withDimnames = FALSE)),
+      colnames(se)
+    )
+    expect_false(result$identifiers$variable$generated)
+    expect_false(result$identifiers$sample$generated)
+  }
 })

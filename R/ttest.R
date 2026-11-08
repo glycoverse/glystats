@@ -26,7 +26,7 @@
 #' In paired analyses, only subjects observed in both groups are used and
 #' `effect_size` is Cohen's \eqn{d_z} based on within-subject differences.
 #'
-#' @returns A list with four elements:
+#' @returns A list containing:
 #' - `tidy_result`: A tibble with t-test results containing the following columns:
 #'   - `variable`: Variable name
 #'   - `estimate`: Difference in group means (group2 - group1)
@@ -48,7 +48,13 @@
 #' The list has classes `glystats_ttest_res` and `glystats_res`.
 #' @seealso [stats::t.test()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
+#' In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+#' endpoints for correlations); undotted metadata columns remain annotations.
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_ttest <- function(
   exp,
@@ -125,7 +131,7 @@ gly_ttest <- function(
   result$meta_data <- meta_data
   result$preprocessing <- transformation
 
-  result
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_ttest()`
@@ -231,7 +237,13 @@ gly_ttest <- function(
 #' @importFrom tidyselect all_of
 #'
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
+#' In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+#' endpoints for correlations); undotted metadata columns remain annotations.
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_wilcox <- function(
   exp,
@@ -308,7 +320,7 @@ gly_wilcox <- function(
   result$meta_data <- meta_data
   result$preprocessing <- transformation
 
-  result
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_wilcox()`

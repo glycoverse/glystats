@@ -83,7 +83,7 @@ test_that("merge counts do not depend on optional sample or feature labels", {
       add_info = FALSE
     )
     n <- if (on == "variable") nrow(exp) else ncol(exp)
-    expect_null(result$raw_result$labels)
+    expect_identical(result$raw_result$labels, result$identifiers[[on]]$data$id)
     expect_length(result$raw_result$order, n)
     expect_equal(result$tidy_result$heights$n_clusters, seq.int(n - 1L, 1L))
     expect_equal(tail(result$tidy_result$heights$n_clusters, 1), 1)

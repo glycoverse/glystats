@@ -44,7 +44,13 @@
 #'  - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' @seealso [ropls::opls()]
 #' @inheritParams gly_scale
+#' @section SE identifiers:
+#' For SE inputs, the result also contains an `identifiers` mapping of result
+#' IDs to input positions and original names; see [gly_identity].
+#' In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+#' endpoints for correlations); undotted metadata columns remain annotations.
 #' @seealso [gly_scale] for input scales, transformations, and fold changes.
+#'   [gly_identity] for SE identifiers, annotation alignment, and unnamed inputs.
 #' @export
 gly_plsda <- function(
   exp,
@@ -113,7 +119,7 @@ gly_plsda <- function(
   result$meta_data <- meta_data
   result$preprocessing <- transformation
 
-  result
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_plsda()`

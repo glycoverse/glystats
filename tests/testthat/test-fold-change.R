@@ -12,13 +12,13 @@ test_that("gly_fold_change works with basic 2-group comparison", {
   expect_s3_class(result, "glystats_fc_res")
   expect_equal(nrow(result$tidy_result), 10)
   expect_equal(ncol(result$tidy_result), 2)
-  expect_setequal(colnames(result$tidy_result), c("variable", "log2fc"))
-  expect_type(result$tidy_result$variable, "character")
+  expect_setequal(colnames(result$tidy_result), c(".variable", "log2fc"))
+  expect_type(result$tidy_result$.variable, "character")
   expect_type(result$tidy_result$log2fc, "double")
 
   # Check that all variables are included
   expect_setequal(
-    result$tidy_result$variable,
+    result$tidy_result$.variable,
     rownames(exp_2group)
   )
 
@@ -27,7 +27,7 @@ test_that("gly_fold_change works with basic 2-group comparison", {
   expect_s3_class(result_with_info, "glystats_fc_res")
   expect_equal(nrow(result_with_info$tidy_result), 10)
   expect_true(ncol(result_with_info$tidy_result) > 2) # Should have more columns with var_info
-  expect_true("variable" %in% colnames(result_with_info$tidy_result))
+  expect_true(".variable" %in% colnames(result_with_info$tidy_result))
   expect_true("log2fc" %in% colnames(result_with_info$tidy_result))
 })
 

@@ -101,8 +101,17 @@ For enhanced dendrogram plotting capabilities, the \code{ggdendro} package is re
 but not required.
 }
 
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+In SE tidy results, identity columns are \code{.variable}/\code{.sample} (dotted
+endpoints for correlations); undotted metadata columns remain annotations.
+}
+
 \seealso{
 \code{\link[stats:hclust]{stats::hclust()}}, \code{\link[stats:dist]{stats::dist()}}, \code{\link[stats:cutree]{stats::cutree()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

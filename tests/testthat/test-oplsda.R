@@ -16,7 +16,7 @@ test_that("gly_oplsda works with valid Topliss ratio", {
   expect_type(oplsda_res, "list")
   expect_setequal(
     names(oplsda_res),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Check tidy_result structure
@@ -33,7 +33,7 @@ test_that("gly_oplsda works with valid Topliss ratio", {
 
   # Check variables tibble
   expect_s3_class(oplsda_res$tidy_result$variables, "tbl_df")
-  expect_true("variable" %in% colnames(oplsda_res$tidy_result$variables))
+  expect_true(".variable" %in% colnames(oplsda_res$tidy_result$variables))
   expect_true("p1" %in% colnames(oplsda_res$tidy_result$variables))
   expect_true("pcorr1" %in% colnames(oplsda_res$tidy_result$variables))
 
@@ -49,7 +49,7 @@ test_that("gly_oplsda works with valid Topliss ratio", {
 
   # Check VIP tibble
   expect_s3_class(oplsda_res$tidy_result$vip, "tbl_df")
-  expect_true("variable" %in% colnames(oplsda_res$tidy_result$vip))
+  expect_true(".variable" %in% colnames(oplsda_res$tidy_result$vip))
   expect_true("vip" %in% colnames(oplsda_res$tidy_result$vip))
   expect_true(all(oplsda_res$tidy_result$vip$vip >= 0)) # VIP scores should be non-negative
 
@@ -394,7 +394,7 @@ test_that("gly_oplsda pcorr values match manual calculation", {
 
   # Get pcorr1 from our function
   function_pcorr1 <- oplsda_res$tidy_result$variables$pcorr1
-  names(function_pcorr1) <- oplsda_res$tidy_result$variables$variable
+  names(function_pcorr1) <- oplsda_res$tidy_result$variables$.variable
 
   # Align by variable names
   common_vars <- intersect(names(manual_pcorr1), names(function_pcorr1))

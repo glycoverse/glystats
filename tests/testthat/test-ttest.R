@@ -13,7 +13,7 @@ test_that("gly_ttest works with t-test method", {
   expect_type(result, "list")
   expect_setequal(
     names(result),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
   expect_equal(nrow(result$tidy_result), 10)
   expect_true("p_adj" %in% colnames(result$tidy_result)) # p_adj should exist
@@ -64,7 +64,7 @@ test_that("gly_wilcox works with wilcoxon method", {
   expect_type(result, "list")
   expect_setequal(
     names(result),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
   expect_equal(nrow(result$tidy_result), 10)
   expect_true("log2fc" %in% colnames(result$tidy_result)) # Wilcoxon should now have log2fc

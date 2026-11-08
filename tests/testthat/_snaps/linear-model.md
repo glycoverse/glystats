@@ -14,7 +14,7 @@
       Error in `.build_linear_model_design()`:
       ! Failed to evaluate `formula` against sample information.
       x object 'missing_predictor' not found
-      i Available columns: sample, treatment, time, age, and batch.
+      i Available columns: treatment, time, age, and batch.
       Caused by error:
       ! object 'missing_predictor' not found
 
@@ -34,7 +34,7 @@
       Error in `.build_linear_model_design()`:
       ! Failed to evaluate `formula` against sample information.
       x missing values in object
-      i Available columns: sample, treatment, time, age, and batch.
+      i Available columns: treatment, time, age, and batch.
       Caused by error in `na.fail.default()`:
       ! missing values in object
 

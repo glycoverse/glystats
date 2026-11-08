@@ -11,7 +11,7 @@ test_that("gly_umap works with default parameters", {
   expect_type(result, "list")
   expect_setequal(
     names(result),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Check tidy_result structure
@@ -19,7 +19,7 @@ test_that("gly_umap works with default parameters", {
   expect_equal(nrow(result$tidy_result), ncol(test_gp_se))
   expect_true("umap1" %in% names(result$tidy_result))
   expect_true("umap2" %in% names(result$tidy_result))
-  expect_true("sample" %in% names(result$tidy_result))
+  expect_true(".sample" %in% names(result$tidy_result))
 
   # Check that coordinates are numeric
   expect_type(result$tidy_result$umap1, "double")
@@ -47,7 +47,7 @@ test_that("gly_umap works with custom parameters", {
 
   expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
   expect_equal(nrow(result$tidy_result), ncol(test_gp_se))
-  expect_true(all(c("umap1", "umap2", "sample") %in% names(result$tidy_result)))
+  expect_true(all(c("umap1", "umap2", ".sample") %in% names(result$tidy_result)))
 })
 
 test_that("gly_umap works with more than 2 components", {
@@ -58,7 +58,7 @@ test_that("gly_umap works with more than 2 components", {
   expect_s3_class(result, c("glystats_umap_res", "glystats_res"))
   expect_equal(nrow(result$tidy_result), ncol(test_gp_se))
   expect_true(all(
-    c("umap1", "umap2", "umap3", "sample") %in% names(result$tidy_result)
+    c("umap1", "umap2", "umap3", ".sample") %in% names(result$tidy_result)
   ))
 
   # Check that all coordinates are numeric
@@ -77,7 +77,7 @@ test_that("gly_umap has consistent sample names", {
 
   # Should have same sample names as input expression matrix
   expect_equal(
-    sort(result$tidy_result$sample),
+    sort(result$tidy_result$.sample),
     sort(colnames(test_gp_se))
   )
 })

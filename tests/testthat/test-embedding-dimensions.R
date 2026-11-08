@@ -15,14 +15,14 @@ test_that("t-SNE tidy output contains every fitted dimension", {
   )
   for (dims in c(1L, 2L, 3L)) {
     result <- gly_tsne(embedding_dimension_fixture(), dims = dims, perplexity = 1, log_transform = FALSE, add_info = FALSE)
-    expect_identical(names(result$tidy_result), c("sample", paste0("tsne", seq_len(dims))))
+    expect_identical(names(result$tidy_result), c(".sample", paste0("tsne", seq_len(dims))))
     expect_equal(unname(as.matrix(result$tidy_result[-1])), unname(result$raw_result$Y))
   }
   unnamed <- embedding_dimension_fixture()
   colnames(unnamed) <- NULL
   result <- gly_tsne(unnamed, dims = 2, perplexity = 1, log_transform = FALSE, add_info = FALSE)
-  expect_equal(dim(result$tidy_result), c(8L, 2L))
-  expect_identical(names(result$tidy_result), c("tsne1", "tsne2"))
+  expect_equal(dim(result$tidy_result), c(8L, 3L))
+  expect_identical(names(result$tidy_result), c(".sample", "tsne1", "tsne2"))
 })
 
 test_that("UMAP tidy output contains every fitted dimension", {
@@ -35,14 +35,14 @@ test_that("UMAP tidy output contains every fitted dimension", {
   )
   for (dims in c(1L, 2L, 3L)) {
     result <- gly_umap(embedding_dimension_fixture(), n_components = dims, n_neighbors = 3, log_transform = FALSE, add_info = FALSE)
-    expect_identical(names(result$tidy_result), c("sample", paste0("umap", seq_len(dims))))
+    expect_identical(names(result$tidy_result), c(".sample", paste0("umap", seq_len(dims))))
     expect_equal(unname(as.matrix(result$tidy_result[-1])), unname(result$raw_result))
   }
   unnamed <- embedding_dimension_fixture()
   colnames(unnamed) <- NULL
   result <- gly_umap(unnamed, n_components = 2, n_neighbors = 3, log_transform = FALSE, add_info = FALSE)
-  expect_equal(dim(result$tidy_result), c(8L, 2L))
-  expect_identical(names(result$tidy_result), c("umap1", "umap2"))
+  expect_equal(dim(result$tidy_result), c(8L, 3L))
+  expect_identical(names(result$tidy_result), c(".sample", "umap1", "umap2"))
 })
 
 test_that("all-missing embeddings respect their requested dimensions", {
@@ -51,8 +51,8 @@ test_that("all-missing embeddings respect their requested dimensions", {
   for (dims in c(1L, 3L)) {
     tsne <- gly_tsne(embedding_dimension_fixture(TRUE), dims = dims, add_info = FALSE)
     umap <- gly_umap(embedding_dimension_fixture(TRUE), n_components = dims, add_info = FALSE)
-    expect_identical(names(tsne$tidy_result), c("sample", paste0("tsne", seq_len(dims))))
-    expect_identical(names(umap$tidy_result), c("sample", paste0("umap", seq_len(dims))))
+    expect_identical(names(tsne$tidy_result), c(".sample", paste0("tsne", seq_len(dims))))
+    expect_identical(names(umap$tidy_result), c(".sample", paste0("umap", seq_len(dims))))
     expect_true(all(is.na(as.matrix(tsne$tidy_result[-1]))))
     expect_true(all(is.na(as.matrix(umap$tidy_result[-1]))))
     expect_equal(nrow(tsne$tidy_result), 8)
@@ -61,8 +61,8 @@ test_that("all-missing embeddings respect their requested dimensions", {
   }
   unnamed <- embedding_dimension_fixture(TRUE)
   colnames(unnamed) <- NULL
-  expect_equal(dim(gly_tsne(unnamed, dims = 3, add_info = FALSE)$tidy_result), c(8L, 3L))
-  expect_equal(dim(gly_umap(unnamed, n_components = 3, add_info = FALSE)$tidy_result), c(8L, 3L))
+  expect_equal(dim(gly_tsne(unnamed, dims = 3, add_info = FALSE)$tidy_result), c(8L, 4L))
+  expect_equal(dim(gly_umap(unnamed, n_components = 3, add_info = FALSE)$tidy_result), c(8L, 4L))
 })
 
 test_that("actual one-dimensional backends return usable tidy results", {

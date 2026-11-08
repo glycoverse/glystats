@@ -28,7 +28,12 @@
 #' @noRd
 .get_expr_mat <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(as.matrix(SummarizedExperiment::assay(exp, 1)))
+    expr_mat <- as.matrix(SummarizedExperiment::assay(exp, 1))
+    dimnames(expr_mat) <- list(
+      .se_axis_ids(exp, "variable"),
+      .se_axis_ids(exp, "sample")
+    )
+    return(expr_mat)
   }
   glyexp::get_expr_mat(exp)
 }
@@ -37,11 +42,11 @@
 #'
 #' @inheritParams .assert_data_container
 #'
-#' @returns A tibble with a `sample` identifier column.
+#' @returns A tibble of sample metadata in input-column order.
 #' @noRd
 .get_sample_info <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(.as_info_tibble(SummarizedExperiment::colData(exp), "sample"))
+    return(tibble::as_tibble(SummarizedExperiment::colData(exp)))
   }
   glyexp::get_sample_info(exp)
 }
@@ -50,29 +55,151 @@
 #'
 #' @inheritParams .assert_data_container
 #'
-#' @returns A tibble with a `variable` identifier column.
+#' @returns A tibble of variable metadata in input-row order.
 #' @noRd
 .get_var_info <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(.as_info_tibble(SummarizedExperiment::rowData(exp), "variable"))
+    return(tibble::as_tibble(SummarizedExperiment::rowData(exp)))
   }
   glyexp::get_var_info(exp)
 }
 
-#' Convert row or column data to a tibble with an identifier
-#'
-#' @param info A `DataFrame` containing row or column metadata.
-#' @param id The identifier column name to use when `info` does not already
-#'   contain it.
-#'
-#' @returns A tibble that preserves an existing identifier column or adds row
-#'   names under `id`.
-#' @noRd
-.as_info_tibble <- function(info, id) {
-  if (id %in% colnames(info)) {
-    return(tibble::as_tibble(info))
+# Resolve IDs from SE axes, never from ordinary annotation columns.
+# Temporary IDs are local to the supplied object's current row/column order.
+.se_axis_map <- function(exp, axis) {
+  original <- if (axis == "variable") rownames(exp) else colnames(exp)
+  n <- if (axis == "variable") nrow(exp) else ncol(exp)
+  generated <- is.null(original) ||
+    anyNA(original) ||
+    any(!nzchar(original)) ||
+    anyDuplicated(original) > 0L
+  ids <- if (n == 0L) {
+    character()
+  } else if (generated) {
+    paste0(".glystats_", axis, "_", seq_len(n))
+  } else {
+    original
   }
-  tibble::as_tibble(info, rownames = id)
+  list(
+    data = tibble::tibble(
+      position = seq_len(n),
+      id = ids,
+      name = if (is.null(original)) rep(NA_character_, n) else original
+    ),
+    generated = generated,
+    names_missing = is.null(original)
+  )
+}
+
+.se_axis_ids <- function(exp, axis) {
+  .se_axis_map(exp, axis)$data$id
+}
+
+# Retain the ID-to-position mapping independently of add_info. Generated IDs
+# are local to this input, not persistent identifiers across arbitrary subsets.
+.record_se_identity <- function(result, exp) {
+  if (!methods::is(exp, "SummarizedExperiment")) {
+    return(result)
+  }
+  variable <- .se_axis_map(exp, "variable")
+  sample <- .se_axis_map(exp, "sample")
+  result$identifiers <- list(
+    variable = variable,
+    sample = sample,
+    columns = c(variable = ".variable", sample = ".sample")
+  )
+  # These analyses do not attach metadata through the common finalizer.
+  if (inherits(result, c("glystats_cor_res", "glystats_set_test_res"))) {
+    result$tidy_result <- .namespace_se_result_ids(result$tidy_result)
+  }
+  filterable <- inherits(
+    result,
+    c(
+      "glystats_ttest_res",
+      "glystats_wilcox_res",
+      "glystats_anova_res",
+      "glystats_ancova_res",
+      "glystats_kruskal_res",
+      "glystats_limma_res",
+      "glystats_linear_model_res"
+    )
+  )
+  if (variable$generated && filterable) {
+    result$identifiers$input_hash <- rlang::hash(exp)
+  }
+  result
+}
+
+# Position-keyed results may only be filtered against their unmodified input.
+# Names alone cannot detect a permutation of duplicate/unnamed rows.
+.validate_filter_identity <- function(exp, res) {
+  recorded <- res$identifiers
+  if (!methods::is(exp, "SummarizedExperiment")) {
+    if (isTRUE(recorded$variable$generated)) {
+      cli::cli_abort(
+        "Position-keyed results require the same unmodified experiment used for analysis."
+      )
+    }
+    return(invisible(NULL))
+  }
+  variable <- .se_axis_map(exp, "variable")
+  if (variable$generated || isTRUE(recorded$variable$generated)) {
+    if (
+      is.null(recorded$input_hash) ||
+        !identical(recorded$input_hash, rlang::hash(exp))
+    ) {
+      cli::cli_abort(c(
+        "Position-keyed results require the same unmodified experiment used for analysis.",
+        "i" = "Re-run the analysis after changing or reordering the experiment."
+      ))
+    }
+  }
+  invisible(NULL)
+}
+
+# Attach annotations by the position of each result ID on the input SE axis.
+# Matching against metadata values would reintroduce the legacy ID contract.
+.add_se_info <- function(tbl, exp, axis) {
+  key <- paste0(".", axis)
+  if (!key %in% names(tbl)) {
+    return(tbl)
+  }
+  info <- if (axis == "variable") .get_var_info(exp) else .get_sample_info(exp)
+  if (ncol(info) == 0L) {
+    return(tbl)
+  }
+  ids <- .se_axis_ids(exp, axis)
+  indices <- match(tbl[[key]], ids)
+  if (anyNA(indices)) {
+    cli::cli_abort(
+      "Result {.field {axis}} IDs do not match the input experiment."
+    )
+  }
+  # Retain the historical add_info ordering: input-axis order, preserving
+  # the relative order of repeated result rows (e.g. contrasts/components).
+  ordering <- order(indices)
+  tbl <- tbl[ordering, , drop = FALSE]
+  indices <- indices[ordering]
+  # Preserve all ordinary metadata columns without overwriting result fields.
+  # Reserve existing names first so an original *_metadata column is kept.
+  used <- union(names(tbl), names(info))
+  info_names <- names(info)
+  for (i in seq_along(info_names)) {
+    if (info_names[i] %in% names(tbl)) {
+      candidate <- paste0(info_names[i], "_metadata")
+      while (candidate %in% used) {
+        candidate <- paste0(candidate, "_metadata")
+      }
+      info_names[i] <- candidate
+      used <- c(used, candidate)
+    }
+  }
+  names(info) <- info_names
+  dplyr::bind_cols(
+    tbl[, key, drop = FALSE],
+    info[indices, , drop = FALSE],
+    tbl[, setdiff(names(tbl), key), drop = FALSE]
+  )
 }
 
 #' Extract metadata from a glystats data container
@@ -107,7 +234,7 @@
 #' @noRd
 .filter_variables <- function(exp, variables) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(exp[rownames(exp) %in% variables, ])
+    return(exp[.se_axis_ids(exp, "variable") %in% variables, , drop = FALSE])
   }
   glyexp::filter_var(exp, .data$variable %in% .env$variables)
 }
@@ -309,6 +436,9 @@
 
 # Add variable information to a tibble
 .add_variable_info <- function(tbl, exp) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    return(.add_se_info(tbl, exp, "variable"))
+  }
   if (!.has_variable_column(tbl)) {
     return(tbl)
   }
@@ -331,6 +461,9 @@
 
 # Add sample information to a tibble
 .add_sample_info <- function(tbl, exp) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    return(.add_se_info(tbl, exp, "sample"))
+  }
   if (!.has_sample_column(tbl)) {
     return(tbl)
   }
@@ -352,27 +485,57 @@
 }
 
 # Process a single tibble with add_info logic
+# Run once, before adding annotations, so ordinary metadata is never renamed.
+.namespace_se_result_ids <- function(x) {
+  if (tibble::is_tibble(x)) {
+    identity <- c(
+      "variable",
+      "sample",
+      "variable1",
+      "variable2",
+      "sample1",
+      "sample2"
+    )
+    matched <- names(x) %in% identity
+    names(x)[matched] <- paste0(".", names(x)[matched])
+    return(x)
+  }
+  if (is.list(x)) {
+    return(lapply(x, .namespace_se_result_ids))
+  }
+  x
+}
+
 .process_tibble_add_info <- function(tbl, exp, add_info) {
+  if (methods::is(exp, "SummarizedExperiment")) {
+    tbl <- .namespace_se_result_ids(tbl)
+    if (add_info) {
+      has_variable <- ".variable" %in% names(tbl)
+      has_sample <- ".sample" %in% names(tbl)
+      if (has_variable) {
+        tbl <- .add_se_info(tbl, exp, "variable")
+      }
+      if (has_sample) tbl <- .add_se_info(tbl, exp, "sample")
+    }
+    return(tbl)
+  }
   if (!add_info) {
     return(tbl)
   }
-
-  # Add variable info if tibble has variable column
-  if (.has_variable_column(tbl)) {
+  has_variable <- .has_variable_column(tbl)
+  has_sample <- .has_sample_column(tbl)
+  if (has_variable) {
     tbl <- .add_variable_info(tbl, exp)
   }
-
-  # Add sample info if tibble has sample column
-  if (.has_sample_column(tbl)) {
+  if (has_sample) {
     tbl <- .add_sample_info(tbl, exp)
   }
-
-  return(tbl)
+  tbl
 }
 
 # Process results with add_info logic (handles both single tibbles and lists)
 .process_results_add_info <- function(results, exp, add_info) {
-  if (!add_info) {
+  if (!add_info && !methods::is(exp, "SummarizedExperiment")) {
     return(results)
   }
 

@@ -241,7 +241,7 @@ test_that("gly_set_test matches an independent Hotelling calculation", {
   expect_s3_class(result, c("glystats_set_test_res", "glystats_res"))
   expect_named(
     result,
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
   expect_named(result$tidy_result, c("sets", "members"))
   expect_equal(result$tidy_result$sets$statistic, expected_t2)
@@ -326,7 +326,7 @@ test_that("gly_set_test tests identical profiles in their effective subspace", {
     rep(redundant$tidy_result$sets$estimate[[1]][["A"]], 2)
   )
   expect_setequal(
-    redundant$tidy_result$members$variable,
+    redundant$tidy_result$members$.variable,
     c("A", "A_alias", "B")
   )
   expect_disjoint(

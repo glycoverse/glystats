@@ -6,7 +6,7 @@ test_that("gly_pca works", {
   expect_type(pca_res, "list")
   expect_setequal(
     names(pca_res),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Check tidy_result structure

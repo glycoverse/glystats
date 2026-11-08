@@ -98,6 +98,14 @@ and the observed mean contrast lies in the estimable subspace. Other
 ineligible sets are retained with
 \code{status = "failed"}, \code{NA} statistics, and an explicit \code{failure_reason}.
 }
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+In SE tidy results, identity columns are \code{.variable}/\code{.sample} (dotted
+endpoints for correlations); undotted metadata columns remain annotations.
+}
+
 \examples{
 set.seed(1)
 expression <- matrix(
@@ -123,4 +131,5 @@ result$tidy_result$sets
 \code{\link[stats:cor]{stats::cor()}}, \code{\link[stats:hclust]{stats::hclust()}}, \code{\link[stats:p.adjust]{stats::p.adjust()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

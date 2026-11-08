@@ -16,7 +16,7 @@ test_that("gly_plsda works with valid dataset", {
   expect_type(plsda_res, "list")
   expect_setequal(
     names(plsda_res),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Check tidy_result structure
@@ -34,7 +34,7 @@ test_that("gly_plsda works with valid dataset", {
 
   # Check variables tibble
   expect_s3_class(plsda_res$tidy_result$variables, "tbl_df")
-  expect_true("variable" %in% colnames(plsda_res$tidy_result$variables))
+  expect_true(".variable" %in% colnames(plsda_res$tidy_result$variables))
   expect_true("p1" %in% colnames(plsda_res$tidy_result$variables))
   expect_true("p2" %in% colnames(plsda_res$tidy_result$variables))
 
@@ -50,7 +50,7 @@ test_that("gly_plsda works with valid dataset", {
 
   # Check VIP tibble
   expect_s3_class(plsda_res$tidy_result$vip, "tbl_df")
-  expect_true("variable" %in% colnames(plsda_res$tidy_result$vip))
+  expect_true(".variable" %in% colnames(plsda_res$tidy_result$vip))
   expect_true("vip" %in% colnames(plsda_res$tidy_result$vip))
   expect_true(all(plsda_res$tidy_result$vip$vip >= 0)) # VIP scores should be non-negative
 

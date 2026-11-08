@@ -320,7 +320,7 @@ test_that("paired and multi-group post-hoc fold changes honor all log bases", {
         expected <- vapply(
           seq_len(nrow(post)),
           function(i) {
-            values_i <- values_log2[post$variable[i], ]
+            values_i <- values_log2[post$.variable[i], ]
             if (paired) {
               valid_subject <- apply(
                 matrix(is.finite(values_i), ncol = 3),
@@ -482,7 +482,16 @@ test_that("legacy S3 log bases use the same scale path as SE inputs", {
     expect_identical(result$preprocessing$input_scale, scale)
     expect_false(result$preprocessing$log_transform)
     se <- suppressWarnings(glyexp::as_se(legacy))
-    expect_equal(run_scale_test("ttest", se)$tidy_result, result$tidy_result)
+    se_result <- run_scale_test("ttest", se)
+    expect_null(result$identifiers)
+    expect_identical(
+      se_result$identifiers$columns,
+      c(variable = ".variable", sample = ".sample")
+    )
+    expect_equal(
+      se_result$tidy_result,
+      dplyr::rename(result$tidy_result, .variable = variable)
+    )
   }
 })
 

@@ -78,8 +78,17 @@ PCA analysis.
 This function only uses base R packages and does not require additional dependencies.
 }
 
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+In SE tidy results, identity columns are \code{.variable}/\code{.sample} (dotted
+endpoints for correlations); undotted metadata columns remain annotations.
+}
+
 \seealso{
 \code{\link[stats:prcomp]{stats::prcomp()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }

@@ -16,8 +16,8 @@ test_that("gly_cor basic functionality works", {
   # Check tidy_result structure
   tidy_result <- result$tidy_result
   expect_s3_class(tidy_result, "tbl_df")
-  expect_true("variable1" %in% colnames(tidy_result))
-  expect_true("variable2" %in% colnames(tidy_result))
+  expect_true(".variable1" %in% colnames(tidy_result))
+  expect_true(".variable2" %in% colnames(tidy_result))
   expect_true("cor" %in% colnames(tidy_result))
   expect_true("p_val" %in% colnames(tidy_result))
   expect_true("p_adj" %in% colnames(tidy_result))

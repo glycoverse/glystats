@@ -16,7 +16,7 @@ test_that("gly_roc works with 2-group binary classification", {
   expect_type(result, "list")
   expect_setequal(
     names(result),
-    c("tidy_result", "raw_result", "meta_data", "preprocessing")
+    c("tidy_result", "raw_result", "meta_data", "preprocessing", "identifiers")
   )
 
   # Test tidy_result structure
@@ -26,7 +26,7 @@ test_that("gly_roc works with 2-group binary classification", {
   # Test AUC
   expect_s3_class(result$tidy_result$auc, "tbl_df")
   expect_true(all(
-    c("variable", "auc", "auc_ci_low", "auc_ci_high") %in%
+    c(".variable", "auc", "auc_ci_low", "auc_ci_high") %in%
       colnames(result$tidy_result$auc)
   ))
   expect_true(all(
@@ -47,7 +47,7 @@ test_that("gly_roc works with 2-group binary classification", {
   # Test coords
   expect_s3_class(result$tidy_result$coords, "tbl_df")
   expect_true(all(
-    c("variable", "threshold", "sensitivity", "specificity") %in%
+    c(".variable", "threshold", "sensitivity", "specificity") %in%
       colnames(result$tidy_result$coords)
   ))
   expect_true(all(
@@ -58,7 +58,7 @@ test_that("gly_roc works with 2-group binary classification", {
     result$tidy_result$coords$specificity >= 0 &
       result$tidy_result$coords$specificity <= 1
   ))
-  expect_equal(length(unique(result$tidy_result$coords$variable)), 10)
+  expect_equal(length(unique(result$tidy_result$coords$.variable)), 10)
 
   # Test raw_result
   expect_type(result$raw_result, "list")

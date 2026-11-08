@@ -42,7 +42,7 @@ uses the supplied values unchanged. This argument must be named when it
 follows \code{...}.}
 }
 \value{
-A list with four elements:
+A list containing:
 \itemize{
 \item \code{tidy_result}: A tibble with Cox model results containing the following columns:
 \itemize{
@@ -71,8 +71,17 @@ The function fits an Cox proportional hazards model for each variable by:
 
 P-values are adjusted by Benjamini-Hochberg method by default.
 }
+\section{SE identifiers}{
+
+For SE inputs, the result also contains an \code{identifiers} mapping of result
+IDs to input positions and original names; see \link{gly_identity}.
+In SE tidy results, identity columns are \code{.variable}/\code{.sample} (dotted
+endpoints for correlations); undotted metadata columns remain annotations.
+}
+
 \seealso{
 \code{\link[survival:coxph]{survival::coxph()}}, \code{\link[survival:Surv]{survival::Surv()}}
 
 \link{gly_scale} for input scales, transformations, and fold changes.
+\link{gly_identity} for SE identifiers, annotation alignment, and unnamed inputs.
 }
