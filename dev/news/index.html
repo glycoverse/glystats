@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.14.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.15.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,12 +33,17 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glystats-development-version">glystats (development version)<a class="anchor" aria-label="anchor" href="#glystats-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.15.0" id="glystats-0150">glystats 0.15.0<a class="anchor" aria-label="anchor" href="#glystats-0150"></a></h2>
 <div class="section level3">
-<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
-<ul><li><p>Require the glyexp development name contract (0.19.0.9000); the development dependency is pinned to the merged glyexp #54 commit for reproducible integration checks (#32).</p></li>
-<li><p>SE tidy results now use <code>.variable</code>/<code>.sample</code> identity columns (and dotted correlation endpoints), including for complete unique names. Ordinary <code>variable</code>/<code>sample</code> metadata is preserved. <code>identifiers$columns</code> records the contract; legacy inputs retain their previous output. Consumers must adapt to the new SE columns (#32).</p></li>
-<li><p>SE analyses now identify samples and variables from the object axes, never from ordinary <code>sample</code>/<code>variable</code> metadata columns. Annotation conflicts retain both values using <code>_metadata</code> suffixes (#32).</p></li>
-<li><p>Unnamed, empty, and repeated SE axis labels are supported using unique input-position IDs throughout fits, paired effects, missing-row recovery, and filtering. Results expose the original-label/position mapping in <code>identifiers</code>; filtering ambiguous variables requires the same unmodified input. See <code><a href="../reference/gly_identity.html">?gly_identity</a></code> (#32).</p></li>
+<h3 id="breaking-changes-0-15-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-15-0"></a></h3>
+<ul><li>SE tidy results use <code>.variable</code> and <code>.sample</code> identity columns, including for complete unique names, and dotted correlation endpoints. Update consumers to use these columns; <code>identifiers$columns</code> records their names. Legacy experiment inputs retain their previous output. (#32)</li>
+<li>SE analyses identify samples and variables from the object axes instead of ordinary <code>sample</code> and <code>variable</code> metadata columns. Ordinary annotations are preserved, with <code>_metadata</code> suffixes resolving name conflicts. (#32)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-15-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-15-0"></a></h3>
+<ul><li>SE analyses support missing, empty, and repeated axis labels using unique input-position IDs. Results expose the original-label and position mapping in <code>identifiers</code>; filtering ambiguous variables requires the same unmodified input. See <code><a href="../reference/gly_identity.html">?gly_identity</a></code>. (#32)</li>
 </ul></div>
 </div>
     <div class="section level2">
