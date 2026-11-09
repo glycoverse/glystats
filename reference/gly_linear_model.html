@@ -9,7 +9,7 @@ experiment using limma's empirical Bayes moderation."><meta property="og:image" 
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.15.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -126,9 +126,19 @@ a specific reference level is required.</p>
 contrast.</p>
     </div>
     <div class="section level2">
+    <h2 id="se-identifiers">SE identifiers<a class="anchor" aria-label="anchor" href="#se-identifiers"></a></h2>
+
+
+<p>For SE inputs, the result also contains an <code>identifiers</code> mapping of result
+IDs to input positions and original names; see <a href="gly_identity.html">gly_identity</a>.
+In SE tidy results, identity columns are <code>.variable</code>/<code>.sample</code> (dotted
+endpoints for correlations); undotted metadata columns remain annotations.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="gly_limma.html">gly_limma()</a></code>, <code><a href="https://rdrr.io/pkg/limma/man/lmFit.html" class="external-link">limma::lmFit()</a></code>, <code><a href="https://rdrr.io/pkg/limma/man/ebayes.html" class="external-link">limma::eBayes()</a></code></p>
-<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.
+<a href="gly_identity.html">gly_identity</a> for SE identifiers, annotation alignment, and unnamed inputs.</p></div>
     </div>
 
     <div class="section level2">

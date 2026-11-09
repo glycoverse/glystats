@@ -108,6 +108,15 @@ when a specific reference level is required.
 P-values are adjusted independently across variables for each
 coefficient or contrast.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`gly_limma()`](https://glycoverse.github.io/glystats/reference/gly_limma.md),
@@ -116,6 +125,8 @@ coefficient or contrast.
 
 [gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.
 
 ## Examples
 

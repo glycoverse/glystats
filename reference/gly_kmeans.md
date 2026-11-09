@@ -67,7 +67,7 @@ gly_kmeans(
 
 ## Value
 
-A list with four elements:
+A list containing:
 
 - `tidy_result`: A tibble with cluster assignments containing the
   following columns:
@@ -107,9 +107,20 @@ specified parameters.
 This function only uses base R packages and does not require additional
 dependencies.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`stats::kmeans()`](https://rdrr.io/r/stats/kmeans.html)
 
 [gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.

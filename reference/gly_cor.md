@@ -110,6 +110,15 @@ testing using the method specified by `p_adj_method`.
 This function requires the `Hmisc` package for efficient correlation
 calculation.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`Hmisc::rcorr()`](https://rdrr.io/pkg/Hmisc/man/rcorr.html),
@@ -117,3 +126,5 @@ calculation.
 
 [gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.

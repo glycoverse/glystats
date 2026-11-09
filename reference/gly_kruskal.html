@@ -13,7 +13,7 @@ P-values are adjusted for multiple testing using the method specified by p_adj_m
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.15.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -150,10 +150,20 @@ instead use paired Wilcoxon signed-rank tests with Holm correction.</p>
 <p>Unpaired analyses require the <code>FSA</code> package for Dunn's post-hoc test.</p>
     </div>
     <div class="section level2">
+    <h2 id="se-identifiers">SE identifiers<a class="anchor" aria-label="anchor" href="#se-identifiers"></a></h2>
+
+
+<p>For SE inputs, the result also contains an <code>identifiers</code> mapping of result
+IDs to input positions and original names; see <a href="gly_identity.html">gly_identity</a>.
+In SE tidy results, identity columns are <code>.variable</code>/<code>.sample</code> (dotted
+endpoints for correlations); undotted metadata columns remain annotations.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/kruskal.test.html" class="external-link">stats::kruskal.test()</a></code>, <code><a href="https://rdrr.io/r/stats/friedman.test.html" class="external-link">stats::friedman.test()</a></code>,
 <code><a href="https://fishr-core-team.github.io/FSA/reference/dunnTest.html" class="external-link">FSA::dunnTest()</a></code></p>
-<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.
+<a href="gly_identity.html">gly_identity</a> for SE identifiers, annotation alignment, and unnamed inputs.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

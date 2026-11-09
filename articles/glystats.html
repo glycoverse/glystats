@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.15.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -247,7 +247,7 @@ tibble:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_tidy_result.html">get_tidy_result</a></span><span class="op">(</span><span class="va">anova_res</span>, <span class="st">"main_test"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 225 × 15</span></span></span>
-<span><span class="co">#&gt;    variable    protein glycan_composition protein_site gene  protein_group term </span></span>
+<span><span class="co">#&gt;    .variable   protein glycan_composition protein_site gene  protein_group term </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;comp&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> P08185-176… P08185  <span style="color: #000000;">Hex</span>(5)<span style="color: #000000;">HexNAc</span>(4)<span style="color: #000000;">Ne</span>…          176 SERP… P08185        group</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> P04196-344… P04196  <span style="color: #000000;">Hex</span>(5)<span style="color: #000000;">HexNAc</span>(4)<span style="color: #000000;">Ne</span>…          344 HRG   P04196        group</span></span>
@@ -281,7 +281,7 @@ also be used in a pipe:</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Groups: <span style="color: #0000BB;">"C"</span>, <span style="color: #0000BB;">"H"</span>, <span style="color: #0000BB;">"M"</span>, and <span style="color: #0000BB;">"Y"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Pairwise comparisons will be performed, with levels coming first as reference groups.</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 58 × 15</span></span></span>
-<span><span class="co">#&gt;    variable    protein glycan_composition protein_site gene  protein_group term </span></span>
+<span><span class="co">#&gt;    .variable   protein glycan_composition protein_site gene  protein_group term </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;comp&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> P04196-344… P04196  <span style="color: #000000;">Hex</span>(5)<span style="color: #000000;">HexNAc</span>(4)<span style="color: #000000;">Ne</span>…          344 HRG   P04196        group</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> P04196-344… P04196  <span style="color: #000000;">Hex</span>(5)<span style="color: #000000;">HexNAc</span>(4)             344 HRG   P04196        group</span></span>

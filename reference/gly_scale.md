@@ -99,9 +99,9 @@ res <- gly_fold_change(exp)
 #> ℹ Test Group: "B"
 res$tidy_result
 #> # A tibble: 1 × 2
-#>   variable log2fc
-#> * <chr>     <dbl>
-#> 1 feature       2
+#>   .variable log2fc
+#> * <chr>      <dbl>
+#> 1 feature        2
 res$preprocessing
 #> $input_scale
 #> [1] "log10"

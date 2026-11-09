@@ -189,6 +189,12 @@ filter_sig_vars(
 
 A filtered object of the same class as `exp`.
 
+## See also
+
+[gly_identity](https://glycoverse.github.io/glystats/reference/gly_identity.md)
+for position IDs and the requirement to use the unmodified input when
+variable names are missing, empty, or duplicated.
+
 ## Examples
 
 ``` r

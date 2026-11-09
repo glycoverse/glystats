@@ -9,7 +9,7 @@ and extract p-values and hazard ratios from it."><meta property="og:image" conte
 
     <a class="navbar-brand me-2" href="../index.html">glystats</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.14.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.15.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,7 +98,7 @@ follows <code>...</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with four elements:</p><ul><li><p><code>tidy_result</code>: A tibble with Cox model results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
+    <p>A list containing:</p><ul><li><p><code>tidy_result</code>: A tibble with Cox model results containing the following columns:</p><ul><li><p><code>variable</code>: Variable name</p></li>
 <li><p><code>coefficient</code>: Regression coefficient (log hazard ratio)</p></li>
 <li><p><code>std.error</code>: Standard error of the coefficient</p></li>
 <li><p><code>statistic</code>: Wald test statistic</p></li>
@@ -117,9 +117,19 @@ follows <code>...</code>.</p></dd>
 <p>P-values are adjusted by Benjamini-Hochberg method by default.</p>
     </div>
     <div class="section level2">
+    <h2 id="se-identifiers">SE identifiers<a class="anchor" aria-label="anchor" href="#se-identifiers"></a></h2>
+
+
+<p>For SE inputs, the result also contains an <code>identifiers</code> mapping of result
+IDs to input positions and original names; see <a href="gly_identity.html">gly_identity</a>.
+In SE tidy results, identity columns are <code>.variable</code>/<code>.sample</code> (dotted
+endpoints for correlations); undotted metadata columns remain annotations.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">survival::coxph()</a></code>, <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">survival::Surv()</a></code></p>
-<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.</p></div>
+<p><a href="gly_scale.html">gly_scale</a> for input scales, transformations, and fold changes.
+<a href="gly_identity.html">gly_identity</a> for SE identifiers, annotation alignment, and unnamed inputs.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

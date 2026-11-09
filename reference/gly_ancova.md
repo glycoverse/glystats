@@ -141,6 +141,15 @@ are performed for variables with significant main effects (p_adj \<
 
 This function requires the `emmeans` package for post-hoc comparisons.
 
+## SE identifiers
+
+For SE inputs, the result also contains an `identifiers` mapping of
+result IDs to input positions and original names; see
+[gly_identity](https://glycoverse.github.io/glystats/reference/gly_identity.md).
+In SE tidy results, identity columns are `.variable`/`.sample` (dotted
+endpoints for correlations); undotted metadata columns remain
+annotations.
+
 ## See also
 
 [`stats::aov()`](https://rdrr.io/r/stats/aov.html),
@@ -149,3 +158,5 @@ This function requires the `emmeans` package for post-hoc comparisons.
 
 [gly_scale](https://glycoverse.github.io/glystats/reference/gly_scale.md)
 for input scales, transformations, and fold changes.
+[gly_identity](https://glycoverse.github.io/glystats/reference/gly_identity.md)
+for SE identifiers, annotation alignment, and unnamed inputs.

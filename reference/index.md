@@ -20,6 +20,8 @@
   : Calculate fold change
 - [`gly_hclust()`](https://glycoverse.github.io/glystats/reference/gly_hclust.md)
   : Hierarchical Clustering for Glycomics and Glycoproteomics Data
+- [`gly_identity`](https://glycoverse.github.io/glystats/reference/gly_identity.md)
+  : Sample and variable identities in SE inputs
 - [`gly_kmeans()`](https://glycoverse.github.io/glystats/reference/gly_kmeans.md)
   : K-means Clustering for Glycomics and Glycoproteomics Data
 - [`gly_kruskal()`](https://glycoverse.github.io/glystats/reference/gly_kruskal.md)

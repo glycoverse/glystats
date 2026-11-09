@@ -1,5 +1,28 @@
 # Changelog
 
+## glystats 0.15.0
+
+### Breaking changes
+
+- SE tidy results use `.variable` and `.sample` identity columns,
+  including for complete unique names, and dotted correlation endpoints.
+  Update consumers to use these columns; `identifiers$columns` records
+  their names. Legacy experiment inputs retain their previous output.
+  (#32)
+- SE analyses identify samples and variables from the object axes
+  instead of ordinary `sample` and `variable` metadata columns. Ordinary
+  annotations are preserved, with `_metadata` suffixes resolving name
+  conflicts. (#32)
+
+### New features
+
+- SE analyses support missing, empty, and repeated axis labels using
+  unique input-position IDs. Results expose the original-label and
+  position mapping in `identifiers`; filtering ambiguous variables
+  requires the same unmodified input. See
+  [`?gly_identity`](https://glycoverse.github.io/glystats/reference/gly_identity.md).
+  (#32)
+
 ## glystats 0.14.0
 
 ### Breaking changes
