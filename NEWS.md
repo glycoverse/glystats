@@ -1,13 +1,13 @@
-# glystats (development version)
+# glystats 0.15.0
 
 ## Breaking changes
 
-* Require the glyexp development name contract (0.19.0.9000); the development dependency is pinned to the merged glyexp #54 commit for reproducible integration checks (#32).
+* SE tidy results use `.variable` and `.sample` identity columns, including for complete unique names, and dotted correlation endpoints. Update consumers to use these columns; `identifiers$columns` records their names. Legacy experiment inputs retain their previous output. (#32)
+* SE analyses identify samples and variables from the object axes instead of ordinary `sample` and `variable` metadata columns. Ordinary annotations are preserved, with `_metadata` suffixes resolving name conflicts. (#32)
 
-* SE tidy results now use `.variable`/`.sample` identity columns (and dotted correlation endpoints), including for complete unique names. Ordinary `variable`/`sample` metadata is preserved. `identifiers$columns` records the contract; legacy inputs retain their previous output. Consumers must adapt to the new SE columns (#32).
+## New features
 
-* SE analyses now identify samples and variables from the object axes, never from ordinary `sample`/`variable` metadata columns. Annotation conflicts retain both values using `_metadata` suffixes (#32).
-* Unnamed, empty, and repeated SE axis labels are supported using unique input-position IDs throughout fits, paired effects, missing-row recovery, and filtering. Results expose the original-label/position mapping in `identifiers`; filtering ambiguous variables requires the same unmodified input. See `?gly_identity` (#32).
+* SE analyses support missing, empty, and repeated axis labels using unique input-position IDs. Results expose the original-label and position mapping in `identifiers`; filtering ambiguous variables requires the same unmodified input. See `?gly_identity`. (#32)
 
 # glystats 0.14.0
 

@@ -1,6 +1,6 @@
 Package: glystats
 Title: Statistical Analysis of Glycoproteomics and Glycomics Data
-Version: 0.14.0.9000
+Version: 0.15.0
 Authors@R: 
     person("Bin", "Fu", , "23110220018@m.fudan.edu.cn", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8567-2997"))
@@ -31,8 +31,8 @@ Suggests:
     limma,
     knitr,
     rmarkdown,
-    glyclean (>= 0.12.0),
-    glyread (>= 0.8.4)
+    glyclean (>= 0.17.1),
+    glyread (>= 0.12.5)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -40,7 +40,7 @@ RoxygenNote: 7.3.3
 URL: https://glycoverse.github.io/glystats/
 Imports:
     tibble,
-    glyexp (>= 0.19.0.9000),
+    glyexp (>= 0.20.0),
     rlang,
     tidyr,
     dplyr,
@@ -61,5 +61,3 @@ Imports:
 Depends: 
     R (>= 4.1)
 VignetteBuilder: knitr
-Remotes:
-    glycoverse/glyexp@cb24f10236c3cb3cc56b762e77de5e2b3e54cd47
