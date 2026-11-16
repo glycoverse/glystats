@@ -154,9 +154,16 @@ gly_fold_change <- function(
   logged = FALSE,
   input_scale = if (logged) "log2" else "raw"
 ) {
-  group1_mean <- rowMeans(expr_mat[, groups == levels(groups)[1], drop = FALSE])
-  group2_mean <- rowMeans(expr_mat[, groups == levels(groups)[2], drop = FALSE])
+  group1_mean <- rowMeans(
+    expr_mat[, groups == levels(groups)[1], drop = FALSE],
+    na.rm = TRUE
+  )
+  group2_mean <- rowMeans(
+    expr_mat[, groups == levels(groups)[2], drop = FALSE],
+    na.rm = TRUE
+  )
   log2fc <- .mean_log2fc(group1_mean, group2_mean, input_scale)
+  log2fc[is.nan(group1_mean) | is.nan(group2_mean)] <- NA_real_
   tibble::tibble(variable = rownames(expr_mat), log2fc = log2fc)
 }
 

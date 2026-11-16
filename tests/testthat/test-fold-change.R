@@ -153,3 +153,32 @@ test_that(".analyze_fold_change works correctly", {
   expect_type(result$log2fc, "double")
   expect_equal(nrow(result), 10)
 })
+
+test_that("fold change and ANOVA post hoc use observed group means", {
+  values <- matrix(
+    c(1, NA, 3, 7, 8, 9, 15, 16, 17),
+    nrow = 1,
+    dimnames = list("V1", paste0("S", 1:9))
+  )
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expr = values),
+    colData = S4Vectors::DataFrame(group = factor(rep(LETTERS[1:3], each = 3)))
+  )
+  fc <- gly_fold_change(exp, log_transform = FALSE)$tidy_result
+  post <- gly_anova(exp, log_transform = FALSE)$tidy_result$post_hoc_test
+  for (result in list(fc, post)) {
+    comparison <- paste(result$ref_group, result$test_group)
+    expect_equal(
+      unname(result$log2fc[match(c("A B", "A C", "B C"), comparison)]),
+      c(2, 3, 1)
+    )
+  }
+
+  SummarizedExperiment::assay(exp)[1, 1:3] <- NA_real_
+  fc <- gly_fold_change(exp, log_transform = FALSE)$tidy_result
+  expect_identical(
+    unname(fc$log2fc[fc$ref_group == "A"]),
+    c(NA_real_, NA_real_)
+  )
+  expect_equal(unname(fc$log2fc[fc$ref_group == "B"]), 1)
+})
