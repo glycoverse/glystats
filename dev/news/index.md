@@ -2,6 +2,11 @@
 
 ## glystats (development version)
 
+- [`gly_fold_change()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md)
+  and post hoc comparisons now use the available observations in each
+  group to calculate fold changes. Comparisons involving a group with no
+  observations for a feature return `NA` (#33).
+
 ## glystats 0.15.0
 
 ### Breaking changes

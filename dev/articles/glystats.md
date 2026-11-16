@@ -20,8 +20,6 @@ provides a useful overview.
 
 library(glystats)
 library(glyexp)
-#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
-#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(glyread)
 library(glyclean)
 library(dplyr)
