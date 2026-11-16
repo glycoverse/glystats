@@ -331,9 +331,9 @@ test_that("paired and multi-group post-hoc fold changes honor all log bases", {
             }
             mean(
               values_i[sample_groups == post$test_group[i]],
-              na.rm = paired
+              na.rm = TRUE
             ) -
-              mean(values_i[sample_groups == post$ref_group[i]], na.rm = paired)
+              mean(values_i[sample_groups == post$ref_group[i]], na.rm = TRUE)
           },
           numeric(1)
         )
