@@ -1,5 +1,7 @@
 # glystats (development version)
 
+* `gly_ancova()` tests group after adjusting for all supplied covariates. Post-hoc tests use that group p-value for selection and reuse the same fitted model.
+
 * `gly_fold_change()` and post hoc comparisons now use the available observations in each group to calculate fold changes. Comparisons involving a group with no observations for a feature return `NA` (#33).
 
 # glystats 0.15.0

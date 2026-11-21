@@ -289,12 +289,17 @@ gly_anova <- function(
 #' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 #' statistical testing. At least 2 groups and at least 1 covariate are required.
 #'
-#' For any variable failed to fit a `stats::aov()` model,
-#' NAs will be assigned to the results in both main test and post-hoc test.
+#' The group F-test compares the additive model including both covariates and
+#' group with the model containing just the covariates, on the same observations
+#' for each variable. The group sum of squares is the additional variation
+#' explained by group after all the covariates. Tests that cannot be estimated
+#' for all observed group levels, or with no residual degrees of freedom,
+#' retain a main-test row with missing statistics.
 #'
 #' **Post-hoc Test:**
-#' emmeans pairwise comparisons with Tukey adjustment (`emmeans::emmeans()`) are performed
-#' for variables with significant main effects (p_adj < 0.05).
+#' Tukey-adjusted emmeans comparisons use the same fitted model for variables
+#' with a conditional group p-value below 0.05. This gate uses the adjusted
+#' p-value unless `p_adj_method = NULL`, in which case it uses the raw p-value.
 #'
 #' @returns
 #' A list containing four elements:
@@ -473,33 +478,32 @@ gly_ancova <- function(
     covariates,
     is_logged = TRUE
   )
+  # In the additive model, the sequential group sum of squares is the
+  # conditional group sum of squares only when group follows all covariates.
   ancova_formula <- stats::reformulate(
-    termlabels = c("group", colnames(covariates)),
+    termlabels = c(colnames(covariates), "group"),
     response = "log_value"
   )
-
-  # Generate raw results
   raw_main_test <- .generate_raw_main_results(
     data,
     stats::aov,
     formula = ancova_formula,
     ...
   )
-  raw_post_hoc_test <- .generate_raw_posthoc_results(
-    raw_main_test,
-    data,
-    stats::aov,
-    p_adj_method,
-    formula = ancova_formula,
-    posthoc_method = "emmeans"
-  )
 
-  # Tibblify results
+  # Keep failed or non-estimable groups in the tidy output without reporting
+  # a lower-dimensional hypothesis as the full group test.
+  estimable <- purrr::map_lgl(raw_main_test, .ancova_group_estimable)
+  tidy_fits <- raw_main_test
+  tidy_fits[!estimable] <- list(NA)
   main_test <- .tibblify_main_test_results(
-    raw_main_test,
+    tidy_fits,
     stats::aov,
     p_adj_method
   )
+  group_p <- if (is.null(p_adj_method)) main_test$p_val else main_test$p_adj
+  significant <- main_test$variable[!is.na(group_p) & group_p < 0.05]
+  raw_post_hoc_test <- purrr::map(raw_main_test[significant], .ancova_posthoc)
   post_hoc_vec <- .format_posthoc_results(
     raw_post_hoc_test,
     stats::aov,
@@ -534,6 +538,29 @@ gly_ancova <- function(
     ),
     class = c("glystats_ancova_res", "glystats_res")
   )
+}
+
+# Only test the complete group term, while allowing aliasing among nuisance
+# covariates. The fit's QR pivot excludes columns that could not be estimated.
+.ancova_group_estimable <- function(fit) {
+  if (!inherits(fit, "aov") || stats::df.residual(fit) <= 0) {
+    return(FALSE)
+  }
+  term <- match("group", attr(stats::terms(fit), "term.labels"))
+  group_df <- sum(fit$assign == term)
+  pivot <- fit$qr$pivot[seq_len(fit$rank)]
+  !is.na(term) && group_df > 0L && sum(fit$assign[pivot] == term) == group_df
+}
+
+.ancova_posthoc <- function(fit) {
+  emm <- emmeans::emmeans(fit, specs = "group")
+  contrasts <- emmeans::contrast(
+    emm,
+    method = "pairwise",
+    adjust = "tukey",
+    reverse = FALSE
+  )
+  as.data.frame(summary(contrasts))
 }
 
 #' Kruskal-Wallis or Friedman Test for Differential Expression Analysis
@@ -837,23 +864,12 @@ gly_kruskal <- function(
   }
 
   if (identical(.f, stats::aov)) {
-    # Post-hoc for ANOVA/ANCOVA
+    # Post-hoc for ANOVA
     if (is.null(formula)) {
       formula <- log_value ~ group
     }
     aov_model <- stats::aov(formula, data = data_nested)
-    if (identical(posthoc_method, "emmeans")) {
-      emm <- emmeans::emmeans(aov_model, specs = "group")
-      contrast <- emmeans::contrast(
-        emm,
-        method = "pairwise",
-        adjust = "tukey",
-        reverse = FALSE
-      )
-      as.data.frame(summary(contrast))
-    } else {
-      suppressWarnings(stats::TukeyHSD(aov_model, which = "group"))
-    }
+    suppressWarnings(stats::TukeyHSD(aov_model, which = "group"))
   } else {
     # Dunn test for Kruskal-Wallis
     # Check number of groups - FSA::dunnTest fails with only 2 groups
