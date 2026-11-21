@@ -15,10 +15,6 @@ test_that("ANCOVA excludes the variation explained by covariates from the group 
   y <- z + e
   d <- data.frame(y, group, z)
   first <- stats::anova(stats::lm(y ~ group + z, data = d))
-  conditional <- stats::anova(
-    stats::lm(y ~ z, data = d),
-    stats::lm(y ~ z + group, data = d)
-  )
   expect_equal(first["group", "F value"], 11.25)
   expect_lt(first["group", "Pr(>F)"], 0.05)
 
@@ -30,12 +26,15 @@ test_that("ANCOVA excludes the variation explained by covariates from the group 
   ))
   main <- result$tidy_result$main_test
   expect_equal(main$.variable, "null")
-  expect_equal(main$df, conditional$Df[2L])
-  expect_equal(main$sumsq, conditional$"Sum of Sq"[2L], tolerance = 1e-12)
-  expect_equal(main$meansq, main$sumsq / main$df)
-  expect_equal(main$statistic, conditional$F[2L], tolerance = 1e-12)
-  expect_equal(main$p_val, 1)
-  expect_equal(main$p_adj, 1)
+  # The errors are orthogonal to both group and z, so the conditional
+  # group effect is exactly zero. Subtracting nested-model residual sums of
+  # squares here can instead produce tiny negative values on some builds.
+  expect_equal(main$df, 1)
+  expect_equal(main$sumsq, 0, tolerance = 1e-12)
+  expect_equal(main$meansq, 0, tolerance = 1e-12)
+  expect_equal(main$statistic, 0, tolerance = 1e-12)
+  expect_equal(main$p_val, 1, tolerance = 1e-12)
+  expect_equal(main$p_adj, 1, tolerance = 1e-12)
   expect_true(is.na(main$post_hoc))
   expect_equal(nrow(result$tidy_result$post_hoc_test), 0L)
   expect_length(result$raw_result$post_hoc_test, 0L)
