@@ -86,12 +86,17 @@ P-values are adjusted for multiple testing using the method specified by \code{p
 For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
 statistical testing. At least 2 groups and at least 1 covariate are required.
 
-For any variable failed to fit a \code{stats::aov()} model,
-NAs will be assigned to the results in both main test and post-hoc test.
+The group F-test compares the additive model including both covariates and
+group with the model containing just the covariates, on the same observations
+for each variable. The group sum of squares is the additional variation
+explained by group after all the covariates. Tests that cannot be estimated
+for all observed group levels, or with no residual degrees of freedom,
+retain a main-test row with missing statistics.
 
 \strong{Post-hoc Test:}
-emmeans pairwise comparisons with Tukey adjustment (\code{emmeans::emmeans()}) are performed
-for variables with significant main effects (p_adj < 0.05).
+Tukey-adjusted emmeans comparisons use the same fitted model for variables
+with a conditional group p-value below 0.05. This gate uses the adjusted
+p-value unless \code{p_adj_method = NULL}, in which case it uses the raw p-value.
 }
 \section{Required packages}{
 
