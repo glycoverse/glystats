@@ -1,5 +1,15 @@
 # glystats (development version)
 
+* `gly_ancova()` tests the group effect after adjustment for every covariate and uses that result to select features for post-hoc comparisons.
+* `gly_anova()` and `gly_ancova()` retain features with an unestimable group effect or zero residual degrees of freedom and return `NA` for unavailable tests.
+* `gly_anova()` and `gly_ancova()` report unadjusted pairwise p-values in `p_val` alongside the adjusted values in `p_adj`. Weighted one-way ANOVA uses the fitted group precisions for Tukey p-values and confidence intervals.
+* SE analyses preserve metadata names containing spaces or punctuation. `gly_limma()` and `gly_ancova()` keep covariates in sample order when numeric sample labels are reordered, and `gly_ancova()` accepts covariates named `sample`, `variable`, or `log_value`.
+* Result tables preserve feature annotations that share names with model estimates or adjusted p-values. `filter_sig_vars()` reports when the requested adjusted p-values are unavailable.
+* Paired tests count only subjects with observed group assignments and match subject and group identifiers even when they contain separator characters.
+* `gly_kruskal()` runs post-hoc comparisons on the groups observed for each feature when a group has only missing values.
+* `gly_set_test()` retains nonconstant profiles measured in small units and keeps missing stratum labels distinct from literal annotation values.
+* `gly_kmeans()` and `gly_hclust()` assign zero distance to constant coordinates during scaling. `gly_hclust()` returns an empty tree and missing cluster assignments for a single sample.
+* `gly_roc()` returns an empty coordinate table with the usual columns when every fit fails. `get_tidy_result()` reports an error when asked to extract a column of a single tidy table.
 * `gly_anova()`, `gly_ancova()`, and `gly_kruskal()` accept comparisons such as `contrasts = "H_vs_C"` and report C relative to H in the tidy post-hoc results. Adjusted p-values still use the full family of comparisons, and character contrasts no longer trigger a model-matrix warning. (#35)
 * Post-hoc tests and fold changes preserve group labels containing hyphens or separator text when matching groups and reporting the direction of a comparison. (#35)
 * `gly_anova()`, `gly_ancova()`, and `gly_kruskal()` apply `subset` consistently to subject matching, omnibus tests, effect sizes, fold changes, and post-hoc tests. (#35)
