@@ -650,18 +650,17 @@
 
   groups <- droplevels(groups)
 
-  subject_group <- paste(subjects, groups, sep = "\r")
-  if (anyDuplicated(subject_group) > 0) {
+  known <- !is.na(groups)
+  subject_group <- data.frame(subject = subjects[known], group = groups[known])
+  if (anyDuplicated(subject_group) > 0L) {
     cli::cli_abort(
       "Each subject must have at most one sample in each group for paired {method}."
     )
   }
 
   group_levels <- levels(groups)
-  subjects_by_group <- purrr::map(
-    group_levels,
-    ~ subjects[groups == .x]
-  )
+  indices <- purrr::map(group_levels, \(group) which(groups == group))
+  subjects_by_group <- purrr::map(indices, \(i) subjects[i])
   complete_subjects <- Reduce(intersect, subjects_by_group)
   if (length(complete_subjects) < 2) {
     cli::cli_abort(
@@ -669,10 +668,7 @@
     )
   }
 
-  indices <- purrr::map(group_levels, function(group) {
-    group_indices <- which(groups == group)
-    group_indices[match(complete_subjects, subjects[group_indices])]
-  })
+  indices <- purrr::map(indices, \(i) i[match(complete_subjects, subjects[i])])
   sample_indices <- unlist(indices, use.names = FALSE)
   n_subjects <- length(complete_subjects)
 

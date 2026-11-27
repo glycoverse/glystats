@@ -647,3 +647,32 @@ test_that("paired analyses reject ambiguous subject layouts", {
     )
   )
 })
+
+test_that("unknown groups cannot create paired subjects", {
+  exp <- model_argument_experiment()[, c(1, 17, 2, 18, 3)]
+  exp$group[5] <- NA
+  expected <- gly_ttest(exp[, 1:4], subject_col = "subject")
+  expect_equal(
+    gly_ttest(exp, subject_col = "subject")$tidy_result,
+    expected$tidy_result
+  )
+  for (analyze in list(gly_ttest, gly_wilcox, gly_anova, gly_kruskal)) {
+    expect_error(
+      analyze(exp[, -4], subject_col = "subject"),
+      "At least 2 subjects"
+    )
+  }
+})
+
+test_that("paired designs distinguish subject and group labels containing separators", {
+  exp <- model_argument_experiment()[, c(1:3, 17:19)]
+  levels(exp$group) <- c("A\rB", "B")
+  exp$subject <- rep(c("person", "person\rA", "other"), 2)
+  paired <- gly_ttest(exp, subject_col = "subject")
+  expect_equal(
+    paired$tidy_result$p_val,
+    gly_ttest(exp, paired = TRUE)$tidy_result$p_val
+  )
+  sets <- gly_set_test(exp, sets = list(first = "v1"), subject_col = "subject")
+  expect_identical(sets$tidy_result$sets$n_ref, 3L)
+})

@@ -596,8 +596,7 @@ gly_set_test <- function(
     ))
   }
 
-  subject_group <- paste(subjects, groups, sep = "\r")
-  if (anyDuplicated(subject_group) > 0) {
+  if (anyDuplicated(data.frame(subjects, groups)) > 0L) {
     cli::cli_abort(
       "Each subject must have at most one sample in each group for paired set testing."
     )
