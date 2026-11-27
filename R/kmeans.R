@@ -189,8 +189,8 @@ gly_kmeans <- function(
   # Scaling columns requires at least two observations. When clustering a
   # single retained variable, the unscaled row still has a valid one-cluster
   # solution, whereas scale() would replace every value with NaN.
-  if (scale && !(on == "variable" && nrow(mat) == 1L)) {
-    mat <- scale(mat)
+  if (scale && nrow(mat) > 1L) {
+    mat <- .scale_cluster_data(mat)
   }
 
   # Perform k-means clustering
@@ -225,4 +225,12 @@ gly_kmeans <- function(
     ),
     class = c("glystats_kmeans_res", "glystats_res")
   )
+}
+
+.scale_cluster_data <- function(mat) {
+  # Constant coordinates have zero distance after centering. Keep their
+  # columns so explicit cluster centers retain the same dimensions.
+  scales <- apply(mat, 2L, stats::sd, na.rm = TRUE)
+  scales[is.na(scales) | scales == 0] <- 1
+  scale(mat, scale = scales)
 }

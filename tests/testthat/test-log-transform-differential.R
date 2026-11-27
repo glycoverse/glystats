@@ -278,10 +278,10 @@ test_that("ANCOVA forwards log_transform without changing model arguments", {
     } else {
       expression["V1", ]
     }
-    reference <- stats::aov(value ~ group + covariate, data = sample_info)
+    reference <- stats::aov(value ~ covariate + group, data = sample_info)
     expect_equal(
-      unname(stats::coef(result$raw_result$main_test$V1)),
-      unname(stats::coef(reference))
+      stats::coef(result$raw_result$main_test$V1),
+      stats::coef(reference)
     )
     expect_gt(nrow(result$tidy_result$post_hoc_test), 0)
   }

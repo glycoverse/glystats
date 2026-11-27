@@ -46,7 +46,8 @@
 #' @noRd
 .get_sample_info <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(tibble::as_tibble(SummarizedExperiment::colData(exp)))
+    info <- as.data.frame(SummarizedExperiment::colData(exp), optional = TRUE)
+    return(tibble::as_tibble(info))
   }
   glyexp::get_sample_info(exp)
 }
@@ -59,7 +60,8 @@
 #' @noRd
 .get_var_info <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(tibble::as_tibble(SummarizedExperiment::rowData(exp)))
+    info <- as.data.frame(SummarizedExperiment::rowData(exp), optional = TRUE)
+    return(tibble::as_tibble(info))
   }
   glyexp::get_var_info(exp)
 }
@@ -180,12 +182,23 @@
   ordering <- order(indices)
   tbl <- tbl[ordering, , drop = FALSE]
   indices <- indices[ordering]
-  # Preserve all ordinary metadata columns without overwriting result fields.
-  # Reserve existing names first so an original *_metadata column is kept.
-  used <- union(names(tbl), names(info))
+  info <- .name_result_annotations(info, names(tbl))
+  dplyr::bind_cols(
+    tbl[, key, drop = FALSE],
+    info[indices, , drop = FALSE],
+    tbl[, setdiff(names(tbl), key), drop = FALSE]
+  )
+}
+
+.name_result_annotations <- function(info, result_names) {
+  # An annotation cannot supply an adjusted p-value when adjustment is off.
+  if ("p_val" %in% result_names) {
+    result_names <- union(result_names, "p_adj")
+  }
+  used <- union(result_names, names(info))
   info_names <- names(info)
   for (i in seq_along(info_names)) {
-    if (info_names[i] %in% names(tbl)) {
+    if (info_names[i] %in% result_names) {
       candidate <- paste0(info_names[i], "_metadata")
       while (candidate %in% used) {
         candidate <- paste0(candidate, "_metadata")
@@ -195,11 +208,7 @@
     }
   }
   names(info) <- info_names
-  dplyr::bind_cols(
-    tbl[, key, drop = FALSE],
-    info[indices, , drop = FALSE],
-    tbl[, setdiff(names(tbl), key), drop = FALSE]
-  )
+  info
 }
 
 #' Extract metadata from a glystats data container
@@ -468,15 +477,11 @@
   }
 
   var_info <- .get_var_info(exp)
-  # Remove the variable column from var_info to avoid duplication
-  var_info_subset <- var_info[,
-    !colnames(var_info) %in% "variable",
-    drop = FALSE
-  ]
-
-  # Only join if there are columns other than variable
-  if (ncol(var_info_subset) > 0) {
-    # Join var_info to tbl, keeping all rows from tbl
+  if (ncol(var_info) > 1L) {
+    var_info <- .name_result_annotations(
+      var_info,
+      setdiff(names(tbl), "variable")
+    )
     tbl <- dplyr::right_join(var_info, tbl, by = "variable")
   }
 
@@ -493,15 +498,11 @@
   }
 
   sample_info <- .get_sample_info(exp)
-  # Remove the sample column from sample_info to avoid duplication
-  sample_info_subset <- sample_info[,
-    !colnames(sample_info) %in% "sample",
-    drop = FALSE
-  ]
-
-  # Only join if there are columns other than sample
-  if (ncol(sample_info_subset) > 0) {
-    # Join sample_info to tbl, keeping all rows from tbl
+  if (ncol(sample_info) > 1L) {
+    sample_info <- .name_result_annotations(
+      sample_info,
+      setdiff(names(tbl), "sample")
+    )
     tbl <- dplyr::right_join(sample_info, tbl, by = "sample")
   }
 
@@ -649,18 +650,17 @@
 
   groups <- droplevels(groups)
 
-  subject_group <- paste(subjects, groups, sep = "\r")
-  if (anyDuplicated(subject_group) > 0) {
+  known <- !is.na(groups)
+  subject_group <- data.frame(subject = subjects[known], group = groups[known])
+  if (anyDuplicated(subject_group) > 0L) {
     cli::cli_abort(
       "Each subject must have at most one sample in each group for paired {method}."
     )
   }
 
   group_levels <- levels(groups)
-  subjects_by_group <- purrr::map(
-    group_levels,
-    ~ subjects[groups == .x]
-  )
+  indices <- purrr::map(group_levels, \(group) which(groups == group))
+  subjects_by_group <- purrr::map(indices, \(i) subjects[i])
   complete_subjects <- Reduce(intersect, subjects_by_group)
   if (length(complete_subjects) < 2) {
     cli::cli_abort(
@@ -668,10 +668,7 @@
     )
   }
 
-  indices <- purrr::map(group_levels, function(group) {
-    group_indices <- which(groups == group)
-    group_indices[match(complete_subjects, subjects[group_indices])]
-  })
+  indices <- purrr::map(indices, \(i) i[match(complete_subjects, subjects[i])])
   sample_indices <- unlist(indices, use.names = FALSE)
   n_subjects <- length(complete_subjects)
 

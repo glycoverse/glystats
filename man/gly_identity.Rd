@@ -49,6 +49,8 @@ sample IDs. When \code{add_info = TRUE}, annotations are attached by the positio
 recorded by the axis IDs. A metadata column colliding with a result field
 receives an \verb{_metadata} suffix, repeated until the name is unused; its
 values are preserved, and result identifiers/statistics are never overwritten.
+In tables with p-values, the name \code{p_adj} is reserved for adjusted
+p-values even when adjustment is disabled.
 
 \code{\link[=filter_sig_vars]{filter_sig_vars()}} can map generated variable IDs back to the original
 input rows, retaining the original class, names, and metadata. Because names

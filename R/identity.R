@@ -47,6 +47,8 @@
 #' recorded by the axis IDs. A metadata column colliding with a result field
 #' receives an `_metadata` suffix, repeated until the name is unused; its
 #' values are preserved, and result identifiers/statistics are never overwritten.
+#' In tables with p-values, the name `p_adj` is reserved for adjusted
+#' p-values even when adjustment is disabled.
 #'
 #' [filter_sig_vars()] can map generated variable IDs back to the original
 #' input rows, retaining the original class, names, and metadata. Because names

@@ -170,7 +170,8 @@ gly_limma <- function(
     log_transform = log_transform
   )
 
-  # Process results with add_info logic
+  # Finalize model statistics before attaching annotations with the same names.
+  result <- .limma_effect_scale(result, transformation)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -181,7 +182,7 @@ gly_limma <- function(
   result$meta_data <- meta_data
   result$preprocessing <- transformation
 
-  .record_se_identity(.limma_effect_scale(result, transformation), exp)
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_limma()`
@@ -359,14 +360,13 @@ gly_limma <- function(
     )
   }
 
-  if (!is.null(sample_names)) {
+  # Automatic data-frame row numbers carry no sample identity.
+  if (!is.null(sample_names) && .row_names_info(covariates, 1L) > 0L) {
     covariate_rows <- rownames(covariates)
-    if (!is.null(covariate_rows)) {
-      if (setequal(covariate_rows, sample_names)) {
-        covariates <- covariates[sample_names, , drop = FALSE]
-      } else if (!identical(covariate_rows, as.character(seq_len(n_samples)))) {
-        cli::cli_abort("covariates row names must match expr_mat column names.")
-      }
+    if (setequal(covariate_rows, sample_names)) {
+      covariates <- covariates[sample_names, , drop = FALSE]
+    } else if (!identical(covariate_rows, as.character(seq_len(n_samples)))) {
+      cli::cli_abort("covariates row names must match expr_mat column names.")
     }
   }
 
@@ -408,14 +408,12 @@ gly_limma <- function(
     if (ncol(subjects) != 1) {
       cli::cli_abort("subjects must have exactly 1 column.")
     }
-    if (!is.null(sample_names)) {
+    if (!is.null(sample_names) && .row_names_info(subjects, 1L) > 0L) {
       subject_rows <- rownames(subjects)
-      if (!is.null(subject_rows)) {
-        if (setequal(subject_rows, sample_names)) {
-          subjects <- subjects[sample_names, , drop = FALSE]
-        } else if (!identical(subject_rows, as.character(seq_len(n_samples)))) {
-          cli::cli_abort("subjects row names must match expr_mat column names.")
-        }
+      if (setequal(subject_rows, sample_names)) {
+        subjects <- subjects[sample_names, , drop = FALSE]
+      } else if (!identical(subject_rows, as.character(seq_len(n_samples)))) {
+        cli::cli_abort("subjects row names must match expr_mat column names.")
       }
     }
     subjects <- subjects[[1]]

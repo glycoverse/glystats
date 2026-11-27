@@ -280,3 +280,11 @@ test_that(".analyze_hclust works correctly", {
   expect_equal(nrow(result$tidy_result$clusters), 10)
   expect_s3_class(result$raw_result, "hclust")
 })
+test_that("sample clustering returns placeholders for a single sample", {
+  exp <- model_argument_experiment()[, 1]
+  fit <- gly_hclust(exp, on = "sample", k_values = 2)
+  expect_null(fit$raw_result)
+  expect_identical(fit$tidy_result$clusters$.sample, colnames(exp))
+  expect_identical(fit$tidy_result$clusters$cluster_k2, NA_integer_)
+  expect_equal(nrow(fit$tidy_result$heights), 0L)
+})

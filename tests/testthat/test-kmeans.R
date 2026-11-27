@@ -105,3 +105,23 @@ test_that("gly_kmeans add_info parameter works", {
     ncol(result_without_info$tidy_result)
   )
 })
+
+test_that("constant coordinates contribute zero to scaled clustering distances", {
+  for (on in c("sample", "variable")) {
+    points <- cbind(x = c(1, 2, 4, 12, 15, 16), constant = 7)
+    rownames(points) <- letters[1:6]
+    exp <- SummarizedExperiment::SummarizedExperiment(
+      assays = list(abundance = if (on == "sample") t(points) else points)
+    )
+    scaled <- cbind(x = as.numeric(scale(points[, "x"])), constant = 0)
+    centers <- scaled[c(1, 6), , drop = FALSE]
+    got <- gly_kmeans(exp, on = on, centers = centers, log_transform = FALSE)
+    expected <- stats::kmeans(scaled, centers)
+    expect_equal(unname(got$raw_result$cluster), expected$cluster)
+    expect_equal(got$raw_result$centers, expected$centers)
+
+    tree <- gly_hclust(exp, on = on, k_values = 2, log_transform = FALSE)
+    expected_tree <- stats::hclust(stats::dist(scaled))
+    expect_equal(tree$raw_result$height, expected_tree$height)
+  }
+})

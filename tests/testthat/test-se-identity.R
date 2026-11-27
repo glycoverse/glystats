@@ -97,6 +97,32 @@ test_that("annotation collisions preserve data and cannot add spurious joins", {
   )
 })
 
+test_that("SE annotations keep literal column names and sample positions", {
+  se <- model_argument_experiment()
+  exp <- se
+  colnames(exp) <- as.character(rev(seq_len(ncol(exp))))
+  names(SummarizedExperiment::colData(exp))[1] <- "study group"
+  SummarizedExperiment::rowData(exp) <- S4Vectors::DataFrame(
+    "glycan label" = rownames(exp),
+    check.names = FALSE
+  )
+  result <- gly_ttest(exp, group_col = "study group")
+  expect_identical(
+    result$tidy_result[["glycan label"]],
+    result$tidy_result$.variable
+  )
+  expect_equal(result$tidy_result$p_val, gly_ttest(se)$tidy_result$p_val)
+  if (requireNamespace("limma", quietly = TRUE)) {
+    got <- gly_limma(exp, group_col = "study group", covariate_cols = "age")
+    expected <- gly_limma(se, covariate_cols = "age")
+    expect_equal(got$tidy_result$log2fc, expected$tidy_result$log2fc)
+  }
+  if (requireNamespace("emmeans", quietly = TRUE)) {
+    got <- gly_ancova(exp, group_col = "study group", covariate_cols = "age")
+    expect_equal(got$raw_result$main_test[[1]]$model$age, exp$age)
+  }
+})
+
 test_that("NULL, duplicate and empty names use consistent position IDs", {
   for (kind in c("NULL", "duplicate", "empty")) {
     se <- identity_se()

@@ -40,8 +40,10 @@
 #' NAs will be assigned to the results in both main test and post-hoc test.
 #'
 #' **Post-hoc Test:**
-#' Tukey's HSD test for pairwise comparisons (`stats::TukeyHSD()`) is performed
-#' for variables with significant main effects (p_adj < 0.05). Paired analyses
+#' Tukey's HSD test for pairwise comparisons is performed for variables with
+#' significant main effects (p_adj < 0.05). When sample weights are supplied,
+#' the comparisons use weighted group means and their fitted standard errors.
+#' Paired analyses
 #' instead use paired t-tests with Holm correction.
 #'
 #' @returns
@@ -230,16 +232,6 @@ gly_anova <- function(
     !!!fit_args,
     paired = design$paired
   )
-  raw_post_hoc_test <- .generate_raw_posthoc_results(
-    raw_main_test,
-    data,
-    stats::aov,
-    p_adj_method,
-    posthoc_method = if (design$paired) "paired_t" else "tukey",
-    paired = design$paired
-  )
-
-  # Tibblify results
   main_test <- .tibblify_main_test_results(
     raw_main_test,
     stats::aov,
@@ -252,6 +244,14 @@ gly_anova <- function(
     expr_mat = log_expr_mat,
     groups = groups,
     effect_models = raw_main_test
+  )
+  raw_post_hoc_test <- .generate_raw_posthoc_results(
+    raw_main_test,
+    data,
+    stats::aov,
+    main_test,
+    posthoc_method = if (design$paired) "paired_t" else "tukey",
+    paired = design$paired
   )
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
   post_hoc_test <- .add_fold_change(
@@ -474,7 +474,7 @@ gly_anova <- function(
 #'       - `variable`: Variable name
 #'       - `ref_group`: Reference group
 #'       - `test_group`: Test/treatment/case group
-#'       - `p_val`: Adjusted p-value from emmeans pairwise test
+#'       - `p_val`: Unadjusted p-value from the emmeans pairwise test
 #'       - `p_adj`: Adjusted p-value from emmeans pairwise test
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `aov` model objects.
@@ -640,6 +640,22 @@ gly_ancova <- function(
     )
   }
 
+  # Keep annotation names distinct from the columns used to assemble each
+  # feature's model frame. Factor contrast specifications use the same aliases.
+  reserved <- c("sample", "variable", "log_value", ".", "...")
+  original_names <- names(covariates)
+  names(covariates) <- utils::tail(
+    make.unique(c(reserved, original_names)),
+    length(original_names)
+  )
+  if (length(model_args)) {
+    codes <- names(model_args$contrasts)
+    matched <- codes %in% original_names
+    names(model_args$contrasts)[matched] <- names(covariates)[
+      match(codes[matched], original_names)
+    ]
+  }
+
   # Prepare data
   log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   data <- .prepare_multi_group_data(
@@ -648,8 +664,17 @@ gly_ancova <- function(
     covariates,
     is_logged = TRUE
   )
+  # aov uses sequential sums of squares. Enter the group after every covariate
+  # to test its additional contribution to the fitted model.
   ancova_formula <- stats::reformulate(
-    termlabels = c("group", colnames(covariates)),
+    termlabels = c(
+      vapply(
+        names(covariates),
+        \(x) deparse1(as.name(x), backtick = TRUE),
+        character(1)
+      ),
+      "group"
+    ),
     response = "log_value"
   )
 
@@ -661,19 +686,17 @@ gly_ancova <- function(
     ...,
     !!!model_args
   )
-  raw_post_hoc_test <- .generate_raw_posthoc_results(
-    raw_main_test,
-    data,
-    stats::aov,
-    p_adj_method,
-    posthoc_method = "emmeans"
-  )
-
-  # Tibblify results
   main_test <- .tibblify_main_test_results(
     raw_main_test,
     stats::aov,
     p_adj_method
+  )
+  raw_post_hoc_test <- .generate_raw_posthoc_results(
+    raw_main_test,
+    data,
+    stats::aov,
+    main_test,
+    posthoc_method = "emmeans"
   )
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
   post_hoc_test <- .add_fold_change(
@@ -934,16 +957,6 @@ gly_kruskal <- function(
     ...,
     paired = design$paired
   )
-  raw_post_hoc_test <- .generate_raw_posthoc_results(
-    raw_main_test,
-    data,
-    test_function,
-    p_adj_method,
-    posthoc_method = if (design$paired) "paired_wilcox" else "dunn",
-    paired = design$paired
-  )
-
-  # Tibblify results
   main_test <- .tibblify_main_test_results(
     raw_main_test,
     test_function,
@@ -956,6 +969,14 @@ gly_kruskal <- function(
     expr_mat = log_expr_mat,
     groups = groups,
     effect_models = raw_main_test
+  )
+  raw_post_hoc_test <- .generate_raw_posthoc_results(
+    raw_main_test,
+    data,
+    test_function,
+    main_test,
+    posthoc_method = if (design$paired) "paired_wilcox" else "dunn",
+    paired = design$paired
   )
   post_hoc_test <- .tibblify_posthoc_results(
     raw_post_hoc_test,
@@ -1023,6 +1044,7 @@ gly_kruskal <- function(
         reverse = FALSE
       )
       result <- as.data.frame(summary(contrast))
+      result$p.unadj <- summary(contrast, adjust = "none")$p.value
       # emmeans wraps some group labels in parentheses when printing contrasts.
       # Use its marginal-mean grid to recover the original pairwise endpoints.
       pairs <- utils::combn(as.character(as.data.frame(emm)$group), 2L)
@@ -1030,19 +1052,15 @@ gly_kruskal <- function(
       result$test_group <- pairs[2, ]
       result
     } else {
-      tukey <- suppressWarnings(stats::TukeyHSD(main_model, which = "group"))
-      # Tukey orders rows by factor level. Keep the original names, which may
-      # themselves contain the hyphen used in its printed comparison labels.
-      attr(tukey, "group_pairs") <- utils::combn(main_model$xlevels$group, 2L)
-      tukey
+      .oneway_tukey(main_model)
     }
   } else {
     # Dunn test for Kruskal-Wallis
     # Check number of groups - FSA::dunnTest fails with only 2 groups
-    observed_groups <- droplevels(data_nested$group[
-      !is.na(data_nested$log_value)
-    ])
-    group_levels <- levels(observed_groups)
+    observed <- stats::complete.cases(data_nested$log_value, data_nested$group)
+    data_nested <- data_nested[observed, , drop = FALSE]
+    data_nested$group <- droplevels(data_nested$group)
+    group_levels <- levels(data_nested$group)
     n_groups <- length(group_levels)
 
     if (n_groups == 2) {
@@ -1078,6 +1096,51 @@ gly_kruskal <- function(
       )
     }
   }
+}
+
+.oneway_tukey <- function(fit) {
+  group <- stats::model.frame(fit)$group
+  weights <- fit$weights %||% rep.int(1, length(group))
+  group_weights <- tapply(weights, group, sum)
+  groups <- names(group_weights)[group_weights > 0]
+  pairs <- utils::combn(groups, 2L)
+  se <- stats::sigma(fit) *
+    sqrt(
+      1 / group_weights[pairs[1, ]] + 1 / group_weights[pairs[2, ]]
+    )
+  df <- stats::df.residual(fit)
+  if (is.null(fit$weights)) {
+    result <- stats::TukeyHSD(fit, which = "group")
+  } else {
+    # TukeyHSD uses unweighted replication counts and residual sums of squares.
+    # In a one-way WLS fit, Var(group mean) = residual variance / sum(weights).
+    fitted_means <- tapply(fit$fitted.values - (fit$offset %||% 0), group, mean)
+    difference <- fitted_means[pairs[2, ]] - fitted_means[pairs[1, ]]
+    width <- stats::qtukey(0.95, length(groups), df) * se / sqrt(2)
+    table <- cbind(
+      diff = difference,
+      lwr = difference - width,
+      upr = difference + width,
+      `p adj` = stats::ptukey(
+        sqrt(2) * abs(difference / se),
+        length(groups),
+        df,
+        lower.tail = FALSE
+      )
+    )
+    rownames(table) <- paste(pairs[2, ], pairs[1, ], sep = "-")
+    result <- structure(
+      list(group = table),
+      class = c("TukeyHSD", "multicomp"),
+      orig.call = fit$call,
+      conf.level = 0.95,
+      ordered = FALSE
+    )
+  }
+  attr(result, "group_pairs") <- pairs
+  attr(result, "p.unadj") <- 2 *
+    stats::pt(-abs(result$group[, "diff"] / se), df)
+  result
 }
 
 # Helper function to generate raw main test results
@@ -1128,26 +1191,12 @@ gly_kruskal <- function(
   main_test_raw,
   data,
   .f,
-  p_adj_method,
+  main_test,
   posthoc_method = "tukey",
   paired = FALSE
 ) {
-  p_fn <- if (identical(.f, stats::aov)) {
-    function(x) {
-      result <- summary(x)[[1]]
-      result["group", "Pr(>F)"]
-    }
-  } else {
-    function(x) x$p.value
-  }
-  valid_main_test_mods <- main_test_raw[!is.na(main_test_raw)]
-  main_test_p_vals <- purrr::map_dbl(valid_main_test_mods, p_fn)
-  if (!is.null(p_adj_method)) {
-    main_test_p_vals <- stats::p.adjust(main_test_p_vals, method = p_adj_method)
-  }
-  sig_vars <- names(main_test_p_vals)[
-    !is.na(main_test_p_vals) & main_test_p_vals < 0.05
-  ]
+  p <- main_test[["p_adj"]] %||% main_test$p_val
+  sig_vars <- main_test$variable[!is.na(p) & p < 0.05]
   if (length(sig_vars) > 0) {
     posthoc_raw_results <- data %>%
       dplyr::filter(.data$variable %in% sig_vars) %>%
@@ -1342,8 +1391,21 @@ gly_kruskal <- function(
       dplyr::mutate(
         params = purrr::map(
           .data$test_result,
-          ~ {
-            if (rlang::is_na(.x)) NULL else broom::tidy(.x)
+          function(fit) {
+            if (rlang::is_na(fit)) {
+              return(NULL)
+            }
+            terms <- broom::tidy(fit)
+            if (identical(.f, stats::aov)) {
+              # Keep one row even if the group term is aliased. Saturated
+              # models have sums of squares but no F statistic or p-value.
+              terms <- terms[match("group", terms$term), , drop = FALSE]
+              if (!"statistic" %in% names(terms)) {
+                terms$statistic <- NA_real_
+                terms$p.value <- NA_real_
+              }
+            }
+            terms
           }
         )
       ) %>%
@@ -1356,13 +1418,6 @@ gly_kruskal <- function(
     if ("p_value" %in% colnames(result_tbl)) {
       result_tbl <- dplyr::rename(result_tbl, p_val = "p_value")
     }
-  }
-
-  # For ANOVA, filter to keep only group effects (not residuals)
-  # For Kruskal-Wallis, keep all results (there's only one row per variable anyway)
-  if (identical(.f, stats::aov)) {
-    result_tbl <- result_tbl %>%
-      dplyr::filter(is.na(.data$term) | .data$term == "group")
   }
 
   if (!is.null(p_adj_method)) {
@@ -1518,7 +1573,7 @@ gly_kruskal <- function(
           variable = var_name,
           ref_group = raw_result$ref_group,
           test_group = raw_result$test_group,
-          p_val = raw_result$p.unadj %||% raw_result$p.value,
+          p_val = raw_result$p.unadj,
           p_adj = raw_result$p.value
         )
       } else {
@@ -1528,7 +1583,7 @@ gly_kruskal <- function(
           variable = var_name,
           ref_group = group_pairs[1, ],
           test_group = group_pairs[2, ],
-          p_val = tukey_df$`p adj`, # TukeyHSD already provides adjusted p-values
+          p_val = as.numeric(attr(raw_result, "p.unadj")),
           p_adj = tukey_df$`p adj`
         )
       }

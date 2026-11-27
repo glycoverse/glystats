@@ -512,6 +512,65 @@ test_that(".tibblify_main_test_results validates effect-size inputs", {
   )
 })
 
+test_that("saturated ANOVA fits retain estimable quantities and skip post-hoc tests", {
+  values <- rbind(sparse = c(1, NA, NA, 5, NA, NA), complete = c(1:3, 11:13))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(abundance = values),
+    colData = S4Vectors::DataFrame(group = rep(c("A", "B"), each = 3))
+  )
+  for (input in list(exp, exp["sparse", ])) {
+    result <- gly_anova(input, log_transform = FALSE)
+    main <- result$tidy_result$main_test
+    sparse <- main[main$.variable == "sparse", ]
+    expect_equal(sparse$df, 1)
+    expect_equal(sparse$sumsq, 8)
+    expect_true(is.na(sparse$statistic))
+    expect_true(is.na(sparse$p_val))
+    expect_true(is.na(sparse$p_adj))
+    expect_false("sparse" %in% result$tidy_result$post_hoc_test$.variable)
+    if (nrow(input) == 2) {
+      expect_identical(result$tidy_result$post_hoc_test$.variable, "complete")
+    }
+  }
+})
+
+test_that("Kruskal post-hoc tests use the groups observed for each feature", {
+  skip_if_not_installed("FSA")
+  group <- factor(
+    rep(c("Z", "A", "C", "B"), each = 8),
+    levels = c("Z", "A", "C", "B")
+  )
+  profile <- 10 * as.integer(group) + rep(1:8, 4)
+  values <- rbind(complete = profile, three = profile, two = profile)
+  values["three", group == "A"] <- NA
+  values["two", group %in% c("A", "B")] <- NA
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(abundance = values),
+    colData = S4Vectors::DataFrame(group = group)
+  )
+  result <- gly_kruskal(exp, p_adj_method = NULL, log_transform = FALSE)
+  post <- result$tidy_result$post_hoc_test
+  for (id in rownames(exp)) {
+    keep <- !is.na(values[id, ])
+    reference <- gly_kruskal(
+      exp[id, keep],
+      p_adj_method = NULL,
+      log_transform = FALSE
+    )
+    expect_equal(
+      post[post$.variable == id, ],
+      reference$tidy_result$post_hoc_test
+    )
+  }
+  pair <- post[post$.variable == "two", ]
+  expect_identical(pair$ref_group, "Z")
+  expect_identical(pair$test_group, "C")
+  expect_equal(
+    pair$p_adj,
+    stats::wilcox.test(profile[group == "C"], profile[group == "Z"])$p.value
+  )
+})
+
 test_that("post_hoc_test should not contain NA rows when add_info is TRUE", {
   # Run ANOVA with add_info = TRUE (default)
   result <- suppressMessages(gly_anova(test_gp_exp))

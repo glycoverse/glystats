@@ -200,8 +200,8 @@ gly_set_test <- function(
 }
 
 .set_strata <- function(var_info, within) {
-  if (is.null(within)) {
-    return(rep("all", nrow(var_info)))
+  if (!length(within)) {
+    return(rep.int(1L, nrow(var_info)))
   }
 
   missing_columns <- setdiff(within, colnames(var_info))
@@ -213,17 +213,9 @@ gly_set_test <- function(
     ))
   }
 
-  values <- var_info[, within, drop = FALSE]
-  values[] <- lapply(values, function(x) {
-    x <- as.character(x)
-    x[is.na(x)] <- "<NA>"
-    x
-  })
-  do.call(
-    interaction,
-    c(as.list(values), list(drop = TRUE, lex.order = TRUE, sep = "\r"))
-  ) |>
-    as.character()
+  var_info |>
+    dplyr::group_by(dplyr::across(all_of(within))) |>
+    dplyr::group_indices()
 }
 
 .construct_correlated_sets <- function(
@@ -329,7 +321,7 @@ gly_set_test <- function(
           "all_missing"
         } else if (length(values) < 2) {
           "insufficient_observations"
-        } else if (stats::var(values) <= sqrt(.Machine$double.eps)) {
+        } else if (all(values == values[[1L]])) {
           "zero_variance"
         } else {
           NA_character_
@@ -604,8 +596,7 @@ gly_set_test <- function(
     ))
   }
 
-  subject_group <- paste(subjects, groups, sep = "\r")
-  if (anyDuplicated(subject_group) > 0) {
+  if (anyDuplicated(data.frame(subjects, groups)) > 0L) {
     cli::cli_abort(
       "Each subject must have at most one sample in each group for paired set testing."
     )
