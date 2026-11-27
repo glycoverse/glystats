@@ -55,7 +55,10 @@ gly_ttest(
 - ...:
 
   Additional arguments passed to
-  [`stats::t.test()`](https://rdrr.io/r/stats/t.test.html).
+  [`stats::t.test()`](https://rdrr.io/r/stats/t.test.html). With
+  `paired = TRUE` and no `subject_col`, observations are paired in order
+  within each group. Both groups must contain the same number of
+  samples.
 
 - subject_col:
 

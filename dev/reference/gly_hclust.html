@@ -89,8 +89,9 @@ will be added to the result tibbles. If FALSE, only the clustering results are r
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://rdrr.io/r/stats/dist.html" class="external-link">stats::dist()</a></code> and <code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>.
-Note: if both functions need a <code>method</code> parameter, use <code>dist.method</code> for distance
-and <code>hclust.method</code> for clustering method.</p></dd>
+A distance method such as <code>method = "manhattan"</code> selects the distance metric.
+A linkage such as <code>method = "average"</code> selects the clustering method.
+Use <code>dist.method</code> and <code>hclust.method</code> to specify both.</p></dd>
 
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>

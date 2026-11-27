@@ -79,7 +79,8 @@ gly_limma(
 - ...:
 
   Additional arguments passed to
-  [`limma::lmFit()`](https://rdrr.io/pkg/limma/man/lmFit.html).
+  [`limma::lmFit()`](https://rdrr.io/pkg/limma/man/lmFit.html). Each
+  input feature is reported separately (`ndups = 1`).
 
 - log_transform:
 

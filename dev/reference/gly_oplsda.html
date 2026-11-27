@@ -73,7 +73,9 @@ that contains group labels. Default is "group".</p></dd>
 
 
 <dt id="arg-ortho-i">ortho_i<a class="anchor" aria-label="anchor" href="#arg-ortho-i"></a></dt>
-<dd><p>An integer indicating the number of orthogonal components to include. Default is NA (automatic).</p></dd>
+<dd><p>An integer indicating the number of orthogonal components to include. Default is NA (automatic selection by <code>ropls</code>).
+Use 0 for a PLS fit. Automatic selection can return no model when the
+data do not support an orthogonal component.</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>

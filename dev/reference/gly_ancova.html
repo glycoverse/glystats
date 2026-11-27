@@ -54,7 +54,9 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 <span>  p_adj_method <span class="op">=</span> <span class="st">"BH"</span>,</span>
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  contrasts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subset <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -100,6 +102,21 @@ raw data; if the input is already on <code>"log"</code>, <code>"log2"</code>, <c
 <code>"logx"</code>, it warns and uses the supplied values unchanged. <code>FALSE</code> always
 uses the supplied values unchanged. This argument must be named when it
 follows <code>...</code>.</p></dd>
+
+
+<dt id="arg-contrasts">contrasts<a class="anchor" aria-label="anchor" href="#arg-contrasts"></a></dt>
+<dd><p>Optional character vector selecting post-hoc comparisons to
+report, e.g. <code>"H_vs_C"</code> compares C to reference H. The form <code>"H-C"</code> is
+also accepted when group names contain no hyphens. The omnibus test uses
+all groups, and post-hoc p-values retain the all-pairs adjustment. Raw
+post-hoc results contain all comparisons. By default all pairs are reported.
+A named list is passed to <code><a href="https://rdrr.io/r/stats/aov.html" class="external-link">stats::aov()</a></code> for factor contrast coding.</p></dd>
+
+
+<dt id="arg-subset">subset<a class="anchor" aria-label="anchor" href="#arg-subset"></a></dt>
+<dd><p>Optional logical or integer index selecting samples in input
+order. Selection precedes subject matching, model fitting, post-hoc tests,
+and effect-size and fold-change calculations.</p></dd>
 
 </dl></div>
     <div class="section level2">

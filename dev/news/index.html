@@ -34,6 +34,58 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glystats-development-version">glystats (development version)<a class="anchor" aria-label="anchor" href="#glystats-development-version"></a></h2>
 <ul><li>
+<code><a href="../reference/gly_anova.html">gly_anova()</a></code>, <code><a href="../reference/gly_ancova.html">gly_ancova()</a></code>, and <code><a href="../reference/gly_kruskal.html">gly_kruskal()</a></code> accept comparisons such as <code>contrasts = "H_vs_C"</code> and report C relative to H in the tidy post-hoc results. Adjusted p-values still use the full family of comparisons, and character contrasts no longer trigger a model-matrix warning. (#35)</li>
+<li>Post-hoc tests and fold changes preserve group labels containing hyphens or separator text when matching groups and reporting the direction of a comparison. (#35)</li>
+<li>
+<code><a href="../reference/gly_anova.html">gly_anova()</a></code>, <code><a href="../reference/gly_ancova.html">gly_ancova()</a></code>, and <code><a href="../reference/gly_kruskal.html">gly_kruskal()</a></code> apply <code>subset</code> consistently to subject matching, omnibus tests, effect sizes, fold changes, and post-hoc tests. (#35)</li>
+<li>
+<code><a href="../reference/gly_anova.html">gly_anova()</a></code> and <code><a href="../reference/gly_ancova.html">gly_ancova()</a></code> use the original fitted model for parametric post-hoc comparisons, including when model weights are supplied. (#35)</li>
+<li>
+<code><a href="../reference/gly_anova.html">gly_anova()</a></code> derives eta-squared and partial eta-squared from the model fitted for each feature, including its sample weights. (#35)</li>
+<li>Repeated-measures <code><a href="../reference/gly_anova.html">gly_anova()</a></code> keeps sample weights and offsets aligned with subjects after reordering samples or excluding incomplete observations. (#35)</li>
+<li>
+<code><a href="../reference/gly_anova.html">gly_anova()</a></code> and <code><a href="../reference/gly_ancova.html">gly_ancova()</a></code> preserve tidy statistics and post-hoc results when <code>qr = FALSE</code> omits the QR decomposition from returned models. (#35)</li>
+<li>Multigroup tests skip post-hoc testing for features with missing omnibus p-values. (#35)</li>
+<li>Analysis functions that do not support group contrasts report an error when given <code>contrasts</code>, including when all assay values are missing. (#35)</li>
+<li>
+<code><a href="../reference/gly_limma.html">gly_limma()</a></code> distinguishes group levels whose names map to the same R identifier, including when a group name collides with a covariate column in the design. (#35)</li>
+<li>
+<code><a href="../reference/gly_limma.html">gly_limma()</a></code> rejects empty or missing contrast labels and comparisons of a group with itself. (#35)</li>
+<li>
+<code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code><a href="../reference/gly_linear_model.html">gly_linear_model()</a></code> preserve observation and sample weights when filtering all-missing features, including when the remaining assay is square. (#35)</li>
+<li>
+<code><a href="../reference/gly_limma.html">gly_limma()</a></code> and <code><a href="../reference/gly_linear_model.html">gly_linear_model()</a></code> report unsupported fit arguments and reject <code>ndups</code> values other than 1 that would break the correspondence between results and input features. (#35)</li>
+<li>
+<code><a href="../reference/gly_ttest.html">gly_ttest()</a></code> and <code><a href="../reference/gly_wilcox.html">gly_wilcox()</a></code> honor <code>paired = TRUE</code> by pairing observations in within-group order when no subject column is supplied, and report a conflict for <code>paired = FALSE</code> with <code>subject_col</code>. (#35)</li>
+<li>
+<code><a href="../reference/gly_ttest.html">gly_ttest()</a></code> and <code><a href="../reference/gly_wilcox.html">gly_wilcox()</a></code> report unrecognized test arguments before fitting individual features. (#35)</li>
+<li>Two-group tests report the selected reference group, and <code><a href="../reference/gly_roc.html">gly_roc()</a></code> reports the selected positive class. (#35)</li>
+<li>
+<code><a href="../reference/gly_cox.html">gly_cox()</a></code> forwards sample weights, subsets, and fitting controls to <code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">survival::coxph()</a></code> and reports unrecognized arguments before fitting individual features. (#35)</li>
+<li>
+<code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> uses the supplied p-value and fold-change cutoffs even when feature annotations have the same names as the cutoff arguments. (#35)</li>
+<li>
+<code><a href="../reference/filter_sig_vars.html">filter_sig_vars()</a></code> reports unused arguments, including misspelled cutoff names. (#35)</li>
+<li>
+<code><a href="../reference/gly_cor.html">gly_cor()</a></code> accepts <code>type</code> as an alias for <code>method</code> and reports an error when they specify different correlations. (#35)</li>
+<li>
+<code><a href="../reference/gly_cor.html">gly_cor()</a></code> retains correlations and observation counts between auxiliary variables supplied through <code>y</code> when every assay feature is missing. (#35)</li>
+<li>
+<code><a href="../reference/gly_hclust.html">gly_hclust()</a></code> routes <code>method</code> to the distance or linkage calculation according to its value and accepts explicit <code>dist.method</code> and <code>hclust.method</code> arguments. (#35)</li>
+<li>
+<code><a href="../reference/gly_hclust.html">gly_hclust()</a></code> keeps cluster sizes supplied through <code>members</code> aligned when all-missing rows are removed. (#35)</li>
+<li>
+<code><a href="../reference/gly_oplsda.html">gly_oplsda()</a></code> passes its default <code>ortho_i = NA</code> to <code>ropls</code> for automatic selection of orthogonal components. Use <code>ortho_i = 0</code> for a PLS fit. (#35)</li>
+<li>
+<code><a href="../reference/gly_plsda.html">gly_plsda()</a></code> and <code><a href="../reference/gly_oplsda.html">gly_oplsda()</a></code> honor the backend component arguments <code>predI</code> and <code>orthoI</code>, including when constructing results for all-missing assays. Requests for orthogonal components in <code><a href="../reference/gly_plsda.html">gly_plsda()</a></code> direct callers to <code><a href="../reference/gly_oplsda.html">gly_oplsda()</a></code>. (#35)</li>
+<li>
+<code><a href="../reference/gly_pca.html">gly_pca()</a></code> accepts the backend scaling argument <code>scale.</code> and retains tidy sample scores when <code>retx = FALSE</code> omits scores from the raw fit. (#35)</li>
+<li>
+<code><a href="../reference/gly_pca.html">gly_pca()</a></code> reports the retained components for <code>rank.</code> and <code>tol</code> and calculates their explained-variance fractions against the total variance. (#35)</li>
+<li>
+<code><a href="../reference/gly_umap.html">gly_umap()</a></code> returns tidy coordinates alongside the full raw result when options such as <code>ret_model = TRUE</code> request additional output. (#35)</li>
+<li>Multivariate analyses including <code><a href="../reference/gly_pca.html">gly_pca()</a></code>, <code><a href="../reference/gly_tsne.html">gly_tsne()</a></code>, <code><a href="../reference/gly_umap.html">gly_umap()</a></code>, and <code><a href="../reference/gly_kmeans.html">gly_kmeans()</a></code> report unrecognized backend arguments even on all-missing assays. (#35)</li>
+<li>
 <code><a href="../reference/gly_fold_change.html">gly_fold_change()</a></code> and post hoc comparisons now use the available observations in each group to calculate fold changes. Comparisons involving a group with no observations for a feature return <code>NA</code> (#33).</li>
 </ul></div>
     <div class="section level2">

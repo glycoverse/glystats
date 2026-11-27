@@ -73,7 +73,8 @@ A list with four elements:
   - `umap3`, `umap4`, etc.: Additional UMAP dimensions (if n_components
     \> 2)
 
-- `raw_result`: The raw UMAP result matrix
+- `raw_result`: The raw UMAP embedding matrix, or the full list returned
+  when extra UMAP outputs are requested.
 
 - `meta_data`: A list containing metadata from the input experiment
 

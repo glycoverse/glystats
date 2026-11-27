@@ -54,7 +54,9 @@ P-values are adjusted for multiple testing using the method specified by <code>p
 <span>  add_info <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  subject_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  log_transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  contrasts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subset <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -101,6 +103,18 @@ raw data; if the input is already on <code>"log"</code>, <code>"log2"</code>, <c
 <code>"logx"</code>, it warns and uses the supplied values unchanged. <code>FALSE</code> always
 uses the supplied values unchanged. This argument must be named when it
 follows <code>...</code>.</p></dd>
+
+
+<dt id="arg-contrasts">contrasts<a class="anchor" aria-label="anchor" href="#arg-contrasts"></a></dt>
+<dd><p>Optional character vector selecting post-hoc comparisons,
+e.g. <code>"H_vs_C"</code> with H as reference. As in <code><a href="gly_anova.html">gly_anova()</a></code>, the main test
+and the all-pairs adjustment use all groups. Raw results retain all pairs.</p></dd>
+
+
+<dt id="arg-subset">subset<a class="anchor" aria-label="anchor" href="#arg-subset"></a></dt>
+<dd><p>Optional logical or integer index selecting samples in input
+order. Selection precedes subject matching, model fitting, post-hoc tests,
+and effect-size and fold-change calculations.</p></dd>
 
 </dl></div>
     <div class="section level2">
