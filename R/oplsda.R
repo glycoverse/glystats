@@ -9,7 +9,9 @@
 #' @param group_col A character string specifying the column name in sample information
 #'   that contains group labels. Default is "group".
 #' @param pred_i An integer indicating the number of predictive components to include. Default is 1.
-#' @param ortho_i An integer indicating the number of orthogonal components to include. Default is NA (automatic).
+#' @param ortho_i An integer indicating the number of orthogonal components to include. Default is NA (automatic selection by `ropls`).
+#'   Use 0 for a PLS fit. Automatic selection can return no model when the
+#'   data do not support an orthogonal component.
 #' @param scale A logical indicating whether to scale the data. Default is TRUE.
 #' @param add_info A logical value. If TRUE (default), sample and variable information from the experiment
 #'  will be added to the result tibbles. If FALSE, only the OPLS-DA results are returned.
@@ -152,6 +154,7 @@ gly_oplsda <- function(
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
+  dots <- .opls_args(rlang::list2(...), pred_i, ortho_i, scale, ncol(expr_mat))
   variable_order <- rownames(expr_mat)
   missing_variables <- .all_na_variables(expr_mat)
   expr_mat <- .remove_all_na_variables(expr_mat)
@@ -162,8 +165,8 @@ gly_oplsda <- function(
         tidy_result = .empty_oplsda_tidy_result(
           variable_order,
           colnames(expr_mat),
-          pred_i = pred_i,
-          ortho_i = if (is.na(ortho_i)) 0 else ortho_i
+          pred_i = if (is.na(dots$predI)) 0L else dots$predI,
+          ortho_i = if (is.na(dots$orthoI)) 0L else dots$orthoI
         ),
         raw_result = NULL
       ),
@@ -178,53 +181,12 @@ gly_oplsda <- function(
   }
 
   # Perform OPLS-DA
-  # Set appropriate cross-validation folds based on sample size
-  n_samples <- nrow(mat)
-  crossval_i <- min(7, n_samples - 1) # Default is 7, but must be less than sample size
-
   # Suppress plotting to prevent Rplots.pdf generation
   # Open a null device to capture any plotting output
   grDevices::pdf(file = NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
 
-  # For small datasets, reduce permutation tests to allow model building
-  perm_i <- if (n_samples < 10) 0 else 20
-
-  dots <- rlang::list2(...)
-  disallowed_args <- intersect(names(dots), c("x", "y"))
-  if (length(disallowed_args) > 0) {
-    cli::cli_abort(
-      "Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; data comes from the function inputs."
-    )
-  }
-
-  call_args <- c(
-    list(
-      x = mat,
-      y = groups,
-      predI = pred_i
-    ),
-    dots
-  )
-  if (!is.na(ortho_i) && !"orthoI" %in% names(call_args)) {
-    call_args$orthoI <- ortho_i
-  }
-  if (!"scaleC" %in% names(call_args)) {
-    call_args$scaleC <- if (scale) "standard" else "none"
-  }
-  if (!"crossvalI" %in% names(call_args)) {
-    call_args$crossvalI <- crossval_i
-  }
-  if (!"permI" %in% names(call_args)) {
-    call_args$permI <- perm_i
-  }
-  if (!"fig.pdfC" %in% names(call_args)) {
-    call_args$fig.pdfC <- "none"
-  }
-  if (!"info.txtC" %in% names(call_args)) {
-    call_args$info.txtC <- "none"
-  }
-
+  call_args <- c(list(x = mat, y = groups), dots)
   oplsda_res <- do.call(ropls::opls, call_args)
 
   # Extract and format results
@@ -248,6 +210,23 @@ gly_oplsda <- function(
     ),
     class = c("glystats_oplsda_res", "glystats_res")
   )
+}
+
+.opls_args <- function(dots, pred, ortho, scale, n_samples) {
+  allowed <- setdiff(names(formals(ropls::opls)), c("x", "y"))
+  defaults <- list(
+    predI = pred,
+    orthoI = ortho,
+    scaleC = if (scale) "standard" else "none",
+    crossvalI = min(7, n_samples - 1L),
+    permI = if (n_samples < 10) 0 else 20,
+    fig.pdfC = "none",
+    info.txtC = "none"
+  )
+  named <- nzchar(rlang::names2(dots))
+  overrides <- .match_backend_args(dots[named], allowed)
+  defaults[names(overrides)] <- overrides
+  .match_backend_args(c(defaults, dots[!named]), allowed)
 }
 
 .empty_oplsda_tidy_result <- function(

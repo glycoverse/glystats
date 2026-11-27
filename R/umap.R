@@ -21,7 +21,8 @@
 #'   - `umap1`: First UMAP dimension
 #'   - `umap2`: Second UMAP dimension, if requested
 #'   - `umap3`, `umap4`, etc.: Additional UMAP dimensions (if n_components > 2)
-#' - `raw_result`: The raw UMAP result matrix
+#' - `raw_result`: The raw UMAP embedding matrix, or the full list returned
+#'   when extra UMAP outputs are requested.
 #' - `meta_data`: A list containing metadata from the input experiment
 #' - `preprocessing`: Input and analysis scales and the applied transformation; see [gly_scale].
 #' The list has classes `glystats_umap_res` and `glystats_res`.
@@ -102,6 +103,19 @@ gly_umap <- function(
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
 
+  dots <- rlang::list2(...)
+  if ("X" %in% names(dots)) {
+    cli::cli_abort(
+      "{.field X} should not be supplied through `...`; data comes from the function inputs."
+    )
+  }
+  if (length(dots)) {
+    allowed <- setdiff(
+      names(formals(uwot::umap)),
+      c("X", "n_neighbors", "n_components", "...")
+    )
+    dots <- .match_backend_args(dots, allowed)
+  }
   sample_order <- colnames(expr_mat)
   expr_mat <- .remove_all_na_variables(expr_mat)
   if (nrow(expr_mat) == 0) {
@@ -124,12 +138,6 @@ gly_umap <- function(
   }
 
   # Perform UMAP
-  dots <- rlang::list2(...)
-  if ("X" %in% names(dots)) {
-    cli::cli_abort(
-      "{.field X} should not be supplied through `...`; data comes from the function inputs."
-    )
-  }
   call_args <- c(
     list(
       X = mat,
@@ -145,8 +153,9 @@ gly_umap <- function(
 
   # Create tidy result tibble
   tidy_result <- tibble::tibble(sample = rownames(mat), .rows = nrow(mat))
-  for (i in seq_len(ncol(umap_res))) {
-    tidy_result[[paste0("umap", i)]] <- umap_res[, i]
+  embedding <- if (is.list(umap_res)) umap_res$embedding else umap_res
+  for (i in seq_len(ncol(embedding))) {
+    tidy_result[[paste0("umap", i)]] <- embedding[, i]
   }
 
   # Return list with both tidy and raw results

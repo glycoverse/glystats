@@ -132,6 +132,11 @@ gly_kmeans <- function(
   )
   checkmate::assert_logical(scale, len = 1)
 
+  dots <- .match_backend_args(
+    rlang::list2(...),
+    setdiff(names(formals(stats::kmeans)), c("x", "centers"))
+  )
+
   variable_order <- rownames(expr_mat)
   sample_order <- colnames(expr_mat)
   missing_variables <- .all_na_variables(expr_mat)
@@ -189,10 +194,11 @@ gly_kmeans <- function(
   }
 
   # Perform k-means clustering
-  kmeans_res <- stats::kmeans(
+  kmeans_res <- rlang::exec(
+    stats::kmeans,
     mat,
     centers = centers,
-    ...
+    !!!dots
   )
 
   # Create result tibble

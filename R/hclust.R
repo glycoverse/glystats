@@ -16,8 +16,9 @@
 #' @param add_info A logical value. If TRUE (default), sample information from the experiment
 #'   will be added to the result tibbles. If FALSE, only the clustering results are returned.
 #' @param ... Additional arguments passed to `stats::dist()` and `stats::hclust()`.
-#'   Note: if both functions need a `method` parameter, use `dist.method` for distance
-#'   and `hclust.method` for clustering method.
+#'   A distance method such as `method = "manhattan"` selects the distance metric.
+#'   A linkage such as `method = "average"` selects the clustering method.
+#'   Use `dist.method` and `hclust.method` to specify both.
 #'
 #' @section Required packages:
 #' This function only uses base R packages and does not require additional dependencies.
@@ -149,6 +150,36 @@ gly_hclust <- function(
   }
   checkmate::assert_logical(scale, len = 1)
 
+  dots <- .match_backend_args(
+    list(...),
+    c("method", "diag", "upper", "p", "members", "dist.method", "hclust.method")
+  )
+  dist_args <- dots[intersect(names(dots), c("diag", "upper", "p"))]
+  hclust_args <- dots[intersect(names(dots), "members")]
+  dist_args$method <- dots$dist.method
+  hclust_args$method <- dots$hclust.method
+  if (!is.null(dots$method)) {
+    distances <- c(
+      "euclidean",
+      "maximum",
+      "manhattan",
+      "canberra",
+      "binary",
+      "minkowski"
+    )
+    if (
+      is.null(dist_args$method) &&
+        (!is.null(hclust_args$method) || !is.na(pmatch(dots$method, distances)))
+    ) {
+      dist_args$method <- dots$method
+    } else if (is.null(hclust_args$method)) {
+      hclust_args$method <- dots$method
+    } else {
+      cli::cli_abort(
+        "{.arg method} duplicates {.arg dist.method} and {.arg hclust.method}."
+      )
+    }
+  }
   variable_order <- rownames(expr_mat)
   sample_order <- colnames(expr_mat)
   missing_variables <- .all_na_variables(expr_mat)
@@ -208,33 +239,15 @@ gly_hclust <- function(
     mat <- scale(mat)
   }
 
-  # Extract arguments for dist() and hclust()
-  dots <- list(...)
-
-  # Handle method parameter conflicts
-  dist_args <- dots
-  hclust_args <- dots
-
-  # Forward arguments only to the function that accepts them.
-  dist_args$members <- NULL
-  hclust_args$diag <- NULL
-  hclust_args$upper <- NULL
-  hclust_args$p <- NULL
-
-  # If dist.method is specified, use it for dist() and remove from hclust_args
-  if ("dist.method" %in% names(dots)) {
-    dist_args$method <- dots$dist.method
-    dist_args$dist.method <- NULL
-    hclust_args$dist.method <- NULL
+  if (
+    on == "variable" &&
+      length(missing_variables) &&
+      length(hclust_args$members) == length(variable_order)
+  ) {
+    hclust_args$members <- hclust_args$members[
+      !variable_order %in% missing_variables
+    ]
   }
-
-  # If hclust.method is specified, use it for hclust() and remove from dist_args
-  if ("hclust.method" %in% names(dots)) {
-    hclust_args$method <- dots$hclust.method
-    hclust_args$hclust.method <- NULL
-    dist_args$hclust.method <- NULL
-  }
-
   # Calculate distance matrix
   dist_mat <- do.call(stats::dist, c(list(x = mat), dist_args))
 

@@ -25,7 +25,9 @@ that contains group labels. Default is "group".}
 
 \item{pred_i}{An integer indicating the number of predictive components to include. Default is 1.}
 
-\item{ortho_i}{An integer indicating the number of orthogonal components to include. Default is NA (automatic).}
+\item{ortho_i}{An integer indicating the number of orthogonal components to include. Default is NA (automatic selection by \code{ropls}).
+Use 0 for a PLS fit. Automatic selection can return no model when the
+data do not support an orthogonal component.}
 
 \item{scale}{A logical indicating whether to scale the data. Default is TRUE.}
 

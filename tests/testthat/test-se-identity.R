@@ -288,7 +288,7 @@ test_that("supervised models keep distinct unnamed samples and variables", {
     .se_axis_ids(se, "variable"),
     .se_axis_ids(se, "sample")
   )
-  for (method in list(gly_plsda, gly_oplsda)) {
+  for (method in list(gly_plsda, function(...) gly_oplsda(..., ortho_i = 1))) {
     set.seed(42)
     got <- quiet_identity(method(se, permI = 0, log_transform = FALSE))
     set.seed(42)

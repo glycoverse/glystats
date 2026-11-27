@@ -1,3 +1,14 @@
+opls_test_exp <- function() {
+  exp <- exp_topliss_valid()
+  # A shared source of variation independent of class gives the automatic
+  # OPLS fit an orthogonal component to estimate.
+  withr::local_seed(89)
+  values <- log1p(SummarizedExperiment::assay(exp))
+  nuisance <- rnorm(ncol(exp))
+  SummarizedExperiment::assay(exp) <- expm1(sweep(values + 3, 2, nuisance, "+"))
+  exp
+}
+
 test_that("gly_oplsda works with valid Topliss ratio", {
   # Skip test if ropls is not available
   skip_if_not_installed("ropls")
@@ -6,7 +17,7 @@ test_that("gly_oplsda works with valid Topliss ratio", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        oplsda_res <- gly_oplsda(exp_topliss_valid())
+        oplsda_res <- gly_oplsda(opls_test_exp())
       },
       type = "output"
     )
@@ -77,7 +88,7 @@ test_that("gly_oplsda works with orthogonal components", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        oplsda_res <- gly_oplsda(exp_topliss_valid(), ortho_i = 1)
+        oplsda_res <- gly_oplsda(opls_test_exp(), ortho_i = 1)
       },
       type = "output"
     )
@@ -127,11 +138,21 @@ test_that("gly_oplsda correctly handles orthogonal loadings and scores", {
     )
   }))
 
-  # Verify automatic case (should not have orthogonal components)
-  expect_true("p1" %in% colnames(oplsda_auto$tidy_result$samples))
-  expect_false("o1" %in% colnames(oplsda_auto$tidy_result$samples))
-  expect_true("p1" %in% colnames(oplsda_auto$tidy_result$variables))
-  expect_false("o1" %in% colnames(oplsda_auto$tidy_result$variables))
+  # Match the native automatic OPLS fit, including the selected components.
+  small_se <- glyexp::as_glycoproteomic_se(small_exp)
+  reference <- suppressWarnings(ropls::opls(
+    t(log1p(SummarizedExperiment::assay(small_se))),
+    factor(small_se$group),
+    predI = 1,
+    orthoI = NA,
+    permI = 0,
+    fig.pdfC = "none",
+    info.txtC = "none"
+  ))
+  expect_identical(oplsda_auto$raw_result@typeC, reference@typeC)
+  expect_equal(oplsda_auto$raw_result@orthoScoreMN, reference@orthoScoreMN)
+  expect_true("p1" %in% names(oplsda_auto$tidy_result$samples))
+  expect_true("p1" %in% names(oplsda_auto$tidy_result$variables))
 
   # Verify forced case (should have orthogonal components)
   expect_true("p1" %in% colnames(oplsda_forced$tidy_result$samples))
@@ -212,7 +233,7 @@ test_that("gly_oplsda raw_result is accessible", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        oplsda_res <- gly_oplsda(exp_topliss_valid())
+        oplsda_res <- gly_oplsda(opls_test_exp())
       },
       type = "output"
     )
@@ -258,7 +279,7 @@ test_that("gly_oplsda handles different scaling options", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        oplsda_scaled <- gly_oplsda(exp_topliss_valid(), scale = TRUE)
+        oplsda_scaled <- gly_oplsda(opls_test_exp(), scale = TRUE)
       },
       type = "output"
     )
@@ -269,7 +290,7 @@ test_that("gly_oplsda handles different scaling options", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        oplsda_unscaled <- gly_oplsda(exp_topliss_valid(), scale = FALSE)
+        oplsda_unscaled <- gly_oplsda(opls_test_exp(), scale = FALSE)
       },
       type = "output"
     )
@@ -286,7 +307,7 @@ test_that("gly_oplsda handles different scaling options", {
 test_that(".analyze_oplsda works correctly", {
   skip_if_not_installed("ropls")
 
-  exp <- exp_topliss_valid()
+  exp <- opls_test_exp()
   expr_mat <- SummarizedExperiment::assay(exp)
   groups <- factor(SummarizedExperiment::colData(exp)$group)
 
@@ -315,7 +336,7 @@ test_that("gly_oplsda includes pcorr columns for predictive components", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        oplsda_res1 <- gly_oplsda(exp_topliss_valid(), pred_i = 1)
+        oplsda_res1 <- gly_oplsda(opls_test_exp(), pred_i = 1)
       },
       type = "output"
     )
@@ -334,7 +355,7 @@ test_that("gly_oplsda includes pcorr columns for predictive components", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        oplsda_res2 <- gly_oplsda(exp_topliss_valid(), pred_i = 2)
+        oplsda_res2 <- gly_oplsda(opls_test_exp(), pred_i = 2, ortho_i = 0)
       },
       type = "output"
     )
@@ -367,7 +388,7 @@ test_that("gly_oplsda pcorr values match manual calculation", {
   suppressMessages(suppressWarnings({
     capture.output(
       {
-        oplsda_res <- gly_oplsda(exp_topliss_valid(), pred_i = 1)
+        oplsda_res <- gly_oplsda(opls_test_exp(), pred_i = 1)
       },
       type = "output"
     )

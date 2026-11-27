@@ -117,6 +117,12 @@ gly_pca <- function(
   checkmate::assert_logical(center, len = 1)
   checkmate::assert_logical(scale, len = 1)
 
+  dots <- rlang::list2(...)
+  if ("scale." %in% names(dots)) {
+    scale <- dots[["scale."]]
+    dots[["scale."]] <- NULL
+  }
+  dots <- .match_backend_args(dots, c("retx", "tol", "rank."))
   variable_order <- rownames(expr_mat)
   missing_variables <- .all_na_variables(expr_mat)
   expr_mat <- .remove_all_na_variables(expr_mat)
@@ -156,7 +162,10 @@ gly_pca <- function(
 
   # If scaling, check for constant columns (zero variance)
   # These will cause prcomp to fail with "cannot rescale a constant/zero column to unit variance"
-  if (scale) {
+  if (is.numeric(scale) && length(scale) == length(variable_order)) {
+    scale <- scale[!variable_order %in% missing_variables]
+  }
+  if (isTRUE(scale)) {
     col_vars <- apply(mat, 2, stats::var, na.rm = TRUE)
     constant_cols <- which(col_vars == 0 | is.na(col_vars))
 
@@ -177,12 +186,32 @@ gly_pca <- function(
     }
   }
 
-  prcomp_res <- stats::prcomp(mat, center = center, scale = scale, ...)
+  prcomp_res <- rlang::exec(
+    stats::prcomp,
+    mat,
+    center = center,
+    scale. = scale,
+    !!!dots
+  )
 
   # Get tidy results and rename columns to be consistent
-  samples_tbl <- broom::tidy(prcomp_res, matrix = "samples")
+  scores <- prcomp_res
+  if (is.null(scores$x)) {
+    scores$x <- stats::predict(prcomp_res, mat)
+  }
+  samples_tbl <- broom::tidy(scores, matrix = "samples")
   variables_tbl <- broom::tidy(prcomp_res, matrix = "variables")
-  eigenvalues_tbl <- broom::tidy(prcomp_res, matrix = "eigenvalues")
+  # prcomp retains the full spectrum even when rank. or tol drops components.
+  importance <- summary(prcomp_res)$importance[,
+    seq_len(ncol(prcomp_res$rotation)),
+    drop = FALSE
+  ]
+  eigenvalues_tbl <- tibble::tibble(
+    PC = as.numeric(seq_len(ncol(importance))),
+    std.dev = unname(importance[1, ]),
+    percent = unname(importance[2, ]),
+    cumulative = unname(importance[3, ])
+  )
 
   # Rename columns to be consistent with other glystats functions
   if ("row" %in% colnames(samples_tbl)) {

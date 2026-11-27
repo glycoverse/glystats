@@ -31,8 +31,9 @@ Default is c(2, 3, 4, 5). If NULL, no cluster assignments are returned.}
 will be added to the result tibbles. If FALSE, only the clustering results are returned.}
 
 \item{...}{Additional arguments passed to \code{stats::dist()} and \code{stats::hclust()}.
-Note: if both functions need a \code{method} parameter, use \code{dist.method} for distance
-and \code{hclust.method} for clustering method.}
+A distance method such as \code{method = "manhattan"} selects the distance metric.
+A linkage such as \code{method = "average"} selects the clustering method.
+Use \code{dist.method} and \code{hclust.method} to specify both.}
 
 \item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
 logging data twice. \code{TRUE} requests the method's log transformation for
