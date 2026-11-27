@@ -170,3 +170,33 @@ test_that("ANCOVA screens features on the covariate-adjusted group effect", {
   expect_true(all(is.na(aliased$tidy_result$main_test$p_val)))
   expect_equal(nrow(aliased$tidy_result$post_hoc_test), 0L)
 })
+
+test_that("ANCOVA models covariate names literally", {
+  exp <- model_argument_experiment()
+  exp$age <- factor(exp$age > 0)
+  expected <- gly_ancova(exp, covariate_cols = "age")
+  for (name in c(
+    "variable",
+    "sample",
+    "log_value",
+    "batch score",
+    "age+group"
+  )) {
+    test_exp <- exp
+    names(SummarizedExperiment::colData(test_exp))[3] <- name
+    result <- gly_ancova(
+      test_exp,
+      covariate_cols = name,
+      contrasts = stats::setNames(list("contr.sum"), name)
+    )
+    expect_equal(
+      result$tidy_result$main_test$p_val,
+      expected$tidy_result$main_test$p_val
+    )
+    expect_equal(
+      result$tidy_result$post_hoc_test$p_adj,
+      expected$tidy_result$post_hoc_test$p_adj
+    )
+    expect_true("contr.sum" %in% result$raw_result$main_test[[1]]$contrasts)
+  }
+})

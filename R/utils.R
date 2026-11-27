@@ -46,7 +46,8 @@
 #' @noRd
 .get_sample_info <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(tibble::as_tibble(SummarizedExperiment::colData(exp)))
+    info <- as.data.frame(SummarizedExperiment::colData(exp), optional = TRUE)
+    return(tibble::as_tibble(info))
   }
   glyexp::get_sample_info(exp)
 }
@@ -59,7 +60,8 @@
 #' @noRd
 .get_var_info <- function(exp) {
   if (methods::is(exp, "SummarizedExperiment")) {
-    return(tibble::as_tibble(SummarizedExperiment::rowData(exp)))
+    info <- as.data.frame(SummarizedExperiment::rowData(exp), optional = TRUE)
+    return(tibble::as_tibble(info))
   }
   glyexp::get_var_info(exp)
 }

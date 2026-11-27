@@ -638,6 +638,22 @@ gly_ancova <- function(
     )
   }
 
+  # Keep annotation names distinct from the columns used to assemble each
+  # feature's model frame. Factor contrast specifications use the same aliases.
+  reserved <- c("sample", "variable", "log_value", ".", "...")
+  original_names <- names(covariates)
+  names(covariates) <- utils::tail(
+    make.unique(c(reserved, original_names)),
+    length(original_names)
+  )
+  if (length(model_args)) {
+    codes <- names(model_args$contrasts)
+    matched <- codes %in% original_names
+    names(model_args$contrasts)[matched] <- names(covariates)[
+      match(codes[matched], original_names)
+    ]
+  }
+
   # Prepare data
   log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   data <- .prepare_multi_group_data(
@@ -649,7 +665,14 @@ gly_ancova <- function(
   # aov uses sequential sums of squares. Enter the group after every covariate
   # to test its additional contribution to the fitted model.
   ancova_formula <- stats::reformulate(
-    termlabels = c(colnames(covariates), "group"),
+    termlabels = c(
+      vapply(
+        names(covariates),
+        \(x) deparse1(as.name(x), backtick = TRUE),
+        character(1)
+      ),
+      "group"
+    ),
     response = "log_value"
   )
 
