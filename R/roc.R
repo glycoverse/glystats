@@ -99,7 +99,7 @@ gly_roc <- function(
     min_count = 2,
     max_count = 2,
     method = "ROC analysis",
-    show_info = TRUE
+    show_info = FALSE
   )
   groups <- group_info$groups
 
@@ -150,7 +150,6 @@ gly_roc <- function(
   # Set positive class
   if (is.null(pos_class)) {
     pos_class <- levels(groups)[2] # Use second level alphabetically as default
-    cli::cli_alert_info("Using {.val {pos_class}} as positive class")
   } else {
     if (!pos_class %in% levels(groups)) {
       cli::cli_abort(c(
@@ -159,6 +158,8 @@ gly_roc <- function(
       ))
     }
   }
+
+  cli::cli_alert_info("Using {.val {pos_class}} as positive class")
 
   expr_mat <- .log_transform_expr_mat(expr_mat, log_transform = log_transform)
 

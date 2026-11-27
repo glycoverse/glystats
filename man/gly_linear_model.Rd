@@ -33,7 +33,8 @@ available methods. If \code{NULL}, no adjustment is performed.}
 \item{add_info}{A logical value. If \code{TRUE} (default), variable information
 from the experiment is added to the tidy result.}
 
-\item{...}{Additional arguments passed to \code{\link[limma:lmFit]{limma::lmFit()}}.}
+\item{...}{Additional arguments passed to \code{\link[limma:lmFit]{limma::lmFit()}}. Each input
+feature is reported separately (\code{ndups = 1}).}
 
 \item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
 logging data twice. \code{TRUE} requests the method's log transformation for

@@ -58,6 +58,7 @@ gly_cox <- function(
   ...,
   log_transform = NULL
 ) {
+  .check_no_contrasts(...)
   # Validate inputs
   checkmate::assert_logical(
     log_transform,
@@ -150,9 +151,19 @@ gly_cox <- function(
   expr_mat <- .log_transform_expr_mat(expr_mat, log_transform = log_transform)
 
   # Fit Cox model for each variable
-  safe_f <- purrr::possibly(survival::coxph, otherwise = NA)
+  allowed <- union(
+    setdiff(names(formals(survival::coxph)), c("formula", "...")),
+    names(formals(survival::coxph.control))
+  )
+  dots <- .match_backend_args(rlang::list2(...), allowed)
+  safe_f <- purrr::possibly(
+    function(formula) {
+      rlang::exec(survival::coxph, formula = formula, !!!dots)
+    },
+    otherwise = NA
+  )
   cox_models <- apply(expr_mat, 1, function(x) {
-    safe_f(survival::Surv(time, event) ~ x, ...)
+    safe_f(survival::Surv(time, event) ~ x)
   })
 
   n_na <- sum(is.na(cox_models))

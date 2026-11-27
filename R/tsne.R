@@ -43,6 +43,7 @@ gly_tsne <- function(
   ...,
   log_transform = NULL
 ) {
+  .check_no_contrasts(...)
   checkmate::assert_logical(
     log_transform,
     len = 1,
@@ -100,6 +101,24 @@ gly_tsne <- function(
 
   checkmate::assert_matrix(expr_mat, mode = "numeric")
 
+  dots <- rlang::list2(...)
+  if ("X" %in% names(dots)) {
+    cli::cli_abort(
+      "{.field X} should not be supplied through `...`; data comes from the function inputs."
+    )
+  }
+  if (length(dots)) {
+    backend <- utils::getS3method(
+      "Rtsne",
+      "default",
+      envir = asNamespace("Rtsne")
+    )
+    dots <- .match_backend_args(
+      dots,
+      setdiff(names(formals(backend)), c("X", "dims", "perplexity", "..."))
+    )
+  }
+
   sample_order <- colnames(expr_mat)
   expr_mat <- .remove_all_na_variables(expr_mat)
   if (nrow(expr_mat) == 0) {
@@ -133,12 +152,6 @@ gly_tsne <- function(
   }
 
   # Perform t-SNE
-  dots <- rlang::list2(...)
-  if ("X" %in% names(dots)) {
-    cli::cli_abort(
-      "{.field X} should not be supplied through `...`; data comes from the function inputs."
-    )
-  }
   call_args <- c(
     list(
       X = mat,

@@ -61,6 +61,7 @@ gly_plsda <- function(
   ...,
   log_transform = NULL
 ) {
+  .check_no_contrasts(...)
   # Check package availability
   rlang::check_installed("ropls")
 
@@ -142,6 +143,11 @@ gly_plsda <- function(
   checkmate::assert_matrix(expr_mat, mode = "numeric")
   checkmate::assert_factor(groups, len = ncol(expr_mat))
 
+  dots <- .opls_args(rlang::list2(...), ncomp, 0, scale, ncol(expr_mat))
+  if (!isTRUE(dots$orthoI == 0)) {
+    cli::cli_abort("Use {.fn gly_oplsda} to fit orthogonal components.")
+  }
+
   variable_order <- rownames(expr_mat)
   missing_variables <- .all_na_variables(expr_mat)
   expr_mat <- .remove_all_na_variables(expr_mat)
@@ -152,7 +158,7 @@ gly_plsda <- function(
         tidy_result = .empty_oplsda_tidy_result(
           variable_order,
           colnames(expr_mat),
-          pred_i = ncomp,
+          pred_i = if (is.na(dots$predI)) 0L else dots$predI,
           ortho_i = 0
         ),
         raw_result = NULL
@@ -168,54 +174,12 @@ gly_plsda <- function(
   }
 
   # Perform PLS-DA using ropls::opls with orthoI = 0
-  # Set appropriate cross-validation folds based on sample size
-  n_samples <- nrow(mat)
-  crossval_i <- min(7, n_samples - 1) # Default is 7, but must be less than sample size
-
   # Suppress plotting to prevent Rplots.pdf generation
   # Open a null device to capture any plotting output
   grDevices::pdf(file = NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
 
-  # For small datasets, reduce permutation tests to allow model building
-  perm_i <- if (n_samples < 10) 0 else 20
-
-  dots <- rlang::list2(...)
-  disallowed_args <- intersect(names(dots), c("x", "y"))
-  if (length(disallowed_args) > 0) {
-    cli::cli_abort(
-      "Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; data comes from the function inputs."
-    )
-  }
-
-  call_args <- c(
-    list(
-      x = mat,
-      y = groups,
-      predI = ncomp
-    ),
-    dots
-  )
-  if (!"orthoI" %in% names(call_args)) {
-    call_args$orthoI <- 0
-  }
-  if (!"scaleC" %in% names(call_args)) {
-    call_args$scaleC <- if (scale) "standard" else "none"
-  }
-  if (!"crossvalI" %in% names(call_args)) {
-    call_args$crossvalI <- crossval_i
-  }
-  if (!"permI" %in% names(call_args)) {
-    call_args$permI <- perm_i
-  }
-  if (!"fig.pdfC" %in% names(call_args)) {
-    call_args$fig.pdfC <- "none"
-  }
-  if (!"info.txtC" %in% names(call_args)) {
-    call_args$info.txtC <- "none"
-  }
-
-  # Perform PLS-DA by setting orthoI = 0 (no orthogonal components)
+  call_args <- c(list(x = mat, y = groups), dots)
   plsda_res <- do.call(ropls::opls, call_args)
 
   # Extract and format results

@@ -126,3 +126,22 @@ exp_multigroup_valid <- function() {
   ) |>
     glyexp::as_se()
 }
+
+model_argument_experiment <- function() {
+  withr::local_seed(41)
+  group <- factor(rep(c("A", "B"), each = 16))
+  values <- matrix(rnorm(320, sd = 0.2), 10) +
+    rep(as.integer(group), each = 10) +
+    3
+  dimnames(values) <- list(paste0("v", 1:10), paste0("s", 1:32))
+  SummarizedExperiment::SummarizedExperiment(
+    assays = list(expr = values),
+    colData = S4Vectors::DataFrame(
+      group = group,
+      subject = rep(1:16, 2),
+      age = rnorm(32),
+      time = sample(32),
+      event = rep(1:0, 16)
+    )
+  )
+}

@@ -71,6 +71,7 @@ filter_sig_vars.glystats_anova_res <- function(
   comparison = NULL,
   ...
 ) {
+  rlang::check_dots_empty()
   .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(
     exp,
@@ -110,6 +111,7 @@ filter_sig_vars.glystats_ancova_res <- function(
   comparison = NULL,
   ...
 ) {
+  rlang::check_dots_empty()
   .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(
     exp,
@@ -149,6 +151,7 @@ filter_sig_vars.glystats_kruskal_res <- function(
   comparison = NULL,
   ...
 ) {
+  rlang::check_dots_empty()
   .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(
     exp,
@@ -186,6 +189,7 @@ filter_sig_vars.glystats_ttest_res <- function(
   fc_cutoff = NULL,
   ...
 ) {
+  rlang::check_dots_empty()
   .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(exp, fc_cutoff, res, use_default = missing(fc_cutoff))
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
@@ -202,6 +206,7 @@ filter_sig_vars.glystats_wilcox_res <- function(
   fc_cutoff = NULL,
   ...
 ) {
+  rlang::check_dots_empty()
   .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(exp, fc_cutoff, res, use_default = missing(fc_cutoff))
   .check_filter_sig_vars_args_ttest(exp, p_adj_cutoff, p_val_cutoff, fc_cutoff)
@@ -219,6 +224,7 @@ filter_sig_vars.glystats_limma_res <- function(
   comparison = NULL,
   ...
 ) {
+  rlang::check_dots_empty()
   .validate_filter_identity(exp, res)
   if (!identical(res$preprocessing$analysis_scale, "raw")) {
     fc_cutoff <- .decide_fc(
@@ -263,6 +269,7 @@ filter_sig_vars.glystats_linear_model_res <- function(
   term = NULL,
   ...
 ) {
+  rlang::check_dots_empty()
   .validate_filter_identity(exp, res)
   fc_cutoff <- .decide_fc(exp, fc_cutoff, res)
   .check_filter_sig_vars_args(
@@ -363,13 +370,13 @@ filter_sig_vars.glystats_linear_model_res <- function(
 
 .add_filters <- function(df, p_adj_cutoff, p_val_cutoff, fc_cutoff) {
   if (!is.null(p_val_cutoff)) {
-    df <- dplyr::filter(df, .data$p_val < p_val_cutoff)
+    df <- dplyr::filter(df, .data$p_val < .env$p_val_cutoff)
   }
   if (!is.null(fc_cutoff)) {
-    df <- dplyr::filter(df, abs(.data$log2fc) > log2(fc_cutoff))
+    df <- dplyr::filter(df, abs(.data$log2fc) > log2(.env$fc_cutoff))
   }
   if (!is.null(p_adj_cutoff)) {
-    df <- dplyr::filter(df, .data$p_adj < p_adj_cutoff)
+    df <- dplyr::filter(df, .data$p_adj < .env$p_adj_cutoff)
   }
   df
 }

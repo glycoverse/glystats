@@ -62,6 +62,7 @@ gly_cor <- function(
   ...,
   log_transform = NULL
 ) {
+  .check_no_contrasts(...)
   # Validate inputs
   checkmate::assert_logical(
     log_transform,
@@ -80,6 +81,17 @@ gly_cor <- function(
   )
   log_transform <- transformation$log_transform
   checkmate::assert_choice(on, c("variable", "sample"))
+  dots <- .match_backend_args(rlang::list2(...), c("y", "type"))
+  if (!is.null(dots$type)) {
+    type <- match.arg(dots$type, c("pearson", "spearman"))
+    if (!missing(method) && method != type) {
+      cli::cli_abort(
+        "{.arg method} and {.arg type} specify different correlations."
+      )
+    }
+    method <- type
+    dots$type <- NULL
+  }
   checkmate::assert_choice(method, c("pearson", "spearman"))
   checkmate::assert_choice(
     p_adj_method,
@@ -96,7 +108,7 @@ gly_cor <- function(
     on,
     method,
     p_adj_method,
-    ...,
+    !!!dots,
     log_transform = log_transform
   )
 
@@ -154,8 +166,12 @@ gly_cor <- function(
   mat <- .log_transform_expr_mat(mat, log_transform = log_transform)
 
   # Calculate correlation using Hmisc::rcorr
-  if (all(rowSums(!is.na(expr_mat)) == 0)) {
-    items <- if (on == "sample") colnames(expr_mat) else rownames(expr_mat)
+  dots <- rlang::list2(...)
+  if (all(is.na(mat))) {
+    if (!is.null(dots$y)) {
+      mat <- cbind(mat, y = dots$y)
+    }
+    items <- colnames(mat)
     empty_matrix <- matrix(
       NA_real_,
       nrow = length(items),
@@ -175,8 +191,17 @@ gly_cor <- function(
       ),
       class = "rcorr"
     )
+    # A supplied auxiliary matrix can still contain observed pairs.
+    observed <- colSums(!is.na(mat)) > 0
+    if (any(observed)) {
+      auxiliary <- Hmisc::rcorr(mat[, observed, drop = FALSE], type = method)
+      for (field in c("r", "n", "P")) {
+        rcorr_result[[field]][observed, observed] <- auxiliary[[field]]
+      }
+      rcorr_result$type <- method
+    }
   } else {
-    rcorr_result <- Hmisc::rcorr(mat, type = method, ...)
+    rcorr_result <- rlang::exec(Hmisc::rcorr, mat, type = method, !!!dots)
   }
 
   # Extract correlation and p-value matrices from rcorr result

@@ -16,7 +16,8 @@
 #'   available methods. If `NULL`, no adjustment is performed.
 #' @param add_info A logical value. If `TRUE` (default), variable information
 #'   from the experiment is added to the tidy result.
-#' @param ... Additional arguments passed to [limma::lmFit()].
+#' @param ... Additional arguments passed to [limma::lmFit()]. Each input
+#'   feature is reported separately (`ndups = 1`).
 #'
 #' @details
 #' `gly_linear_model()` and [gly_limma()] both use limma under the hood, but
@@ -207,6 +208,11 @@ gly_linear_model <- function(
 
   log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   row_has_data <- rowSums(is.finite(log_expr_mat)) > 0
+  dots <- .limma_fit_args(
+    dots,
+    row_has_data = row_has_data,
+    expression_dim = dim(log_expr_mat)
+  )
   if (!any(row_has_data)) {
     tidy_result <- purrr::map_dfr(report_original, function(term) {
       result <- tibble::tibble(
@@ -238,11 +244,6 @@ gly_linear_model <- function(
     ))
   }
   model_expr_mat <- log_expr_mat[row_has_data, , drop = FALSE]
-  dots <- .subset_linear_model_weights(
-    dots,
-    row_has_data = row_has_data,
-    expression_dim = dim(log_expr_mat)
-  )
 
   fit <- rlang::exec(
     limma::lmFit,
@@ -425,25 +426,47 @@ gly_linear_model <- function(
   ))
 }
 
-.subset_linear_model_weights <- function(
+.limma_fit_args <- function(
   dots,
   row_has_data,
   expression_dim
 ) {
+  formal_args <- setdiff(
+    names(formals(limma::lmFit)),
+    c("object", "design", "...")
+  )
+  # Robust regression and correlated fits accept additional tuning arguments.
+  dots <- .match_backend_args(dots, formal_args, allow_extra = TRUE)
+  if (identical(dots$method %||% "ls", "ls") && is.null(dots$block)) {
+    dots <- .match_backend_args(dots, formal_args)
+  }
+  if (!is.null(dots$ndups) && dots$ndups != 1L) {
+    cli::cli_abort(
+      "{.arg ndups} must be 1 to report one result per input feature."
+    )
+  }
   weights <- dots$weights
   if (is.null(weights)) {
     return(dots)
   }
 
-  if (is.matrix(weights)) {
-    if (
-      nrow(weights) == expression_dim[[1]] &&
-        ncol(weights) %in% c(1L, expression_dim[[2]])
-    ) {
-      dots$weights <- weights[row_has_data, , drop = FALSE]
-    }
-  } else if (is.numeric(weights) && length(weights) == expression_dim[[1]]) {
+  genes <- expression_dim[[1]]
+  samples <- expression_dim[[2]]
+  if (
+    is.matrix(weights) &&
+      nrow(weights) == genes &&
+      ncol(weights) %in% c(1L, samples)
+  ) {
+    dots$weights <- weights[row_has_data, , drop = FALSE]
+  } else if (!is.matrix(weights) && length(weights) == genes) {
     dots$weights <- weights[row_has_data]
+  } else if (
+    length(weights) == samples &&
+      sum(row_has_data) == samples &&
+      genes != samples
+  ) {
+    # In a square retained assay limma treats a column or vector as gene weights.
+    dots$weights <- matrix(weights, nrow = 1L)
   }
 
   dots

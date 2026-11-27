@@ -33,7 +33,9 @@ If NULL (default), the first level of the group factor is used as the reference.
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
-\item{...}{Additional arguments passed to \code{stats::wilcox.test()}.}
+\item{...}{Additional arguments passed to \code{stats::wilcox.test()}. With
+\code{paired = TRUE} and no \code{subject_col}, observations are paired in order
+within each group. Both groups must contain the same number of samples.}
 
 \item{subject_col}{An optional character string naming the subject identifier
 column in sample information. When supplied, samples are matched by subject

@@ -107,6 +107,55 @@ test_that("gly_anova comparison direction is correct for 3 groups", {
   expect_true(all(result$tidy_result$post_hoc_test$log2fc > 0))
 })
 
+test_that("gly_anova reports requested post-hoc contrasts with all-pairs adjustment", {
+  groups <- factor(
+    rep(c("H", "M-dose", "C"), each = 4),
+    levels = c("H", "M-dose", "C")
+  )
+  values <- rbind(
+    signal = c(1:4, 10:13, 200, 220, 230, 250),
+    null = c(1:4, 4:1, 2, 4, 1, 3)
+  )
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(expression = values),
+    colData = S4Vectors::DataFrame(group = groups, subject = rep(1:4, 3))
+  )
+  for (subject in list(NULL, "subject")) {
+    all_pairs <- gly_anova(exp, subject_col = subject)
+    expect_no_warning(
+      selected <- gly_anova(
+        exp,
+        contrasts = c("H_vs_C", "C_vs_M-dose"),
+        subject_col = subject
+      )
+    )
+    main <- selected$tidy_result$main_test
+    expect_identical(main$p_adj, all_pairs$tidy_result$main_test$p_adj)
+    expect_identical(
+      main$post_hoc,
+      ifelse(main$.variable == "signal", "H_vs_C;C_vs_M-dose", NA_character_)
+    )
+
+    post <- selected$tidy_result$post_hoc_test
+    all_post <- all_pairs$tidy_result$post_hoc_test
+    expected <- all_post[all_post$test_group == "C", ]
+    expect_identical(post$ref_group, c("H", "C"))
+    expect_identical(post$test_group, c("C", "M-dose"))
+    expect_equal(post$p_adj, expected$p_adj)
+    expect_equal(post$log2fc, expected$log2fc * c(1, -1))
+  }
+
+  expect_error(gly_anova(exp, contrasts = "H_vs_missing"), "not found")
+  expect_error(gly_anova(exp, contrasts = "H_vs_H"), "different groups")
+  expect_no_warning(
+    coded <- gly_anova(exp, contrasts = list(group = "contr.sum"))
+  )
+  expect_identical(
+    coded$raw_result$main_test$signal$contrasts$group,
+    "contr.sum"
+  )
+})
+
 test_that("gly_kruskal comparison direction is correct for 2 groups", {
   # Create a test experiment with 2 groups
   # group B has higher mean than group A

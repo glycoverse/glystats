@@ -186,25 +186,21 @@ gly_fold_change <- function(
   input_scale = if (logged) "log2" else "raw"
 ) {
   comparisons <- .make_comparisons(levels(groups))
-  result_list <- purrr::map(comparisons, function(c) {
-    sample_mask <- groups %in% c
-    sub_groups <- factor(groups[sample_mask], levels = c)
-    .fc_2groups(
+  purrr::map(comparisons, function(pair) {
+    sample_mask <- groups %in% pair
+    sub_groups <- factor(groups[sample_mask], levels = pair)
+    result <- .fc_2groups(
       expr_mat[, sample_mask, drop = FALSE],
       sub_groups,
       logged,
       input_scale = input_scale
     )
-  })
-  comparison_str <- purrr::map_chr(
-    comparisons,
-    ~ stringr::str_c(.x[1], "_vs_", .x[2])
-  )
-  names(result_list) <- comparison_str
-  dplyr::bind_rows(result_list, .id = "comparison") |>
-    tidyr::separate(
-      col = "comparison",
-      into = c("ref_group", "test_group"),
-      sep = "_vs_"
+    dplyr::mutate(
+      result,
+      ref_group = pair[1],
+      test_group = pair[2],
+      .before = 1
     )
+  }) |>
+    dplyr::bind_rows()
 }
