@@ -452,7 +452,6 @@ filter_sig_vars.glystats_linear_model_res <- function(
   if (!is.null(p_val_cutoff) && on == "post_hoc_test") {
     cli::cli_abort(c(
       "{.arg p_val_cutoff} can't be used with {.fn gly_anova} or {.fn gly_kruskal} when {.arg on} is {.val post_hoc_test}.",
-      "i" = "This is because post-hoc test results only have adjusted p-values.",
       "i" = "Please use {.arg p_adj_cutoff} instead."
     ))
   }

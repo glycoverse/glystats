@@ -76,7 +76,7 @@ A list containing four elements:
 \item \code{variable}: Variable name
 \item \code{ref_group}: Reference group
 \item \code{test_group}: Test/treatment/case group
-\item \code{p_val}: Adjusted p-value from emmeans pairwise test
+\item \code{p_val}: Unadjusted p-value from the emmeans pairwise test
 \item \code{p_adj}: Adjusted p-value from emmeans pairwise test
 }
 }

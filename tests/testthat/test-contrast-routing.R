@@ -112,6 +112,45 @@ test_that("analyses without group contrasts reject them before fitting", {
   expect_error(filter_sig_vars(exp, result, contrasts = "H_vs_C"), "contrasts")
 })
 
+test_that("post-hoc probabilities and weighted intervals match the fitted model", {
+  skip_if_not_installed("emmeans")
+  exp <- contrast_experiment()[1, ]
+  w <- rep(c(0.5, 1, 3, 1), length.out = ncol(exp))
+  offset <- rep(c(0, 0.25, -0.5), length.out = ncol(exp))
+  for (weights in list(NULL, w, replace(w, exp$group == "M - dose", 0))) {
+    result <- gly_anova(exp, weights = weights, offset = offset)
+    fit <- result$raw_result$main_test[[1]]
+    means <- emmeans::emmeans(fit, "group")
+    if (!is.null(weights)) {
+      means <- means[levels(exp$group) %in% exp$group[weights > 0]]
+    }
+    pairs <- emmeans::contrast(means, "pairwise")
+    raw <- as.data.frame(summary(pairs, adjust = "none"))
+    adjusted <- as.data.frame(summary(
+      pairs,
+      adjust = "tukey",
+      infer = c(TRUE, TRUE)
+    ))
+    post <- result$tidy_result$post_hoc_test
+    expect_equal(post$p_val, raw$p.value)
+    expect_equal(post$p_adj, adjusted$p.value)
+    table <- result$raw_result$post_hoc_test[[1]]$group
+    expect_equal(unname(table[, "lwr"]), -adjusted$upper.CL)
+    expect_equal(unname(table[, "upr"]), -adjusted$lower.CL)
+  }
+  result <- gly_ancova(exp, covariate_cols = "age")
+  fit <- result$raw_result$main_test[[1]]
+  pairs <- emmeans::contrast(emmeans::emmeans(fit, "group"), "pairwise")
+  expect_equal(
+    result$tidy_result$post_hoc_test$p_val,
+    summary(pairs, adjust = "none")$p.value
+  )
+  expect_equal(
+    result$tidy_result$post_hoc_test$p_adj,
+    summary(pairs, adjust = "tukey")$p.value
+  )
+})
+
 test_that("limma compares the original group levels when model names collide", {
   skip_if_not_installed("limma")
   exp <- contrast_experiment()

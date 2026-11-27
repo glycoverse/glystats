@@ -40,8 +40,10 @@
 #' NAs will be assigned to the results in both main test and post-hoc test.
 #'
 #' **Post-hoc Test:**
-#' Tukey's HSD test for pairwise comparisons (`stats::TukeyHSD()`) is performed
-#' for variables with significant main effects (p_adj < 0.05). Paired analyses
+#' Tukey's HSD test for pairwise comparisons is performed for variables with
+#' significant main effects (p_adj < 0.05). When sample weights are supplied,
+#' the comparisons use weighted group means and their fitted standard errors.
+#' Paired analyses
 #' instead use paired t-tests with Holm correction.
 #'
 #' @returns
@@ -472,7 +474,7 @@ gly_anova <- function(
 #'       - `variable`: Variable name
 #'       - `ref_group`: Reference group
 #'       - `test_group`: Test/treatment/case group
-#'       - `p_val`: Adjusted p-value from emmeans pairwise test
+#'       - `p_val`: Unadjusted p-value from the emmeans pairwise test
 #'       - `p_adj`: Adjusted p-value from emmeans pairwise test
 #'   - `raw_result`: A list containing:
 #'     - `main_test`: A list of raw `aov` model objects.
@@ -1042,6 +1044,7 @@ gly_kruskal <- function(
         reverse = FALSE
       )
       result <- as.data.frame(summary(contrast))
+      result$p.unadj <- summary(contrast, adjust = "none")$p.value
       # emmeans wraps some group labels in parentheses when printing contrasts.
       # Use its marginal-mean grid to recover the original pairwise endpoints.
       pairs <- utils::combn(as.character(as.data.frame(emm)$group), 2L)
@@ -1049,11 +1052,7 @@ gly_kruskal <- function(
       result$test_group <- pairs[2, ]
       result
     } else {
-      tukey <- suppressWarnings(stats::TukeyHSD(main_model, which = "group"))
-      # Tukey orders rows by factor level. Keep the original names, which may
-      # themselves contain the hyphen used in its printed comparison labels.
-      attr(tukey, "group_pairs") <- utils::combn(main_model$xlevels$group, 2L)
-      tukey
+      .oneway_tukey(main_model)
     }
   } else {
     # Dunn test for Kruskal-Wallis
@@ -1097,6 +1096,51 @@ gly_kruskal <- function(
       )
     }
   }
+}
+
+.oneway_tukey <- function(fit) {
+  group <- stats::model.frame(fit)$group
+  weights <- fit$weights %||% rep.int(1, length(group))
+  group_weights <- tapply(weights, group, sum)
+  groups <- names(group_weights)[group_weights > 0]
+  pairs <- utils::combn(groups, 2L)
+  se <- stats::sigma(fit) *
+    sqrt(
+      1 / group_weights[pairs[1, ]] + 1 / group_weights[pairs[2, ]]
+    )
+  df <- stats::df.residual(fit)
+  if (is.null(fit$weights)) {
+    result <- stats::TukeyHSD(fit, which = "group")
+  } else {
+    # TukeyHSD uses unweighted replication counts and residual sums of squares.
+    # In a one-way WLS fit, Var(group mean) = residual variance / sum(weights).
+    fitted_means <- tapply(fit$fitted.values - (fit$offset %||% 0), group, mean)
+    difference <- fitted_means[pairs[2, ]] - fitted_means[pairs[1, ]]
+    width <- stats::qtukey(0.95, length(groups), df) * se / sqrt(2)
+    table <- cbind(
+      diff = difference,
+      lwr = difference - width,
+      upr = difference + width,
+      `p adj` = stats::ptukey(
+        sqrt(2) * abs(difference / se),
+        length(groups),
+        df,
+        lower.tail = FALSE
+      )
+    )
+    rownames(table) <- paste(pairs[2, ], pairs[1, ], sep = "-")
+    result <- structure(
+      list(group = table),
+      class = c("TukeyHSD", "multicomp"),
+      orig.call = fit$call,
+      conf.level = 0.95,
+      ordered = FALSE
+    )
+  }
+  attr(result, "group_pairs") <- pairs
+  attr(result, "p.unadj") <- 2 *
+    stats::pt(-abs(result$group[, "diff"] / se), df)
+  result
 }
 
 # Helper function to generate raw main test results
@@ -1529,7 +1573,7 @@ gly_kruskal <- function(
           variable = var_name,
           ref_group = raw_result$ref_group,
           test_group = raw_result$test_group,
-          p_val = raw_result$p.unadj %||% raw_result$p.value,
+          p_val = raw_result$p.unadj,
           p_adj = raw_result$p.value
         )
       } else {
@@ -1539,7 +1583,7 @@ gly_kruskal <- function(
           variable = var_name,
           ref_group = group_pairs[1, ],
           test_group = group_pairs[2, ],
-          p_val = tukey_df$`p adj`, # TukeyHSD already provides adjusted p-values
+          p_val = as.numeric(attr(raw_result, "p.unadj")),
           p_adj = tukey_df$`p adj`
         )
       }
