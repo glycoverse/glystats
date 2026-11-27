@@ -230,16 +230,6 @@ gly_anova <- function(
     !!!fit_args,
     paired = design$paired
   )
-  raw_post_hoc_test <- .generate_raw_posthoc_results(
-    raw_main_test,
-    data,
-    stats::aov,
-    p_adj_method,
-    posthoc_method = if (design$paired) "paired_t" else "tukey",
-    paired = design$paired
-  )
-
-  # Tibblify results
   main_test <- .tibblify_main_test_results(
     raw_main_test,
     stats::aov,
@@ -252,6 +242,14 @@ gly_anova <- function(
     expr_mat = log_expr_mat,
     groups = groups,
     effect_models = raw_main_test
+  )
+  raw_post_hoc_test <- .generate_raw_posthoc_results(
+    raw_main_test,
+    data,
+    stats::aov,
+    main_test,
+    posthoc_method = if (design$paired) "paired_t" else "tukey",
+    paired = design$paired
   )
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
   post_hoc_test <- .add_fold_change(
@@ -648,8 +646,10 @@ gly_ancova <- function(
     covariates,
     is_logged = TRUE
   )
+  # aov uses sequential sums of squares. Enter the group after every covariate
+  # to test its additional contribution to the fitted model.
   ancova_formula <- stats::reformulate(
-    termlabels = c("group", colnames(covariates)),
+    termlabels = c(colnames(covariates), "group"),
     response = "log_value"
   )
 
@@ -661,19 +661,17 @@ gly_ancova <- function(
     ...,
     !!!model_args
   )
-  raw_post_hoc_test <- .generate_raw_posthoc_results(
-    raw_main_test,
-    data,
-    stats::aov,
-    p_adj_method,
-    posthoc_method = "emmeans"
-  )
-
-  # Tibblify results
   main_test <- .tibblify_main_test_results(
     raw_main_test,
     stats::aov,
     p_adj_method
+  )
+  raw_post_hoc_test <- .generate_raw_posthoc_results(
+    raw_main_test,
+    data,
+    stats::aov,
+    main_test,
+    posthoc_method = "emmeans"
   )
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
   post_hoc_test <- .add_fold_change(
@@ -934,16 +932,6 @@ gly_kruskal <- function(
     ...,
     paired = design$paired
   )
-  raw_post_hoc_test <- .generate_raw_posthoc_results(
-    raw_main_test,
-    data,
-    test_function,
-    p_adj_method,
-    posthoc_method = if (design$paired) "paired_wilcox" else "dunn",
-    paired = design$paired
-  )
-
-  # Tibblify results
   main_test <- .tibblify_main_test_results(
     raw_main_test,
     test_function,
@@ -956,6 +944,14 @@ gly_kruskal <- function(
     expr_mat = log_expr_mat,
     groups = groups,
     effect_models = raw_main_test
+  )
+  raw_post_hoc_test <- .generate_raw_posthoc_results(
+    raw_main_test,
+    data,
+    test_function,
+    main_test,
+    posthoc_method = if (design$paired) "paired_wilcox" else "dunn",
+    paired = design$paired
   )
   post_hoc_test <- .tibblify_posthoc_results(
     raw_post_hoc_test,
@@ -1128,26 +1124,12 @@ gly_kruskal <- function(
   main_test_raw,
   data,
   .f,
-  p_adj_method,
+  main_test,
   posthoc_method = "tukey",
   paired = FALSE
 ) {
-  p_fn <- if (identical(.f, stats::aov)) {
-    function(x) {
-      result <- summary(x)[[1]]
-      result["group", "Pr(>F)"]
-    }
-  } else {
-    function(x) x$p.value
-  }
-  valid_main_test_mods <- main_test_raw[!is.na(main_test_raw)]
-  main_test_p_vals <- purrr::map_dbl(valid_main_test_mods, p_fn)
-  if (!is.null(p_adj_method)) {
-    main_test_p_vals <- stats::p.adjust(main_test_p_vals, method = p_adj_method)
-  }
-  sig_vars <- names(main_test_p_vals)[
-    !is.na(main_test_p_vals) & main_test_p_vals < 0.05
-  ]
+  p <- main_test[["p_adj"]] %||% main_test$p_val
+  sig_vars <- main_test$variable[!is.na(p) & p < 0.05]
   if (length(sig_vars) > 0) {
     posthoc_raw_results <- data %>%
       dplyr::filter(.data$variable %in% sig_vars) %>%
@@ -1342,8 +1324,21 @@ gly_kruskal <- function(
       dplyr::mutate(
         params = purrr::map(
           .data$test_result,
-          ~ {
-            if (rlang::is_na(.x)) NULL else broom::tidy(.x)
+          function(fit) {
+            if (rlang::is_na(fit)) {
+              return(NULL)
+            }
+            terms <- broom::tidy(fit)
+            if (identical(.f, stats::aov)) {
+              # Keep one row even if the group term is aliased. Saturated
+              # models have sums of squares but no F statistic or p-value.
+              terms <- terms[match("group", terms$term), , drop = FALSE]
+              if (!"statistic" %in% names(terms)) {
+                terms$statistic <- NA_real_
+                terms$p.value <- NA_real_
+              }
+            }
+            terms
           }
         )
       ) %>%
@@ -1356,13 +1351,6 @@ gly_kruskal <- function(
     if ("p_value" %in% colnames(result_tbl)) {
       result_tbl <- dplyr::rename(result_tbl, p_val = "p_value")
     }
-  }
-
-  # For ANOVA, filter to keep only group effects (not residuals)
-  # For Kruskal-Wallis, keep all results (there's only one row per variable anyway)
-  if (identical(.f, stats::aov)) {
-    result_tbl <- result_tbl %>%
-      dplyr::filter(is.na(.data$term) | .data$term == "group")
   }
 
   if (!is.null(p_adj_method)) {

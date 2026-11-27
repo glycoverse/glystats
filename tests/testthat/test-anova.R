@@ -512,6 +512,28 @@ test_that(".tibblify_main_test_results validates effect-size inputs", {
   )
 })
 
+test_that("saturated ANOVA fits retain estimable quantities and skip post-hoc tests", {
+  values <- rbind(sparse = c(1, NA, NA, 5, NA, NA), complete = c(1:3, 11:13))
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(abundance = values),
+    colData = S4Vectors::DataFrame(group = rep(c("A", "B"), each = 3))
+  )
+  for (input in list(exp, exp["sparse", ])) {
+    result <- gly_anova(input, log_transform = FALSE)
+    main <- result$tidy_result$main_test
+    sparse <- main[main$.variable == "sparse", ]
+    expect_equal(sparse$df, 1)
+    expect_equal(sparse$sumsq, 8)
+    expect_true(is.na(sparse$statistic))
+    expect_true(is.na(sparse$p_val))
+    expect_true(is.na(sparse$p_adj))
+    expect_false("sparse" %in% result$tidy_result$post_hoc_test$.variable)
+    if (nrow(input) == 2) {
+      expect_identical(result$tidy_result$post_hoc_test$.variable, "complete")
+    }
+  }
+})
+
 test_that("post_hoc_test should not contain NA rows when add_info is TRUE", {
   # Run ANOVA with add_info = TRUE (default)
   result <- suppressMessages(gly_anova(test_gp_exp))

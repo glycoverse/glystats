@@ -138,3 +138,35 @@ test_that("gly_ancova error handling", {
     "covariates must be provided"
   )
 })
+
+test_that("ANCOVA screens features on the covariate-adjusted group effect", {
+  group <- factor(rep(c("A", "B"), each = 12))
+  age <- rep(1:12, 2) + 10 * (group == "B")
+  confounded <- age + 0.3 * rep(c(1, -1, -1, 1), 6)
+  values <- rbind(
+    confounded = confounded,
+    signal = confounded + 4 * (group == "B")
+  )
+  exp <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(abundance = values),
+    colData = S4Vectors::DataFrame(group = group, age = age)
+  )
+
+  res <- gly_ancova(exp, covariate_cols = "age", log_transform = FALSE)
+  expected <- apply(values, 1, function(y) {
+    stats::coef(summary(stats::lm(y ~ group + age)))["groupB", "Pr(>|t|)"]
+  })
+  main <- res$tidy_result$main_test
+  expect_equal(main$p_val, unname(expected[main$.variable]))
+  expect_equal(
+    main$p_adj,
+    unname(stats::p.adjust(expected, "BH")[main$.variable])
+  )
+  expect_identical(unique(res$tidy_result$post_hoc_test$.variable), "signal")
+
+  exp$batch <- group
+  aliased <- gly_ancova(exp, covariate_cols = "batch", log_transform = FALSE)
+  expect_identical(aliased$tidy_result$main_test$.variable, rownames(exp))
+  expect_true(all(is.na(aliased$tidy_result$main_test$p_val)))
+  expect_equal(nrow(aliased$tidy_result$post_hoc_test), 0L)
+})
