@@ -185,8 +185,8 @@ gly_hclust <- function(
   missing_variables <- .all_na_variables(expr_mat)
   expr_mat <- .remove_all_na_variables(expr_mat)
 
-  cannot_fit <- nrow(expr_mat) == 0 ||
-    (on == "variable" && nrow(expr_mat) < 2)
+  n_objects <- if (on == "variable") nrow(expr_mat) else ncol(expr_mat)
+  cannot_fit <- nrow(expr_mat) == 0 || n_objects < 2L
   if (cannot_fit) {
     cluster_type <- on
     cluster_names <- if (on == "variable") variable_order else sample_order
@@ -236,7 +236,7 @@ gly_hclust <- function(
   mat <- .log_transform_expr_mat(mat, log_transform = log_transform)
   # Scale data if requested
   if (scale) {
-    mat <- scale(mat)
+    mat <- .scale_cluster_data(mat)
   }
 
   if (
