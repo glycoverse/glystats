@@ -2,79 +2,21 @@
 
 ## glystats (development version)
 
-- [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
-  tests the group effect after adjustment for every covariate and uses
-  that result to select features for post-hoc comparisons. (#36)
-- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
-  and
-  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
-  retain features with an unestimable group effect or zero residual
-  degrees of freedom and return `NA` for unavailable tests. (#36)
-- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
-  and
-  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
-  report unadjusted pairwise p-values in `p_val` alongside the adjusted
-  values in `p_adj`. Weighted one-way ANOVA uses the fitted group
-  precisions for Tukey p-values and confidence intervals. (#36)
-- SE analyses preserve metadata names containing spaces or punctuation.
-  [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
-  and
-  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
-  keep covariates in sample order when numeric sample labels are
-  reordered, and
-  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
-  accepts covariates named `sample`, `variable`, or `log_value`. (#36)
-- Result tables preserve feature annotations that share names with model
-  estimates or adjusted p-values.
-  [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
-  reports when the requested adjusted p-values are unavailable. (#36)
+## glystats 0.15.1
+
+### Differential tests and model fitting
+
+- Multigroup tests skip post-hoc testing for features with missing
+  omnibus p-values. (#35)
 - Paired tests count only subjects with observed group assignments and
   match subject and group identifiers even when they contain separator
   characters. (#36)
-- [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md)
-  runs post-hoc comparisons on the groups observed for each feature when
-  a group has only missing values. (#36)
-- [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
-  retains nonconstant profiles measured in small units and keeps missing
-  stratum labels distinct from literal annotation values. (#36)
-- [`gly_kmeans()`](https://glycoverse.github.io/glystats/dev/reference/gly_kmeans.md)
-  and
-  [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
-  assign zero distance to constant coordinates during scaling.
-  [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
-  returns an empty tree and missing cluster assignments for a single
-  sample. (#36)
-- [`gly_roc()`](https://glycoverse.github.io/glystats/dev/reference/gly_roc.md)
-  returns an empty coordinate table with the usual columns when every
-  fit fails.
-  [`get_tidy_result()`](https://glycoverse.github.io/glystats/dev/reference/get_tidy_result.md)
-  reports an error when asked to extract a column of a single tidy
-  table. (#36)
-- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md),
-  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md),
-  and
-  [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md)
-  accept comparisons such as `contrasts = "H_vs_C"` and report C
-  relative to H in the tidy post-hoc results. Adjusted p-values still
-  use the full family of comparisons, and character contrasts no longer
-  trigger a model-matrix warning. (#35)
 - Post-hoc tests and fold changes preserve group labels containing
   hyphens or separator text when matching groups and reporting the
   direction of a comparison. (#35)
-- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md),
-  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md),
-  and
-  [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md)
-  apply `subset` consistently to subject matching, omnibus tests, effect
-  sizes, fold changes, and post-hoc tests. (#35)
-- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
-  and
-  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
-  use the original fitted model for parametric post-hoc comparisons,
-  including when model weights are supplied. (#35)
-- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
-  derives eta-squared and partial eta-squared from the model fitted for
-  each feature, including its sample weights. (#35)
+- [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  tests the group effect after adjustment for every covariate and uses
+  that result to select features for post-hoc comparisons. (#36)
 - Repeated-measures
   [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
   keeps sample weights and offsets aligned with subjects after
@@ -84,18 +26,51 @@
   [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
   preserve tidy statistics and post-hoc results when `qr = FALSE` omits
   the QR decomposition from returned models. (#35)
-- Multigroup tests skip post-hoc testing for features with missing
-  omnibus p-values. (#35)
-- Analysis functions that do not support group contrasts report an error
-  when given `contrasts`, including when all assay values are missing.
+- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
+  and
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  report unadjusted pairwise p-values in `p_val` alongside the adjusted
+  values in `p_adj`. Weighted one-way ANOVA uses the fitted group
+  precisions for Tukey p-values and confidence intervals. (#36)
+- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
+  and
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  retain features with an unestimable group effect or zero residual
+  degrees of freedom and return `NA` for unavailable tests. (#36)
+- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
+  and
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  use the original fitted model for parametric post-hoc comparisons,
+  including when model weights are supplied. (#35)
+- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
+  derives eta-squared and partial eta-squared from the model fitted for
+  each feature, including its sample weights. (#35)
+- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md),
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md),
+  and
+  [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md)
+  accept comparisons such as `contrasts = "H_vs_C"` and report C
+  relative to H in the tidy post-hoc results. Adjusted p-values still
+  use the full family of comparisons, and character contrasts no longer
+  trigger a model-matrix warning. (#35)
+- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md),
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md),
+  and
+  [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md)
+  apply `subset` consistently to subject matching, omnibus tests, effect
+  sizes, fold changes, and post-hoc tests. (#35)
+- [`gly_cox()`](https://glycoverse.github.io/glystats/dev/reference/gly_cox.md)
+  forwards sample weights, subsets, and fitting controls to
+  [`survival::coxph()`](https://rdrr.io/pkg/survival/man/coxph.html) and
+  reports unrecognized arguments before fitting individual features.
   (#35)
-- [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
-  distinguishes group levels whose names map to the same R identifier,
-  including when a group name collides with a covariate column in the
-  design. (#35)
-- [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
-  rejects empty or missing contrast labels and comparisons of a group
-  with itself. (#35)
+- [`gly_fold_change()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md)
+  and post hoc comparisons now use the available observations in each
+  group to calculate fold changes. Comparisons involving a group with no
+  observations for a feature return `NA`. (#33)
+- [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md)
+  runs post-hoc comparisons on the groups observed for each feature when
+  a group has only missing values. (#36)
 - [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
   and
   [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md)
@@ -107,6 +82,16 @@
   report unsupported fit arguments and reject `ndups` values other than
   1 that would break the correspondence between results and input
   features. (#35)
+- [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
+  distinguishes group levels whose names map to the same R identifier,
+  including when a group name collides with a covariate column in the
+  design. (#35)
+- [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
+  rejects empty or missing contrast labels and comparisons of a group
+  with itself. (#35)
+- [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
+  retains nonconstant profiles measured in small units and keeps missing
+  stratum labels distinct from literal annotation values. (#36)
 - [`gly_ttest()`](https://glycoverse.github.io/glystats/dev/reference/gly_ttest.md)
   and
   [`gly_wilcox()`](https://glycoverse.github.io/glystats/dev/reference/gly_wilcox.md)
@@ -118,19 +103,9 @@
   [`gly_wilcox()`](https://glycoverse.github.io/glystats/dev/reference/gly_wilcox.md)
   report unrecognized test arguments before fitting individual features.
   (#35)
-- Two-group tests report the selected reference group, and
-  [`gly_roc()`](https://glycoverse.github.io/glystats/dev/reference/gly_roc.md)
-  reports the selected positive class. (#35)
-- [`gly_cox()`](https://glycoverse.github.io/glystats/dev/reference/gly_cox.md)
-  forwards sample weights, subsets, and fitting controls to
-  [`survival::coxph()`](https://rdrr.io/pkg/survival/man/coxph.html) and
-  reports unrecognized arguments before fitting individual features.
-  (#35)
-- [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
-  uses the supplied p-value and fold-change cutoffs even when feature
-  annotations have the same names as the cutoff arguments. (#35)
-- [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
-  reports unused arguments, including misspelled cutoff names. (#35)
+
+### Multivariate analysis and correlation
+
 - [`gly_cor()`](https://glycoverse.github.io/glystats/dev/reference/gly_cor.md)
   accepts `type` as an alias for `method` and reports an error when they
   specify different correlations. (#35)
@@ -139,15 +114,36 @@
   variables supplied through `y` when every assay feature is missing.
   (#35)
 - [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
+  keeps cluster sizes supplied through `members` aligned when
+  all-missing rows are removed. (#35)
+- [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
   routes `method` to the distance or linkage calculation according to
   its value and accepts explicit `dist.method` and `hclust.method`
   arguments. (#35)
-- [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
-  keeps cluster sizes supplied through `members` aligned when
-  all-missing rows are removed. (#35)
+- [`gly_kmeans()`](https://glycoverse.github.io/glystats/dev/reference/gly_kmeans.md)
+  and
+  [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
+  assign zero distance to constant coordinates during scaling.
+  [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
+  returns an empty tree and missing cluster assignments for a single
+  sample. (#36)
 - [`gly_oplsda()`](https://glycoverse.github.io/glystats/dev/reference/gly_oplsda.md)
   passes its default `ortho_i = NA` to `ropls` for automatic selection
   of orthogonal components. Use `ortho_i = 0` for a PLS fit. (#35)
+- Multivariate analyses including
+  [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md),
+  [`gly_tsne()`](https://glycoverse.github.io/glystats/dev/reference/gly_tsne.md),
+  [`gly_umap()`](https://glycoverse.github.io/glystats/dev/reference/gly_umap.md),
+  and
+  [`gly_kmeans()`](https://glycoverse.github.io/glystats/dev/reference/gly_kmeans.md)
+  report unrecognized backend arguments even on all-missing assays.
+  (#35)
+- [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md)
+  accepts the backend scaling argument `scale.` and retains tidy sample
+  scores when `retx = FALSE` omits scores from the raw fit. (#35)
+- [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md)
+  reports the retained components for `rank.` and `tol` and calculates
+  their explained-variance fractions against the total variance. (#35)
 - [`gly_plsda()`](https://glycoverse.github.io/glystats/dev/reference/gly_plsda.md)
   and
   [`gly_oplsda()`](https://glycoverse.github.io/glystats/dev/reference/gly_oplsda.md)
@@ -158,27 +154,41 @@
   direct callers to
   [`gly_oplsda()`](https://glycoverse.github.io/glystats/dev/reference/gly_oplsda.md).
   (#35)
-- [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md)
-  accepts the backend scaling argument `scale.` and retains tidy sample
-  scores when `retx = FALSE` omits scores from the raw fit. (#35)
-- [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md)
-  reports the retained components for `rank.` and `tol` and calculates
-  their explained-variance fractions against the total variance. (#35)
 - [`gly_umap()`](https://glycoverse.github.io/glystats/dev/reference/gly_umap.md)
   returns tidy coordinates alongside the full raw result when options
   such as `ret_model = TRUE` request additional output. (#35)
-- Multivariate analyses including
-  [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md),
-  [`gly_tsne()`](https://glycoverse.github.io/glystats/dev/reference/gly_tsne.md),
-  [`gly_umap()`](https://glycoverse.github.io/glystats/dev/reference/gly_umap.md),
-  and
-  [`gly_kmeans()`](https://glycoverse.github.io/glystats/dev/reference/gly_kmeans.md)
-  report unrecognized backend arguments even on all-missing assays.
+
+### Inputs and result tables
+
+- Analysis functions that do not support group contrasts report an error
+  when given `contrasts`, including when all assay values are missing.
   (#35)
-- [`gly_fold_change()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md)
-  and post hoc comparisons now use the available observations in each
-  group to calculate fold changes. Comparisons involving a group with no
-  observations for a feature return `NA` (#33).
+- Result tables preserve feature annotations that share names with model
+  estimates or adjusted p-values.
+  [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
+  reports when the requested adjusted p-values are unavailable. (#36)
+- [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
+  reports unused arguments, including misspelled cutoff names. (#35)
+- [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
+  uses the supplied p-value and fold-change cutoffs even when feature
+  annotations have the same names as the cutoff arguments. (#35)
+- SE analyses preserve metadata names containing spaces or punctuation.
+  [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
+  and
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  keep covariates in sample order when numeric sample labels are
+  reordered, and
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  accepts covariates named `sample`, `variable`, or `log_value`. (#36)
+- Two-group tests report the selected reference group, and
+  [`gly_roc()`](https://glycoverse.github.io/glystats/dev/reference/gly_roc.md)
+  reports the selected positive class. (#35)
+- [`gly_roc()`](https://glycoverse.github.io/glystats/dev/reference/gly_roc.md)
+  returns an empty coordinate table with the usual columns when every
+  fit fails.
+  [`get_tidy_result()`](https://glycoverse.github.io/glystats/dev/reference/get_tidy_result.md)
+  reports an error when asked to extract a column of a single tidy
+  table. (#36)
 
 ## glystats 0.15.0
 
