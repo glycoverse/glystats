@@ -173,6 +173,36 @@ test_that("gly_set_test constructs complete and connected sets", {
   expect_equal(complete$meta_data, S4Vectors::metadata(exp))
 })
 
+test_that("automatic set construction retains variation in small measurement units", {
+  exp <- make_hotelling_exp()[c("A", "B", "A_alias"), ]
+  values <- log2(SummarizedExperiment::assay(exp) + 1e-6)
+  SummarizedExperiment::assay(exp) <- values
+  reference <- gly_set_test(exp, log_transform = FALSE)
+  SummarizedExperiment::assay(exp) <- values * 1e-7
+  for (method in c("connected", "complete")) {
+    fit <- gly_set_test(exp, clustering = method, log_transform = FALSE)
+    expect_identical(
+      fit$raw_result$definitions,
+      reference$raw_result$definitions
+    )
+    expect_equal(fit$tidy_result$sets$p_val, reference$tidy_result$sets$p_val)
+  }
+})
+
+test_that("set strata distinguish missing values and literal annotation strings", {
+  exp <- make_correlated_set_exp()[rep("A", 5), ]
+  rownames(exp) <- letters[1:5]
+  SummarizedExperiment::rowData(exp) <- S4Vectors::DataFrame(
+    protein = c(NA, "<NA>", "a\rb", "a", NA),
+    site = c("one", "one", "c", "b\rc", "one")
+  )
+  fit <- gly_set_test(exp, within = c("protein", "site"))
+  expect_identical(
+    unname(fit$raw_result$definitions),
+    list(c("a", "e"), "b", "c", "d")
+  )
+})
+
 test_that("gly_set_test records exclusions and honors within strata", {
   exp <- make_correlated_set_exp()
   SummarizedExperiment::rowData(exp)$site <- c(
