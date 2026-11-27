@@ -207,4 +207,7 @@ test_that("failed ROC fits return a typed empty coordinate table", {
   )
   expect_identical(coords, expected)
   expect_true(all(is.na(result$tidy_result$auc$auc)))
+  empty <- gly_roc(exp[integer(), ], add_info = FALSE)
+  expect_identical(empty$tidy_result$coords, expected)
+  expect_identical(empty$tidy_result$auc$.variable, character())
 })

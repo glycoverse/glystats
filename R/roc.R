@@ -162,15 +162,16 @@ gly_roc <- function(
   cli::cli_alert_info("Using {.val {pos_class}} as positive class")
 
   expr_mat <- .log_transform_expr_mat(expr_mat, log_transform = log_transform)
+  variables <- as.character(rownames(expr_mat))
 
   # Prepare data for ROC analysis
   response <- as.numeric(groups == pos_class)
   safe_f <- purrr::possibly(pROC::roc, otherwise = NA)
   roc_objs <- purrr::map(
-    rownames(expr_mat),
+    variables,
     ~ suppressMessages(safe_f(response, expr_mat[.x, ]))
   )
-  names(roc_objs) <- rownames(expr_mat)
+  names(roc_objs) <- variables
   n_na <- sum(is.na(roc_objs))
   if (n_na > 0) {
     cli::cli_warn("{.val {n_na}} variables failed to fit the model")
@@ -193,7 +194,7 @@ gly_roc <- function(
     c(auc_ci_low = ci[1], auc_ci_high = ci[3])
   })
   roc_auc_tb <- tibble::tibble(
-    variable = rownames(expr_mat),
+    variable = variables,
     auc = purrr::map_dbl(roc_objs, ~ if (rlang::is_na(.x)) NA else .x$auc),
     auc_ci_low = purrr::map_dbl(auc_ci, 1),
     auc_ci_high = purrr::map_dbl(auc_ci, 2)
@@ -202,14 +203,16 @@ gly_roc <- function(
   coords_tb <- purrr::map(roc_objs, function(roc) {
     if (!rlang::is_na(roc)) tibble::as_tibble(pROC::coords(roc, "all"))
   }) |>
-    purrr::list_rbind(
-      names_to = "variable",
-      ptype = tibble::tibble(
-        threshold = double(),
-        specificity = double(),
-        sensitivity = double()
-      )
-    )
+    dplyr::bind_rows(.id = "variable")
+  coords_tb <- dplyr::bind_rows(
+    tibble::tibble(
+      variable = character(),
+      threshold = double(),
+      specificity = double(),
+      sensitivity = double()
+    ),
+    coords_tb
+  )
 
   # Create tidy result list
   tidy_result <- list(auc = roc_auc_tb, coords = coords_tb)
