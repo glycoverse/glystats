@@ -56,3 +56,29 @@ test_that("add_info parameter works correctly for functions returning tibbles wi
     c(".sample", "group", "PC", "value")
   )
 })
+
+test_that("limma keeps native estimates alongside colliding feature annotations", {
+  skip_if_not_installed("limma")
+  exp <- model_argument_experiment()
+  SummarizedExperiment::rowData(exp)$estimate <- paste0(
+    "label",
+    seq_len(nrow(exp))
+  )
+  for (scale in c("raw", "log", "log10", "logx")) {
+    S4Vectors::metadata(exp)$scale <- scale
+    expected <- gly_limma(
+      exp,
+      log_transform = FALSE,
+      add_info = FALSE
+    )$tidy_result
+    got <- gly_limma(exp, log_transform = FALSE)$tidy_result
+    expect_equal(
+      got$estimate,
+      expected$estimate[match(got$.variable, expected$.variable)]
+    )
+    expect_identical(
+      got$estimate_metadata,
+      SummarizedExperiment::rowData(exp)$estimate
+    )
+  }
+})

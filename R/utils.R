@@ -182,12 +182,23 @@
   ordering <- order(indices)
   tbl <- tbl[ordering, , drop = FALSE]
   indices <- indices[ordering]
-  # Preserve all ordinary metadata columns without overwriting result fields.
-  # Reserve existing names first so an original *_metadata column is kept.
-  used <- union(names(tbl), names(info))
+  info <- .name_result_annotations(info, names(tbl))
+  dplyr::bind_cols(
+    tbl[, key, drop = FALSE],
+    info[indices, , drop = FALSE],
+    tbl[, setdiff(names(tbl), key), drop = FALSE]
+  )
+}
+
+.name_result_annotations <- function(info, result_names) {
+  # An annotation cannot supply an adjusted p-value when adjustment is off.
+  if ("p_val" %in% result_names) {
+    result_names <- union(result_names, "p_adj")
+  }
+  used <- union(result_names, names(info))
   info_names <- names(info)
   for (i in seq_along(info_names)) {
-    if (info_names[i] %in% names(tbl)) {
+    if (info_names[i] %in% result_names) {
       candidate <- paste0(info_names[i], "_metadata")
       while (candidate %in% used) {
         candidate <- paste0(candidate, "_metadata")
@@ -197,11 +208,7 @@
     }
   }
   names(info) <- info_names
-  dplyr::bind_cols(
-    tbl[, key, drop = FALSE],
-    info[indices, , drop = FALSE],
-    tbl[, setdiff(names(tbl), key), drop = FALSE]
-  )
+  info
 }
 
 #' Extract metadata from a glystats data container
@@ -470,15 +477,11 @@
   }
 
   var_info <- .get_var_info(exp)
-  # Remove the variable column from var_info to avoid duplication
-  var_info_subset <- var_info[,
-    !colnames(var_info) %in% "variable",
-    drop = FALSE
-  ]
-
-  # Only join if there are columns other than variable
-  if (ncol(var_info_subset) > 0) {
-    # Join var_info to tbl, keeping all rows from tbl
+  if (ncol(var_info) > 1L) {
+    var_info <- .name_result_annotations(
+      var_info,
+      setdiff(names(tbl), "variable")
+    )
     tbl <- dplyr::right_join(var_info, tbl, by = "variable")
   }
 
@@ -495,15 +498,11 @@
   }
 
   sample_info <- .get_sample_info(exp)
-  # Remove the sample column from sample_info to avoid duplication
-  sample_info_subset <- sample_info[,
-    !colnames(sample_info) %in% "sample",
-    drop = FALSE
-  ]
-
-  # Only join if there are columns other than sample
-  if (ncol(sample_info_subset) > 0) {
-    # Join sample_info to tbl, keeping all rows from tbl
+  if (ncol(sample_info) > 1L) {
+    sample_info <- .name_result_annotations(
+      sample_info,
+      setdiff(names(tbl), "sample")
+    )
     tbl <- dplyr::right_join(sample_info, tbl, by = "sample")
   }
 

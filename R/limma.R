@@ -170,7 +170,8 @@ gly_limma <- function(
     log_transform = log_transform
   )
 
-  # Process results with add_info logic
+  # Finalize model statistics before attaching annotations with the same names.
+  result <- .limma_effect_scale(result, transformation)
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -181,7 +182,7 @@ gly_limma <- function(
   result$meta_data <- meta_data
   result$preprocessing <- transformation
 
-  .record_se_identity(.limma_effect_scale(result, transformation), exp)
+  .record_se_identity(result, exp)
 }
 
 #' Run the internal computation for `gly_limma()`

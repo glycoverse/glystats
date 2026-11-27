@@ -285,13 +285,6 @@ filter_sig_vars.glystats_linear_model_res <- function(
       "{.arg fc_cutoff} cannot be used with {.fn gly_linear_model} results because model estimates are not necessarily fold changes."
     )
   }
-  if (!is.null(p_adj_cutoff) && !"p_adj" %in% colnames(res$tidy_result)) {
-    cli::cli_abort(c(
-      "{.arg p_adj_cutoff} cannot be used because this result has no adjusted p-values.",
-      "i" = "Set {.arg p_adj_cutoff} to NULL and provide {.arg p_val_cutoff}."
-    ))
-  }
-
   available_terms <- unique(res$tidy_result$term)
   if (!is.null(term) && !term %in% available_terms) {
     cli::cli_abort(c(
@@ -376,6 +369,15 @@ filter_sig_vars.glystats_linear_model_res <- function(
     df <- dplyr::filter(df, abs(.data$log2fc) > log2(.env$fc_cutoff))
   }
   if (!is.null(p_adj_cutoff)) {
+    if (!"p_adj" %in% names(df)) {
+      cli::cli_abort(
+        c(
+          "{.arg p_adj_cutoff} cannot be used because this result has no adjusted p-values.",
+          "i" = "Set {.arg p_adj_cutoff} to NULL and provide {.arg p_val_cutoff}."
+        ),
+        call = rlang::caller_env()
+      )
+    }
     df <- dplyr::filter(df, .data$p_adj < .env$p_adj_cutoff)
   }
   df

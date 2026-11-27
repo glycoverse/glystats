@@ -204,3 +204,27 @@ test_that("filter_sig_vars works for limma for multiple groups", {
   sig_exp <- filter_sig_vars(exp, result, comparison = "H_vs_C")
   expect_equal(nrow(sig_exp), 7)
 })
+
+test_that("feature annotations cannot supply missing adjusted p-values", {
+  exp <- model_argument_experiment()
+  SummarizedExperiment::rowData(exp)$p_adj <- 0
+  SummarizedExperiment::rowData(exp)$p_adj_metadata <- 1
+  for (fit in list(gly_ttest, gly_anova)) {
+    result <- fit(exp, p_adj_method = NULL)
+    tbl <- if (identical(fit, gly_anova)) {
+      result$tidy_result$main_test
+    } else {
+      result$tidy_result
+    }
+    expect_false("p_adj" %in% names(tbl))
+    expect_identical(tbl$p_adj_metadata_metadata, rep(0, nrow(exp)))
+    expect_identical(tbl$p_adj_metadata, rep(1, nrow(exp)))
+    expect_error(filter_sig_vars(exp, result), "has no adjusted p-values")
+    expect_no_error(filter_sig_vars(
+      exp,
+      result,
+      p_val_cutoff = 0.05,
+      p_adj_cutoff = NULL
+    ))
+  }
+})
