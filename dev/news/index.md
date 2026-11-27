@@ -2,6 +2,54 @@
 
 ## glystats (development version)
 
+- [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  tests the group effect after adjustment for every covariate and uses
+  that result to select features for post-hoc comparisons. (#36)
+- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
+  and
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  retain features with an unestimable group effect or zero residual
+  degrees of freedom and return `NA` for unavailable tests. (#36)
+- [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md)
+  and
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  report unadjusted pairwise p-values in `p_val` alongside the adjusted
+  values in `p_adj`. Weighted one-way ANOVA uses the fitted group
+  precisions for Tukey p-values and confidence intervals. (#36)
+- SE analyses preserve metadata names containing spaces or punctuation.
+  [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md)
+  and
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  keep covariates in sample order when numeric sample labels are
+  reordered, and
+  [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md)
+  accepts covariates named `sample`, `variable`, or `log_value`. (#36)
+- Result tables preserve feature annotations that share names with model
+  estimates or adjusted p-values.
+  [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
+  reports when the requested adjusted p-values are unavailable. (#36)
+- Paired tests count only subjects with observed group assignments and
+  match subject and group identifiers even when they contain separator
+  characters. (#36)
+- [`gly_kruskal()`](https://glycoverse.github.io/glystats/dev/reference/gly_kruskal.md)
+  runs post-hoc comparisons on the groups observed for each feature when
+  a group has only missing values. (#36)
+- [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
+  retains nonconstant profiles measured in small units and keeps missing
+  stratum labels distinct from literal annotation values. (#36)
+- [`gly_kmeans()`](https://glycoverse.github.io/glystats/dev/reference/gly_kmeans.md)
+  and
+  [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
+  assign zero distance to constant coordinates during scaling.
+  [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)
+  returns an empty tree and missing cluster assignments for a single
+  sample. (#36)
+- [`gly_roc()`](https://glycoverse.github.io/glystats/dev/reference/gly_roc.md)
+  returns an empty coordinate table with the usual columns when every
+  fit fails.
+  [`get_tidy_result()`](https://glycoverse.github.io/glystats/dev/reference/get_tidy_result.md)
+  reports an error when asked to extract a column of a single tidy
+  table. (#36)
 - [`gly_anova()`](https://glycoverse.github.io/glystats/dev/reference/gly_anova.md),
   [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md),
   and

@@ -55,14 +55,17 @@ It's useful to be used in pipes.</p>
 
 
 <dt id="arg-which">which<a class="anchor" aria-label="anchor" href="#arg-which"></a></dt>
-<dd><p>Used to specify which element to get, when the result is a list.
+<dd><p>A single component name specifying which element to get when
+the result is a list.
 For glystats results with only one tidy result (e.g. <code><a href="gly_ttest.html">gly_ttest()</a></code>), this argument is not needed.
 For others (e.g. <code><a href="gly_anova.html">gly_anova()</a></code>), this argument is required to specify which tidy result to get.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble.</p>
+    <p><code>get_tidy_result()</code> returns a tibble. <code>get_raw_result()</code> returns
+the stored raw result or its selected component, which may be a fitted
+model, a list of models, or <code>NULL</code> when no model was fitted.</p>
     </div>
 
     <div class="section level2">

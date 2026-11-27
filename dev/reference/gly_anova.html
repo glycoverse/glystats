@@ -157,8 +157,10 @@ eta-squared for the group term.</p>
 <p>For any variable failed to fit a <code><a href="https://rdrr.io/r/stats/aov.html" class="external-link">stats::aov()</a></code> model,
 NAs will be assigned to the results in both main test and post-hoc test.</p>
 <p><strong>Post-hoc Test:</strong>
-Tukey's HSD test for pairwise comparisons (<code><a href="https://rdrr.io/r/stats/TukeyHSD.html" class="external-link">stats::TukeyHSD()</a></code>) is performed
-for variables with significant main effects (p_adj &lt; 0.05). Paired analyses
+Tukey's HSD test for pairwise comparisons is performed for variables with
+significant main effects (p_adj &lt; 0.05). When sample weights are supplied,
+the comparisons use weighted group means and their fitted standard errors.
+Paired analyses
 instead use paired t-tests with Holm correction.</p>
     </div>
     <div class="section level2">

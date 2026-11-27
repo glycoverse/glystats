@@ -59,7 +59,8 @@ not the sample IDs. When `add_info = TRUE`, annotations are attached by
 the positions recorded by the axis IDs. A metadata column colliding with
 a result field receives an `_metadata` suffix, repeated until the name
 is unused; its values are preserved, and result identifiers/statistics
-are never overwritten.
+are never overwritten. In tables with p-values, the name `p_adj` is
+reserved for adjusted p-values even when adjustment is disabled.
 
 [`filter_sig_vars()`](https://glycoverse.github.io/glystats/dev/reference/filter_sig_vars.md)
 can map generated variable IDs back to the original input rows,

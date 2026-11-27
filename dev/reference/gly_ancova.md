@@ -124,7 +124,7 @@ A list containing four elements:
 
     - `test_group`: Test/treatment/case group
 
-    - `p_val`: Adjusted p-value from emmeans pairwise test
+    - `p_val`: Unadjusted p-value from the emmeans pairwise test
 
     - `p_adj`: Adjusted p-value from emmeans pairwise test
 

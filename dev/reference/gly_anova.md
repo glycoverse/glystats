@@ -156,10 +156,11 @@ For any variable failed to fit a
 [`stats::aov()`](https://rdrr.io/r/stats/aov.html) model, NAs will be
 assigned to the results in both main test and post-hoc test.
 
-**Post-hoc Test:** Tukey's HSD test for pairwise comparisons
-([`stats::TukeyHSD()`](https://rdrr.io/r/stats/TukeyHSD.html)) is
+**Post-hoc Test:** Tukey's HSD test for pairwise comparisons is
 performed for variables with significant main effects (p_adj \< 0.05).
-Paired analyses instead use paired t-tests with Holm correction.
+When sample weights are supplied, the comparisons use weighted group
+means and their fitted standard errors. Paired analyses instead use
+paired t-tests with Holm correction.
 
 ## SE identifiers
 
