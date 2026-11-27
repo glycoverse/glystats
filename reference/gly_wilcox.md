@@ -56,6 +56,9 @@ gly_wilcox(
 
   Additional arguments passed to
   [`stats::wilcox.test()`](https://rdrr.io/r/stats/wilcox.test.html).
+  With `paired = TRUE` and no `subject_col`, observations are paired in
+  order within each group. Both groups must contain the same number of
+  samples.
 
 - subject_col:
 

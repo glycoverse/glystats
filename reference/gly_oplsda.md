@@ -44,7 +44,9 @@ gly_oplsda(
 - ortho_i:
 
   An integer indicating the number of orthogonal components to include.
-  Default is NA (automatic).
+  Default is NA (automatic selection by `ropls`). Use 0 for a PLS fit.
+  Automatic selection can return no model when the data do not support
+  an orthogonal component.
 
 - scale:
 

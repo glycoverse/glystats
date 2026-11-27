@@ -57,9 +57,10 @@ gly_hclust(
 
   Additional arguments passed to
   [`stats::dist()`](https://rdrr.io/r/stats/dist.html) and
-  [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html). Note: if
-  both functions need a `method` parameter, use `dist.method` for
-  distance and `hclust.method` for clustering method.
+  [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html). A distance
+  method such as `method = "manhattan"` selects the distance metric. A
+  linkage such as `method = "average"` selects the clustering method.
+  Use `dist.method` and `hclust.method` to specify both.
 
 - log_transform:
 

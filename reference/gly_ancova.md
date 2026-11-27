@@ -17,7 +17,9 @@ gly_ancova(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = NULL
+  log_transform = NULL,
+  contrasts = NULL,
+  subset = NULL
 )
 ```
 
@@ -68,6 +70,23 @@ gly_ancova(
   the supplied values unchanged. This argument must be named when it
   follows `...`.
 
+- contrasts:
+
+  Optional character vector selecting post-hoc comparisons to report,
+  e.g. `"H_vs_C"` compares C to reference H. The form `"H-C"` is also
+  accepted when group names contain no hyphens. The omnibus test uses
+  all groups, and post-hoc p-values retain the all-pairs adjustment. Raw
+  post-hoc results contain all comparisons. By default all pairs are
+  reported. A named list is passed to
+  [`stats::aov()`](https://rdrr.io/r/stats/aov.html) for factor contrast
+  coding.
+
+- subset:
+
+  Optional logical or integer index selecting samples in input order.
+  Selection precedes subject matching, model fitting, post-hoc tests,
+  and effect-size and fold-change calculations.
+
 ## Value
 
 A list containing four elements:
@@ -105,7 +124,7 @@ A list containing four elements:
 
     - `test_group`: Test/treatment/case group
 
-    - `p_val`: Adjusted p-value from emmeans pairwise test
+    - `p_val`: Unadjusted p-value from the emmeans pairwise test
 
     - `p_adj`: Adjusted p-value from emmeans pairwise test
 

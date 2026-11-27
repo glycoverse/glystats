@@ -15,7 +15,9 @@ gly_kruskal(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = NULL
+  log_transform = NULL,
+  contrasts = NULL,
+  subset = NULL
 )
 ```
 
@@ -67,6 +69,20 @@ gly_kruskal(
   it warns and uses the supplied values unchanged. `FALSE` always uses
   the supplied values unchanged. This argument must be named when it
   follows `...`.
+
+- contrasts:
+
+  Optional character vector selecting post-hoc comparisons, e.g.
+  `"H_vs_C"` with H as reference. As in
+  [`gly_anova()`](https://glycoverse.github.io/glystats/reference/gly_anova.md),
+  the main test and the all-pairs adjustment use all groups. Raw results
+  retain all pairs.
+
+- subset:
+
+  Optional logical or integer index selecting samples in input order.
+  Selection precedes subject matching, model fitting, post-hoc tests,
+  and effect-size and fold-change calculations.
 
 ## Value
 
