@@ -17,7 +17,9 @@ For glystats results with only one tidy result (e.g. \code{\link[=gly_ttest]{gly
 For others (e.g. \code{\link[=gly_anova]{gly_anova()}}), this argument is required to specify which tidy result to get.}
 }
 \value{
-A tibble.
+\code{get_tidy_result()} returns a tibble. \code{get_raw_result()} returns
+the stored raw result or its selected component, which may be a fitted
+model, a list of models, or \code{NULL} when no model was fitted.
 }
 \description{
 Syntax sugar for \verb{$tidy_result} and \verb{$raw_result} elements of a glystats result object.

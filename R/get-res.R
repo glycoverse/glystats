@@ -8,7 +8,9 @@
 #'   For glystats results with only one tidy result (e.g. [gly_ttest()]), this argument is not needed.
 #'   For others (e.g. [gly_anova()]), this argument is required to specify which tidy result to get.
 #'
-#' @returns A tibble.
+#' @returns `get_tidy_result()` returns a tibble. `get_raw_result()` returns
+#'   the stored raw result or its selected component, which may be a fitted
+#'   model, a list of models, or `NULL` when no model was fitted.
 #'
 #' @examples
 #' library(glyexp)
@@ -32,30 +34,41 @@
 #' @export
 get_tidy_result <- function(res, which = NULL) {
   checkmate::assert_class(res, "glystats_res")
+  checkmate::assert_string(which, null.ok = TRUE)
 
-  if (is.null(which)) {
-    if (!tibble::is_tibble(res$tidy_result)) {
+  result <- res$tidy_result
+  if (tibble::is_tibble(result)) {
+    if (!is.null(which)) {
       cli::cli_abort(c(
-        "{.arg which} must be provided for {.cls {class(res)[[1]]}} result.",
-        "i" = "Available tibbles: {.val {names(res$tidy_result)}}"
+        "This analysis has a single tidy result.",
+        "i" = "Omit {.arg which} to retrieve the tibble."
       ))
-    } else {
-      return(res$tidy_result)
     }
+    return(result)
   }
-
-  if (!which %in% names(res$tidy_result)) {
+  if (is.null(which)) {
     cli::cli_abort(c(
-      "{.arg which} must be one of {.val {names(res$tidy_result)}}"
+      "{.arg which} must be provided for {.cls {class(res)[[1]]}} result.",
+      "i" = "Available tibbles: {.val {names(result)}}"
     ))
   }
-  return(res$tidy_result[[which]])
+  if (!which %in% names(result)) {
+    cli::cli_abort(c(
+      "{.arg which} must be one of {.val {names(result)}}"
+    ))
+  }
+  result <- result[[which]]
+  if (!tibble::is_tibble(result)) {
+    cli::cli_abort("The selected tidy result must be a tibble.")
+  }
+  result
 }
 
 #' @rdname get_tidy_result
 #' @export
 get_raw_result <- function(res, which = NULL) {
   checkmate::assert_class(res, "glystats_res")
+  checkmate::assert_string(which, null.ok = TRUE)
   if (is.null(which)) {
     return(res$raw_result)
   }

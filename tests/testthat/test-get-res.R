@@ -22,4 +22,5 @@ test_that("get_tidy_result works when tidy_result is already a tibble", {
   result <- suppressMessages(gly_fold_change(test_gp_se))
   expect_no_error(tidy_result <- get_tidy_result(result))
   expect_s3_class(tidy_result, "tbl_df")
+  expect_error(get_tidy_result(result, "log2fc"), "single tidy result")
 })

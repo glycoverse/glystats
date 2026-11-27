@@ -199,14 +199,17 @@ gly_roc <- function(
     auc_ci_high = purrr::map_dbl(auc_ci, 2)
   )
 
-  coords_tb <- roc_objs %>%
-    purrr::map(
-      ~ tibble::as_tibble(
-        if (rlang::is_na(.x)) NULL else pROC::coords(.x, "all")
+  coords_tb <- purrr::map(roc_objs, function(roc) {
+    if (!rlang::is_na(roc)) tibble::as_tibble(pROC::coords(roc, "all"))
+  }) |>
+    purrr::list_rbind(
+      names_to = "variable",
+      ptype = tibble::tibble(
+        threshold = double(),
+        specificity = double(),
+        sensitivity = double()
       )
-    ) %>%
-    rlang::set_names(rownames(expr_mat)) %>%
-    dplyr::bind_rows(.id = "variable")
+    )
 
   # Create tidy result list
   tidy_result <- list(auc = roc_auc_tb, coords = coords_tb)

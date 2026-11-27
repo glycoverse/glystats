@@ -193,3 +193,18 @@ test_that(".analyze_roc works correctly", {
   expect_equal(nrow(result$tidy_result$auc), 10)
   expect_equal(length(result$raw_result), 10)
 })
+test_that("failed ROC fits return a typed empty coordinate table", {
+  skip_if_not_installed("pROC")
+  exp <- model_argument_experiment()
+  SummarizedExperiment::assay(exp)[, exp$group == "B"] <- NA_real_
+  expect_warning(result <- gly_roc(exp, add_info = FALSE), "failed to fit")
+  coords <- get_tidy_result(result, "coords")
+  expected <- tibble::tibble(
+    .variable = character(),
+    threshold = double(),
+    specificity = double(),
+    sensitivity = double()
+  )
+  expect_identical(coords, expected)
+  expect_true(all(is.na(result$tidy_result$auc$auc)))
+})
