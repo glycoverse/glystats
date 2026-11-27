@@ -1057,10 +1057,10 @@ gly_kruskal <- function(
   } else {
     # Dunn test for Kruskal-Wallis
     # Check number of groups - FSA::dunnTest fails with only 2 groups
-    observed_groups <- droplevels(data_nested$group[
-      !is.na(data_nested$log_value)
-    ])
-    group_levels <- levels(observed_groups)
+    observed <- stats::complete.cases(data_nested$log_value, data_nested$group)
+    data_nested <- data_nested[observed, , drop = FALSE]
+    data_nested$group <- droplevels(data_nested$group)
+    group_levels <- levels(data_nested$group)
     n_groups <- length(group_levels)
 
     if (n_groups == 2) {
