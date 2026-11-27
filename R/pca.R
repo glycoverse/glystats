@@ -56,6 +56,7 @@ gly_pca <- function(
   ...,
   log_transform = NULL
 ) {
+  .check_no_contrasts(...)
   checkmate::assert_logical(
     log_transform,
     len = 1,

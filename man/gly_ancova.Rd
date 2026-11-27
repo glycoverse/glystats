@@ -11,7 +11,8 @@ gly_ancova(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = NULL
+  log_transform = NULL,
+  contrasts = NULL
 )
 }
 \arguments{
@@ -40,6 +41,13 @@ raw data; if the input is already on \code{"log"}, \code{"log2"}, \code{"log10"}
 \code{"logx"}, it warns and uses the supplied values unchanged. \code{FALSE} always
 uses the supplied values unchanged. This argument must be named when it
 follows \code{...}.}
+
+\item{contrasts}{Optional character vector selecting post-hoc comparisons to
+report, e.g. \code{"H_vs_C"} compares C to reference H. The form \code{"H-C"} is
+also accepted when group names contain no hyphens. The omnibus test uses
+all groups, and post-hoc p-values retain the all-pairs adjustment. Raw
+post-hoc results contain all comparisons. By default all pairs are reported.
+A named list is passed to \code{stats::aov()} for factor contrast coding.}
 }
 \value{
 A list containing four elements:

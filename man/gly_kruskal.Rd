@@ -11,7 +11,8 @@ gly_kruskal(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = NULL
+  log_transform = NULL,
+  contrasts = NULL
 )
 }
 \arguments{
@@ -41,6 +42,10 @@ raw data; if the input is already on \code{"log"}, \code{"log2"}, \code{"log10"}
 \code{"logx"}, it warns and uses the supplied values unchanged. \code{FALSE} always
 uses the supplied values unchanged. This argument must be named when it
 follows \code{...}.}
+
+\item{contrasts}{Optional character vector selecting post-hoc comparisons,
+e.g. \code{"H_vs_C"} with H as reference. As in \code{\link[=gly_anova]{gly_anova()}}, the main test
+and the all-pairs adjustment use all groups. Raw results retain all pairs.}
 }
 \value{
 A list containing four elements:

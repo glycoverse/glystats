@@ -61,6 +61,7 @@ gly_plsda <- function(
   ...,
   log_transform = NULL
 ) {
+  .check_no_contrasts(...)
   # Check package availability
   rlang::check_installed("ropls")
 

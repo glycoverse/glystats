@@ -309,6 +309,16 @@
   }
 }
 
+# Some modeling backends accept and discard unknown arguments in their dots.
+.check_no_contrasts <- function(..., hint = NULL) {
+  if ("contrasts" %in% ...names()) {
+    cli::cli_abort(
+      c("{.arg contrasts} is not supported by this analysis.", i = hint),
+      call = rlang::caller_env()
+    )
+  }
+}
+
 # Extract and convert groups to factor
 .extract_groups <- function(sample_info, group_col) {
   groups <- sample_info[[group_col]]

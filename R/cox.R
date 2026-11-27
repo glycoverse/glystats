@@ -58,6 +58,7 @@ gly_cox <- function(
   ...,
   log_transform = NULL
 ) {
+  .check_no_contrasts(...)
   # Validate inputs
   checkmate::assert_logical(
     log_transform,

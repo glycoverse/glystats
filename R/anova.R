@@ -182,21 +182,9 @@ gly_anova <- function(
     cli::cli_abort("groups must have at least 2 levels for ANOVA")
   }
 
-  comparisons <- NULL
-  model_args <- NULL
-  if (is.character(contrasts)) {
-    checkmate::assert_character(contrasts, min.len = 1, any.missing = FALSE)
-    comparisons <- unique(unname(.parse_custom_contrasts(
-      contrasts,
-      levels(groups)
-    )))
-    if (any(purrr::map_lgl(comparisons, \(pair) pair[1] == pair[2]))) {
-      cli::cli_abort("A post-hoc contrast must compare two different groups.")
-    }
-    cli::cli_alert_info("Reporting post-hoc comparisons: {.val {contrasts}}")
-  } else if (!is.null(contrasts)) {
-    checkmate::assert_list(contrasts)
-    model_args <- list(contrasts = contrasts)
+  model_args <- if (is.list(contrasts)) list(contrasts = contrasts)
+  comparisons <- if (is.null(model_args)) {
+    .parse_posthoc_comparisons(contrasts, groups)
   }
 
   design <- .match_paired_samples(
@@ -236,7 +224,6 @@ gly_anova <- function(
     data,
     stats::aov,
     p_adj_method,
-    formula = anova_formula,
     posthoc_method = if (design$paired) "paired_t" else "tukey",
     paired = design$paired
   )
@@ -264,31 +251,11 @@ gly_anova <- function(
     input_scale = input_scale
   )
 
-  if (!is.null(comparisons)) {
-    post_hoc_test <- .select_anova_comparisons(
-      post_hoc_test,
-      comparisons,
-      levels(groups)
-    )
-  }
-  significant <- post_hoc_test |>
-    dplyr::filter(.data$p_adj < 0.05) |>
-    dplyr::group_by(.data$variable) |>
-    dplyr::summarise(
-      post_hoc = paste(
-        paste0(.data$ref_group, "_vs_", .data$test_group),
-        collapse = ";"
-      )
-    )
-  main_test$post_hoc <- significant$post_hoc[match(
-    main_test$variable,
-    significant$variable
-  )]
-
-  # Assemble tidy results
-  tidy_result <- list(
-    main_test = main_test,
-    post_hoc_test = post_hoc_test
+  tidy_result <- .report_posthoc(
+    main_test,
+    post_hoc_test,
+    comparisons,
+    levels(groups)
   )
 
   # Assemble raw results
@@ -307,8 +274,50 @@ gly_anova <- function(
   )
 }
 
+.parse_posthoc_comparisons <- function(contrasts, groups) {
+  if (is.null(contrasts)) {
+    return(NULL)
+  }
+  comparisons <- .parse_custom_contrasts(contrasts, levels(groups))
+  cli::cli_alert_info("Reporting post-hoc comparisons: {.val {contrasts}}")
+  unique(unname(comparisons))
+}
+
+.report_posthoc <- function(
+  main_test,
+  post_hoc_test,
+  comparisons,
+  group_levels
+) {
+  if (!is.null(comparisons)) {
+    post_hoc_test <- .select_posthoc_comparisons(
+      post_hoc_test,
+      comparisons,
+      group_levels
+    )
+  }
+  significant <- post_hoc_test |>
+    dplyr::filter(.data$p_adj < 0.05) |>
+    dplyr::group_by(.data$variable) |>
+    dplyr::summarise(
+      post_hoc = paste(
+        paste0(.data$ref_group, "_vs_", .data$test_group),
+        collapse = ";"
+      )
+    )
+  main_test$post_hoc <- significant$post_hoc[match(
+    main_test$variable,
+    significant$variable
+  )]
+
+  list(
+    main_test = main_test,
+    post_hoc_test = post_hoc_test
+  )
+}
+
 # The shared contrast parser returns each pair in test, reference order.
-.select_anova_comparisons <- function(post_hoc, comparisons, group_levels) {
+.select_posthoc_comparisons <- function(post_hoc, comparisons, group_levels) {
   purrr::map(comparisons, function(pair) {
     test <- pair[1]
     ref <- pair[2]
@@ -348,6 +357,7 @@ gly_anova <- function(
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#' @inheritParams gly_anova
 #' @param ... Additional arguments passed to `stats::aov()`.
 #'
 #' @details
@@ -406,7 +416,8 @@ gly_ancova <- function(
   p_adj_method = "BH",
   add_info = TRUE,
   ...,
-  log_transform = NULL
+  log_transform = NULL,
+  contrasts = NULL
 ) {
   # Validate inputs
   checkmate::assert_logical(
@@ -448,7 +459,8 @@ gly_ancova <- function(
     group_col = group_col,
     min_count = 2,
     max_count = NULL,
-    method = "ancova"
+    method = "ancova",
+    show_info = !is.character(contrasts)
   )
   groups <- group_info$groups
 
@@ -469,6 +481,7 @@ gly_ancova <- function(
     covariates,
     p_adj_method,
     ...,
+    contrasts = contrasts,
     log_transform = log_transform,
     input_scale = transformation$input_scale
   )
@@ -494,7 +507,8 @@ gly_ancova <- function(
   p_adj_method = "BH",
   ...,
   log_transform = TRUE,
-  input_scale = "raw"
+  input_scale = "raw",
+  contrasts = NULL
 ) {
   checkmate::assert_flag(log_transform)
   # Check package availability
@@ -512,6 +526,11 @@ gly_ancova <- function(
   # Validate group count
   if (length(levels(groups)) < 2) {
     cli::cli_abort("groups must have at least 2 levels for ANCOVA")
+  }
+
+  model_args <- if (is.list(contrasts)) list(contrasts = contrasts)
+  comparisons <- if (is.null(model_args)) {
+    .parse_posthoc_comparisons(contrasts, groups)
   }
 
   # Normalize and validate covariates
@@ -548,14 +567,14 @@ gly_ancova <- function(
     data,
     stats::aov,
     formula = ancova_formula,
-    ...
+    ...,
+    !!!model_args
   )
   raw_post_hoc_test <- .generate_raw_posthoc_results(
     raw_main_test,
     data,
     stats::aov,
     p_adj_method,
-    formula = ancova_formula,
     posthoc_method = "emmeans"
   )
 
@@ -565,12 +584,6 @@ gly_ancova <- function(
     stats::aov,
     p_adj_method
   )
-  post_hoc_vec <- .format_posthoc_results(
-    raw_post_hoc_test,
-    stats::aov,
-    main_test$variable
-  )
-  main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
   post_hoc_test <- .add_fold_change(
     post_hoc_test,
@@ -579,10 +592,11 @@ gly_ancova <- function(
     input_scale = input_scale
   )
 
-  # Assemble tidy results
-  tidy_result <- list(
-    main_test = main_test,
-    post_hoc_test = post_hoc_test
+  tidy_result <- .report_posthoc(
+    main_test,
+    post_hoc_test,
+    comparisons,
+    levels(groups)
   )
 
   # Assemble raw results
@@ -618,6 +632,9 @@ gly_ancova <- function(
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#' @param contrasts Optional character vector selecting post-hoc comparisons,
+#'   e.g. `"H_vs_C"` with H as reference. As in [gly_anova()], the main test
+#'   and the all-pairs adjustment use all groups. Raw results retain all pairs.
 #' @param ... Additional arguments passed to `stats::kruskal.test()` or, for
 #'   paired analyses, `stats::friedman.test()`.
 #' @param subject_col An optional character string naming the subject identifier
@@ -685,7 +702,8 @@ gly_kruskal <- function(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = NULL
+  log_transform = NULL,
+  contrasts = NULL
 ) {
   # Validate inputs
   checkmate::assert_logical(
@@ -723,7 +741,8 @@ gly_kruskal <- function(
     group_col = group_col,
     min_count = 2,
     max_count = NULL,
-    method = "kruskal"
+    method = "kruskal",
+    show_info = !is.character(contrasts)
   )
   groups <- group_info$groups
   subjects <- .extract_paired_subjects(sample_info, subject_col, group_col)
@@ -735,6 +754,7 @@ gly_kruskal <- function(
     p_adj_method,
     ...,
     subjects = subjects,
+    contrasts = contrasts,
     log_transform = log_transform,
     input_scale = transformation$input_scale
   )
@@ -761,7 +781,8 @@ gly_kruskal <- function(
   ...,
   subjects = NULL,
   log_transform = TRUE,
-  input_scale = "raw"
+  input_scale = "raw",
+  contrasts = NULL
 ) {
   checkmate::assert_flag(log_transform)
   # Validate inputs
@@ -777,6 +798,8 @@ gly_kruskal <- function(
   if (length(levels(groups)) < 2) {
     cli::cli_abort("groups must have at least 2 levels for Kruskal-Wallis test")
   }
+
+  comparisons <- .parse_posthoc_comparisons(contrasts, groups)
 
   design <- .match_paired_samples(
     expr_mat,
@@ -822,7 +845,6 @@ gly_kruskal <- function(
     data,
     test_function,
     p_adj_method,
-    formula = test_formula,
     posthoc_method = if (design$paired) "paired_wilcox" else "dunn",
     paired = design$paired
   )
@@ -841,12 +863,6 @@ gly_kruskal <- function(
     groups = groups,
     effect_models = raw_main_test
   )
-  post_hoc_vec <- .format_posthoc_results(
-    raw_post_hoc_test,
-    stats::kruskal.test,
-    main_test$variable
-  )
-  main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(
     raw_post_hoc_test,
     stats::kruskal.test
@@ -859,10 +875,11 @@ gly_kruskal <- function(
     input_scale = input_scale
   )
 
-  # Assemble tidy results
-  tidy_result <- list(
-    main_test = main_test,
-    post_hoc_test = post_hoc_test
+  tidy_result <- .report_posthoc(
+    main_test,
+    post_hoc_test,
+    comparisons,
+    levels(groups)
   )
 
   # Assemble raw results
@@ -887,7 +904,7 @@ gly_kruskal <- function(
 .perform_raw_posthoc_test <- function(
   data_nested,
   .f,
-  formula = NULL,
+  main_model,
   posthoc_method = "tukey",
   paired = FALSE
 ) {
@@ -903,30 +920,36 @@ gly_kruskal <- function(
 
   if (identical(.f, stats::aov)) {
     # Post-hoc for ANOVA/ANCOVA
-    if (is.null(formula)) {
-      formula <- log_value ~ group
-    }
-    aov_model <- stats::aov(formula, data = data_nested)
     if (identical(posthoc_method, "emmeans")) {
-      emm <- emmeans::emmeans(aov_model, specs = "group")
+      emm <- emmeans::emmeans(main_model, specs = "group")
       contrast <- emmeans::contrast(
         emm,
         method = "pairwise",
         adjust = "tukey",
         reverse = FALSE
       )
-      as.data.frame(summary(contrast))
+      result <- as.data.frame(summary(contrast))
+      # emmeans wraps some group labels in parentheses when printing contrasts.
+      # Use its marginal-mean grid to recover the original pairwise endpoints.
+      pairs <- utils::combn(as.character(as.data.frame(emm)$group), 2L)
+      result$ref_group <- pairs[1, ]
+      result$test_group <- pairs[2, ]
+      result
     } else {
-      tukey <- suppressWarnings(stats::TukeyHSD(aov_model, which = "group"))
+      tukey <- suppressWarnings(stats::TukeyHSD(main_model, which = "group"))
       # Tukey orders rows by factor level. Keep the original names, which may
       # themselves contain the hyphen used in its printed comparison labels.
-      attr(tukey, "group_pairs") <- utils::combn(aov_model$xlevels$group, 2L)
+      attr(tukey, "group_pairs") <- utils::combn(main_model$xlevels$group, 2L)
       tukey
     }
   } else {
     # Dunn test for Kruskal-Wallis
     # Check number of groups - FSA::dunnTest fails with only 2 groups
-    n_groups <- length(unique(data_nested$group))
+    observed_groups <- droplevels(data_nested$group[
+      !is.na(data_nested$log_value)
+    ])
+    group_levels <- levels(observed_groups)
+    n_groups <- length(group_levels)
 
     if (n_groups == 2) {
       # Use pairwise Wilcoxon test for 2 groups
@@ -940,34 +963,24 @@ gly_kruskal <- function(
       # In pairwise.wilcox.test, column name is the first group (ref_group),
       # row name is the second group (test_group)
       p_matrix <- wilcox_result$p.value
-      comparisons <- c()
-      p_values <- c()
-
-      for (i in seq_len(nrow(p_matrix))) {
-        for (j in seq_len(ncol(p_matrix))) {
-          if (!is.na(p_matrix[i, j])) {
-            group1 <- colnames(p_matrix)[j] # ref_group (column name)
-            group2 <- rownames(p_matrix)[i] # test_group (row name)
-            comparisons <- c(comparisons, paste(group2, "-", group1))
-            p_values <- c(p_values, p_matrix[i, j])
-          }
-        }
-      }
-
-      # Create dunnTest-like structure
+      observed <- which(!is.na(p_matrix), arr.ind = TRUE)
+      ref <- colnames(p_matrix)[observed[, 2]]
+      test <- rownames(p_matrix)[observed[, 1]]
       list(
         res = data.frame(
-          Comparison = comparisons,
-          P.unadj = p_values,
-          P.adj = p_values,
-          stringsAsFactors = FALSE
+          Comparison = stringr::str_c(test, " - ", ref),
+          ref_group = ref,
+          test_group = test,
+          P.unadj = p_matrix[observed],
+          P.adj = p_matrix[observed]
         ),
         method = wilcox_result$p.adjust.method
       )
     } else {
       # Use FSA::dunnTest for 3+ groups
       .standardize_dunn_posthoc_result(
-        FSA::dunnTest(log_value ~ group, data = data_nested, method = "holm")
+        FSA::dunnTest(log_value ~ group, data = data_nested, method = "holm"),
+        group_levels
       )
     }
   }
@@ -1019,7 +1032,6 @@ gly_kruskal <- function(
   data,
   .f,
   p_adj_method,
-  formula = NULL,
   posthoc_method = "tukey",
   paired = FALSE
 ) {
@@ -1045,7 +1057,7 @@ gly_kruskal <- function(
         posthoc_raw = list(.perform_raw_posthoc_test(
           .data$data,
           .f,
-          formula = formula,
+          main_model = main_test_raw[[.data$variable]],
           posthoc_method = posthoc_method,
           paired = paired
         ))
@@ -1177,10 +1189,9 @@ gly_kruskal <- function(
 
   list(
     res = data.frame(
-      Comparison = purrr::map_chr(
-        comparisons,
-        ~ paste(.x[1], "-", .x[2])
-      ),
+      Comparison = paste(test_groups, "-", ref_groups),
+      ref_group = ref_groups,
+      test_group = test_groups,
       P.unadj = p_values,
       P.adj = adjusted,
       stringsAsFactors = FALSE
@@ -1424,67 +1435,6 @@ gly_kruskal <- function(
   (h_stat - nlevels(groups) + 1) / (length(log_values) - nlevels(groups))
 }
 
-# Helper function to convert post-hoc raw results to tibble
-.format_posthoc_results <- function(posthoc_raw, .f, variables) {
-  if (length(posthoc_raw) == 0) {
-    return(rep(NA_character_, length(variables)))
-  }
-  posthoc_map <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
-    if (identical(.f, stats::aov)) {
-      if (
-        is.data.frame(raw_result) &&
-          all(c("ref_group", "test_group") %in% colnames(raw_result))
-      ) {
-        significant <- !is.na(raw_result$p.value) & raw_result$p.value < 0.05
-        sig_pairs <- stringr::str_c(
-          raw_result$ref_group[significant],
-          "_vs_",
-          raw_result$test_group[significant]
-        )
-      } else if (
-        is.data.frame(raw_result) &&
-          "contrast" %in% colnames(raw_result)
-      ) {
-        sig_pairs <- raw_result$contrast[raw_result$p.value < 0.05]
-        sig_pairs <- purrr::map_chr(sig_pairs, function(x) {
-          parts <- stringr::str_split(x, "\\s*-\\s*", simplify = TRUE)
-          stringr::str_c(parts[, 1], "_vs_", parts[, 2])
-        })
-      } else {
-        tukey_df <- as.data.frame(raw_result$group)
-        sig_pairs <- rownames(tukey_df)[tukey_df$"p adj" < 0.05]
-        sig_pairs <- purrr::map(sig_pairs, function(x) {
-          # switch two groups and change the "-" to "_vs_"
-          parts <- stringr::str_split(x, "-", simplify = TRUE)
-          stringr::str_c(parts[, 2], "_vs_", parts[, 1])
-        })
-      }
-      sig_str <- if (length(sig_pairs) == 0) {
-        NA_character_
-      } else {
-        paste(sig_pairs, collapse = ";")
-      }
-    } else {
-      dunn_df <- raw_result$res
-      significant <- !is.na(dunn_df$P.adj) & dunn_df$P.adj < 0.05
-      sig_pairs <- dunn_df$Comparison[significant]
-      # Raw Dunn results are standardized to "test - ref". Convert them back to
-      # the package-facing "ref_vs_test" label used elsewhere.
-      sig_pairs <- purrr::map_chr(sig_pairs, function(x) {
-        parts <- stringr::str_split(x, " - ", simplify = TRUE)
-        stringr::str_c(parts[, 2], "_vs_", parts[, 1])
-      })
-      sig_str <- if (length(sig_pairs) == 0) {
-        NA_character_
-      } else {
-        paste(sig_pairs, collapse = ";")
-      }
-    }
-    sig_str
-  })
-  purrr::map_chr(variables, ~ posthoc_map[[.x]] %||% NA_character_)
-}
-
 # Helper function to convert post-hoc raw results to long format tibble
 .tibblify_posthoc_results <- function(posthoc_raw, .f) {
   if (length(posthoc_raw) == 0) {
@@ -1501,35 +1451,12 @@ gly_kruskal <- function(
   # Convert each post-hoc result to tibble and combine
   result_list <- purrr::imap(posthoc_raw, function(raw_result, var_name) {
     if (identical(.f, stats::aov)) {
-      if (
-        is.data.frame(raw_result) &&
-          all(c("ref_group", "test_group") %in% colnames(raw_result))
-      ) {
+      if (is.data.frame(raw_result)) {
         tibble::tibble(
           variable = var_name,
           ref_group = raw_result$ref_group,
           test_group = raw_result$test_group,
-          p_val = raw_result$p.unadj,
-          p_adj = raw_result$p.value
-        )
-      } else if (
-        is.data.frame(raw_result) &&
-          "contrast" %in% colnames(raw_result)
-      ) {
-        comparison_parts <- stringr::str_split(
-          raw_result$contrast,
-          "\\s*-\\s*",
-          simplify = TRUE
-        )
-        tibble::tibble(
-          variable = var_name,
-          ref_group = comparison_parts[, 1],
-          test_group = comparison_parts[, 2],
-          p_val = if ("p.unadj" %in% colnames(raw_result)) {
-            raw_result$p.unadj
-          } else {
-            raw_result$p.value
-          },
+          p_val = raw_result$p.unadj %||% raw_result$p.value,
           p_adj = raw_result$p.value
         )
       } else {
@@ -1547,17 +1474,10 @@ gly_kruskal <- function(
       # For Dunn test results
       dunn_df <- raw_result$res
 
-      # Parse group comparisons (format: "test_group - ref_group")
-      comparison_parts <- stringr::str_split(
-        dunn_df$Comparison,
-        " - ",
-        simplify = TRUE
-      )
-
       tibble::tibble(
         variable = var_name,
-        ref_group = comparison_parts[, 2],
-        test_group = comparison_parts[, 1],
+        ref_group = dunn_df$ref_group,
+        test_group = dunn_df$test_group,
         p_val = dunn_df$P.unadj, # Unadjusted p-value
         p_adj = dunn_df$P.adj # Adjusted p-value
       )
@@ -1630,25 +1550,25 @@ gly_kruskal <- function(
   }
 }
 
-.standardize_dunn_posthoc_result <- function(raw_result) {
-  if (!("res" %in% names(raw_result)) || nrow(raw_result$res) == 0) {
-    return(raw_result)
-  }
-
-  comparison_parts <- stringr::str_split(
-    raw_result$res$Comparison,
-    " - ",
-    simplify = TRUE
+.standardize_dunn_posthoc_result <- function(raw_result, group_levels) {
+  # Dunn lists all comparisons against each successive factor level. Match
+  # whole labels because a level can itself contain the printed separator.
+  indices <- seq_along(group_levels)
+  pairs <- which(outer(indices, indices, `<`), arr.ind = TRUE)
+  ref <- group_levels[pairs[, 1]]
+  test <- group_levels[pairs[, 2]]
+  rows <- match(
+    make.unique(raw_result$res$Comparison),
+    make.unique(paste(ref, "-", test))
   )
-  raw_result$res$Comparison <- stringr::str_c(
-    comparison_parts[, 2],
-    " - ",
-    comparison_parts[, 1]
-  )
-
-  if ("Z" %in% colnames(raw_result$res)) {
-    raw_result$res$Z <- -raw_result$res$Z
+  if (anyNA(rows)) {
+    cli::cli_abort(
+      "Could not match Dunn comparisons to the observed group levels."
+    )
   }
-
+  raw_result$res$ref_group <- ref[rows]
+  raw_result$res$test_group <- test[rows]
+  raw_result$res$Comparison <- paste(test[rows], "-", ref[rows])
+  raw_result$res$Z <- -raw_result$res$Z
   raw_result
 }

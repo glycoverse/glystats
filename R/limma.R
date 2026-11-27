@@ -136,7 +136,8 @@ gly_limma <- function(
     group_col = group_col,
     min_count = 2,
     max_count = NULL,
-    method = "limma"
+    method = "limma",
+    show_info = is.null(contrasts)
   )
   groups <- group_info$groups
 
@@ -491,7 +492,7 @@ gly_limma <- function(
   }
   design <- stats::model.matrix(design_formula, data = design_data)
   # Use make.names to ensure valid R names for limma group terms
-  valid_names <- make.names(group_levels)
+  valid_names <- make.names(group_levels, unique = TRUE)
   design_terms <- stats::terms(design_formula, data = design_data)
   term_labels <- attr(design_terms, "term.labels")
   group_term_index <- which(term_labels == "groups")
@@ -506,8 +507,7 @@ gly_limma <- function(
   }
   colnames(design)[group_cols] <- valid_names
 
-  # Create mapping from original names to valid names
-  name_mapping <- rlang::set_names(valid_names, group_levels)
+  colnames(design) <- make.unique(colnames(design))
 
   # Generate contrasts based on user input or default pairwise
   if (is.null(contrasts)) {
@@ -516,24 +516,27 @@ gly_limma <- function(
   } else {
     # Parse user-specified contrasts
     contrast_pairs <- .parse_custom_contrasts(contrasts, group_levels)
+    cli::cli_alert_info("Fitting contrasts: {.val {contrasts}}")
   }
 
-  # Create contrast matrix using limma::makeContrasts
-  # Use valid names for limma contrast matrix
-  contrast_strings <- purrr::map_chr(
-    contrast_pairs,
-    ~ {
-      valid_name1 <- name_mapping[.x[1]]
-      valid_name2 <- name_mapping[.x[2]]
-      stringr::str_c(valid_name1, "-", valid_name2)
-    }
+  # Assign coefficients by group column so covariate names and punctuation
+  # cannot change which design coefficients the contrast compares.
+  contrast_matrix <- matrix(
+    0,
+    nrow = ncol(design),
+    ncol = length(contrast_pairs),
+    dimnames = list(
+      Levels = colnames(design),
+      Contrasts = purrr::map_chr(
+        contrast_pairs,
+        \(pair) paste(valid_names[match(pair, group_levels)], collapse = "-")
+      )
+    )
   )
-
-  # Build the makeContrasts call
-  contrast_matrix <- do.call(
-    limma::makeContrasts,
-    c(as.list(contrast_strings), list(levels = colnames(design)))
-  )
+  for (i in seq_along(contrast_pairs)) {
+    rows <- group_cols[match(contrast_pairs[[i]], group_levels)]
+    contrast_matrix[rows, i] <- c(1, -1)
+  }
 
   missing_tbl <- purrr::map_dfr(contrast_pairs, function(pair) {
     base_tbl <- tibble::tibble(
@@ -649,6 +652,7 @@ gly_limma <- function(
 
 # Helper function to parse custom contrasts
 .parse_custom_contrasts <- function(contrasts, group_levels) {
+  checkmate::assert_character(contrasts, min.len = 1, any.missing = FALSE)
   # Helper function to parse a single contrast
   .parse_single_contrast <- function(contrast) {
     # Try to parse using both formats
@@ -696,6 +700,10 @@ gly_limma <- function(
       cli::cli_abort(
         "Group {.val {group2}} not found in data. Available groups: {.val {group_levels}}"
       )
+    }
+
+    if (group1 == group2) {
+      cli::cli_abort("A contrast must compare two different groups.")
     }
 
     # Return as character vector

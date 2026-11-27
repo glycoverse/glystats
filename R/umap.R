@@ -43,6 +43,7 @@ gly_umap <- function(
   ...,
   log_transform = NULL
 ) {
+  .check_no_contrasts(...)
   rlang::check_installed("uwot")
   checkmate::assert_logical(
     log_transform,

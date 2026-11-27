@@ -66,6 +66,10 @@ gly_ttest <- function(
   subject_col = NULL,
   log_transform = NULL
 ) {
+  .check_no_contrasts(
+    ...,
+    hint = "Use {.arg ref_group} to set the reference for the two groups."
+  )
   # Validate inputs
   checkmate::assert_logical(
     log_transform,
@@ -255,6 +259,10 @@ gly_wilcox <- function(
   subject_col = NULL,
   log_transform = NULL
 ) {
+  .check_no_contrasts(
+    ...,
+    hint = "Use {.arg ref_group} to set the reference for the two groups."
+  )
   # Validate inputs
   checkmate::assert_logical(
     log_transform,
