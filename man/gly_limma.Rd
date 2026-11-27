@@ -49,7 +49,8 @@ Use the second format if group names contain hyphens.
 \item{add_info}{A logical value. If TRUE (default), variable information from the experiment
 will be added to the result tibble. If FALSE, only the statistical results are returned.}
 
-\item{...}{Additional arguments passed to \code{limma::lmFit()}.}
+\item{...}{Additional arguments passed to \code{limma::lmFit()}. Each input
+feature is reported separately (\code{ndups = 1}).}
 
 \item{log_transform}{\code{NULL} (default) uses \code{metadata(exp)$scale} to avoid
 logging data twice. \code{TRUE} requests the method's log transformation for

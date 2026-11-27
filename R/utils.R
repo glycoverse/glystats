@@ -309,6 +309,20 @@
   }
 }
 
+# Use R argument matching to retain positional and unambiguous partial names.
+.match_backend_args <- function(dots, allowed, allow_extra = FALSE) {
+  if (!length(dots)) {
+    return(dots)
+  }
+  args <- rlang::set_names(rep(list(NULL), length(allowed)), allowed)
+  if (allow_extra) {
+    args <- c(args, alist(... = ))
+  }
+  signature <- rlang::new_function(args, NULL)
+  call <- as.call(c(list(quote(backend)), dots))
+  as.list(match.call(signature, call))[-1L]
+}
+
 # Some modeling backends accept and discard unknown arguments in their dots.
 .check_no_contrasts <- function(..., hint = NULL) {
   if ("contrasts" %in% ...names()) {
@@ -671,7 +685,8 @@
       rep(complete_subjects, times = length(group_levels)),
       levels = complete_subjects
     ),
-    paired = TRUE
+    paired = TRUE,
+    indices = sample_indices
   )
 }
 

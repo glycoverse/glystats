@@ -12,7 +12,8 @@ gly_anova(
   ...,
   subject_col = NULL,
   log_transform = NULL,
-  contrasts = NULL
+  contrasts = NULL,
+  subset = NULL
 )
 }
 \arguments{
@@ -49,6 +50,10 @@ also accepted when group names contain no hyphens. The omnibus test uses
 all groups, and post-hoc p-values retain the all-pairs adjustment. Raw
 post-hoc results contain all comparisons. By default all pairs are reported.
 A named list is passed to \code{stats::aov()} for factor contrast coding.}
+
+\item{subset}{Optional logical or integer index selecting samples in input
+order. Selection precedes subject matching, model fitting, post-hoc tests,
+and effect-size and fold-change calculations.}
 }
 \value{
 A list containing four elements:

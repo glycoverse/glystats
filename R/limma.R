@@ -26,7 +26,8 @@
 #'   "group1" will be used as the reference group.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#' @param ... Additional arguments passed to `limma::lmFit()`.
+#' @param ... Additional arguments passed to `limma::lmFit()`. Each input
+#'   feature is reported separately (`ndups = 1`).
 #'
 #' @details
 #' For raw data with automatic transformation, the function performs log2 transformation on the expression data (log2(x + 1e-6)) before
@@ -137,7 +138,7 @@ gly_limma <- function(
     min_count = 2,
     max_count = NULL,
     method = "limma",
-    show_info = is.null(contrasts)
+    show_info = FALSE
   )
   groups <- group_info$groups
 
@@ -234,6 +235,10 @@ gly_limma <- function(
     groups <- .reorder_groups_for_ref(groups, ref_group)
   }
 
+  if (is.null(contrasts)) {
+    .display_group_info(groups)
+  }
+
   # Use the multi-group workflow for all cases
   result <- .limma_multigroups(
     expr_mat,
@@ -250,17 +255,6 @@ gly_limma <- function(
 }
 
 # Internal helper functions for limma analysis
-
-# Helper function to reorder groups so that ref_group becomes the first level
-.reorder_groups_for_ref <- function(groups, ref_group) {
-  current_levels <- levels(groups)
-
-  # Move ref_group to the first position
-  new_levels <- c(ref_group, setdiff(current_levels, ref_group))
-
-  # Reorder the factor levels
-  factor(groups, levels = new_levels)
-}
 
 # Extract covariates from sample_info for gly_limma
 .extract_covariates_from_sample_info <- function(
@@ -470,6 +464,11 @@ gly_limma <- function(
   # Prepare data for limma
   log_expr_mat <- .log_transform_expr_mat(expr_mat, log_transform)
   row_has_data <- rowSums(is.finite(log_expr_mat)) > 0
+  fit_args <- .limma_fit_args(
+    rlang::list2(...),
+    row_has_data,
+    dim(log_expr_mat)
+  )
   missing_vars <- character(0)
   if (!all(row_has_data)) {
     missing_vars <- rownames(log_expr_mat)[!row_has_data]
@@ -566,7 +565,12 @@ gly_limma <- function(
   }
 
   # Fit linear model
-  fit <- limma::lmFit(log_expr_mat, design, ...)
+  fit <- rlang::exec(
+    limma::lmFit,
+    object = log_expr_mat,
+    design = design,
+    !!!fit_args
+  )
   if (is.null(rownames(fit$coefficients)) && !is.null(rownames(log_expr_mat))) {
     rownames(fit$coefficients) <- rownames(log_expr_mat)
     rownames(fit$stdev.unscaled) <- rownames(log_expr_mat)

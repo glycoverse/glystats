@@ -370,13 +370,13 @@ filter_sig_vars.glystats_linear_model_res <- function(
 
 .add_filters <- function(df, p_adj_cutoff, p_val_cutoff, fc_cutoff) {
   if (!is.null(p_val_cutoff)) {
-    df <- dplyr::filter(df, .data$p_val < p_val_cutoff)
+    df <- dplyr::filter(df, .data$p_val < .env$p_val_cutoff)
   }
   if (!is.null(fc_cutoff)) {
-    df <- dplyr::filter(df, abs(.data$log2fc) > log2(fc_cutoff))
+    df <- dplyr::filter(df, abs(.data$log2fc) > log2(.env$fc_cutoff))
   }
   if (!is.null(p_adj_cutoff)) {
-    df <- dplyr::filter(df, .data$p_adj < p_adj_cutoff)
+    df <- dplyr::filter(df, .data$p_adj < .env$p_adj_cutoff)
   }
   df
 }

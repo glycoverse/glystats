@@ -81,6 +81,17 @@ gly_cor <- function(
   )
   log_transform <- transformation$log_transform
   checkmate::assert_choice(on, c("variable", "sample"))
+  dots <- .match_backend_args(rlang::list2(...), c("y", "type"))
+  if (!is.null(dots$type)) {
+    type <- match.arg(dots$type, c("pearson", "spearman"))
+    if (!missing(method) && method != type) {
+      cli::cli_abort(
+        "{.arg method} and {.arg type} specify different correlations."
+      )
+    }
+    method <- type
+    dots$type <- NULL
+  }
   checkmate::assert_choice(method, c("pearson", "spearman"))
   checkmate::assert_choice(
     p_adj_method,
@@ -97,7 +108,7 @@ gly_cor <- function(
     on,
     method,
     p_adj_method,
-    ...,
+    !!!dots,
     log_transform = log_transform
   )
 
@@ -155,7 +166,8 @@ gly_cor <- function(
   mat <- .log_transform_expr_mat(mat, log_transform = log_transform)
 
   # Calculate correlation using Hmisc::rcorr
-  if (all(rowSums(!is.na(expr_mat)) == 0)) {
+  dots <- rlang::list2(...)
+  if (!length(dots) && all(rowSums(!is.na(expr_mat)) == 0)) {
     items <- if (on == "sample") colnames(expr_mat) else rownames(expr_mat)
     empty_matrix <- matrix(
       NA_real_,
@@ -177,7 +189,7 @@ gly_cor <- function(
       class = "rcorr"
     )
   } else {
-    rcorr_result <- Hmisc::rcorr(mat, type = method, ...)
+    rcorr_result <- rlang::exec(Hmisc::rcorr, mat, type = method, !!!dots)
   }
 
   # Extract correlation and p-value matrices from rcorr result

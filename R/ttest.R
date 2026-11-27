@@ -15,7 +15,9 @@
 #'  If NULL (default), the first level of the group factor is used as the reference.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#' @param ... Additional arguments passed to `stats::t.test()`.
+#' @param ... Additional arguments passed to `stats::t.test()`. With
+#'   `paired = TRUE` and no `subject_col`, observations are paired in order
+#'   within each group. Both groups must contain the same number of samples.
 #' @param subject_col An optional character string naming the subject identifier
 #'   column in sample information. When supplied, samples are matched by subject
 #'   and a paired t-test is performed.
@@ -106,6 +108,7 @@ gly_ttest <- function(
     group_col = group_col,
     min_count = 2,
     max_count = 2,
+    show_info = FALSE,
     method = "t-test"
   )
   groups <- group_info$groups
@@ -205,7 +208,9 @@ gly_ttest <- function(
 #'  If NULL (default), the first level of the group factor is used as the reference.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
-#' @param ... Additional arguments passed to `stats::wilcox.test()`.
+#' @param ... Additional arguments passed to `stats::wilcox.test()`. With
+#'   `paired = TRUE` and no `subject_col`, observations are paired in order
+#'   within each group. Both groups must contain the same number of samples.
 #' @param subject_col An optional character string naming the subject identifier
 #'   column in sample information. When supplied, samples are matched by subject
 #'   and a paired Wilcoxon signed-rank test is performed.
@@ -299,6 +304,7 @@ gly_wilcox <- function(
     group_col = group_col,
     min_count = 2,
     max_count = 2,
+    show_info = FALSE,
     method = "wilcoxon"
   )
   groups <- group_info$groups
@@ -393,10 +399,36 @@ gly_wilcox <- function(
   log_transform = TRUE,
   input_scale = "raw"
 ) {
+  method <- utils::getS3method(
+    if (identical(.f, stats::t.test)) "t.test" else "wilcox.test",
+    "default"
+  )
+  dots <- .match_backend_args(
+    rlang::list2(...),
+    setdiff(names(formals(method)), c("x", "y", "..."))
+  )
+  if ("paired" %in% names(dots)) {
+    checkmate::assert_flag(dots$paired)
+    if (!dots$paired && !is.null(subjects)) {
+      cli::cli_abort("{.arg paired = FALSE} conflicts with {.arg subject_col}.")
+    }
+    if (dots$paired && is.null(subjects)) {
+      if (length(unique(as.integer(table(groups)))) != 1L || anyNA(groups)) {
+        cli::cli_abort(
+          "Positional pairing requires the same number of samples in each group."
+        )
+      }
+      subjects <- stats::ave(seq_along(groups), groups, FUN = seq_along)
+    }
+    dots$paired <- NULL
+  }
+
   # Reorder groups if ref_group is specified
   if (!is.null(ref_group)) {
     groups <- .reorder_groups_for_ref(groups, ref_group)
   }
+
+  .display_two_group_info(groups)
 
   design <- .match_paired_samples(
     expr_mat,
@@ -413,7 +445,7 @@ gly_wilcox <- function(
     log_expr_mat,
     groups,
     .f,
-    ...,
+    !!!dots,
     paired = design$paired
   )
   tidy_result <- .gly_dea_2groups_tibblify(
@@ -450,17 +482,6 @@ gly_wilcox <- function(
 
   # Perform statistical tests and store raw results
   dots <- rlang::list2(...)
-  disallowed_args <- intersect(names(dots), c("formula", "data"))
-  if (length(disallowed_args) > 0) {
-    cli::cli_abort(
-      "Arguments {cli::format_inline(disallowed_args)} should not be supplied through `...`; they are controlled internally."
-    )
-  }
-  if (paired && "paired" %in% names(dots)) {
-    cli::cli_abort(
-      "{.arg paired} is controlled by {.arg subject_col} in a paired analysis."
-    )
-  }
   if (paired) {
     dots$paired <- TRUE
   }

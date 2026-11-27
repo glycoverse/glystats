@@ -12,7 +12,8 @@ gly_kruskal(
   ...,
   subject_col = NULL,
   log_transform = NULL,
-  contrasts = NULL
+  contrasts = NULL,
+  subset = NULL
 )
 }
 \arguments{
@@ -46,6 +47,10 @@ follows \code{...}.}
 \item{contrasts}{Optional character vector selecting post-hoc comparisons,
 e.g. \code{"H_vs_C"} with H as reference. As in \code{\link[=gly_anova]{gly_anova()}}, the main test
 and the all-pairs adjustment use all groups. Raw results retain all pairs.}
+
+\item{subset}{Optional logical or integer index selecting samples in input
+order. Selection precedes subject matching, model fitting, post-hoc tests,
+and effect-size and fold-change calculations.}
 }
 \value{
 A list containing four elements:

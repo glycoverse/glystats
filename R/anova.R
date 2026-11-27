@@ -22,6 +22,9 @@
 #'   post-hoc results contain all comparisons. By default all pairs are reported.
 #'   A named list is passed to `stats::aov()` for factor contrast coding.
 #' @param ... Additional arguments passed to `stats::aov()`.
+#' @param subset Optional logical or integer index selecting samples in input
+#'   order. Selection precedes subject matching, model fitting, post-hoc tests,
+#'   and effect-size and fold-change calculations.
 #' @param subject_col An optional character string naming the subject identifier
 #'   column in sample information. When supplied, a subject-blocked
 #'   repeated-measures ANOVA is performed.
@@ -86,7 +89,8 @@ gly_anova <- function(
   ...,
   subject_col = NULL,
   log_transform = NULL,
-  contrasts = NULL
+  contrasts = NULL,
+  subset = NULL
 ) {
   # Validate inputs
   checkmate::assert_logical(
@@ -115,8 +119,9 @@ gly_anova <- function(
   checkmate::assert_string(subject_col, null.ok = TRUE)
 
   # Extract data from experiment object
-  expr_mat <- .get_expr_mat(exp)
-  sample_info <- .get_sample_info(exp)
+  input <- .multigroup_input(exp, subset, rlang::list2(...))
+  expr_mat <- input$expr_mat
+  sample_info <- input$sample_info
 
   # Extract and validate groups
   group_info <- .extract_and_validate_groups(
@@ -135,12 +140,15 @@ gly_anova <- function(
     expr_mat,
     groups,
     p_adj_method,
-    ...,
+    !!!input$dots,
     subjects = subjects,
     contrasts = contrasts,
     log_transform = log_transform,
     input_scale = transformation$input_scale
   )
+  if (!input$keep_qr) {
+    result$raw_result$main_test <- .drop_aov_qr(result$raw_result$main_test)
+  }
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -193,6 +201,10 @@ gly_anova <- function(
     subjects,
     method = "ANOVA"
   )
+  fit_args <- rlang::list2(..., !!!model_args)
+  if (design$paired) {
+    fit_args <- .index_sample_args(fit_args, design$indices, ncol(expr_mat))
+  }
   expr_mat <- design$expr_mat
   groups <- design$groups
 
@@ -215,8 +227,7 @@ gly_anova <- function(
     data,
     stats::aov,
     formula = anova_formula,
-    ...,
-    !!!model_args,
+    !!!fit_args,
     paired = design$paired
   )
   raw_post_hoc_test <- .generate_raw_posthoc_results(
@@ -272,6 +283,81 @@ gly_anova <- function(
     ),
     class = c("glystats_anova_res", "glystats_res")
   )
+}
+
+.multigroup_input <- function(exp, subset, dots, rank_test = FALSE) {
+  backend_args <- if (!rank_test) {
+    unique(c(names(formals(stats::aov)), names(formals(stats::lm)), "tol"))
+  } else {
+    c("subset", "na.action", "drop.unused.levels", "xlev")
+  }
+  dots <- .match_backend_args(
+    dots,
+    setdiff(backend_args, c("formula", "data", "..."))
+  )
+  if (!is.null(dots$subset)) {
+    if (!is.null(subset)) {
+      cli::cli_abort("{.arg subset} was supplied twice.")
+    }
+    subset <- dots$subset
+    dots$subset <- NULL
+  }
+  expr_mat <- .get_expr_mat(exp)
+  sample_info <- .get_sample_info(exp)
+  if (!is.null(subset)) {
+    if (
+      !is.logical(subset) &&
+        !checkmate::test_integerish(subset, any.missing = FALSE)
+    ) {
+      cli::cli_abort(
+        "{.arg subset} must index samples with logical or integer values."
+      )
+    }
+    indices <- seq_len(ncol(expr_mat))[subset]
+    if (anyNA(indices)) {
+      cli::cli_abort(
+        "{.arg subset} contains missing or out-of-range sample indices."
+      )
+    }
+    dots <- .index_sample_args(dots, indices, ncol(expr_mat))
+    expr_mat <- expr_mat[, indices, drop = FALSE]
+    sample_info <- sample_info[indices, , drop = FALSE]
+  }
+  keep_qr <- !identical(dots$qr, FALSE)
+  if (!keep_qr) {
+    dots$qr <- TRUE
+  }
+  list(
+    expr_mat = expr_mat,
+    sample_info = sample_info,
+    dots = dots,
+    keep_qr = keep_qr
+  )
+}
+
+# Summary and Tukey calculations require QR even when the caller omits it
+# from the returned fits.
+.drop_aov_qr <- function(fits) {
+  lapply(fits, function(fit) {
+    if (inherits(fit, "aov")) {
+      fit$qr <- NULL
+      fit$call$qr <- FALSE
+    }
+    fit
+  })
+}
+
+.index_sample_args <- function(dots, indices, n_samples) {
+  for (name in intersect(names(dots), c("weights", "offset"))) {
+    values <- dots[[name]]
+    if (!is.null(values)) {
+      if (length(values) != n_samples) {
+        cli::cli_abort("{.arg {name}} must have one value per input sample.")
+      }
+      dots[[name]] <- values[indices]
+    }
+  }
+  dots
 }
 
 .parse_posthoc_comparisons <- function(contrasts, groups) {
@@ -417,7 +503,8 @@ gly_ancova <- function(
   add_info = TRUE,
   ...,
   log_transform = NULL,
-  contrasts = NULL
+  contrasts = NULL,
+  subset = NULL
 ) {
   # Validate inputs
   checkmate::assert_logical(
@@ -450,8 +537,9 @@ gly_ancova <- function(
   checkmate::assert_character(covariate_cols, min.len = 1)
 
   # Extract data from experiment object
-  expr_mat <- .get_expr_mat(exp)
-  sample_info <- .get_sample_info(exp)
+  input <- .multigroup_input(exp, subset, rlang::list2(...))
+  expr_mat <- input$expr_mat
+  sample_info <- input$sample_info
 
   # Extract and validate groups
   group_info <- .extract_and_validate_groups(
@@ -480,11 +568,14 @@ gly_ancova <- function(
     groups,
     covariates,
     p_adj_method,
-    ...,
+    !!!input$dots,
     contrasts = contrasts,
     log_transform = log_transform,
     input_scale = transformation$input_scale
   )
+  if (!input$keep_qr) {
+    result$raw_result$main_test <- .drop_aov_qr(result$raw_result$main_test)
+  }
   result$tidy_result <- .process_results_add_info(
     result$tidy_result,
     exp,
@@ -632,6 +723,7 @@ gly_ancova <- function(
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#' @inheritParams gly_anova
 #' @param contrasts Optional character vector selecting post-hoc comparisons,
 #'   e.g. `"H_vs_C"` with H as reference. As in [gly_anova()], the main test
 #'   and the all-pairs adjustment use all groups. Raw results retain all pairs.
@@ -703,7 +795,8 @@ gly_kruskal <- function(
   ...,
   subject_col = NULL,
   log_transform = NULL,
-  contrasts = NULL
+  contrasts = NULL,
+  subset = NULL
 ) {
   # Validate inputs
   checkmate::assert_logical(
@@ -732,8 +825,9 @@ gly_kruskal <- function(
   checkmate::assert_string(subject_col, null.ok = TRUE)
 
   # Extract data from experiment object
-  expr_mat <- .get_expr_mat(exp)
-  sample_info <- .get_sample_info(exp)
+  input <- .multigroup_input(exp, subset, rlang::list2(...), rank_test = TRUE)
+  expr_mat <- input$expr_mat
+  sample_info <- input$sample_info
 
   # Extract and validate groups
   group_info <- .extract_and_validate_groups(
@@ -752,7 +846,7 @@ gly_kruskal <- function(
     expr_mat,
     groups,
     p_adj_method,
-    ...,
+    !!!input$dots,
     subjects = subjects,
     contrasts = contrasts,
     log_transform = log_transform,
@@ -1004,20 +1098,23 @@ gly_kruskal <- function(
   if (is.null(formula)) {
     formula <- log_value ~ group
   }
-  safe_f <- purrr::possibly(function(...) rlang::exec(.f, ...), otherwise = NA)
-  main_test_raw <- data %>%
-    dplyr::nest_by(.data$variable) %>%
-    dplyr::mutate(
-      test_result = list(safe_f(
-        formula,
-        data = if (paired) {
-          .complete_paired_variable_data(.data$data)
-        } else {
-          .data$data
-        },
-        !!!dots
-      ))
-    )
+  fit_one <- function(df) {
+    args <- dots
+    if (paired) {
+      complete <- .complete_paired_variable_data(df)
+      args <- .index_sample_args(
+        args,
+        match(complete$sample, df$sample),
+        nrow(df)
+      )
+      df <- complete
+    }
+    rlang::exec(.f, formula, data = df, !!!args)
+  }
+  safe_fit <- purrr::possibly(fit_one, otherwise = NA)
+  main_test_raw <- data |>
+    dplyr::nest_by(.data$variable) |>
+    dplyr::mutate(test_result = list(safe_fit(.data$data)))
   main_test_list <- main_test_raw$test_result
   n_na <- sum(is.na(main_test_list))
   if (n_na > 0) {
@@ -1048,7 +1145,9 @@ gly_kruskal <- function(
   if (!is.null(p_adj_method)) {
     main_test_p_vals <- stats::p.adjust(main_test_p_vals, method = p_adj_method)
   }
-  sig_vars <- names(main_test_p_vals)[main_test_p_vals < 0.05]
+  sig_vars <- names(main_test_p_vals)[
+    !is.na(main_test_p_vals) & main_test_p_vals < 0.05
+  ]
   if (length(sig_vars) > 0) {
     posthoc_raw_results <- data %>%
       dplyr::filter(.data$variable %in% sig_vars) %>%
@@ -1322,12 +1421,10 @@ gly_kruskal <- function(
     result_tbl$variable,
     result_tbl$statistic,
     function(var_name, statistic) {
-      if (identical(effect_size_method, "eta_squared")) {
-        .calculate_eta_squared(expr_mat, groups, var_name)
+      if (effect_size_method %in% c("eta_squared", "partial_eta_squared")) {
+        .calculate_partial_eta_squared(effect_models[[var_name]])
       } else if (identical(effect_size_method, "epsilon_squared")) {
         .calculate_epsilon_squared(expr_mat, groups, var_name, statistic)
-      } else if (identical(effect_size_method, "partial_eta_squared")) {
-        .calculate_partial_eta_squared(effect_models[[var_name]])
       } else {
         .calculate_kendalls_w(expr_mat, groups, var_name, statistic)
       }
@@ -1369,41 +1466,6 @@ gly_kruskal <- function(
     return(NA_real_)
   }
   statistic / (n_subjects * (n_groups - 1))
-}
-
-#' Calculate eta-squared for one-way ANOVA
-#'
-#' @param expr_mat A numeric matrix with variables as rows and samples as columns.
-#' @param groups A factor specifying group membership for each sample.
-#' @param var_name A character string specifying the variable to evaluate.
-#'
-#' @return A numeric scalar containing eta-squared.
-#' @noRd
-.calculate_eta_squared <- function(expr_mat, groups, var_name) {
-  log_values <- expr_mat[var_name, ]
-  valid_idx <- !is.na(log_values) & !is.na(groups)
-  log_values <- log_values[valid_idx]
-  groups <- droplevels(groups[valid_idx])
-
-  if (length(log_values) == 0 || nlevels(groups) < 2) {
-    return(NA_real_)
-  }
-
-  grand_mean <- mean(log_values)
-  group_means <- purrr::map_dbl(levels(groups), function(group) {
-    mean(log_values[groups == group])
-  })
-  group_sizes <- purrr::map_int(levels(groups), function(group) {
-    sum(groups == group)
-  })
-  ss_between <- sum(group_sizes * (group_means - grand_mean)^2)
-  ss_total <- sum((log_values - grand_mean)^2)
-
-  if (!is.finite(ss_total) || ss_total == 0) {
-    return(NA_real_)
-  }
-
-  ss_between / ss_total
 }
 
 #' Calculate epsilon-squared for the Kruskal-Wallis test
