@@ -15,6 +15,12 @@
 #'  If NULL, no adjustment is performed.
 #' @param add_info A logical value. If TRUE (default), variable information from the experiment
 #'  will be added to the result tibble. If FALSE, only the statistical results are returned.
+#' @param contrasts Optional character vector selecting post-hoc comparisons to
+#'   report, e.g. `"H_vs_C"` compares C to reference H. The form `"H-C"` is
+#'   also accepted when group names contain no hyphens. The omnibus test uses
+#'   all groups, and post-hoc p-values retain the all-pairs adjustment. Raw
+#'   post-hoc results contain all comparisons. By default all pairs are reported.
+#'   A named list is passed to `stats::aov()` for factor contrast coding.
 #' @param ... Additional arguments passed to `stats::aov()`.
 #' @param subject_col An optional character string naming the subject identifier
 #'   column in sample information. When supplied, a subject-blocked
@@ -79,7 +85,8 @@ gly_anova <- function(
   add_info = TRUE,
   ...,
   subject_col = NULL,
-  log_transform = NULL
+  log_transform = NULL,
+  contrasts = NULL
 ) {
   # Validate inputs
   checkmate::assert_logical(
@@ -117,7 +124,8 @@ gly_anova <- function(
     group_col = group_col,
     min_count = 2,
     max_count = NULL,
-    method = "anova"
+    method = "anova",
+    show_info = !is.character(contrasts)
   )
   groups <- group_info$groups
   subjects <- .extract_paired_subjects(sample_info, subject_col, group_col)
@@ -129,6 +137,7 @@ gly_anova <- function(
     p_adj_method,
     ...,
     subjects = subjects,
+    contrasts = contrasts,
     log_transform = log_transform,
     input_scale = transformation$input_scale
   )
@@ -155,7 +164,8 @@ gly_anova <- function(
   ...,
   subjects = NULL,
   log_transform = TRUE,
-  input_scale = "raw"
+  input_scale = "raw",
+  contrasts = NULL
 ) {
   checkmate::assert_flag(log_transform)
   # Validate inputs
@@ -170,6 +180,23 @@ gly_anova <- function(
   # Validate group count
   if (length(levels(groups)) < 2) {
     cli::cli_abort("groups must have at least 2 levels for ANOVA")
+  }
+
+  comparisons <- NULL
+  model_args <- NULL
+  if (is.character(contrasts)) {
+    checkmate::assert_character(contrasts, min.len = 1, any.missing = FALSE)
+    comparisons <- unique(unname(.parse_custom_contrasts(
+      contrasts,
+      levels(groups)
+    )))
+    if (any(purrr::map_lgl(comparisons, \(pair) pair[1] == pair[2]))) {
+      cli::cli_abort("A post-hoc contrast must compare two different groups.")
+    }
+    cli::cli_alert_info("Reporting post-hoc comparisons: {.val {contrasts}}")
+  } else if (!is.null(contrasts)) {
+    checkmate::assert_list(contrasts)
+    model_args <- list(contrasts = contrasts)
   }
 
   design <- .match_paired_samples(
@@ -201,6 +228,7 @@ gly_anova <- function(
     stats::aov,
     formula = anova_formula,
     ...,
+    !!!model_args,
     paired = design$paired
   )
   raw_post_hoc_test <- .generate_raw_posthoc_results(
@@ -227,12 +255,6 @@ gly_anova <- function(
     groups = groups,
     effect_models = raw_main_test
   )
-  post_hoc_vec <- .format_posthoc_results(
-    raw_post_hoc_test,
-    stats::aov,
-    main_test$variable
-  )
-  main_test$post_hoc <- post_hoc_vec
   post_hoc_test <- .tibblify_posthoc_results(raw_post_hoc_test, stats::aov)
   post_hoc_test <- .add_fold_change(
     post_hoc_test,
@@ -241,6 +263,27 @@ gly_anova <- function(
     paired_data = if (design$paired) data else NULL,
     input_scale = input_scale
   )
+
+  if (!is.null(comparisons)) {
+    post_hoc_test <- .select_anova_comparisons(
+      post_hoc_test,
+      comparisons,
+      levels(groups)
+    )
+  }
+  significant <- post_hoc_test |>
+    dplyr::filter(.data$p_adj < 0.05) |>
+    dplyr::group_by(.data$variable) |>
+    dplyr::summarise(
+      post_hoc = paste(
+        paste0(.data$ref_group, "_vs_", .data$test_group),
+        collapse = ";"
+      )
+    )
+  main_test$post_hoc <- significant$post_hoc[match(
+    main_test$variable,
+    significant$variable
+  )]
 
   # Assemble tidy results
   tidy_result <- list(
@@ -262,6 +305,28 @@ gly_anova <- function(
     ),
     class = c("glystats_anova_res", "glystats_res")
   )
+}
+
+# The shared contrast parser returns each pair in test, reference order.
+.select_anova_comparisons <- function(post_hoc, comparisons, group_levels) {
+  purrr::map(comparisons, function(pair) {
+    test <- pair[1]
+    ref <- pair[2]
+    reverse <- match(ref, group_levels) > match(test, group_levels)
+    ordered <- if (reverse) pair else rev(pair)
+    rows <- post_hoc$ref_group == ordered[1] & post_hoc$test_group == ordered[2]
+    result <- post_hoc[rows, , drop = FALSE]
+    if (reverse) {
+      result <- dplyr::mutate(
+        result,
+        ref_group = ref,
+        test_group = test,
+        log2fc = -.data$log2fc
+      )
+    }
+    result
+  }) |>
+    dplyr::bind_rows()
 }
 
 #' Analysis of Covariance (ANCOVA) for Differential Expression Analysis
@@ -852,7 +917,11 @@ gly_kruskal <- function(
       )
       as.data.frame(summary(contrast))
     } else {
-      suppressWarnings(stats::TukeyHSD(aov_model, which = "group"))
+      tukey <- suppressWarnings(stats::TukeyHSD(aov_model, which = "group"))
+      # Tukey orders rows by factor level. Keep the original names, which may
+      # themselves contain the hyphen used in its printed comparison labels.
+      attr(tukey, "group_pairs") <- utils::combn(aov_model$xlevels$group, 2L)
+      tukey
     }
   } else {
     # Dunn test for Kruskal-Wallis
@@ -1464,21 +1533,12 @@ gly_kruskal <- function(
           p_adj = raw_result$p.value
         )
       } else {
-        # For TukeyHSD results
         tukey_df <- as.data.frame(raw_result$group)
-        tukey_df$comparison <- rownames(tukey_df)
-
-        # Parse group comparisons (format: "group2-group1")
-        comparison_parts <- stringr::str_split(
-          tukey_df$comparison,
-          "-",
-          simplify = TRUE
-        )
-
+        group_pairs <- attr(raw_result, "group_pairs")
         tibble::tibble(
           variable = var_name,
-          ref_group = comparison_parts[, 2], # Second part is ref_group
-          test_group = comparison_parts[, 1], # First part is test_group
+          ref_group = group_pairs[1, ],
+          test_group = group_pairs[2, ],
           p_val = tukey_df$`p adj`, # TukeyHSD already provides adjusted p-values
           p_adj = tukey_df$`p adj`
         )
