@@ -167,8 +167,11 @@ gly_cor <- function(
 
   # Calculate correlation using Hmisc::rcorr
   dots <- rlang::list2(...)
-  if (!length(dots) && all(rowSums(!is.na(expr_mat)) == 0)) {
-    items <- if (on == "sample") colnames(expr_mat) else rownames(expr_mat)
+  if (all(is.na(mat))) {
+    if (!is.null(dots$y)) {
+      mat <- cbind(mat, y = dots$y)
+    }
+    items <- colnames(mat)
     empty_matrix <- matrix(
       NA_real_,
       nrow = length(items),
@@ -188,6 +191,15 @@ gly_cor <- function(
       ),
       class = "rcorr"
     )
+    # A supplied auxiliary matrix can still contain observed pairs.
+    observed <- colSums(!is.na(mat)) > 0
+    if (any(observed)) {
+      auxiliary <- Hmisc::rcorr(mat[, observed, drop = FALSE], type = method)
+      for (field in c("r", "n", "P")) {
+        rcorr_result[[field]][observed, observed] <- auxiliary[[field]]
+      }
+      rcorr_result$type <- method
+    }
   } else {
     rcorr_result <- rlang::exec(Hmisc::rcorr, mat, type = method, !!!dots)
   }

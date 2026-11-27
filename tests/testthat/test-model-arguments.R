@@ -149,8 +149,15 @@ test_that("correlation backend names agree with the wrapper and preserve auxilia
     gly_cor(exp, method = "pearson", type = "spearman"),
     "different correlations"
   )
-  y <- cbind(aux = seq_len(ncol(exp)))
+  y <- cbind(a = seq_len(ncol(exp)), b = rev(seq_len(ncol(exp))))
   SummarizedExperiment::assay(exp)[] <- NA_real_
-  fit <- gly_cor(exp, y = y)
-  expect_identical(tail(colnames(fit$raw_result$r), 1), "aux")
+  expect_no_warning(fit <- gly_cor(exp, y = y))
+  expected <- Hmisc::rcorr(y)
+  for (field in c("r", "n", "P")) {
+    expect_equal(
+      fit$raw_result[[field]][colnames(y), colnames(y)],
+      expected[[field]]
+    )
+  }
+  expect_equal(fit$raw_result$n[1, "a"], 0L)
 })
