@@ -184,6 +184,33 @@ exp |>
   filter(p_adj < 0.05)
 ```
 
+## Compare two independent groups with SAM
+
+With the Bioconductor package `siggenes` installed, we can compare group C
+with healthy samples using Significance Analysis of Microarrays (SAM).
+The sign of `d` gives the direction on the analysis scale. Positive values
+indicate higher mean abundance in C. For relative abundances, the comparison
+is relative to the normalization reference.
+
+```{r sam, eval=requireNamespace("siggenes", quietly = TRUE)}
+two_groups <- exp[, exp$group %in% c("H", "C")]
+sam <- gly_sam(two_groups, ref_group = "H", delta = 1, seed = 42, add_info = FALSE)
+sam$thresholds
+get_tidy_result(sam) |>
+  filter(called) |>
+  select(.variable, d, p_val, q_value) |>
+  head()
+```
+
+Here `delta = 1` calls features whose scores reach the corresponding lower
+or upper cutoff. The threshold table gives the number called and their
+estimated permutation FDR. Each feature also has a pooled permutation p-value
+and a separate q-value. Omit `delta` to inspect the backend's grid of
+thresholds before choosing one. Only complete features with estimable
+within-group variation contribute to inference. The `exclusion` column
+identifies the others, and `sam$diagnostics` reports the tested family size
+and how many distinct label permutations were used.
+
 ## Match a group template
 
 To find glycoforms with higher abundance in group C relative to the other
@@ -240,6 +267,7 @@ data:
   - `gly_anova()`: One-way ANOVA
   - `gly_kruskal()`: Kruskal-Wallis rank sum test
   - `gly_limma()`: Linear models for microarray data (limma)
+  - `gly_sam()` compares two independent groups using SAM.
   - `gly_ancova()`: ANCOVA (Analysis of Covariance)
   - `gly_linear_model()`: Formula-based moderated linear models
   - `gly_set_test()`: correlated variable-set testing

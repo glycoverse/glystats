@@ -7,7 +7,8 @@ Authors@R:
 Description: Provides a unified toolbox for bioinformatics analyses of glycomics
     and glycoproteomics data. Implemented methods include differential testing
     (independent and paired t-tests, Wilcoxon tests, one-way and
-    repeated-measures ANOVA, Kruskal–Wallis and Friedman tests), formula-based
+    repeated-measures ANOVA, Kruskal–Wallis and Friedman tests, two-group
+    significance analysis of microarrays), formula-based
     moderated linear models, correlated-set Hotelling tests, multivariate
     modeling and visualization (PCA, t-SNE, UMAP), supervised learning (PLS-DA,
     OPLS-DA), clustering (k-means, hierarchical, self-organizing maps), survival
@@ -29,6 +30,8 @@ Suggests:
     kohonen (>= 3.0.0),
     Hmisc,
     limma,
+    siggenes,
+    multtest,
     knitr,
     rmarkdown,
     glyclean (>= 0.17.1),
