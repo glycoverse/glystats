@@ -44,6 +44,8 @@
   : Abundance scales and automatic transformations
 - [`gly_set_test()`](https://glycoverse.github.io/glystats/dev/reference/gly_set_test.md)
   : Construct and Test Correlated Variable Sets
+- [`gly_som()`](https://glycoverse.github.io/glystats/dev/reference/gly_som.md)
+  : Map abundance profiles with a self-organizing map
 - [`gly_tsne()`](https://glycoverse.github.io/glystats/dev/reference/gly_tsne.md)
   : t-Distributed Stochastic Neighbor Embedding (t-SNE)
 - [`gly_ttest()`](https://glycoverse.github.io/glystats/dev/reference/gly_ttest.md)

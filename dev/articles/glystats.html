@@ -326,6 +326,49 @@ glycoform covers. The default BH correction covers the variables tested
 for this template.</p>
 </div>
 <div class="section level2">
+<h2 id="map-glycoform-profiles-across-samples">Map glycoform profiles across samples<a class="anchor" aria-label="anchor" href="#map-glycoform-profiles-across-samples"></a>
+</h2>
+<p>With the optional <code>kohonen</code> package installed,
+<code><a href="../reference/gly_som.html">gly_som()</a></code> places each glycoform on a two-dimensional grid
+using its abundance in each sample. Glycoforms assigned to the same unit
+share a fitted prototype. Use <code>on = "sample"</code> to map samples
+across glycoforms. To explore group-mean curves, calculate those means
+first and supply one assay column per group.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">som</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gly_som.html">gly_som</a></span><span class="op">(</span><span class="va">exp</span>, grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">42</span>, add_info <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_tidy_result.html">get_tidy_result</a></span><span class="op">(</span><span class="va">som</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
+<span><span class="co">#&gt;   .variable                         unit     x     y distance n_finite exclusion</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> P08185-176-Hex(5)HexNAc(4)NeuAc…     6     3     2    2.28        12 <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> P04196-344-Hex(5)HexNAc(4)NeuAc…     1     1     1    1.23        12 <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> P04196-344-Hex(5)HexNAc(4)           3     3     1    2.00        12 <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> P10909-291-Hex(6)HexNAc(5)           3     3     1    0.843       12 <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> P04196-344-Hex(5)HexNAc(4)NeuAc…     1     1     1    2.92        12 <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> P04196-345-Hex(5)HexNAc(4)           3     3     1    1.77        12 <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="va">som</span><span class="op">$</span><span class="va">diagnostics</span><span class="op">$</span><span class="va">units</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">#&gt;    unit     x     y n_profiles</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1     1     1         22</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2     2     1         14</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3     3     1         57</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4     1     2         43</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5     2     2         63</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6     3     2         26</span></span></code></pre></div>
+<p>The <code>distance</code> column measures how closely each profile
+fits its assigned prototype. An excluded profile keeps its ID and an
+<code>exclusion</code> reason. The unit table counts the profiles
+assigned to each cell, including empty cells.</p>
+<p>By default each sample coordinate is standardized across the training
+glycoforms after the abundance transformation. With
+<code>scale = FALSE</code>, coordinates with a wider spread carry more
+weight. For relative abundances, similarity describes variation relative
+to the normalization reference. These assignments are exploratory. The
+seed reproduces a fit for the same input and settings, while a different
+seed or grid size can change membership.</p>
+</div>
+<div class="section level2">
 <h2 id="available-analyses">Available analyses<a class="anchor" aria-label="anchor" href="#available-analyses"></a>
 </h2>
 <p>The package includes the following analyses for glycomics and
@@ -382,6 +425,9 @@ analysis (PLS-DA)</li>
 <code><a href="../reference/gly_kmeans.html">gly_kmeans()</a></code>: K-means clustering</li>
 <li>
 <code><a href="../reference/gly_hclust.html">gly_hclust()</a></code>: Hierarchical clustering</li>
+<li>
+<code><a href="../reference/gly_som.html">gly_som()</a></code> maps glycan or sample profiles to a
+self-organizing grid.</li>
 </ul>
 </li>
 <li>

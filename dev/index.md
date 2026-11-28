@@ -169,6 +169,10 @@ ttest_res <- gly_ttest(exp)
 # PCA analysis
 pca_res <- gly_pca(exp)
 
+# Map glycan profiles across samples (requires kohonen)
+som_res <- gly_som(exp, seed = 42)
+get_tidy_result(som_res)
+
 # ROC analysis
 roc_res <- gly_roc(exp)
 

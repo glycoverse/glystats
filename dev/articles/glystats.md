@@ -318,6 +318,54 @@ The sample and group counts show how much of the template each glycoform
 covers. The default BH correction covers the variables tested for this
 template.
 
+## Map glycoform profiles across samples
+
+With the optional `kohonen` package installed,
+[`gly_som()`](https://glycoverse.github.io/glystats/dev/reference/gly_som.md)
+places each glycoform on a two-dimensional grid using its abundance in
+each sample. Glycoforms assigned to the same unit share a fitted
+prototype. Use `on = "sample"` to map samples across glycoforms. To
+explore group-mean curves, calculate those means first and supply one
+assay column per group.
+
+``` r
+
+som <- gly_som(exp, grid = c(3, 2), seed = 42, add_info = FALSE)
+head(get_tidy_result(som))
+#> # A tibble: 6 × 7
+#>   .variable                         unit     x     y distance n_finite exclusion
+#>   <chr>                            <int> <int> <int>    <dbl>    <int> <chr>    
+#> 1 P08185-176-Hex(5)HexNAc(4)NeuAc…     6     3     2    2.28        12 NA       
+#> 2 P04196-344-Hex(5)HexNAc(4)NeuAc…     1     1     1    1.23        12 NA       
+#> 3 P04196-344-Hex(5)HexNAc(4)           3     3     1    2.00        12 NA       
+#> 4 P10909-291-Hex(6)HexNAc(5)           3     3     1    0.843       12 NA       
+#> 5 P04196-344-Hex(5)HexNAc(4)NeuAc…     1     1     1    2.92        12 NA       
+#> 6 P04196-345-Hex(5)HexNAc(4)           3     3     1    1.77        12 NA
+som$diagnostics$units
+#> # A tibble: 6 × 4
+#>    unit     x     y n_profiles
+#>   <int> <int> <int>      <int>
+#> 1     1     1     1         22
+#> 2     2     2     1         14
+#> 3     3     3     1         57
+#> 4     4     1     2         43
+#> 5     5     2     2         63
+#> 6     6     3     2         26
+```
+
+The `distance` column measures how closely each profile fits its
+assigned prototype. An excluded profile keeps its ID and an `exclusion`
+reason. The unit table counts the profiles assigned to each cell,
+including empty cells.
+
+By default each sample coordinate is standardized across the training
+glycoforms after the abundance transformation. With `scale = FALSE`,
+coordinates with a wider spread carry more weight. For relative
+abundances, similarity describes variation relative to the normalization
+reference. These assignments are exploratory. The seed reproduces a fit
+for the same input and settings, while a different seed or grid size can
+change membership.
+
 ## Available analyses
 
 The package includes the following analyses for glycomics and
@@ -358,6 +406,8 @@ glycoproteomics data:
     K-means clustering
   - [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md):
     Hierarchical clustering
+  - [`gly_som()`](https://glycoverse.github.io/glystats/dev/reference/gly_som.md)
+    maps glycan or sample profiles to a self-organizing grid.
 - **Survival analysis:**
   - [`gly_cox()`](https://glycoverse.github.io/glystats/dev/reference/gly_cox.md):
     Cox proportional hazards model
