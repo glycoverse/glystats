@@ -1,6 +1,6 @@
 # glystats (development version)
 
-* New `gly_pattern_hunter()` finds variables that follow or oppose a named group template using sample-level Pearson, Spearman, or Kendall correlations and reports multiple-testing-adjusted p-values.
+* New `gly_pattern_hunter()` finds variables that follow or oppose a named group template using sample-level Pearson, Spearman, or Kendall correlations and reports multiple-testing-adjusted p-values. (#37)
 
 # glystats 0.15.1
 

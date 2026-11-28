@@ -76,7 +76,8 @@ and variation in abundance. Other rows retain their counts and receive
 \code{NA} for the coefficient and p-values.
 
 Raw abundances use \code{log2(x + 1e-6)} by default. See \link{gly_scale} for scale
-overrides. With relative abundances, a match describes a change in relative
+overrides. With relative abundances, a match describes changes only
+relative to the normalization reference, such as the total measured
 abundance. Even a strong positive correlation with an increasing template
 can include a decrease between adjacent groups.
 
