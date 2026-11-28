@@ -1,6 +1,6 @@
 # glystats (development version)
 
-* New `gly_ebam()` compares two independent groups using signed EBAM scores, posterior probabilities of differential abundance, and permutation FDR for each posterior threshold.
+* New `gly_ebam()` compares two independent groups using signed EBAM scores, posterior probabilities of differential abundance, and permutation FDR for each posterior threshold. (#40)
 * New `gly_sam()` compares two independent groups using signed SAM scores, reports permutation FDR across thresholds, and retains excluded features with their reasons. (#39)
 * New `gly_som()` maps glycan or sample abundance profiles to a self-organizing grid and reports unit assignments, distances, and excluded profiles. (#38)
 * New `gly_pattern_hunter()` finds variables that follow or oppose a named group template using sample-level Pearson, Spearman, or Kendall correlations and reports multiple-testing-adjusted p-values. (#37)
