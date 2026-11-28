@@ -3,6 +3,11 @@
 ## glystats (development version)
 
 - New
+  [`gly_ebam()`](https://glycoverse.github.io/glystats/dev/reference/gly_ebam.md)
+  compares two independent groups using signed EBAM scores, posterior
+  probabilities of differential abundance, and permutation FDR for each
+  posterior threshold. (#40)
+- New
   [`gly_sam()`](https://glycoverse.github.io/glystats/dev/reference/gly_sam.md)
   compares two independent groups using signed SAM scores, reports
   permutation FDR across thresholds, and retains excluded features with

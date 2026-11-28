@@ -215,6 +215,9 @@ named unique inputs; plotting consumers require adaptation.
   : Correlation Analysis for Glycomics and Glycoproteomics Data
 - [`gly_cox()`](https://glycoverse.github.io/glystats/dev/reference/gly_cox.md)
   : Cox Proportional Hazards Model for Survival Analysis
+- [`gly_ebam()`](https://glycoverse.github.io/glystats/dev/reference/gly_ebam.md)
+  : Compare two independent groups by empirical Bayes analysis of
+  microarrays
 - [`gly_fold_change()`](https://glycoverse.github.io/glystats/dev/reference/gly_fold_change.md)
   : Calculate fold change
 - [`gly_hclust()`](https://glycoverse.github.io/glystats/dev/reference/gly_hclust.md)

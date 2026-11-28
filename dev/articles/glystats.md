@@ -328,6 +328,53 @@ with estimable within-group variation contribute to inference. The
 the tested family size and how many distinct label permutations were
 used.
 
+## Estimate posterior probabilities with EBAM
+
+Empirical Bayes analysis of microarrays (EBAM) estimates the probability
+that each glycoform differs between the two groups. With H as the
+reference, a positive `z` indicates a higher mean in C on the analysis
+scale.
+
+``` r
+
+ebam <- gly_ebam(two_groups, ref_group = "H", posterior_threshold = 0.9, seed = 2)
+#> 
+#> We're doing 20 complete permutations
+ebam$thresholds
+#> # A tibble: 1 × 6
+#>   posterior_threshold cutoff_lower cutoff_upper n_called    p0    fdr
+#>                 <dbl>        <dbl>        <dbl>    <int> <dbl>  <dbl>
+#> 1                 0.9         -Inf         2.12       15 0.622 0.0518
+get_tidy_result(ebam) |>
+  filter(called) |>
+  select(.variable, z, posterior, local_fdr) |>
+  head()
+#> # A tibble: 6 × 4
+#>   .variable                                     z posterior local_fdr
+#>   <chr>                                     <dbl>     <dbl>     <dbl>
+#> 1 P04196-344-Hex(5)HexNAc(4)NeuAc(1)         4.32     0.965    0.0347
+#> 2 P04196-344-Hex(5)HexNAc(4)                 2.12     0.906    0.0936
+#> 3 P04196-344-Hex(5)HexNAc(4)NeuAc(2)         5.66     0.949    0.0514
+#> 4 P04196-344-Hex(5)HexNAc(4)dHex(2)          3.46     0.964    0.0360
+#> 5 P04196-344-Hex(4)HexNAc(3)                 3.22     0.961    0.0389
+#> 6 P04196-344-Hex(5)HexNAc(4)dHex(1)NeuAc(2)  3.59     0.965    0.0350
+```
+
+`posterior` estimates the probability of differential abundance for one
+feature. Its complement, `local_fdr`, estimates the probability of the
+null for that feature. At the chosen threshold, siggenes identifies the
+lower and upper score tails. Use `called` to recover the set of features
+whose permutation FDR appears in `ebam$thresholds`. Supplying a vector
+such as `c(0.8, 0.9, 0.95)` returns a row for each threshold and leaves
+feature calls unspecified.
+
+EBAM fits complete features with estimable within-group variation.
+Excluded features keep their IDs and reasons in the tidy table. With
+three samples per group, requesting 100 permutations uses all 20
+possible label allocations. `ebam$settings$n_perm` and
+`ebam$diagnostics$n_permutations` record the requested and actual
+counts.
+
 ## Match a group template
 
 To find glycoforms with higher abundance in group C relative to the
@@ -424,6 +471,9 @@ glycoproteomics data:
     Linear models for microarray data (limma)
   - [`gly_sam()`](https://glycoverse.github.io/glystats/dev/reference/gly_sam.md)
     compares two independent groups using SAM.
+  - [`gly_ebam()`](https://glycoverse.github.io/glystats/dev/reference/gly_ebam.md)
+    estimates posterior probabilities of differential abundance between
+    two independent groups.
   - [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md):
     ANCOVA (Analysis of Covariance)
   - [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md):
