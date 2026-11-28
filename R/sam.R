@@ -132,16 +132,22 @@ gly_sam <- function(
     meta_data = meta_data
   )
   mat <- .get_expr_mat(exp)
-  groups <- .sam_groups(exp, mat, group_col, ref_group)
+  groups <- .siggenes_groups(exp, mat, group_col, ref_group, "SAM")
   cl <- as.integer(groups) - 1L
   mat <- .log_transform_expr_mat(mat, preprocessing$log_transform)
-  features <- .sam_testable_features(mat, cl, s0)
+  features <- .siggenes_testable_features(
+    mat,
+    cl,
+    "SAM",
+    estimate_s0 = is.null(s0)
+  )
   rows <- features$rows
 
   draws <- min(n_perm, round(choose(length(cl), sum(cl == 0L))))
   # d.stat() drops a dimension when accumulating false calls for a singleton
   # tail across permutation batches. One batch keeps the tail count intact.
-  batch_size <- if (features$singleton_tail) draws else 10L
+  negative <- features$difference < 0
+  batch_size <- if (sum(negative) == 1L || sum(!negative) == 1L) draws else 10L
   withr::local_seed(seed)
   fit <- tryCatch(
     siggenes::sam(
@@ -233,7 +239,7 @@ gly_sam <- function(
   .record_se_identity(result, exp)
 }
 
-.sam_groups <- function(exp, mat, group_col, ref_group) {
+.siggenes_groups <- function(exp, mat, group_col, ref_group, method) {
   info <- .get_sample_info(exp)
   checkmate::assert_matrix(mat, mode = "numeric", ncols = nrow(info))
   if (inherits(exp, "glyexp_experiment")) {
@@ -269,16 +275,18 @@ gly_sam <- function(
     group_col,
     min_count = 2L,
     max_count = 2L,
-    method = "unpaired SAM"
+    method = paste("unpaired", method)
   )
   if (any(table(groups) < 2L)) {
-    cli::cli_abort("Unpaired SAM requires at least two samples in each group.")
+    cli::cli_abort(
+      "Unpaired {method} requires at least two samples in each group."
+    )
   }
   checkmate::assert_choice(ref_group, levels(groups), null.ok = TRUE)
   .reorder_groups_for_ref(groups, ref_group %||% levels(groups)[1L])
 }
 
-.sam_testable_features <- function(mat, cl, s0) {
+.siggenes_testable_features <- function(mat, cl, method, estimate_s0 = FALSE) {
   n_finite <- as.integer(rowSums(is.finite(mat)))
   # multtest and siggenes interpret this literal as missing even in a
   # complete numeric matrix, which would otherwise drop observations silently.
@@ -286,10 +294,10 @@ gly_sam <- function(
   complete <- which(n_finite == ncol(mat) & !reserved)
   if (length(complete) < 2L) {
     cli::cli_abort(
-      "SAM requires at least two complete features. Found {length(complete)} of {nrow(mat)}."
+      "{method} requires at least two complete features. Found {length(complete)} of {nrow(mat)}."
     )
   }
-  # Use the same observed score components and zero check as siggenes::d.stat().
+  # Both fits use multtest's Welch components and the SAM zero-SE tolerance.
   observed <- multtest::mt.teststat.num.denum(
     mat[complete, , drop = FALSE],
     cl,
@@ -300,10 +308,10 @@ gly_sam <- function(
   rows <- complete[usable]
   if (length(rows) < 2L) {
     cli::cli_abort(
-      "SAM requires at least two features with estimable within-group variation. Found {length(rows)} of {nrow(mat)}."
+      "{method} requires at least two features with estimable within-group variation. Found {length(rows)} of {nrow(mat)}."
     )
   }
-  if (is.null(s0) && length(unique(se[usable])) < 25L) {
+  if (estimate_s0 && length(unique(se[usable])) < 25L) {
     cli::cli_abort(c(
       "Automatic {.arg s0} estimation requires at least 25 distinct testable standard errors.",
       "i" = "Supply a prespecified nonnegative {.arg s0} to analyze a smaller panel."
@@ -316,17 +324,16 @@ gly_sam <- function(
   if (length(rows) < nrow(mat)) {
     cli::cli_warn(
       c(
-        "SAM inference uses {length(rows)} of {nrow(mat)} features.",
+        "{method} inference uses {length(rows)} of {nrow(mat)} features.",
         "i" = "All input IDs are retained. See {.field exclusion} for the reason each feature was omitted."
       ),
-      class = "glystats_sam_exclusions"
+      class = paste0("glystats_", tolower(method), "_exclusions")
     )
   }
-  negative <- observed$teststat.num[usable] < 0
   list(
     rows = rows,
     n_finite = n_finite,
     exclusion = exclusion,
-    singleton_tail = sum(negative) == 1L || sum(!negative) == 1L
+    difference = observed$teststat.num[usable]
   )
 }

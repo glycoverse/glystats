@@ -211,6 +211,35 @@ within-group variation contribute to inference. The `exclusion` column
 identifies the others, and `sam$diagnostics` reports the tested family size
 and how many distinct label permutations were used.
 
+## Estimate posterior probabilities with EBAM
+
+Empirical Bayes analysis of microarrays (EBAM) estimates the probability
+that each glycoform differs between the two groups. With H as the reference,
+a positive `z` indicates a higher mean in C on the analysis scale.
+
+```{r ebam, eval=requireNamespace("siggenes", quietly = TRUE)}
+ebam <- gly_ebam(two_groups, ref_group = "H", posterior_threshold = 0.9, seed = 2)
+ebam$thresholds
+get_tidy_result(ebam) |>
+  filter(called) |>
+  select(.variable, z, posterior, local_fdr) |>
+  head()
+```
+
+`posterior` estimates the probability of differential abundance for one
+feature. Its complement, `local_fdr`, estimates the probability of the null
+for that feature. At the chosen threshold, siggenes identifies the lower
+and upper score tails. Use `called` to recover the set of features whose
+permutation FDR appears in `ebam$thresholds`. Supplying a
+vector such as `c(0.8, 0.9, 0.95)` returns a row for each threshold and
+leaves feature calls unspecified.
+
+EBAM fits complete features with estimable within-group variation.
+Excluded features keep their IDs and reasons in the tidy table. With
+three samples per group, requesting 100 permutations uses all 20 possible
+label allocations. `ebam$settings$n_perm` and
+`ebam$diagnostics$n_permutations` record the requested and actual counts.
+
 ## Match a group template
 
 To find glycoforms with higher abundance in group C relative to the other
@@ -268,6 +297,7 @@ data:
   - `gly_kruskal()`: Kruskal-Wallis rank sum test
   - `gly_limma()`: Linear models for microarray data (limma)
   - `gly_sam()` compares two independent groups using SAM.
+  - `gly_ebam()` estimates posterior probabilities of differential abundance between two independent groups.
   - `gly_ancova()`: ANCOVA (Analysis of Covariance)
   - `gly_linear_model()`: Formula-based moderated linear models
   - `gly_set_test()`: correlated variable-set testing
