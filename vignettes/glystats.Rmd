@@ -184,6 +184,26 @@ exp |>
   filter(p_adj < 0.05)
 ```
 
+## Match a group template
+
+To find glycoforms with higher abundance in group C relative to the other
+three groups pooled, assign C a score of 1 and the others a score of 0.
+Each sample takes its own group's score. The signed correlation measures
+the direction and strength of the match on the analysis scale.
+
+```{r}
+exp |>
+  gly_pattern_hunter(template = c(H = 0, M = 0, Y = 0, C = 1), add_info = FALSE) |>
+  get_tidy_result() |>
+  filter(cor > 0) |>
+  arrange(p_adj, desc(cor)) |>
+  head()
+```
+
+The sample and group counts show how much of the template each glycoform
+covers. The default BH correction covers the variables tested for this
+template.
+
 ## Available analyses
 
 The package includes the following analyses for glycomics and glycoproteomics
@@ -216,4 +236,5 @@ data:
 
 - **Additional tools:**
   - `gly_cor()`: Correlation analysis
+  - `gly_pattern_hunter()` matches variables to a named group template.
   - `gly_roc()`: Receiver operating characteristic (ROC) analysis
