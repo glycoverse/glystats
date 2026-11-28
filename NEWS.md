@@ -1,5 +1,6 @@
 # glystats (development version)
 
+* New `gly_som()` maps glycan or sample abundance profiles to a self-organizing grid and reports unit assignments, distances, and excluded profiles.
 * New `gly_pattern_hunter()` finds variables that follow or oppose a named group template using sample-level Pearson, Spearman, or Kendall correlations and reports multiple-testing-adjusted p-values. (#37)
 
 # glystats 0.15.1

@@ -10,15 +10,14 @@ Description: Provides a unified toolbox for bioinformatics analyses of glycomics
     repeated-measures ANOVA, Kruskal–Wallis and Friedman tests), formula-based
     moderated linear models, correlated-set Hotelling tests, multivariate
     modeling and visualization (PCA, t-SNE, UMAP), supervised learning (PLS-DA,
-    OPLS-DA), clustering (k-means, hierarchical), survival modeling (Cox
-    proportional hazards), correlation analysis, and ROC/AUC evaluation.
+    OPLS-DA), clustering (k-means, hierarchical, self-organizing maps), survival
+    modeling (Cox proportional hazards), correlation analysis, and ROC/AUC evaluation.
     All user-facing functions follow the gly_*() naming
     convention to facilitate auto-completion in RStudio. Analysis functions
     accept 'glyexp' 'GlycomicSE', 'GlycoproteomicSE', and
     'SummarizedExperiment' objects as their unified data interface.
 License: MIT + file LICENSE
 Suggests:
-    withr,
     testthat (>= 3.0.0),
     FSA,
     emmeans,
@@ -27,6 +26,7 @@ Suggests:
     uwot,
     pROC,
     ggdendro,
+    kohonen (>= 3.0.0),
     Hmisc,
     limma,
     knitr,
@@ -40,6 +40,7 @@ RoxygenNote: 7.3.3
 URL: https://glycoverse.github.io/glystats/
 Imports:
     tibble,
+    withr,
     glyexp (>= 0.20.0),
     rlang,
     tidyr,

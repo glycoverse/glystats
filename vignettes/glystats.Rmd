@@ -204,6 +204,31 @@ The sample and group counts show how much of the template each glycoform
 covers. The default BH correction covers the variables tested for this
 template.
 
+## Map glycoform profiles across samples
+
+With the optional `kohonen` package installed, `gly_som()` places each
+glycoform on a two-dimensional grid using its abundance in each sample.
+Glycoforms assigned to the same unit share a fitted prototype.
+Use `on = "sample"` to map samples across glycoforms. To explore group-mean
+curves, calculate those means first and supply one assay column per group.
+
+```{r som, eval=requireNamespace("kohonen", quietly = TRUE)}
+som <- gly_som(exp, grid = c(3, 2), seed = 42, add_info = FALSE)
+head(get_tidy_result(som))
+som$diagnostics$units
+```
+
+The `distance` column measures how closely each profile fits its assigned
+prototype. An excluded profile keeps its ID and an `exclusion` reason. The
+unit table counts the profiles assigned to each cell, including empty cells.
+
+By default each sample coordinate is standardized across the training
+glycoforms after the abundance transformation. With `scale = FALSE`,
+coordinates with a wider spread carry more weight. For relative abundances,
+similarity describes variation relative to the normalization reference.
+These assignments are exploratory. The seed reproduces a fit for the same
+input and settings, while a different seed or grid size can change membership.
+
 ## Available analyses
 
 The package includes the following analyses for glycomics and glycoproteomics
@@ -230,6 +255,7 @@ data:
 - **Clustering:**
   - `gly_kmeans()`: K-means clustering
   - `gly_hclust()`: Hierarchical clustering
+  - `gly_som()` maps glycan or sample profiles to a self-organizing grid.
 
 - **Survival analysis:**
   - `gly_cox()`: Cox proportional hazards model
