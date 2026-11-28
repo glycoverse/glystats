@@ -288,6 +288,46 @@ exp |>
 #> #   p_val <dbl>, p_adj <dbl>, effect_size <dbl>, post_hoc <chr>
 ```
 
+## Compare two independent groups with SAM
+
+With the Bioconductor package `siggenes` installed, we can compare group
+C with healthy samples using Significance Analysis of Microarrays (SAM).
+The sign of `d` gives the direction on the analysis scale. Positive
+values indicate higher mean abundance in C. For relative abundances, the
+comparison is relative to the normalization reference.
+
+``` r
+
+two_groups <- exp[, exp$group %in% c("H", "C")]
+sam <- gly_sam(two_groups, ref_group = "H", delta = 1, seed = 42, add_info = FALSE)
+#> 
+#> We're doing 20 complete permutations
+sam$thresholds
+#> # A tibble: 1 × 7
+#>   delta cutoff_lower cutoff_upper n_called expected_false    p0    fdr
+#>   <dbl>        <dbl>        <dbl>    <int>          <dbl> <dbl>  <dbl>
+#> 1     1         -Inf         1.89        2            0.1 0.644 0.0322
+get_tidy_result(sam) |>
+  filter(called) |>
+  select(.variable, d, p_val, q_value) |>
+  head()
+#> # A tibble: 2 × 4
+#>   .variable                              d    p_val q_value
+#>   <chr>                              <dbl>    <dbl>   <dbl>
+#> 1 P04196-344-Hex(5)HexNAc(4)NeuAc(2)  2.27 0.000444  0.0644
+#> 2 P00734-121-Hex(5)HexNAc(4)          1.89 0.000889  0.0644
+```
+
+Here `delta = 1` calls features whose scores reach the corresponding
+lower or upper cutoff. The threshold table gives the number called and
+their estimated permutation FDR. Each feature also has a pooled
+permutation p-value and a separate q-value. Omit `delta` to inspect the
+backend’s grid of thresholds before choosing one. Only complete features
+with estimable within-group variation contribute to inference. The
+`exclusion` column identifies the others, and `sam$diagnostics` reports
+the tested family size and how many distinct label permutations were
+used.
+
 ## Match a group template
 
 To find glycoforms with higher abundance in group C relative to the
@@ -382,6 +422,8 @@ glycoproteomics data:
     Kruskal-Wallis rank sum test
   - [`gly_limma()`](https://glycoverse.github.io/glystats/dev/reference/gly_limma.md):
     Linear models for microarray data (limma)
+  - [`gly_sam()`](https://glycoverse.github.io/glystats/dev/reference/gly_sam.md)
+    compares two independent groups using SAM.
   - [`gly_ancova()`](https://glycoverse.github.io/glystats/dev/reference/gly_ancova.md):
     ANCOVA (Analysis of Covariance)
   - [`gly_linear_model()`](https://glycoverse.github.io/glystats/dev/reference/gly_linear_model.md):

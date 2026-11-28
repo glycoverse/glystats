@@ -3,6 +3,11 @@
 ## glystats (development version)
 
 - New
+  [`gly_sam()`](https://glycoverse.github.io/glystats/dev/reference/gly_sam.md)
+  compares two independent groups using signed SAM scores, reports
+  permutation FDR across thresholds, and retains excluded features with
+  their reasons. (#39)
+- New
   [`gly_som()`](https://glycoverse.github.io/glystats/dev/reference/gly_som.md)
   maps glycan or sample abundance profiles to a self-organizing grid and
   reports unit assignments, distances, and excluded profiles. (#38)
