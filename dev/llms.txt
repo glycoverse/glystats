@@ -171,6 +171,10 @@ pca_res <- gly_pca(exp)
 
 # ROC analysis
 roc_res <- gly_roc(exp)
+
+# Match a template in an experiment with groups H and C
+pattern_res <- gly_pattern_hunter(exp, template = c(H = 0, C = 1))
+get_tidy_result(pattern_res)
 ```
 
 That’s it! These functions use `glycoverse` column conventions to load
@@ -223,6 +227,8 @@ named unique inputs; plotting consumers require adaptation.
   : Formula-based Linear Models
 - [`gly_oplsda()`](https://glycoverse.github.io/glystats/dev/reference/gly_oplsda.md)
   : Orthogonal Partial Least Squares Discriminant Analysis (OPLS-DA)
+- [`gly_pattern_hunter()`](https://glycoverse.github.io/glystats/dev/reference/gly_pattern_hunter.md)
+  : Match variables to a group template
 - [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md)
   : Principal Component Analysis (PCA)
 - [`gly_plsda()`](https://glycoverse.github.io/glystats/dev/reference/gly_plsda.md)

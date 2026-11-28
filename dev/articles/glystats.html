@@ -298,6 +298,34 @@ also be used in a pipe:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   p_val &lt;dbl&gt;, p_adj &lt;dbl&gt;, effect_size &lt;dbl&gt;, post_hoc &lt;chr&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="match-a-group-template">Match a group template<a class="anchor" aria-label="anchor" href="#match-a-group-template"></a>
+</h2>
+<p>To find glycoforms with higher abundance in group C relative to the
+other three groups pooled, assign C a score of 1 and the others a score
+of 0. Each sample takes its own group’s score. The signed correlation
+measures the direction and strength of the match on the analysis
+scale.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exp</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/gly_pattern_hunter.html">gly_pattern_hunter</a></span><span class="op">(</span>template <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>H <span class="op">=</span> <span class="fl">0</span>, M <span class="op">=</span> <span class="fl">0</span>, Y <span class="op">=</span> <span class="fl">0</span>, C <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, add_info <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/get_tidy_result.html">get_tidy_result</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">cor</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">p_adj</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">cor</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
+<span><span class="co">#&gt;   .variable                         cor n_samples n_groups n_scores  p_val p_adj</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> P01877-92-Hex(3)HexNAc(5)dHex(… 0.604        12        4        2 0.037<span style="text-decoration: underline;">6</span> 0.790</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> P43652-109-Hex(5)HexNAc(4)NeuA… 0.595        12        4        2 0.041<span style="text-decoration: underline;">5</span> 0.790</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> P10909-291-Hex(3)HexNAc(8)      0.575        12        4        2 0.050<span style="text-decoration: underline;">3</span> 0.790</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> P10909-291-Hex(6)HexNAc(6)NeuA… 0.567        12        4        2 0.054<span style="text-decoration: underline;">3</span> 0.790</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> P04196-344-Hex(6)HexNAc(5)dHex… 0.553        12        4        2 0.062<span style="text-decoration: underline;">0</span> 0.790</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> O75882-1082-Hex(6)HexNAc(4)dHe… 0.543        12        4        2 0.068<span style="text-decoration: underline;">0</span> 0.790</span></span></code></pre></div>
+<p>The sample and group counts show how much of the template each
+glycoform covers. The default BH correction covers the variables tested
+for this template.</p>
+</div>
+<div class="section level2">
 <h2 id="available-analyses">Available analyses<a class="anchor" aria-label="anchor" href="#available-analyses"></a>
 </h2>
 <p>The package includes the following analyses for glycomics and
@@ -368,6 +396,9 @@ analysis (PLS-DA)</li>
 <ul>
 <li>
 <code><a href="../reference/gly_cor.html">gly_cor()</a></code>: Correlation analysis</li>
+<li>
+<code><a href="../reference/gly_pattern_hunter.html">gly_pattern_hunter()</a></code> matches variables to a named group
+template.</li>
 <li>
 <code><a href="../reference/gly_roc.html">gly_roc()</a></code>: Receiver operating characteristic (ROC)
 analysis</li>

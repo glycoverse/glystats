@@ -288,6 +288,36 @@ exp |>
 #> #   p_val <dbl>, p_adj <dbl>, effect_size <dbl>, post_hoc <chr>
 ```
 
+## Match a group template
+
+To find glycoforms with higher abundance in group C relative to the
+other three groups pooled, assign C a score of 1 and the others a score
+of 0. Each sample takes its own group’s score. The signed correlation
+measures the direction and strength of the match on the analysis scale.
+
+``` r
+
+exp |>
+  gly_pattern_hunter(template = c(H = 0, M = 0, Y = 0, C = 1), add_info = FALSE) |>
+  get_tidy_result() |>
+  filter(cor > 0) |>
+  arrange(p_adj, desc(cor)) |>
+  head()
+#> # A tibble: 6 × 7
+#>   .variable                         cor n_samples n_groups n_scores  p_val p_adj
+#>   <chr>                           <dbl>     <int>    <int>    <int>  <dbl> <dbl>
+#> 1 P01877-92-Hex(3)HexNAc(5)dHex(… 0.604        12        4        2 0.0376 0.790
+#> 2 P43652-109-Hex(5)HexNAc(4)NeuA… 0.595        12        4        2 0.0415 0.790
+#> 3 P10909-291-Hex(3)HexNAc(8)      0.575        12        4        2 0.0503 0.790
+#> 4 P10909-291-Hex(6)HexNAc(6)NeuA… 0.567        12        4        2 0.0543 0.790
+#> 5 P04196-344-Hex(6)HexNAc(5)dHex… 0.553        12        4        2 0.0620 0.790
+#> 6 O75882-1082-Hex(6)HexNAc(4)dHe… 0.543        12        4        2 0.0680 0.790
+```
+
+The sample and group counts show how much of the template each glycoform
+covers. The default BH correction covers the variables tested for this
+template.
+
 ## Available analyses
 
 The package includes the following analyses for glycomics and
@@ -334,5 +364,7 @@ glycoproteomics data:
 - **Additional tools:**
   - [`gly_cor()`](https://glycoverse.github.io/glystats/dev/reference/gly_cor.md):
     Correlation analysis
+  - [`gly_pattern_hunter()`](https://glycoverse.github.io/glystats/dev/reference/gly_pattern_hunter.md)
+    matches variables to a named group template.
   - [`gly_roc()`](https://glycoverse.github.io/glystats/dev/reference/gly_roc.md):
     Receiver operating characteristic (ROC) analysis

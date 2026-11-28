@@ -32,6 +32,8 @@
   : Formula-based Linear Models
 - [`gly_oplsda()`](https://glycoverse.github.io/glystats/dev/reference/gly_oplsda.md)
   : Orthogonal Partial Least Squares Discriminant Analysis (OPLS-DA)
+- [`gly_pattern_hunter()`](https://glycoverse.github.io/glystats/dev/reference/gly_pattern_hunter.md)
+  : Match variables to a group template
 - [`gly_pca()`](https://glycoverse.github.io/glystats/dev/reference/gly_pca.md)
   : Principal Component Analysis (PCA)
 - [`gly_plsda()`](https://glycoverse.github.io/glystats/dev/reference/gly_plsda.md)
