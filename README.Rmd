@@ -161,6 +161,10 @@ pca_res <- gly_pca(exp)
 
 # ROC analysis
 roc_res <- gly_roc(exp)
+
+# Match a template in an experiment with groups H and C
+pattern_res <- gly_pattern_hunter(exp, template = c(H = 0, C = 1))
+get_tidy_result(pattern_res)
 ```
 
 That's it! These functions use `glycoverse` column conventions to load needed data and perform analysis.
