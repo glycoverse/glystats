@@ -42,6 +42,26 @@ test_that("Pearson matches use individual samples in unequal-sized groups", {
   expect_equal(unname(get_raw_result(result, "noisy")$parameter), 7)
 })
 
+test_that("reversing a signed template preserves two-sided inference", {
+  exp <- pattern_experiment()
+  template <- c(A = -1, M = 0, Z = 2)
+  for (method in c("pearson", "spearman", "kendall")) {
+    forward <- get_tidy_result(gly_pattern_hunter(
+      exp,
+      template,
+      method = method
+    ))
+    reverse <- get_tidy_result(gly_pattern_hunter(
+      exp,
+      -template,
+      method = method
+    ))
+    expect_equal(reverse$cor, -forward$cor)
+    expect_equal(reverse$p_val, forward$p_val)
+    expect_equal(reverse$p_adj, forward$p_adj)
+  }
+})
+
 test_that("sample order, template order and factor levels do not change the match", {
   exp <- pattern_experiment()
   template <- c(A = 0, M = 1, Z = 3)
